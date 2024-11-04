@@ -168,8 +168,8 @@ namespace SharpHoundCommonLib {
                 //pass
             }
 
-            using (var ctx = new PrincipalContext(ContextType.Domain)) {
-                try {
+            try {
+                using (var ctx = new PrincipalContext(ContextType.Domain)) {
                     var principal = Principal.FindByIdentity(ctx, IdentityType.Sid, sid);
                     if (principal != null) {
                         var entry = ((DirectoryEntry)principal.GetUnderlyingObject()).ToDirectoryObject();
@@ -178,10 +178,11 @@ namespace SharpHoundCommonLib {
                             return (true, type);
                         }
                     }
-                } catch {
-                    //pass
                 }
+            } catch {
+                //pass
             }
+           
 
             return (false, Label.Base);
         }
@@ -212,8 +213,8 @@ namespace SharpHoundCommonLib {
                 //pass
             }
 
-            using (var ctx = new PrincipalContext(ContextType.Domain)) {
-                try {
+            try {
+                using (var ctx = new PrincipalContext(ContextType.Domain)) {
                     var principal = Principal.FindByIdentity(ctx, IdentityType.Guid, guid);
                     if (principal != null) {
                         var entry = ((DirectoryEntry)principal.GetUnderlyingObject()).ToDirectoryObject();
@@ -222,10 +223,11 @@ namespace SharpHoundCommonLib {
                             return (true, type);
                         }
                     }
-                } catch {
-                    //pass
                 }
+            } catch {
+                //pass
             }
+            
 
             return (false, Label.Base);
         }
@@ -345,8 +347,8 @@ namespace SharpHoundCommonLib {
                 return (true, domainName);
             }
 
-            using (var ctx = new PrincipalContext(ContextType.Domain)) {
-                try {
+            try {
+                using (var ctx = new PrincipalContext(ContextType.Domain)) {
                     var principal = Principal.FindByIdentity(ctx, IdentityType.Sid, sid);
                     if (principal != null) {
                         var dn = principal.DistinguishedName;
@@ -355,10 +357,11 @@ namespace SharpHoundCommonLib {
                             return (true, Helpers.DistinguishedNameToDomain(dn));
                         }
                     }
-                } catch {
-                    //pass
                 }
+            } catch {
+                //pass
             }
+            
 
             return (false, string.Empty);
         }
@@ -877,8 +880,8 @@ namespace SharpHoundCommonLib {
                 return (true, principal);
             }
 
-            using (var ctx = new PrincipalContext(ContextType.Domain)) {
-                try {
+            try {
+                using (var ctx = new PrincipalContext(ContextType.Domain)) {
                     var lookupPrincipal =
                         Principal.FindByIdentity(ctx, IdentityType.DistinguishedName, distinguishedName);
                     if (lookupPrincipal != null) {
@@ -896,11 +899,12 @@ namespace SharpHoundCommonLib {
                     }
 
                     return (false, default);
-                } catch {
-                    _unresolvablePrincipals.Add(distinguishedName);
-                    return (false, default);
                 }
+            } catch {
+                _unresolvablePrincipals.Add(distinguishedName);
+                return (false, default);
             }
+            
         }
 
         public async Task<(bool Success, string DSHeuristics)> GetDSHueristics(string domain, string dn) {

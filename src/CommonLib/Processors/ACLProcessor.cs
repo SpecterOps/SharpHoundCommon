@@ -19,6 +19,7 @@ namespace SharpHoundCommonLib.Processors {
         private readonly ILogger _log;
         private readonly ILdapUtils _utils;
         private readonly ConcurrentHashSet _builtDomainCaches = new(StringComparer.OrdinalIgnoreCase);
+        private readonly object _lock = new();
 
         static ACLProcessor() {
             //Create a dictionary with the base GUIDs of each object type
@@ -50,6 +51,14 @@ namespace SharpHoundCommonLib.Processors {
         ///     LAPS
         /// </summary>
         private async Task BuildGuidCache(string domain) {
+            lock (_lock) {
+                if (_builtDomainCaches.Contains(domain)) {
+                    return;
+                }
+
+                _builtDomainCaches.Add(domain);
+            }
+            
             _log.LogInformation("Building GUID Cache for {Domain}", domain);
             await foreach (var result in _utils.PagedQuery(new LdapQueryParameters {
                                DomainName = domain,
@@ -83,6 +92,7 @@ namespace SharpHoundCommonLib.Processors {
                     _log.LogDebug("Error while building GUID cache for {Domain}: {Message}", domain, result.Error);
                 }
             }
+            
         }
 
         /// <summary>
@@ -236,10 +246,7 @@ namespace SharpHoundCommonLib.Processors {
         public async IAsyncEnumerable<ACE> ProcessACL(byte[] ntSecurityDescriptor, string objectDomain,
             Label objectType,
             bool hasLaps, string objectName = "") {
-            if (!_builtDomainCaches.Contains(objectDomain)) {
-                _builtDomainCaches.Add(objectDomain);
-                await BuildGuidCache(objectDomain);
-            }
+            await BuildGuidCache(objectDomain);
 
             if (ntSecurityDescriptor == null) {
                 _log.LogDebug("Security Descriptor is null for {Name}", objectName);

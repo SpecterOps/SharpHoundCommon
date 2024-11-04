@@ -57,17 +57,33 @@ namespace SharpHoundCommonLib.Processors {
         /// </summary>
         /// <param name="entry"></param>
         /// <returns></returns>
-        public async Task<Dictionary<string, object>> ReadDomainProperties(IDirectoryObject entry, string domain)
-        {
+        public async Task<Dictionary<string, object>> ReadDomainProperties(IDirectoryObject entry, string domain) {
             var props = GetCommonProps(entry);
 
+            if (entry.TryGetProperty(LDAPProperties.ExpirePasswordsOnSmartCardOnlyAccounts, out var expirePassword) &&
+                bool.TryParse(expirePassword, out var expirePasswordBool)) {
+                props.Add("expirepasswordsonsmartcardonlyaccounts", expirePasswordBool);
+            }
 
-            props.Add("expirepasswordsonsmartcardonlyaccounts", entry.GetProperty(LDAPProperties.ExpirePasswordsOnSmartCardOnlyAccounts));
-            props.Add("machineaccountquota", entry.GetProperty(LDAPProperties.MachineAccountQuota));
-            props.Add("minpwdlength", entry.GetProperty(LDAPProperties.MinPwdLength));
-            props.Add("pwdproperties", entry.GetProperty(LDAPProperties.PwdProperties));
-            props.Add("pwdhistorylength", entry.GetProperty(LDAPProperties.PwdHistoryLength));
-            props.Add("lockoutthreshold", entry.GetProperty(LDAPProperties.LockoutThreshold));
+            if (entry.TryGetLongProperty(LDAPProperties.MachineAccountQuota, out var machineAccountQuota)) {
+                props.Add("machineaccountquota", machineAccountQuota);
+            }
+
+            if (entry.TryGetLongProperty(LDAPProperties.MinPwdLength, out var minPwdLength)) {
+                props.Add("minpwdlength", minPwdLength);
+            }
+
+            if (entry.TryGetLongProperty(LDAPProperties.PwdProperties, out var pwdProperties)) {
+                props.Add("pwdproperties", pwdProperties);
+            }
+
+            if (entry.TryGetLongProperty(LDAPProperties.PwdHistoryLength, out var pwdHistoryLength)) {
+                props.Add("pwdhistorylength", pwdHistoryLength);
+            }
+
+            if (entry.TryGetLongProperty(LDAPProperties.LockoutThreshold, out var lockoutThreshold)) {
+                props.Add("lockoutthreshold", lockoutThreshold);
+            }
 
             if (entry.TryGetLongProperty(LDAPProperties.MinPwdAge, out var minpwdage)) {
                 var duration = ConvertNanoDuration(minpwdage);
@@ -75,27 +91,32 @@ namespace SharpHoundCommonLib.Processors {
                     props.Add("minpwdage", duration);
                 }
             }
+
             if (entry.TryGetLongProperty(LDAPProperties.MaxPwdAge, out var maxpwdage)) {
                 var duration = ConvertNanoDuration(maxpwdage);
                 if (duration != null) {
                     props.Add("maxpwdage", duration);
                 }
             }
+
             if (entry.TryGetLongProperty(LDAPProperties.LockoutDuration, out var lockoutduration)) {
                 var duration = ConvertNanoDuration(lockoutduration);
                 if (duration != null) {
                     props.Add("lockoutduration", duration);
                 }
             }
+
             if (entry.TryGetLongProperty(LDAPProperties.LockOutObservationWindow, out var lockoutobservationwindow)) {
                 var duration = ConvertNanoDuration(lockoutobservationwindow);
                 if (duration != null) {
                     props.Add("lockoutobservationwindow", lockoutobservationwindow);
                 }
             }
+
             if (!entry.TryGetLongProperty(LDAPProperties.DomainFunctionalLevel, out var functionalLevel)) {
                 functionalLevel = -1;
             }
+
             props.Add("functionallevel", FunctionalLevelToString((int)functionalLevel));
 
             var dn = entry.GetProperty(LDAPProperties.DistinguishedName);
@@ -623,7 +644,7 @@ namespace SharpHoundCommonLib.Processors {
                         if (testBytes == null || testBytes.Length == 0) {
                             continue;
                         }
-                        
+
                         // SIDs
                         try {
                             var sid = new SecurityIdentifier(testBytes, 0);
@@ -707,8 +728,7 @@ namespace SharpHoundCommonLib.Processors {
             return value;
         }
 
-        private static List<string> ConvertEncryptionTypes(string encryptionTypes)
-        {
+        private static List<string> ConvertEncryptionTypes(string encryptionTypes) {
             if (encryptionTypes == null) {
                 return null;
             }
@@ -719,36 +739,36 @@ namespace SharpHoundCommonLib.Processors {
                 supportedEncryptionTypes.Add("Not defined");
             }
 
-            if ((encryptionTypesInt & KerberosEncryptionTypes.DES_CBC_CRC) == KerberosEncryptionTypes.DES_CBC_CRC)
-            {
+            if ((encryptionTypesInt & KerberosEncryptionTypes.DES_CBC_CRC) == KerberosEncryptionTypes.DES_CBC_CRC) {
                 supportedEncryptionTypes.Add("DES-CBC-CRC");
             }
-            if ((encryptionTypesInt & KerberosEncryptionTypes.DES_CBC_MD5) == KerberosEncryptionTypes.DES_CBC_MD5)
-            {
+
+            if ((encryptionTypesInt & KerberosEncryptionTypes.DES_CBC_MD5) == KerberosEncryptionTypes.DES_CBC_MD5) {
                 supportedEncryptionTypes.Add("DES-CBC-MD5");
             }
-            if ((encryptionTypesInt & KerberosEncryptionTypes.RC4_HMAC_MD5) == KerberosEncryptionTypes.RC4_HMAC_MD5)
-            {
+
+            if ((encryptionTypesInt & KerberosEncryptionTypes.RC4_HMAC_MD5) == KerberosEncryptionTypes.RC4_HMAC_MD5) {
                 supportedEncryptionTypes.Add("RC4-HMAC-MD5");
             }
-            if ((encryptionTypesInt & KerberosEncryptionTypes.AES128_CTS_HMAC_SHA1_96) == KerberosEncryptionTypes.AES128_CTS_HMAC_SHA1_96)
-            {
+
+            if ((encryptionTypesInt & KerberosEncryptionTypes.AES128_CTS_HMAC_SHA1_96) ==
+                KerberosEncryptionTypes.AES128_CTS_HMAC_SHA1_96) {
                 supportedEncryptionTypes.Add("AES128-CTS-HMAC-SHA1-96");
             }
-            if ((encryptionTypesInt & KerberosEncryptionTypes.AES256_CTS_HMAC_SHA1_96) == KerberosEncryptionTypes.AES256_CTS_HMAC_SHA1_96)
-            {
+
+            if ((encryptionTypesInt & KerberosEncryptionTypes.AES256_CTS_HMAC_SHA1_96) ==
+                KerberosEncryptionTypes.AES256_CTS_HMAC_SHA1_96) {
                 supportedEncryptionTypes.Add("AES256-CTS-HMAC-SHA1-96");
             }
 
             return supportedEncryptionTypes;
         }
 
-        private static string ConvertNanoDuration(long duration)
-        {
+        private static string ConvertNanoDuration(long duration) {
             // In case duration is long.MinValue, Math.Abs will overflow.  Value represents Forever or Never
             if (duration == long.MinValue) {
                 return "Forever";
-            // And if the value is positive, it indicates an error code
+                // And if the value is positive, it indicates an error code
             } else if (duration > 0) {
                 return null;
             }
@@ -761,20 +781,19 @@ namespace SharpHoundCommonLib.Processors {
             List<string> timeComponents = new List<string>();
 
             // Add each time component if it's greater than zero
-            if (durationSpan.Days > 0)
-            {
+            if (durationSpan.Days > 0) {
                 timeComponents.Add($"{durationSpan.Days} {(durationSpan.Days == 1 ? "day" : "days")}");
             }
-            if (durationSpan.Hours > 0)
-            {
+
+            if (durationSpan.Hours > 0) {
                 timeComponents.Add($"{durationSpan.Hours} {(durationSpan.Hours == 1 ? "hour" : "hours")}");
             }
-            if (durationSpan.Minutes > 0)
-            {
+
+            if (durationSpan.Minutes > 0) {
                 timeComponents.Add($"{durationSpan.Minutes} {(durationSpan.Minutes == 1 ? "minute" : "minutes")}");
             }
-            if (durationSpan.Seconds > 0)
-            {
+
+            if (durationSpan.Seconds > 0) {
                 timeComponents.Add($"{durationSpan.Seconds} {(durationSpan.Seconds == 1 ? "second" : "seconds")}");
             }
 
@@ -888,10 +907,12 @@ namespace SharpHoundCommonLib.Processors {
                 foreach (var cert in chain.ChainElements) temp.Add(cert.Certificate.Thumbprint);
                 Chain = temp.ToArray();
             } catch (Exception e) {
-                Logging.LogProvider.CreateLogger("ParsedCertificate").LogWarning(e, "Failed to read certificate chain for certificate {Name} with Algo {Algorithm}", name, parsedCertificate.SignatureAlgorithm.FriendlyName);
+                Logging.LogProvider.CreateLogger("ParsedCertificate").LogWarning(e,
+                    "Failed to read certificate chain for certificate {Name} with Algo {Algorithm}", name,
+                    parsedCertificate.SignatureAlgorithm.FriendlyName);
                 Chain = Array.Empty<string>();
             }
-            
+
 
             // Extensions
             var extensions = parsedCertificate.Extensions;

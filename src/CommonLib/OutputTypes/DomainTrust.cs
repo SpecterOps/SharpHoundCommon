@@ -9,7 +9,7 @@ namespace SharpHoundCommonLib.OutputTypes
         public bool IsTransitive { get; set; }
         public bool SidFilteringEnabled { get; set; }
         public bool TGTDelegationEnabled { get; set; }
-        public string TrustAttributes { get; set; }
+        public long TrustAttributes { get; set; }
         public TrustDirection TrustDirection { get; set; }
         public TrustType TrustType { get; set; }
     }
