@@ -14,5 +14,6 @@ namespace SharpHoundCommonLib.OutputTypes
         public bool IsDeleted { get; set; }
         public bool IsACLProtected { get; set; }
         public TypedPrincipal ContainedBy { get; set; }
+        public bool DoesAnyAceGrantOwnerRights { get; set; }
     }
 }
