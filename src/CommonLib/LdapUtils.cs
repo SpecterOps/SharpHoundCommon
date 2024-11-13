@@ -315,7 +315,7 @@ namespace SharpHoundCommonLib {
             return (false, null);
         }
 
-        public async Task<(bool Success, string DomainName)> GetDomainNameFromSid(string sid) {
+        public virtual async Task<(bool Success, string DomainName)> GetDomainNameFromSid(string sid) {
             string domainSid;
             try {
                 domainSid = new SecurityIdentifier(sid).AccountDomainSid?.Value.ToUpper();
@@ -408,7 +408,7 @@ namespace SharpHoundCommonLib {
             return (false, string.Empty);
         }
 
-        public async Task<(bool Success, string DomainSid)> GetDomainSidFromDomainName(string domainName) {
+        public virtual async Task<(bool Success, string DomainSid)> GetDomainSidFromDomainName(string domainName) {
             if (Cache.GetDomainSidMapping(domainName, out var domainSid)) return (true, domainSid);
 
             try {
@@ -938,7 +938,7 @@ namespace SharpHoundCommonLib {
                 OutputBase output = principal.ObjectType switch {
                     Label.User => new User(),
                     Label.Computer => new Computer(),
-                    Label.Group => new OutputTypes.Group(),
+                    Label.Group => new Group(),
                     Label.GPO => new GPO(),
                     Label.Domain => new OutputTypes.Domain(),
                     Label.OU => new OU(),
@@ -961,7 +961,7 @@ namespace SharpHoundCommonLib {
                 yield return entdc;
             }
         }
-
+        
         private async IAsyncEnumerable<Group> GetEnterpriseDCGroups() {
             var grouped = new ConcurrentDictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
             var forestSidToName = new ConcurrentDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -972,7 +972,7 @@ namespace SharpHoundCommonLib {
                     await GetDomainSidFromDomainName(forestName) is (true, var forestDomainSid)) {
                     forestSidToName.TryAdd(forestDomainSid, forestName);
                     if (!grouped.ContainsKey(forestDomainSid)) {
-                        grouped[forestDomainSid] = new List<string>();
+                        grouped[forestDomainSid] = [];
                     }
 
                     foreach (var k in domainSid) {
@@ -982,10 +982,13 @@ namespace SharpHoundCommonLib {
             }
 
             foreach (var f in grouped) {
-                var group = new Group { ObjectIdentifier = $"{f.Key}-S-1-5-9" };
-                group.Properties.Add("name", $"ENTERPRISE DOMAIN CONTROLLERS@{forestSidToName[f.Key]}".ToUpper());
+                if (!forestSidToName.TryGetValue(f.Key, out var forestName)) {
+                    continue;
+                }
+                var group = new Group { ObjectIdentifier = $"{forestName}-S-1-5-9" };
+                group.Properties.Add("name", $"ENTERPRISE DOMAIN CONTROLLERS@{forestName}".ToUpper());
                 group.Properties.Add("domainsid", f.Key);
-                group.Properties.Add("domain", forestSidToName[f.Key]);
+                group.Properties.Add("domain", forestName);
                 group.Members = f.Value.Select(x => new TypedPrincipal(x, Label.Computer)).ToArray();
                 yield return group;
             }

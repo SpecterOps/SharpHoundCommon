@@ -6,6 +6,7 @@ using CommonLibTest.Facades;
 using Moq;
 using SharpHoundCommonLib;
 using SharpHoundCommonLib.Enums;
+using SharpHoundCommonLib.OutputTypes;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -230,6 +231,36 @@ namespace CommonLibTest {
 
             var (success, sid) = await utils.ResolveHostToSid(spn, "");
             Assert.False(success);
+        }
+
+        [WindowsOnlyFact]
+        public async Task EnterpriseDomainControllersGroup_CorrectValues() {
+            var utilsMock = new Mock<LdapUtils>();
+            
+            //We're going to say TESTLAB.LOCAL is forest root, and SECONDARY is a child domain underneath TESTLAB.LOCAL
+
+            utilsMock.Setup(x => x.GetDomainNameFromSid("S-1-5-21-3130019616-2776909439-2417379446-2105"))
+                .ReturnsAsync((true, "TESTLAB.LOCAL"));
+            utilsMock.Setup(x => x.GetDomainNameFromSid("S-1-5-21-3130019616-2776909439-2417379446-2106"))
+                .ReturnsAsync((true, "TESTLAB.LOCAL"));
+            utilsMock.Setup(x => x.GetDomainNameFromSid("S-1-5-21-3130019616-2776909439-2417379447-2105"))
+                .ReturnsAsync((true, "SECONDARY.TESTLAB.LOCAL"));
+
+            utilsMock.Setup(x => x.GetForest("TESTLAB.LOCAL")).ReturnsAsync((true, "TESTLAB.LOCAL"));
+            utilsMock.Setup(x => x.GetForest("SECONDARY.TESTLAB.LOCAL")).ReturnsAsync((true, "TESTLAB.LOCAL"));
+            
+            utilsMock.Setup(x => x.GetDomainSidFromDomainName("TESTLAB.LOCAL")).ReturnsAsync((true, "S-1-5-21-3130019616-2776909439-2417379446"));
+
+            var utils = utilsMock.Object;
+            utils.AddDomainController("S-1-5-21-3130019616-2776909439-2417379446-2105");
+            utils.AddDomainController("S-1-5-21-3130019616-2776909439-2417379446-2106");
+            utils.AddDomainController("S-1-5-21-3130019616-2776909439-2417379447-2105");
+
+            var result = await utils.GetWellKnownPrincipalOutput().ToArrayAsync();
+            Assert.Single(result);
+            var entDCGroup = result[0] as Group;
+            Assert.Equal("TESTLAB.LOCAL-S-1-5-9", entDCGroup.ObjectIdentifier);
+            Assert.Equal(3, entDCGroup.Members.Length);
         }
     }
 }
