@@ -239,11 +239,9 @@ namespace CommonLibTest {
             
             //We're going to say TESTLAB.LOCAL is forest root, and SECONDARY is a child domain underneath TESTLAB.LOCAL
 
-            utilsMock.Setup(x => x.GetDomainNameFromSid("S-1-5-21-3130019616-2776909439-2417379446-2105"))
+            utilsMock.Setup(x => x.GetDomainNameFromSid("S-1-5-21-3130019616-2776909439-2417379446"))
                 .ReturnsAsync((true, "TESTLAB.LOCAL"));
-            utilsMock.Setup(x => x.GetDomainNameFromSid("S-1-5-21-3130019616-2776909439-2417379446-2106"))
-                .ReturnsAsync((true, "TESTLAB.LOCAL"));
-            utilsMock.Setup(x => x.GetDomainNameFromSid("S-1-5-21-3130019616-2776909439-2417379447-2105"))
+            utilsMock.Setup(x => x.GetDomainNameFromSid("S-1-5-21-3130019616-2776909439-2417379447"))
                 .ReturnsAsync((true, "SECONDARY.TESTLAB.LOCAL"));
 
             utilsMock.Setup(x => x.GetForest("TESTLAB.LOCAL")).ReturnsAsync((true, "TESTLAB.LOCAL"));
