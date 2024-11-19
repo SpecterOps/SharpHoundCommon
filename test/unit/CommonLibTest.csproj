@@ -42,9 +42,6 @@
     <ItemGroup>
         <CoverageFiles Include="../../docfx/coverage/coverage.opencover.xml" />
     </ItemGroup>
-    <ItemGroup>
-        <Folder Include="Facades\SAMMocks" />
-    </ItemGroup>
     <Target Name="Report" AfterTargets="VSTest" DependsOnTargets="GenerateCoverageResult">
         <ReportGenerator VerbosityLevel="Error" ProjectDirectory="$(MSBuildProjectDirectory)" ReportFiles="@(CoverageFiles)" ReportTypes="Html;Badges" TargetDirectory="$(CoverletOutput)report\" />
     </Target>
