@@ -314,5 +314,70 @@ namespace CommonLibTest
             var status = receivedStatus[0];
             Assert.Equal("StatusAccessDenied", status.Status);
         }
+        
+        [Fact]
+        public async Task LocalGroupProcessor_GetLocalGroups_LookupPrincipalBySid()
+        {
+            var mockProcessor = new Mock<LocalGroupProcessor>(new MockLdapUtils(), null);
+            var mockSamServer = new MockFailSAMServer_LookupPrincipalBySid();
+            mockProcessor.Setup(x => x.OpenSamServer(It.IsAny<string>())).Returns(mockSamServer);
+            var processor = mockProcessor.Object;
+            var machineDomainSid = $"{Consts.MockWorkstationMachineSid}-1000";
+            var receivedStatus = new List<CSVComputerStatus>();
+            processor.ComputerStatusEvent += async status =>  {
+                receivedStatus.Add(status);
+            };
+            var results = await processor.GetLocalGroups("primary.testlab.local", machineDomainSid, "TESTLAB.LOCAL", false)
+                .ToArrayAsync();
+            
+            Assert.Equal(3, results.Length);
+            var adminGroup = results.First(x => x.ObjectIdentifier.EndsWith("-544"));
+            Assert.Single(adminGroup.Results);
+            Assert.Equal($"{machineDomainSid}-544", adminGroup.ObjectIdentifier);
+            Assert.Equal("S-1-5-21-4243161961-3815211218-2888324771-512", adminGroup.Results[0].ObjectIdentifier);
+            var rdpGroup = results.First(x => x.ObjectIdentifier.EndsWith("-555"));
+            Assert.Equal(1, rdpGroup.Results.Length);
+            Assert.Collection(rdpGroup.Results, 
+                principal =>
+                {
+                    Assert.Equal($"{machineDomainSid}-544", principal.ObjectIdentifier);
+                    Assert.Equal(Label.LocalGroup, principal.ObjectType);
+                });
+        }
+
+        [Fact]
+        public async Task LocalGroupProcessor_GetLocalGroups_PreviouslyCached()
+        {
+            var mockProcessor = new Mock<LocalGroupProcessor>(new MockLdapUtils(), null);
+            var mockSamServer = new MockFailSAMServer_PreviouslyCached();
+            mockProcessor.Setup(x => x.OpenSamServer(It.IsAny<string>())).Returns(mockSamServer);
+            var processor = mockProcessor.Object;
+            var machineDomainSid = $"{Consts.MockWorkstationMachineSid}-1001";
+            var results = await processor.GetLocalGroups("win10.testlab.local", machineDomainSid, "TESTLAB.LOCAL", false)
+                .ToArrayAsync();
+            
+            Assert.Equal(3, results.Length);
+            var adminGroup = results.First(x => x.ObjectIdentifier.EndsWith("-544"));
+            
+            Assert.Equal($"{machineDomainSid}-544", adminGroup.ObjectIdentifier);
+            Assert.Equal("S-1-5-21-4243161961-3815211218-2888324771-512", adminGroup.Results[1].ObjectIdentifier);
+            var rdpGroup = results.First(x => x.ObjectIdentifier.EndsWith("-555"));
+            Assert.Equal(3, rdpGroup.Results.Length);
+            Assert.Collection(rdpGroup.Results, 
+                principal =>
+                {
+                    Assert.Equal($"{machineDomainSid}-1003", principal.ObjectIdentifier);
+                    Assert.Equal(Label.LocalGroup, principal.ObjectType);
+                    
+                }, principal =>
+                {
+                    Assert.Equal($"{Consts.MockWorkstationMachineSid}-1003", principal.ObjectIdentifier);
+                    Assert.Equal(Label.LocalGroup, principal.ObjectType);
+                }, principal =>
+                {
+                    Assert.Equal($"{machineDomainSid}-544", principal.ObjectIdentifier);
+                    Assert.Equal(Label.LocalGroup, principal.ObjectType);
+                });
+        }
     }
 }
