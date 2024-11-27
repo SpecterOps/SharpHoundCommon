@@ -989,5 +989,370 @@ namespace CommonLibTest
             Assert.True(hasGuid);
             Assert.Equal(guidExpected.ToString(), guidActual);
         }
+        
+        [Fact]
+        public async void LDAPPropertyProcessor_ReadDomainProperties_TestExpirePassword()
+        {
+            var mock = new MockDirectoryObject("DC\u003dtestlab,DC\u003dlocal", new Dictionary<string, object>
+            {
+                {LDAPProperties.ExpirePasswordsOnSmartCardOnlyAccounts, "True"}
+            }, "S-1-5-21-3130019616-2776909439-2417379446","");
+
+            var processor = new LdapPropertyProcessor(new MockLdapUtils());
+            var test = await processor.ReadDomainProperties(mock,"testlab.local");
+            Assert.Contains("expirepasswordsonsmartcardonlyaccounts", test.Keys);
+            Assert.Equal(true, test["expirepasswordsonsmartcardonlyaccounts"]);
+        }
+        
+        [Fact]
+        public async void LDAPPropertyProcessor_ReadDomainProperties_TestMachineAccountQuota()
+        {
+            var mock = new MockDirectoryObject("DC\u003dtestlab,DC\u003dlocal", new Dictionary<string, object>
+            {
+                {LDAPProperties.MachineAccountQuota, "4"}
+            }, "S-1-5-21-3130019616-2776909439-2417379446","");
+
+            var processor = new LdapPropertyProcessor(new MockLdapUtils());
+            var test = await processor.ReadDomainProperties(mock,"testlab.local");
+            Assert.Contains("machineaccountquota", test.Keys);
+            Assert.Equal(4, test["machineaccountquota"] as long?);
+        }
+        
+        [Fact]
+        public async void LDAPPropertyProcessor_ReadDomainProperties_TestMinPwdLength()
+        {
+            var mock = new MockDirectoryObject("DC\u003dtestlab,DC\u003dlocal", new Dictionary<string, object>
+            {
+                {LDAPProperties.MinPwdLength, "4"}
+            }, "S-1-5-21-3130019616-2776909439-2417379446","");
+
+            var processor = new LdapPropertyProcessor(new MockLdapUtils());
+            var test = await processor.ReadDomainProperties(mock,"testlab.local");
+            Assert.Contains("minpwdlength", test.Keys);
+            Assert.Equal(4, test["minpwdlength"] as long?);
+        }
+        
+        [Fact]
+        public async void LDAPPropertyProcessor_ReadDomainProperties_TestPwdProperties()
+        {
+            var mock = new MockDirectoryObject("DC\u003dtestlab,DC\u003dlocal", new Dictionary<string, object>
+            {
+                {LDAPProperties.PwdProperties, "4"}
+            }, "S-1-5-21-3130019616-2776909439-2417379446","");
+
+            var processor = new LdapPropertyProcessor(new MockLdapUtils());
+            var test = await processor.ReadDomainProperties(mock,"testlab.local");
+            Assert.Contains("pwdproperties", test.Keys);
+            Assert.Equal(4, test["pwdproperties"] as long?);
+        }
+        
+        [Fact]
+        public async void LDAPPropertyProcessor_ReadDomainProperties_TestPwdHistoryLength()
+        {
+            var mock = new MockDirectoryObject("DC\u003dtestlab,DC\u003dlocal", new Dictionary<string, object>
+            {
+                {LDAPProperties.PwdHistoryLength, "4"}
+            }, "S-1-5-21-3130019616-2776909439-2417379446","");
+
+            var processor = new LdapPropertyProcessor(new MockLdapUtils());
+            var test = await processor.ReadDomainProperties(mock,"testlab.local");
+            Assert.Contains("pwdhistorylength", test.Keys);
+            Assert.Equal(4, test["pwdhistorylength"] as long?);
+        }
+        
+        [Fact]
+        public async void LDAPPropertyProcessor_ReadDomainProperties_TestLockoutThreshold()
+        {
+            var mock = new MockDirectoryObject("DC\u003dtestlab,DC\u003dlocal", new Dictionary<string, object>
+            {
+                {LDAPProperties.LockoutThreshold, "4"}
+            }, "S-1-5-21-3130019616-2776909439-2417379446","");
+
+            var processor = new LdapPropertyProcessor(new MockLdapUtils());
+            var test = await processor.ReadDomainProperties(mock,"testlab.local");
+            Assert.Contains("lockoutthreshold", test.Keys);
+            Assert.Equal(4, test["lockoutthreshold"] as long?);
+        }
+        
+        [Fact]
+        public async void LDAPPropertyProcessor_ReadDomainProperties_TestMinPwdAge()
+        {
+            var mock = new MockDirectoryObject("DC\u003dtestlab,DC\u003dlocal", new Dictionary<string, object>
+            {
+                {LDAPProperties.MinPwdAge, long.MinValue}
+            }, "S-1-5-21-3130019616-2776909439-2417379446","");
+
+            var processor = new LdapPropertyProcessor(new MockLdapUtils());
+            var test = await processor.ReadDomainProperties(mock,"testlab.local");
+            Assert.Contains("minpwdage", test.Keys);
+            Assert.Equal("Forever", test["minpwdage"] as string);
+        }
+        
+        [Fact]
+        public async void LDAPPropertyProcessor_ReadDomainProperties_TestMaxPwdAge()
+        {
+            var mock = new MockDirectoryObject("DC\u003dtestlab,DC\u003dlocal", new Dictionary<string, object>
+            {
+                {LDAPProperties.MaxPwdAge, long.MinValue}
+            }, "S-1-5-21-3130019616-2776909439-2417379446","");
+
+            var processor = new LdapPropertyProcessor(new MockLdapUtils());
+            var test = await processor.ReadDomainProperties(mock,"testlab.local");
+            Assert.Contains("maxpwdage", test.Keys);
+            Assert.Equal("Forever", test["maxpwdage"] as string);
+        }
+        
+        [Fact]
+        public async void LDAPPropertyProcessor_ReadDomainProperties_TestLockoutDuration()
+        {
+            var mock = new MockDirectoryObject("DC\u003dtestlab,DC\u003dlocal", new Dictionary<string, object>
+            {
+                {LDAPProperties.LockoutDuration, long.MinValue}
+            }, "S-1-5-21-3130019616-2776909439-2417379446","");
+
+            var processor = new LdapPropertyProcessor(new MockLdapUtils());
+            var test = await processor.ReadDomainProperties(mock,"testlab.local");
+            Assert.Contains("lockoutduration", test.Keys);
+            Assert.Equal("Forever", test["lockoutduration"] as string);
+        }
+        
+        [Fact]
+        public async void LDAPPropertyProcessor_ReadDomainProperties_TestLockOutObservationWindow()
+        {
+            var mock = new MockDirectoryObject("DC\u003dtestlab,DC\u003dlocal", new Dictionary<string, object>
+            {
+                {LDAPProperties.LockOutObservationWindow, long.MinValue}
+            }, "S-1-5-21-3130019616-2776909439-2417379446","");
+
+            var processor = new LdapPropertyProcessor(new MockLdapUtils());
+            var test = await processor.ReadDomainProperties(mock,"testlab.local");
+            Assert.Contains("lockoutobservationwindow", test.Keys);
+            Assert.Equal(long.MinValue, test["lockoutobservationwindow"] as long?);
+        }
+        
+        [WindowsOnlyFact]
+        public async Task LDAPPropertyProcessor_ReadUserProperties_TestLastLogonNull()
+        {
+            var mock = new MockDirectoryObject("CN\u003ddfm,CN\u003dUsers,DC\u003dtestlab,DC\u003dlocal",
+                new Dictionary<string, object>
+                {
+                    {"description", "Test"},
+                    {"useraccountcontrol", "66048"},
+                    {"lastlogontimestamp", "132670318095676525"},
+                    {"homedirectory", @"\\win10\testdir"},
+                    {"mail", "test@testdomain.com"},
+                    {
+                        "serviceprincipalname", new[]
+                        {
+                            "MSSQLSVC/win10"
+                        }
+                    },
+                    {"admincount", "1"},
+                    {
+                        "sidhistory", new[]
+                        {
+                            Utils.B64ToBytes("AQUAAAAAAAUVAAAAIE+Qun9GhKV2SBaQUQQAAA==")
+                        }
+                    },
+                    {"pwdlastset", "132131667346106691"}
+                }, "S-1-5-21-3130019616-2776909439-2417379446-1101","");
+
+            var processor = new LdapPropertyProcessor(new MockLdapUtils());
+            var test = await processor.ReadUserProperties(mock, "testlab.local");
+            var props = test.Props;
+            var keys = props.Keys;
+
+            Assert.Contains("lastlogon", keys);
+            Assert.Equal(-1, (long)props["lastlogon"]);
+            
+        }
+        
+        [WindowsOnlyFact]
+        public async Task LDAPPropertyProcessor_ReadUserProperties_TestLastLogonTimeStampNull()
+        {
+            var mock = new MockDirectoryObject("CN\u003ddfm,CN\u003dUsers,DC\u003dtestlab,DC\u003dlocal",
+                new Dictionary<string, object>
+                {
+                    {"description", "Test"},
+                    {"useraccountcontrol", "66048"},
+                    {"homedirectory", @"\\win10\testdir"},
+                    {"mail", "test@testdomain.com"},
+                    {
+                        "serviceprincipalname", new[]
+                        {
+                            "MSSQLSVC/win10"
+                        }
+                    },
+                    {"admincount", "1"},
+                    {
+                        "sidhistory", new[]
+                        {
+                            Utils.B64ToBytes("AQUAAAAAAAUVAAAAIE+Qun9GhKV2SBaQUQQAAA==")
+                        }
+                    },
+                    {"pwdlastset", "132131667346106691"}
+                }, "S-1-5-21-3130019616-2776909439-2417379446-1101","");
+
+            var processor = new LdapPropertyProcessor(new MockLdapUtils());
+            var test = await processor.ReadUserProperties(mock, "testlab.local");
+            var props = test.Props;
+            var keys = props.Keys;
+
+            Assert.Contains("lastlogontimestamp", keys);
+            Assert.Equal(-1, (long)props["lastlogontimestamp"]);
+            
+        }
+        
+        [WindowsOnlyFact]
+        public async Task LDAPPropertyProcessor_ReadUserProperties_TestPasswordLastSetNull()
+        {
+            var mock = new MockDirectoryObject("CN\u003ddfm,CN\u003dUsers,DC\u003dtestlab,DC\u003dlocal",
+                new Dictionary<string, object>
+                {
+                    {"description", "Test"},
+                    {"useraccountcontrol", "66048"},
+                    {"homedirectory", @"\\win10\testdir"},
+                    {"mail", "test@testdomain.com"},
+                    {
+                        "serviceprincipalname", new[]
+                        {
+                            "MSSQLSVC/win10"
+                        }
+                    },
+                    {"admincount", "1"},
+                    {
+                        "sidhistory", new[]
+                        {
+                            Utils.B64ToBytes("AQUAAAAAAAUVAAAAIE+Qun9GhKV2SBaQUQQAAA==")
+                        }
+                    }
+                }, "S-1-5-21-3130019616-2776909439-2417379446-1101","");
+
+            var processor = new LdapPropertyProcessor(new MockLdapUtils());
+            var test = await processor.ReadUserProperties(mock, "testlab.local");
+            var props = test.Props;
+            var keys = props.Keys;
+
+            Assert.Contains("lastlogontimestamp", keys);
+            Assert.Equal(-1, (long)props["lastlogontimestamp"]);
+            
+        }
+        
+        [Fact]
+        public async Task LDAPPropertyProcessor_ReadUserProperties_TestDelegatesNull()
+        {
+            var mock = new MockDirectoryObject("CN\u003ddfm,CN\u003dUsers,DC\u003dtestlab,DC\u003dlocal",
+                new Dictionary<string, object>
+                {
+                    {"description", "Test"},
+                    {"useraccountcontrol", 0x1000000.ToString()},
+                    {LDAPProperties.LastLogon, "132673011142753043"},
+                    {LDAPProperties.LastLogonTimestamp, "132670318095676525"},
+                    {"homedirectory", @"\\win10\testdir"},
+                    {
+                        "serviceprincipalname", new[]
+                        {
+                            "MSSQLSVC\\win10"
+                        }
+                    },
+                    {"admincount", "1"},
+                    {
+                        "sidhistory", new[]
+                        {
+                            Utils.B64ToBytes("AQUAAAAAAAUVAAAAIE+Qun9GhKV2SBaQUQQAAA==")
+                        }
+                    },
+                    {"pwdlastset", "132131667346106691"},
+                    {
+                        "msds-allowedtodelegateto", new[]
+                        {
+                            null,
+                            "rdpman/win10"
+                        }
+                    }
+                }, "S-1-5-21-3130019616-2776909439-2417379446-1101", "");
+
+            var processor = new LdapPropertyProcessor(new MockLdapUtils());
+            var test = await processor.ReadUserProperties(mock, "testlab.local");
+            var props = test.Props;
+            var keys = props.Keys;
+
+            Assert.Contains("allowedtodelegate", keys);
+            var atd = props["allowedtodelegate"] as string[];
+            Assert.Equal(2, atd.Length);
+            //Assert.Contains("host/primary", atd);
+            Assert.Contains("rdpman/win10", atd);
+
+            var atdr = test.AllowedToDelegate;
+            Assert.Equal(1, atdr.Length);
+            var expected = new TypedPrincipal[]
+            {
+                new()
+                {
+                    ObjectIdentifier = "S-1-5-21-3130019616-2776909439-2417379446-1104",
+                    ObjectType = Label.Computer
+                }
+            };
+            Assert.Equal(expected, atdr);
+        }
+        [WindowsOnlyFact]
+        public async Task LDAPPropertyProcessor_ReadComputerProperties_TestDelegatesNull()
+        {
+            var mock = new MockDirectoryObject("CN\u003dWIN10,OU\u003dTestOU,DC\u003dtestlab,DC\u003dlocal",
+                new Dictionary<string, object>
+                {
+                    {"description", "Test"},
+                    {"useraccountcontrol", 0x1001000.ToString()},
+                    {"lastlogon", "132673011142753043"},
+                    {"lastlogontimestamp", "132670318095676525"},
+                    {"operatingsystem", "Windows 10 Enterprise"},
+                    {"operatingsystemservicepack", "1607"},
+                    {"mail", "test@testdomain.com"},
+                    {"admincount", "c"},
+                    {
+                        "sidhistory", new[]
+                        {
+                            Utils.B64ToBytes("AQUAAAAAAAUVAAAAIE+Qun9GhKV2SBaQUQQAAA==")
+                        }
+                    },
+                    {
+                        "msds-allowedtodelegateto", new[]
+                        {
+                            null,
+                            "ldap/PRIMARY.testlab.local",
+                            "ldap/PRIMARY"
+                        }
+                    },
+                    {"pwdlastset", "132131667346106691"},
+                    {
+                        "serviceprincipalname", new[]
+                        {
+                            "WSMAN/WIN10",
+                            "WSMAN/WIN10.testlab.local",
+                            "RestrictedKrbHost/WIN10",
+                            "HOST/WIN10",
+                            "RestrictedKrbHost/WIN10.testlab.local",
+                            "HOST/WIN10.testlab.local"
+                        }
+                    }
+                }, "S-1-5-21-3130019616-2776909439-2417379446-1101","");
+
+            var processor = new LdapPropertyProcessor(new MockLdapUtils());
+            var test = await processor.ReadComputerProperties(mock, "testlab.local");
+            var props = test.Props;
+            var keys = props.Keys;
+
+            Assert.Contains("allowedtodelegate", keys);
+            var atd = props["allowedtodelegate"] as string[];
+            Assert.Equal(3, atd.Length);
+
+            //AllowedToDelegate
+            Assert.Single(test.AllowedToDelegate);
+            Assert.Contains(new TypedPrincipal
+            {
+                ObjectIdentifier = "S-1-5-21-3130019616-2776909439-2417379446-1001",
+                ObjectType = Label.Computer
+            }, test.AllowedToDelegate);
+        }
     }
 }
