@@ -132,9 +132,9 @@ namespace SharpHoundCommonLib.Processors {
         /// <param name="result"></param>
         /// <param name="searchResult"></param>
         /// <returns></returns>
-        public async Task<(ACE[], bool)> ProcessACL(ResolvedSearchResult result, IDirectoryObject searchResult, bool checkForOwnerRights) {
+        public async Task<(ACE[], bool, bool)> ProcessACL(ResolvedSearchResult result, IDirectoryObject searchResult, bool checkForOwnerRights) {
             if (!searchResult.TryGetByteProperty(LDAPProperties.SecurityDescriptor, out var descriptor)) {
-                return ([], false);
+                return ([], false, false);
             }
 
             var domain = result.Domain;
@@ -146,7 +146,7 @@ namespace SharpHoundCommonLib.Processors {
             {
                 var aces = ProcessACL(descriptor, domain, type, hasLaps, name);
                 // Convert to array for return
-                return (await aces.ToArrayAsync(), false);
+                return (await aces.ToArrayAsync(), false, false);
             }
             return await ProcessACL(descriptor, domain, type, hasLaps, name, checkForOwnerRights);
         }
@@ -612,11 +612,12 @@ namespace SharpHoundCommonLib.Processors {
             }
         }
 
-        public async Task<(ACE[], bool)> ProcessACL(byte[] ntSecurityDescriptor, string objectDomain,
+        public async Task<(ACE[], bool, bool)> ProcessACL(byte[] ntSecurityDescriptor, string objectDomain,
             Label objectType, bool hasLaps, string objectName = "", bool checkForOwnerRights = true)
         {
             var aces = new List<ACE>();
             bool isAnyPermissionForOwnerRightsSid = false;
+            bool isAnyPermissionForOwnerRightsSidInherited = false;
 
             await BuildGuidCache(objectDomain);
 
@@ -691,7 +692,7 @@ namespace SharpHoundCommonLib.Processors {
                     resolvedPrincipal.ObjectType = Label.Base;
                 }
 
-                // Check if any rights are explicitly defined for the OWNER RIGHTS SID
+                //Check if any rights are explicitly defined for the OWNER RIGHTS SID
                 if (checkForOwnerRights && resolvedPrincipal.ObjectIdentifier.EndsWith("S-1-3-4"))
                 {
                     isAnyPermissionForOwnerRightsSid = true;
@@ -706,6 +707,12 @@ namespace SharpHoundCommonLib.Processors {
                 if (inherited)
                 {
                     aceInheritanceHash = CalculateInheritanceHash(ir, aceRights, aceType, ace.InheritedObjectType());
+
+                    //Check if any rights that are explicitly defined for the OWNER RIGHTS SID are inherited
+                    if (checkForOwnerRights && resolvedPrincipal.ObjectIdentifier.EndsWith("S-1-3-4"))
+                    {
+                        isAnyPermissionForOwnerRightsSidInherited = true;
+                    }
                 }
 
                 _log.LogTrace("Processing ACE with rights {Rights} and guid {GUID} on object {Name}", aceRights,
@@ -1030,7 +1037,7 @@ namespace SharpHoundCommonLib.Processors {
                         });
                 }
             }
-            return (aces.ToArray(), isAnyPermissionForOwnerRightsSid);
+            return (aces.ToArray(), isAnyPermissionForOwnerRightsSid, isAnyPermissionForOwnerRightsSidInherited);
         }
 
 
