@@ -1354,5 +1354,103 @@ namespace CommonLibTest
                 ObjectType = Label.Computer
             }, test.AllowedToDelegate);
         }
+        
+        [WindowsOnlyFact]
+        public async Task LDAPPropertyProcessor_ReadComputerProperties_AllowedToActOnBehalfOfOtherIdentity()
+        {
+            var mock = new MockDirectoryObject("CN\u003dWIN10,OU\u003dTestOU,DC\u003dtestlab,DC\u003dlocal",
+                new Dictionary<string, object>
+                {
+                    {"description", "Test"},
+                    {"useraccountcontrol", 0x1001000.ToString()},
+                    {"lastlogon", "132673011142753043"},
+                    {"lastlogontimestamp", "132670318095676525"},
+                    {"operatingsystem", "Windows 10 Enterprise"},
+                    {"operatingsystemservicepack", "1607"},
+                    {"mail", "test@testdomain.com"},
+                    {"admincount", "c"},
+                    {
+                        "sidhistory", new[]
+                        {
+                            Utils.B64ToBytes("AQUAAAAAAAUVAAAAIE+Qun9GhKV2SBaQUQQAAA==")
+                        }
+                    },
+                    {
+                        "msds-allowedtodelegateto", new[]
+                        {
+                            "ldap/PRIMARY.testlab.local/testlab.local",
+                            "ldap/PRIMARY.testlab.local",
+                            "ldap/PRIMARY"
+                        }
+                    },
+                    {"pwdlastset", "132131667346106691"},
+                    {
+                        "serviceprincipalname", new[]
+                        {
+                            "WSMAN/WIN10",
+                            "WSMAN/WIN10.testlab.local",
+                            "RestrictedKrbHost/WIN10",
+                            "HOST/WIN10",
+                            "RestrictedKrbHost/WIN10.testlab.local",
+                            "HOST/WIN10.testlab.local"
+                        }
+                    }
+                }, "S-1-5-21-3130019616-2776909439-2417379446-1101","");
+
+            var processor = new LdapPropertyProcessor(new MockLdapUtils());
+            var test = await processor.ReadComputerProperties(mock, "testlab.local");
+            var props = test.Props;
+            var keys = props.Keys;
+
+            //UAC
+            Assert.Contains("enabled", keys);
+            Assert.Contains("unconstraineddelegation", keys);
+            Assert.Contains("trustedtoauth", keys);
+            Assert.Contains("isdc", keys);
+            Assert.Contains("lastlogon", keys);
+            Assert.Contains("lastlogontimestamp", keys);
+            Assert.Contains("pwdlastset", keys);
+            Assert.True((bool)props["enabled"]);
+            Assert.False((bool)props["unconstraineddelegation"]);
+            Assert.True((bool)props["trustedtoauth"]);
+            Assert.False((bool)props["isdc"]);
+
+            Assert.Contains("lastlogon", keys);
+            Assert.Equal(1622827514, (long)props["lastlogon"]);
+            Assert.Contains("lastlogontimestamp", keys);
+            Assert.Equal(1622558209, (long)props["lastlogontimestamp"]);
+            Assert.Contains("pwdlastset", keys);
+            Assert.Equal(1568693134, (long)props["pwdlastset"]);
+
+            //AllowedToDelegate
+            Assert.Single(test.AllowedToDelegate);
+            Assert.Contains(new TypedPrincipal
+            {
+                ObjectIdentifier = "S-1-5-21-3130019616-2776909439-2417379446-1001",
+                ObjectType = Label.Computer
+            }, test.AllowedToDelegate);
+
+            //Other Stuff
+            Assert.Contains("serviceprincipalnames", keys);
+            Assert.Equal(6, (props["serviceprincipalnames"] as string[]).Length);
+            Assert.Contains("operatingsystem", keys);
+            Assert.Equal("Windows 10 Enterprise 1607", props["operatingsystem"] as string);
+            Assert.Contains("description", keys);
+            Assert.Equal("Test", props["description"] as string);
+            Assert.Contains("email", keys);
+            Assert.Equal("test@testdomain.com", props["email"] as string);
+
+            //SidHistory
+            Assert.Contains("sidhistory", keys);
+            var sh = props["sidhistory"] as string[];
+            Assert.Single(sh);
+            Assert.Contains("S-1-5-21-3130019616-2776909439-2417379446-1105", sh);
+            Assert.Single(test.SidHistory);
+            Assert.Contains(new TypedPrincipal
+            {
+                ObjectIdentifier = "S-1-5-21-3130019616-2776909439-2417379446-1105",
+                ObjectType = Label.User
+            }, test.SidHistory);
+        }
     }
 }
