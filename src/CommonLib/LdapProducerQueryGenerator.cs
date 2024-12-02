@@ -59,11 +59,6 @@ public class LdapProducerQueryGenerator {
             };
         }
 
-        if (methods.HasFlag(CollectionMethod.Group)) {
-            filter = filter.AddGroups();
-            properties.AddRange(CommonProperties.GroupResolutionProps);
-        }
-
         if (methods.IsComputerCollectionSet()) {
             filter = filter.AddComputers();
             properties.AddRange(CommonProperties.ComputerMethodProps);
@@ -87,6 +82,11 @@ public class LdapProducerQueryGenerator {
         if (methods.HasFlag(CollectionMethod.DCRegistry)) {
             filter = filter.AddComputers(CommonFilters.DomainControllers);
             properties.AddRange(CommonProperties.ComputerMethodProps);
+        }
+        
+        if (methods.HasFlag(CollectionMethod.Group)) {
+            filter = filter.AddGroups();
+            properties.AddRange(CommonProperties.GroupResolutionProps);
         }
         
         return new GeneratedLdapParameters {
