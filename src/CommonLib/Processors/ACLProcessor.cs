@@ -235,7 +235,7 @@ namespace SharpHoundCommonLib.Processors {
             {
                 return (Array.Empty<ACE>(), false, false);
             }
-            return await ProcessACL(descriptor, result.Domain, result.ObjectType, searchResult.HasLAPS(), result.DisplayName, checkForOwnerRights);
+            return await ProcessACL(descriptor, result.Domain, result.ObjectType, searchResult.HasLAPS(), checkForOwnerRights, result.DisplayName);
         }
 
         /// <summary>
@@ -251,7 +251,7 @@ namespace SharpHoundCommonLib.Processors {
         public async IAsyncEnumerable<ACE> ProcessACL(byte[] ntSecurityDescriptor, string objectDomain,
            Label objectType, bool hasLaps, string objectName = "")
         {
-            var (aces, _, _) = await ProcessACL(ntSecurityDescriptor, objectDomain, objectType, hasLaps, objectName, true);
+            var (aces, _, _) = await ProcessACL(ntSecurityDescriptor, objectDomain, objectType, hasLaps, true, objectName);
             foreach (var ace in aces)
             {
                 yield return ace;
@@ -259,7 +259,7 @@ namespace SharpHoundCommonLib.Processors {
         }
 
         public async Task<(ACE[], bool, bool)> ProcessACL(byte[] ntSecurityDescriptor, string objectDomain,
-            Label objectType, bool hasLaps, string objectName = "", bool checkForOwnerRights = true)
+            Label objectType, bool hasLaps, bool checkForOwnerRights, string objectName)
         {
             var aces = new List<ACE>();
             bool isAnyPermissionForOwnerRightsSid = false;
