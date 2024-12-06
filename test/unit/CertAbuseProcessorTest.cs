@@ -1,4 +1,12 @@
 ﻿using System;
+using System.DirectoryServices;
+using System.Threading.Tasks;
+using CommonLibTest.Facades;
+using Moq;
+using Newtonsoft.Json;
+using SharpHoundCommonLib;
+using SharpHoundCommonLib.Processors;
+using Xunit;
 using Xunit.Abstractions;
 
 namespace CommonLibTest {
@@ -77,26 +85,27 @@ namespace CommonLibTest {
         //     Assert.Empty(results);
         // }
 
-        // [Fact]
-        // public void CertAbuseProcessor_ProcessCAPermissions_NullSecurity_ReturnsNull()
-        // {
-        //     var mockUtils = new Mock<MockLDAPUtils>();
-        //     var processor = new CertAbuseProcessor(mockUtils.Object);
+        [Fact]
+        public async Task CertAbuseProcessor_ProcessCAPermissions_NullSecurity_ReturnsNull()
+        {
+            var processor = new CertAbuseProcessor(new MockLdapUtils());
 
-        //     var results = processor.ProcessRegistryEnrollmentPermissions(null, null, "test");
+            var results = await processor.ProcessRegistryEnrollmentPermissions(null, "DUMPSTER.FIRE", null, "test");
 
-        //     Assert.Empty(results);
-        // }
+            Assert.Equal("Value cannot be null. (Parameter 'machineName')", results.FailureReason);
+            Assert.False(results.Collected);
+            Assert.Empty(results.Data);
+        }
 
         // [WindowsOnlyFact]
         // public void CertAbuseProcessor_ProcessCAPermissions_ReturnsCorrectValues()
         // {
-        //     var mockUtils = new Mock<MockLDAPUtils>();
+        //     var mockUtils = new Mock<MockLdapUtils>();
         //     var sd = new ActiveDirectorySecurityDescriptor(new ActiveDirectorySecurity());
         //     mockUtils.Setup(x => x.MakeSecurityDescriptor()).Returns(sd);
         //     var processor = new CertAbuseProcessor(mockUtils.Object);
         //     var bytes = Helpers.B64ToBytes(CASecurityFixture);
-
+        //
         //     var results = processor.ProcessCAPermissions(bytes, "TESTLAB.LOCAL", "test", false);
         //     _testOutputHelper.WriteLine(JsonConvert.SerializeObject(results, Formatting.Indented));
         //     Assert.Contains(results,

@@ -210,6 +210,7 @@ namespace CommonLibTest
             Assert.Single(receivedStatus);
             var status = receivedStatus[0];
             Assert.Equal("StatusAccessDenied", status.Status);
+            Assert.Equal("GetMachineSid", status.Task);
         }
 
         [Fact]
@@ -229,6 +230,7 @@ namespace CommonLibTest
             Assert.Single(receivedStatus);
             var status = receivedStatus[0];
             Assert.Equal("StatusAccessDenied", status.Status);
+            Assert.Equal("GetDomains", status.Task);
         }
 
         [Fact]
@@ -249,6 +251,7 @@ namespace CommonLibTest
             Assert.Single(receivedStatus);
             var status = receivedStatus[0];
             Assert.Equal("StatusAccessDenied", status.Status);
+            Assert.Equal("OpenDomain - BUILTIN", status.Task);
         }
 
         [Fact]
@@ -269,6 +272,7 @@ namespace CommonLibTest
             Assert.Single(receivedStatus);
             var status = receivedStatus[0];
             Assert.Equal("StatusAccessDenied", status.Status);
+            Assert.Equal("GetAliases - BUILTIN", status.Task);
         }
         
         [Fact]
@@ -291,6 +295,7 @@ namespace CommonLibTest
             Assert.Single(receivedStatus);
             var status = receivedStatus[0];
             Assert.Equal("StatusAccessDenied", status.Status);
+            Assert.Equal("OpenAlias - Administrators", status.Task);
         }
         
         [Fact]
@@ -313,6 +318,7 @@ namespace CommonLibTest
             Assert.Single(receivedStatus);
             var status = receivedStatus[0];
             Assert.Equal("StatusAccessDenied", status.Status);
+            Assert.Equal("GetMembersInAlias - Users", status.Task);
         }
         
         [Fact]
