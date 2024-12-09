@@ -138,7 +138,7 @@ namespace SharpHoundCommonLib.Processors {
                     continue;
                 }
 
-                var (matchSuccess, sids) = await _utils.GetGlobalCatalogMatches(username, computerDomain);
+                (bool matchSuccess, string[] sids) = await _utils.GetGlobalCatalogMatches(username, computerDomain);
                 if (matchSuccess) {
                     results.AddRange(
                         sids.Select(s => new Session { ComputerSID = resolvedComputerSID, UserSID = s }));

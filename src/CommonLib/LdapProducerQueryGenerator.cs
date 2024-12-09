@@ -46,7 +46,7 @@ public class LdapProducerQueryGenerator {
             if (methods.HasFlag(CollectionMethod.SPNTargets))
                 properties.AddRange(CommonProperties.SPNTargetProps);
 
-            if (methods.HasFlag(CollectionMethod.DCRegistry))
+            if (methods.HasFlag(CollectionMethod.DCRegistry) || methods.HasFlag(CollectionMethod.LdapServices))
                 properties.AddRange(CommonProperties.ComputerMethodProps);
 
             if (methods.HasFlag(CollectionMethod.SPNTargets)) {
@@ -79,7 +79,7 @@ public class LdapProducerQueryGenerator {
             properties.AddRange(CommonProperties.GPOLocalGroupProps);
         }
 
-        if (methods.HasFlag(CollectionMethod.DCRegistry)) {
+        if (methods.HasFlag(CollectionMethod.DCRegistry) || methods.HasFlag(CollectionMethod.LdapServices)) {
             filter = filter.AddComputers(CommonFilters.DomainControllers);
             properties.AddRange(CommonProperties.ComputerMethodProps);
         }

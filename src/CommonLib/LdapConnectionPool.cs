@@ -19,7 +19,7 @@ namespace SharpHoundCommonLib {
     internal class LdapConnectionPool : IDisposable{
         private readonly ConcurrentBag<LdapConnectionWrapper> _connections;
         private readonly ConcurrentBag<LdapConnectionWrapper> _globalCatalogConnection;
-        private readonly SemaphoreSlim _semaphore;
+        private readonly SemaphoreSlim _semaphore = null;
         private readonly string _identifier;
         private readonly string _poolIdentifier;
         private readonly LdapConfig _ldapConfig;

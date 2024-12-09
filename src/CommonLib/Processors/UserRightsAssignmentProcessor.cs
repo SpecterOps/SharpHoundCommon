@@ -18,7 +18,7 @@ namespace SharpHoundCommonLib.Processors
         private readonly ILogger _log;
         private readonly ILdapUtils _utils;
 
-        public UserRightsAssignmentProcessor(ILdapUtils  utils, ILogger log = null)
+        public UserRightsAssignmentProcessor(ILdapUtils utils, ILogger log = null)
         {
             _utils = utils;
             _log = log ?? Logging.LogProvider.CreateLogger("UserRightsAssignmentProcessor");
