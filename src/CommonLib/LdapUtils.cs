@@ -182,7 +182,7 @@ namespace SharpHoundCommonLib {
             } catch {
                 //pass
             }
-           
+
 
             return (false, Label.Base);
         }
@@ -227,7 +227,7 @@ namespace SharpHoundCommonLib {
             } catch {
                 //pass
             }
-            
+
 
             return (false, Label.Base);
         }
@@ -361,7 +361,7 @@ namespace SharpHoundCommonLib {
             } catch {
                 //pass
             }
-            
+
 
             return (false, string.Empty);
         }
@@ -904,7 +904,6 @@ namespace SharpHoundCommonLib {
                 _unresolvablePrincipals.Add(distinguishedName);
                 return (false, default);
             }
-            
         }
 
         public async Task<(bool Success, string DSHeuristics)> GetDSHueristics(string domain, string dn) {
@@ -961,7 +960,7 @@ namespace SharpHoundCommonLib {
                 yield return entdc;
             }
         }
-        
+
         private async IAsyncEnumerable<Group> GetEnterpriseDCGroups() {
             var grouped = new ConcurrentDictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
             var forestSidToName = new ConcurrentDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -985,6 +984,7 @@ namespace SharpHoundCommonLib {
                 if (!forestSidToName.TryGetValue(f.Key, out var forestName)) {
                     continue;
                 }
+
                 var group = new Group { ObjectIdentifier = $"{forestName}-S-1-5-9" };
                 group.Properties.Add("name", $"ENTERPRISE DOMAIN CONTROLLERS@{forestName}".ToUpper());
                 group.Properties.Add("domainsid", f.Key);
@@ -1143,10 +1143,8 @@ namespace SharpHoundCommonLib {
         }
 
         public static async Task<(bool Success, ResolvedSearchResult ResolvedResult)> ResolveSearchResult(
-            IDirectoryObject directoryObject, ILdapUtils utils)
-        {
-            if (!directoryObject.GetObjectIdentifier(out var objectIdentifier))
-            {
+            IDirectoryObject directoryObject, ILdapUtils utils) {
+            if (!directoryObject.GetObjectIdentifier(out var objectIdentifier)) {
                 return (false, default);
             }
 
@@ -1155,17 +1153,14 @@ namespace SharpHoundCommonLib {
             };
 
             //If the object is deleted, we can short circuit the rest of this logic as we don't really care about anything else
-            if (directoryObject.IsDeleted())
-            {
+            if (directoryObject.IsDeleted()) {
                 res.Deleted = true;
                 return (true, res);
             }
 
-            if (directoryObject.TryGetLongProperty(LDAPProperties.UserAccountControl, out var rawUac))
-            {
+            if (directoryObject.TryGetLongProperty(LDAPProperties.UserAccountControl, out var rawUac)) {
                 var flags = (UacFlags)rawUac;
-                if (flags.HasFlag(UacFlags.ServerTrustAccount))
-                {
+                if (flags.HasFlag(UacFlags.ServerTrustAccount)) {
                     res.IsDomainController = true;
                     utils.AddDomainController(objectIdentifier);
                 }
@@ -1173,35 +1168,24 @@ namespace SharpHoundCommonLib {
 
             string domain;
 
-            if (directoryObject.TryGetDistinguishedName(out var distinguishedName))
-            {
+            if (directoryObject.TryGetDistinguishedName(out var distinguishedName)) {
                 domain = Helpers.DistinguishedNameToDomain(distinguishedName);
-            }
-            else
-            {
+            } else {
                 if (objectIdentifier.StartsWith("S-1-5") &&
-                    await utils.GetDomainNameFromSid(objectIdentifier) is (true, var domainName))
-                {
+                    await utils.GetDomainNameFromSid(objectIdentifier) is (true, var domainName)) {
                     domain = domainName;
-                }
-                else
-                {
+                } else {
                     return (false, default);
                 }
             }
 
             string domainSid;
             var match = SIDRegex.Match(objectIdentifier);
-            if (match.Success)
-            {
+            if (match.Success) {
                 domainSid = match.Groups[1].Value;
-            }
-            else if (await utils.GetDomainSidFromDomainName(domain) is (true, var sid))
-            {
+            } else if (await utils.GetDomainSidFromDomainName(domain) is (true, var sid)) {
                 domainSid = sid;
-            }
-            else
-            {
+            } else {
                 Logging.Logger.LogWarning("Failed to resolve domain sid for object {Identifier}", objectIdentifier);
                 domainSid = null;
             }
@@ -1209,12 +1193,10 @@ namespace SharpHoundCommonLib {
             res.Domain = domain;
             res.DomainSid = domainSid;
 
-            if (WellKnownPrincipal.GetWellKnownPrincipal(objectIdentifier, out var wellKnownPrincipal))
-            {
+            if (WellKnownPrincipal.GetWellKnownPrincipal(objectIdentifier, out var wellKnownPrincipal)) {
                 res.DisplayName = $"{wellKnownPrincipal.ObjectIdentifier}@{domain}";
                 res.ObjectType = wellKnownPrincipal.ObjectType;
-                if (await utils.GetWellKnownPrincipal(objectIdentifier, domain) is (true, var convertedPrincipal))
-                {
+                if (await utils.GetWellKnownPrincipal(objectIdentifier, domain) is (true, var convertedPrincipal)) {
                     res.ObjectId = convertedPrincipal.ObjectIdentifier;
                 }
 
@@ -1228,136 +1210,100 @@ namespace SharpHoundCommonLib {
             return (true, res);
         }
 
-        private static async Task<Label> ComputeLabel(IDirectoryObject directoryObject, string objectIdentifier, string domain, ILdapUtils utils)
-        {
-            if (!directoryObject.GetLabel(out var label))
-            {
-                if (await utils.ResolveIDAndType(objectIdentifier, domain) is (true, var typedPrincipal))
-                {
+        private static async Task<Label> ComputeLabel(IDirectoryObject directoryObject, string objectIdentifier,
+            string domain, ILdapUtils utils) {
+            if (!directoryObject.GetLabel(out var label)) {
+                if (await utils.ResolveIDAndType(objectIdentifier, domain) is (true, var typedPrincipal)) {
                     label = typedPrincipal.ObjectType;
                 }
             }
 
-            if (directoryObject.IsMSA() || directoryObject.IsGMSA())
-            {
+            if (directoryObject.IsMSA() || directoryObject.IsGMSA()) {
                 label = Label.User;
             }
 
             return label;
         }
 
-        private static string ComputeDisplayName(IDirectoryObject directoryObject, string domain, Label label, string samAccountName)
-        {
+        private static string ComputeDisplayName(IDirectoryObject directoryObject, string domain, Label label,
+            string samAccountName) {
             string displayName;
-            switch (label)
-            {
+            switch (label) {
                 case Label.User:
                 case Label.Group:
                 case Label.Base:
                     displayName = $"{samAccountName}@{domain}";
                     break;
-                case Label.Computer:
-                    {
-                        var shortName = samAccountName?.TrimEnd('$');
-                        if (directoryObject.TryGetProperty(LDAPProperties.DNSHostName, out var dns))
-                        {
-                            displayName = dns;
-                        }
-                        else if (!string.IsNullOrWhiteSpace(shortName))
-                        {
-                            displayName = $"{shortName}.{domain}";
-                        }
-                        else if (directoryObject.TryGetProperty(LDAPProperties.CanonicalName,
-                                       out var canonicalName))
-                        {
-                            displayName = $"{canonicalName}.{domain}";
-                        }
-                        else if (directoryObject.TryGetProperty(LDAPProperties.Name, out var name))
-                        {
-                            displayName = $"{name}.{domain}";
-                        }
-                        else
-                        {
-                            displayName = $"UNKNOWN.{domain}";
-                        }
-
-                        break;
+                case Label.Computer: {
+                    var shortName = samAccountName?.TrimEnd('$');
+                    if (directoryObject.TryGetProperty(LDAPProperties.DNSHostName, out var dns)) {
+                        displayName = dns;
+                    } else if (!string.IsNullOrWhiteSpace(shortName)) {
+                        displayName = $"{shortName}.{domain}";
+                    } else if (directoryObject.TryGetProperty(LDAPProperties.CanonicalName,
+                                   out var canonicalName)) {
+                        displayName = $"{canonicalName}.{domain}";
+                    } else if (directoryObject.TryGetProperty(LDAPProperties.Name, out var name)) {
+                        displayName = $"{name}.{domain}";
+                    } else {
+                        displayName = $"UNKNOWN.{domain}";
                     }
+
+                    break;
+                }
                 case Label.GPO:
-                case Label.IssuancePolicy:
-                    {
-                        if (directoryObject.TryGetProperty(LDAPProperties.DisplayName, out var ldapDisplayName))
-                        {
-                            displayName = $"{ldapDisplayName}@{domain}";
-                        }
-                        else if (directoryObject.TryGetProperty(LDAPProperties.CanonicalName,
-                                       out var canonicalName))
-                        {
-                            displayName = $"{canonicalName}@{domain}";
-                        }
-                        else
-                        {
-                            displayName = $"UNKNOWN@{domain}";
-                        }
-
-                        break;
+                case Label.IssuancePolicy: {
+                    if (directoryObject.TryGetProperty(LDAPProperties.DisplayName, out var ldapDisplayName)) {
+                        displayName = $"{ldapDisplayName}@{domain}";
+                    } else if (directoryObject.TryGetProperty(LDAPProperties.CanonicalName,
+                                   out var canonicalName)) {
+                        displayName = $"{canonicalName}@{domain}";
+                    } else {
+                        displayName = $"UNKNOWN@{domain}";
                     }
+
+                    break;
+                }
                 case Label.Domain:
                     displayName = domain;
                     break;
-                case Label.OU:
-                    {
-                        if (directoryObject.TryGetProperty(LDAPProperties.Name, out var name))
-                        {
-                            displayName = $"{name}@{domain}";
-                        }
-                        else if (directoryObject.TryGetProperty(LDAPProperties.OU, out var ou))
-                        {
-                            displayName = $"{ou}@{domain}";
-                        }
-                        else
-                        {
-                            displayName = $"UNKNOWN@{domain}";
-                        }
-
-                        break;
+                case Label.OU: {
+                    if (directoryObject.TryGetProperty(LDAPProperties.Name, out var name)) {
+                        displayName = $"{name}@{domain}";
+                    } else if (directoryObject.TryGetProperty(LDAPProperties.OU, out var ou)) {
+                        displayName = $"{ou}@{domain}";
+                    } else {
+                        displayName = $"UNKNOWN@{domain}";
                     }
-                case Label.Container:
-                    {
-                        if (directoryObject.TryGetProperty(LDAPProperties.Name, out var name))
-                        {
-                            displayName = $"{name}@{domain}";
-                        }
-                        else if (directoryObject.TryGetProperty(LDAPProperties.CanonicalName,
-                                       out var canonicalName))
-                        {
-                            displayName = $"{canonicalName}@{domain}";
-                        }
-                        else
-                        {
-                            displayName = $"UNKNOWN@{domain}";
-                        }
 
-                        break;
+                    break;
+                }
+                case Label.Container: {
+                    if (directoryObject.TryGetProperty(LDAPProperties.Name, out var name)) {
+                        displayName = $"{name}@{domain}";
+                    } else if (directoryObject.TryGetProperty(LDAPProperties.CanonicalName,
+                                   out var canonicalName)) {
+                        displayName = $"{canonicalName}@{domain}";
+                    } else {
+                        displayName = $"UNKNOWN@{domain}";
                     }
+
+                    break;
+                }
                 case Label.Configuration:
                 case Label.RootCA:
                 case Label.AIACA:
                 case Label.NTAuthStore:
                 case Label.EnterpriseCA:
-                case Label.CertTemplate:
-                    {
-                        if (directoryObject.TryGetProperty(LDAPProperties.Name, out var name))
-                        {
-                            displayName = $"{name}@{domain}";
-                        }
-                        else
-                        {
-                            displayName = $"UNKNOWN@{domain}";
-                        }
-
-                        break;
+                case Label.CertTemplate: {
+                    if (directoryObject.TryGetProperty(LDAPProperties.Name, out var name)) {
+                        displayName = $"{name}@{domain}";
+                    } else {
+                        displayName = $"UNKNOWN@{domain}";
                     }
+
+                    break;
+                }
                 default:
                     throw new ArgumentOutOfRangeException();
             }
