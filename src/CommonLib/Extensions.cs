@@ -186,7 +186,7 @@ namespace SharpHoundCommonLib
         /// <param name="methods"></param>
         /// <returns></returns>
         public static bool IsComputerCollectionSet(this CollectionMethod methods) {
-            const CollectionMethod test = CollectionMethod.ComputerOnly | CollectionMethod.LoggedOn;
+            const CollectionMethod test = CollectionMethod.ComputerOnly | CollectionMethod.LoggedOn | CollectionMethod.SmbInfo | CollectionMethod.SmbInfo;
             return (methods & test) != 0;
         }
 

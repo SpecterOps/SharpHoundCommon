@@ -1,7 +1,5 @@
-﻿namespace SharpHoundCommonLib.Enums
-{
-    public enum LdapErrorCodes : int
-    {
+﻿namespace SharpHoundCommonLib.Enums {
+    public enum LdapErrorCodes : int {
         Success = 0,
         StrongAuthRequired = 8,
         SaslBindInProgress = 14,

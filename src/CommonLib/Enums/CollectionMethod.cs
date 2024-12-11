@@ -1,10 +1,8 @@
 ﻿using System;
 
-namespace SharpHoundCommonLib.Enums
-{
+namespace SharpHoundCommonLib.Enums {
     [Flags]
-    public enum CollectionMethod
-    {
+    public enum CollectionMethod {
         None = 0,
         Group = 1,
         LocalAdmin = 1 << 1,
@@ -30,9 +28,13 @@ namespace SharpHoundCommonLib.Enums
         SmbInfo = 1 << 22,
         EventLogs = 1 << 23,
         LocalGroups = DCOM | RDP | LocalAdmin | PSRemote,
-        ComputerOnly = LocalGroups | Session | UserRights | CARegistry | DCRegistry | WebClientService | SmbInfo | EventLogs,
+        ComputerOnly = LocalGroups | Session | UserRights | CARegistry | DCRegistry | WebClientService | SmbInfo,
         DCOnly = ACL | Container | Group | ObjectProps | Trusts | GPOLocalGroup | CertServices | LdapServices | SmbInfo,
-        Default = Group | Session | Trusts | ACL | ObjectProps | LocalGroups | SPNTargets | Container | CertServices | LdapServices | SmbInfo,
-        All = Default | LoggedOn | GPOLocalGroup | UserRights | CARegistry | DCRegistry | WebClientService | LdapServices | EventLogs
+
+        Default = Group | Session | Trusts | ACL | ObjectProps | LocalGroups | SPNTargets | Container | CertServices |
+                  LdapServices | SmbInfo,
+
+        All = Default | LoggedOn | GPOLocalGroup | UserRights | CARegistry | DCRegistry | WebClientService |
+              LdapServices
     }
 }

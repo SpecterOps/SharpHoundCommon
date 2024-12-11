@@ -8,22 +8,16 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SharpHoundCommonLib.Processors
-{
-    public class SmbProcessor(int timeoutMs, ILogger? log = null)
-    {
+namespace SharpHoundCommonLib.Processors {
+    public class SmbProcessor(int timeoutMs, ILogger? log = null) {
         private readonly ILogger _log = log ?? Logging.LogProvider.CreateLogger("SmbProcessor");
-        int _timeoutMs = timeoutMs;
 
-        public async Task<ApiResult<SmbInfo>> Scan(string host)
-        {
+        public async Task<ApiResult<SmbInfo>> Scan(string host) {
             var scanner = new SmbScanner();
-            var result = await scanner.Scan(host, 445, _timeoutMs);
+            var result = await scanner.Scan(host, 445, timeoutMs);
 
-            if (result.Success && result.Info != null)
-            {
-                var info = new SmbInfo()
-                {
+            if (result.Success && result.Info != null) {
+                var info = new SmbInfo() {
                     SigningEnabled = result.Info.SmbSigning,
                     OsVersion = result.Info.OsVersion,
                     OsBuild = result.Info.OsBuildNumber.ToString(),
@@ -31,27 +25,21 @@ namespace SharpHoundCommonLib.Processors
                 };
 
                 return ApiResult<SmbInfo>.CreateSuccess(info);
-            }
-            else
-            {
+            } else {
                 return ApiResult<SmbInfo>.CreateError(result.ErrorMessage ?? "Unknown error");
             }
         }
-
     }
 
 
-    public enum SmbVersion
-    {
+    public enum SmbVersion {
         Unknown,
         SMBv1,
         SMBv2
     }
 
-    public class SmbScanResult
-    {
-        public SmbScanResult(string host)
-        {
+    public class SmbScanResult {
+        public SmbScanResult(string host) {
             Host = host;
         }
 
@@ -62,18 +50,13 @@ namespace SharpHoundCommonLib.Processors
         public SmbVersion SmbVersion { get; set; }
     }
 
-    public class SMBPacket
-    {
-        public SMBPacket(bool signingEnabled)
-        {
-            if (signingEnabled)
-            {
+    public class SMBPacket {
+        public SMBPacket(bool signingEnabled) {
+            if (signingEnabled) {
                 SMB_Signing = signingEnabled;
                 SMB_Session_Key_Length = [0x00, 0x00];
                 SMB_Negotiate_Flags = [0x15, 0x82, 0x08, 0xa0];
-            }
-            else
-            {
+            } else {
                 SMB_Signing = signingEnabled;
                 SMB_Session_Key_Length = [0x00, 0x00];
                 SMB_Negotiate_Flags = [0x05, 0x80, 0x08, 0xa0];
@@ -95,8 +78,7 @@ namespace SharpHoundCommonLib.Processors
         public byte[]? Session_Key { get; set; }
     }
 
-    public class NTLMInfo
-    {
+    public class NTLMInfo {
         public string? NativeOs { get; set; }
         public string? NativeLanManager { get; set; }
         public string? NbtDomainName { get; set; }
@@ -110,115 +92,107 @@ namespace SharpHoundCommonLib.Processors
         public DateTime TimeStamp { get; set; }
         public bool SmbSigning { get; set; }
 
-        public static NTLMInfo FromBytes(byte[] buf)
-        {
-            NTLMInfo ntlminfo = new NTLMInfo();
-            string NTLMSSP_Negotiate = BitConverter.ToString(buf).Replace("-", "");
+        public static NTLMInfo FromBytes(byte[] buf) {
+            var ntlminfo = new NTLMInfo();
+            var ntlmsspNegotiate = BitConverter.ToString(buf).Replace("-", "");
             int off;
-            off = NTLMSSP_Negotiate.IndexOf("4E544C4D53535000") / 2;
-            int NTLMSSP_Negotiate_Len = (NTLMSSP_Negotiate.Length - NTLMSSP_Negotiate.IndexOf("4E544C4D53535000")) / 2;
-            byte[] ntlm = new byte[NTLMSSP_Negotiate_Len];
-            Array.Copy(buf, off, ntlm, 0, NTLMSSP_Negotiate_Len);
+            off = ntlmsspNegotiate.IndexOf("4E544C4D53535000", StringComparison.Ordinal) / 2;
+            var ntlmsspNegotiateLen = (ntlmsspNegotiate.Length - ntlmsspNegotiate.IndexOf("4E544C4D53535000", StringComparison.Ordinal)) / 2;
+            var ntlm = new byte[ntlmsspNegotiateLen];
+            Array.Copy(buf, off, ntlm, 0, ntlmsspNegotiateLen);
 
-            NTLMSSP_Negotiate_Len = BitConverter.ToInt16(ntlm, 0xc);
+            ntlmsspNegotiateLen = BitConverter.ToInt16(ntlm, 0xc);
             off = BitConverter.ToInt16(ntlm, 0x10);
             ntlminfo.OsBuildNumber = BitConverter.ToInt16(ntlm, off - 6);
             ntlminfo.OsVersion = $@"{ntlm[off - 8]}.{ntlm[off - 7]}";
 
-            off += NTLMSSP_Negotiate_Len;
+            off += ntlmsspNegotiateLen;
             int type = BitConverter.ToInt16(ntlm, off);
 
-            while (type != 0)
-            {
+            while (type != 0) {
                 off += 2;
-                NTLMSSP_Negotiate_Len = BitConverter.ToInt16(ntlm, off);
+                ntlmsspNegotiateLen = BitConverter.ToInt16(ntlm, off);
                 off += 2;
-                switch (type)
-                {
+                switch (type) {
                     case 1:
-                        ntlminfo.NbtComputer = Encoding.Unicode.GetString(ntlm, off, NTLMSSP_Negotiate_Len);
+                        ntlminfo.NbtComputer = Encoding.Unicode.GetString(ntlm, off, ntlmsspNegotiateLen);
                         break;
                     case 2:
-                        ntlminfo.NbtDomainName = Encoding.Unicode.GetString(ntlm, off, NTLMSSP_Negotiate_Len);
+                        ntlminfo.NbtDomainName = Encoding.Unicode.GetString(ntlm, off, ntlmsspNegotiateLen);
                         break;
                     case 3:
-                        ntlminfo.DnsComputerName = Encoding.Unicode.GetString(ntlm, off, NTLMSSP_Negotiate_Len);
+                        ntlminfo.DnsComputerName = Encoding.Unicode.GetString(ntlm, off, ntlmsspNegotiateLen);
                         break;
                     case 4:
-                        ntlminfo.DnsDomainName = Encoding.Unicode.GetString(ntlm, off, NTLMSSP_Negotiate_Len);
+                        ntlminfo.DnsDomainName = Encoding.Unicode.GetString(ntlm, off, ntlmsspNegotiateLen);
                         break;
                     case 5:
-                        ntlminfo.DnsTreeName = Encoding.Unicode.GetString(ntlm, off, NTLMSSP_Negotiate_Len);
+                        ntlminfo.DnsTreeName = Encoding.Unicode.GetString(ntlm, off, ntlmsspNegotiateLen);
                         break;
                     case 7:
                         ntlminfo.TimeStamp = DateTime.FromFileTime(BitConverter.ToInt64(ntlm, off));
                         break;
                 }
-                off += NTLMSSP_Negotiate_Len;
+
+                off += ntlmsspNegotiateLen;
                 type = BitConverter.ToInt16(ntlm, off);
             }
 
             return ntlminfo;
         }
     }
-    
-    public class SmbScanner
-    { 
-        public async Task<SmbScanResult> Scan(string host, int port, int timeoutMs = 10000)
-        {
-            var result = new SmbScanResult(host)
-            {
+
+    public class SmbScanner {
+        public async Task<SmbScanResult> Scan(string host, int port, int timeoutMs = 10000) {
+            var result = new SmbScanResult(host) {
                 Success = false,
                 SmbVersion = SmbVersion.Unknown
             };
 
-            var SMBClientReceive = new byte[2048];
-            TcpClient? SMB_Client = null;
-            NetworkStream? SMB_Client_Stream = null;
+            TcpClient? smbClient = null;
 
-            try
-            {
-                SMB_Client = await ConnectAsync(host, port, timeoutMs);
+            try {
+                smbClient = await ConnectAsync(host, port, timeoutMs);
 
-                if (!SMB_Client.Connected)
-                {
+                if (!smbClient.Connected) {
                     result.ErrorMessage = "SMBInfo can't connect!";
                     return result;
                 }
 
-                SMB_Client_Stream = SMB_Client.GetStream();
+                var smbClientStream = smbClient.GetStream();
 
                 using var operationCts = new System.Threading.CancellationTokenSource(timeoutMs);
 
-                if (port == 139)
-                {
-                    await SendStreamAsync(SMB_Client_Stream, GetNtbiosTCPData(), operationCts.Token);
+                if (port == 139) {
+                    await SendStreamAsync(smbClientStream, GetNtbiosTCPData(), operationCts.Token);
                 }
 
-                try
-                {
+                byte[] smbClientReceive;
+                try {
                     // Try SMBv1 first
-                    SMBClientReceive = await SendStreamAsync(SMB_Client_Stream, GetNegotiateSMBv1Data(), operationCts.Token);
+                    smbClientReceive =
+                        await SendStreamAsync(smbClientStream, GetNegotiateSMBv1Data(), operationCts.Token);
 
-                    bool singingEnabled = BitConverter.ToString(SMBClientReceive).Replace("-", "").Substring(78, 2) == "0F";
+                    var singingEnabled = BitConverter.ToString(smbClientReceive).Replace("-", "").Substring(78, 2) ==
+                                         "0F";
 
-                    SMBClientReceive = await SendStreamAsync(SMB_Client_Stream, GetNTLMSSPNegotiatev1Data(), operationCts.Token);
+                    smbClientReceive = await SendStreamAsync(smbClientStream, GetNTLMSSPNegotiatev1Data(),
+                        operationCts.Token);
 
-                    int len = BitConverter.ToInt16(SMBClientReceive, 43);
+                    int len = BitConverter.ToInt16(smbClientReceive, 43);
                     string[]? ss = null;
 
-                    if (Encoding.Unicode.GetString(SMBClientReceive, len + 47, SMBClientReceive.Length - len - 47).Split('\0')[0].ToLower().Contains("windows"))
-                    {
-                        ss = Encoding.Unicode.GetString(SMBClientReceive, len + 47, SMBClientReceive.Length - len - 47).Split('\0');
-                    }
-                    else
-                    {
-                        ss = Encoding.Unicode.GetString(SMBClientReceive, len + 48, SMBClientReceive.Length - len - 48).Split('\0');
+                    if (Encoding.Unicode.GetString(smbClientReceive, len + 47, smbClientReceive.Length - len - 47)
+                        .Split('\0')[0].ToLower().Contains("windows")) {
+                        ss = Encoding.Unicode.GetString(smbClientReceive, len + 47, smbClientReceive.Length - len - 47)
+                            .Split('\0');
+                    } else {
+                        ss = Encoding.Unicode.GetString(smbClientReceive, len + 48, smbClientReceive.Length - len - 48)
+                            .Split('\0');
                     }
 
-                    if (ss.Length >= 2)
-                    {
-                        result.Info = NTLMInfo.FromBytes(SMBClientReceive);
+                    if (ss.Length >= 2) {
+                        result.Info = NTLMInfo.FromBytes(smbClientReceive);
                         result.Info.NativeOs = ss[0];
                         result.Info.NativeLanManager = ss[1];
                         result.Info.SmbSigning = singingEnabled;
@@ -226,107 +200,93 @@ namespace SharpHoundCommonLib.Processors
 
                     result.SmbVersion = SmbVersion.SMBv1;
                     result.Success = true;
-                }
-                catch
-                {
+                } catch {
                     // If SMBv1 fails, try SMBv2 with a new connection
-                    if (SMB_Client != null)
-                    {
-                        SMB_Client.Close();
+                    if (smbClient != null) {
+                        smbClient.Close();
                     }
 
-                    SMB_Client = await ConnectAsync(host, port, 10000);
-                    SMB_Client_Stream = SMB_Client.GetStream();
+                    smbClient = await ConnectAsync(host, port, 10000);
+                    smbClientStream = smbClient.GetStream();
 
-                    SMBClientReceive = await SendStreamAsync(SMB_Client_Stream, GetNegotiateSMBv2Data1(), operationCts.Token);
-                    if (BitConverter.ToString([SMBClientReceive[4], SMBClientReceive[5], SMBClientReceive[6], SMBClientReceive[7]]).ToLower() == "ff-53-4d-42")
-                    {
+                    smbClientReceive =
+                        await SendStreamAsync(smbClientStream, GetNegotiateSMBv2Data1(), operationCts.Token);
+                    if (BitConverter.ToString([
+                            smbClientReceive[4], smbClientReceive[5], smbClientReceive[6], smbClientReceive[7]
+                        ]).ToLower() == "ff-53-4d-42") {
                         result.ErrorMessage = "Could not connect with SMBv2";
                         return result;
                     }
 
-                    bool signingEnabled = BitConverter.ToString(new byte[] { SMBClientReceive[70] }) == "03";
-                    var SMBPackets = new SMBPacket(signingEnabled);
-                    
-                    
+                    var signingEnabled = BitConverter.ToString(new byte[] { smbClientReceive[70] }) == "03";
+                    var smbPackets = new SMBPacket(signingEnabled);
 
-                    await SendStreamAsync(SMB_Client_Stream, GetNegotiateSMBv2Data2(), operationCts.Token);
-                    SMBClientReceive = await SendStreamAsync(SMB_Client_Stream, GetNTLMSSPNegotiatev2Data(SMBPackets), operationCts.Token);
 
-                    result.Info = NTLMInfo.FromBytes(SMBClientReceive);
-                    result.Info.SmbSigning = SMBPackets.SMB_Signing;
+                    await SendStreamAsync(smbClientStream, GetNegotiateSMBv2Data2(), operationCts.Token);
+                    smbClientReceive = await SendStreamAsync(smbClientStream, GetNTLMSSPNegotiatev2Data(smbPackets),
+                        operationCts.Token);
+
+                    result.Info = NTLMInfo.FromBytes(smbClientReceive);
+                    result.Info.SmbSigning = smbPackets.SMB_Signing;
 
                     result.SmbVersion = SmbVersion.SMBv2;
                     result.Success = true;
                 }
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 result.ErrorMessage = ex.Message;
-            }
-            finally
-            {
-                SMB_Client?.Close();
+            } finally {
+                smbClient?.Close();
             }
 
             return result;
         }
 
-        private static async Task<TcpClient> ConnectAsync(string host, int port, int timeoutMs)
-        {
+        private static async Task<TcpClient> ConnectAsync(string host, int port, int timeoutMs) {
             using var connectCts = new System.Threading.CancellationTokenSource(timeoutMs + 100);
             var client = new TcpClient();
 
             client.Client.SendTimeout = timeoutMs;
             client.Client.ReceiveTimeout = timeoutMs;
 
-            try
-            {
+            try {
                 var connectTask = client.ConnectAsync(host, port);
-                if (await Task.WhenAny(connectTask, Task.Delay(timeoutMs, connectCts.Token)) != connectTask)
-                {
+                if (await Task.WhenAny(connectTask, Task.Delay(timeoutMs, connectCts.Token)) != connectTask) {
                     client.Close();
                     throw new TimeoutException($"Connection to {host}:{port} timed out after {timeoutMs}ms");
                 }
 
                 await connectTask;
                 return client;
-            }
-            catch (Exception ex) when (ex is SocketException || ex is TimeoutException)
-            {
+            } catch (Exception ex) when (ex is SocketException || ex is TimeoutException) {
                 client.Close();
                 throw new TimeoutException($"Connection to {host}:{port} timed out after {timeoutMs}ms", ex);
-            }
-            catch
-            {
+            } catch {
                 client.Close();
                 throw;
             }
         }
 
-        private static async Task<byte[]> SendStreamAsync(NetworkStream stream, byte[] BytesToSend, System.Threading.CancellationToken cancellationToken)
-        {
-            byte[] BytesReceived = new byte[2048];
+        private static async Task<byte[]> SendStreamAsync(NetworkStream stream, byte[] BytesToSend,
+            System.Threading.CancellationToken cancellationToken) {
+            var bytesReceived = new byte[2048];
             await stream.WriteAsync(BytesToSend, 0, BytesToSend.Length, cancellationToken);
             await stream.FlushAsync(cancellationToken);
-            await stream.ReadAsync(BytesReceived, 0, BytesReceived.Length, cancellationToken);
-            return BytesReceived;
+            await stream.ReadAsync(bytesReceived, 0, bytesReceived.Length, cancellationToken);
+            return bytesReceived;
         }
 
-        private static byte[] GetNtbiosTCPData()
-        {
-            byte[] NtbiosTCPData = {
-                0x81,0x00,0x00,0x44,0x20,0x43,0x4b,0x46,0x44,0x45,0x4e,0x45,0x43,0x46,0x44,0x45
-                ,0x46,0x46,0x43,0x46,0x47,0x45,0x46,0x46,0x43,0x43,0x41,0x43,0x41,0x43,0x41,0x43
-                ,0x41,0x43,0x41,0x43,0x41,0x00,0x20,0x43,0x41,0x43,0x41,0x43,0x41,0x43,0x41,0x43
-                ,0x41,0x43,0x41,0x43,0x41,0x43,0x41,0x43,0x41,0x43,0x41,0x43,0x41,0x43,0x41,0x43
-                ,0x41,0x43,0x41,0x43,0x41,0x41,0x41,0x00
+        private static byte[] GetNtbiosTCPData() {
+            byte[] NetbiosTCPData = {
+                0x81, 0x00, 0x00, 0x44, 0x20, 0x43, 0x4b, 0x46, 0x44, 0x45, 0x4e, 0x45, 0x43, 0x46, 0x44, 0x45, 0x46,
+                0x46, 0x43, 0x46, 0x47, 0x45, 0x46, 0x46, 0x43, 0x43, 0x41, 0x43, 0x41, 0x43, 0x41, 0x43, 0x41, 0x43,
+                0x41, 0x43, 0x41, 0x00, 0x20, 0x43, 0x41, 0x43, 0x41, 0x43, 0x41, 0x43, 0x41, 0x43, 0x41, 0x43, 0x41,
+                0x43, 0x41, 0x43, 0x41, 0x43, 0x41, 0x43, 0x41, 0x43, 0x41, 0x43, 0x41, 0x43, 0x41, 0x43, 0x41, 0x43,
+                0x41, 0x41, 0x41, 0x00
             };
-            return NtbiosTCPData;
+            return NetbiosTCPData;
         }
 
-        private static byte[] GetNegotiateSMBv1Data()
-        {
+        private static byte[] GetNegotiateSMBv1Data() {
             byte[] NegotiateSMBv1Data = {
                 0x00, 0x00, 0x00, 0x85, 0xFF, 0x53, 0x4D, 0x42, 0x72, 0x00, 0x00, 0x00, 0x00, 0x18, 0x53, 0xC8,
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFE,
@@ -341,8 +301,7 @@ namespace SharpHoundCommonLib.Processors
             return NegotiateSMBv1Data;
         }
 
-        private static byte[] GetNTLMSSPNegotiatev1Data()
-        {
+        private static byte[] GetNTLMSSPNegotiatev1Data() {
             byte[] NTLMSSPNegotiatev1Data = {
                 0x00, 0x00, 0x01, 0x0A, 0xFF, 0x53, 0x4D, 0x42, 0x73, 0x00, 0x00, 0x00, 0x00, 0x18, 0x07, 0xC8,
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFE,
@@ -354,7 +313,7 @@ namespace SharpHoundCommonLib.Processors
                 0xA2, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                 0x00, 0x05, 0x02, 0xCE, 0x0E, 0x00, 0x00, 0x00, 0x0F, 0x00, 0x57, 0x00, 0x69, 0x00, 0x6E, 0x00,
                 0x64, 0x00, 0x6F, 0x00, 0x77, 0x00, 0x73, 0x00, 0x20, 0x00, 0x53, 0x00, 0x65, 0x00, 0x72, 0x00,
-                0x76, 0x00,0x65, 0x00, 0x72, 0x00, 0x20, 0x00, 0x32, 0x00, 0x30, 0x00, 0x30, 0x00, 0x33, 0x00,
+                0x76, 0x00, 0x65, 0x00, 0x72, 0x00, 0x20, 0x00, 0x32, 0x00, 0x30, 0x00, 0x30, 0x00, 0x33, 0x00,
                 0x20, 0x00, 0x33, 0x00, 0x37, 0x00, 0x39, 0x00, 0x30, 0x00, 0x20, 0x00, 0x53, 0x00,
                 0x65, 0x00, 0x72, 0x00, 0x76, 0x00, 0x69, 0x00, 0x63, 0x00, 0x65, 0x00, 0x20, 0x00,
                 0x50, 0x00, 0x61, 0x00, 0x63, 0x00, 0x6B, 0x00, 0x20, 0x00, 0x32, 0x00, 0x00, 0x00,
@@ -366,8 +325,7 @@ namespace SharpHoundCommonLib.Processors
             return NTLMSSPNegotiatev1Data;
         }
 
-        private static byte[] GetNegotiateSMBv2Data1()
-        {
+        private static byte[] GetNegotiateSMBv2Data1() {
             byte[] NegotiateSMBData = {
                 0x00, 0x00, 0x00, 0x45, 0xFF, 0x53, 0x4D, 0x42, 0x72, 0x00,
                 0x00, 0x00, 0x00, 0x18, 0x01, 0x48, 0x00, 0x00, 0x00, 0x00,
@@ -381,8 +339,7 @@ namespace SharpHoundCommonLib.Processors
             return NegotiateSMBData;
         }
 
-        private static byte[] GetNegotiateSMBv2Data2()
-        {
+        private static byte[] GetNegotiateSMBv2Data2() {
             byte[] NegotiateSMB2Data = {
                 0x00, 0x00, 0x00, 0x68, 0xFE, 0x53, 0x4D, 0x42, 0x40, 0x00,
                 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -399,8 +356,7 @@ namespace SharpHoundCommonLib.Processors
             return NegotiateSMB2Data;
         }
 
-        private static byte[] GetNTLMSSPNegotiatev2Data(SMBPacket SMBPackets)
-        {
+        private static byte[] GetNTLMSSPNegotiatev2Data(SMBPacket SMBPackets) {
             byte[] NTLMSSPNegotiateData = {
                 0x00, 0x00, 0x00, 0x9A, 0xFE, 0x53, 0x4D, 0x42, 0x40, 0x00,
                 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,

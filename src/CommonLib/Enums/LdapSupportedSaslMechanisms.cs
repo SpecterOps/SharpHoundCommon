@@ -4,10 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SharpHoundCommonLib.Enums
-{
-    public static class LdapSupportedSaslMechansims
-    {
+namespace SharpHoundCommonLib.Enums {
+    public static class LdapSupportedSaslMechanisms {
         public const string GSSAPI = "GSSAPI";
         public const string GSS_SPNEGO = "GSS-SPNEGO";
         public const string EXTERNAL = "EXTERNAL";

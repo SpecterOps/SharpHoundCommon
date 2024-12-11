@@ -1,12 +1,10 @@
 ﻿using System.Collections.Generic;
 
-namespace SharpHoundCommonLib.OutputTypes
-{
+namespace SharpHoundCommonLib.OutputTypes {
     /// <summary>
     ///     Represents a computer object in Active Directory. Contains all the properties BloodHound cares about
     /// </summary>
-    public class Computer : OutputBase
-    {
+    public class Computer : OutputBase {
         public string PrimaryGroupSID { get; set; }
         public TypedPrincipal[] AllowedToDelegate { get; set; } = [];
         public TypedPrincipal[] AllowedToAct { get; set; } = [];
@@ -25,15 +23,17 @@ namespace SharpHoundCommonLib.OutputTypes
 
 #pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
         public ApiResult<bool> IsWebClientRunning { get; set; }
-        public LdapService? LdapServices { get; set; } 
+        public LdapService? LdapServices { get; set; }
         public ApiResult<SmbInfo>? SmbInfo { get; set; }
-        public ApiResult<NtlmSessionResult>? NtlmSessions { get; set; } 
+        public ApiResult<NtlmSessionResult>? NtlmSessions { get; set; }
 #pragma warning restore CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
-
     }
 
-    public class LdapService(bool hasLdap, bool hasLdaps, ApiResult<bool> isSigningRequired, ApiResult<bool> isChannelBindingRequired)
-    {
+    public class LdapService(
+        bool hasLdap,
+        bool hasLdaps,
+        ApiResult<bool> isSigningRequired,
+        ApiResult<bool> isChannelBindingRequired) {
         // Is the LDAP port accesible?
         public bool HasLdap { get; set; } = hasLdap;
 
@@ -46,32 +46,30 @@ namespace SharpHoundCommonLib.OutputTypes
         // For LDAPS, is EPA(ChannelBinding) required?
         public ApiResult<bool> IsChannelBindingDisabled { get; set; } = isChannelBindingRequired;
 
-        public override string ToString()
-        {
-            return $@"HasLdap: {HasLdap}
-HasLdaps: {HasLdaps}
-IsSigningRequired: {IsSigningRequired}
-IsChannelBindingDisabled: {IsChannelBindingDisabled}";
+        public override string ToString() {
+            return $"""
+                    HasLdap: {HasLdap}
+                    HasLdaps: {HasLdaps}
+                    IsSigningRequired: {IsSigningRequired}
+                    IsChannelBindingDisabled: {IsChannelBindingDisabled}
+                    """;
         }
     }
 
 
-    public class SmbInfo
-    {
+    public class SmbInfo {
         public bool? SigningEnabled;
         public string OsVersion;
         public string OsBuild;
         public string DnsComputerName { get; internal set; }
     }
 
-    public class DCRegistryData
-    {
+    public class DCRegistryData {
         public IntRegistryAPIResult CertificateMappingMethods { get; set; }
         public IntRegistryAPIResult StrongCertificateBindingEnforcement { get; set; }
     }
 
-    public class ComputerStatus
-    {
+    public class ComputerStatus {
         public bool Connectable { get; set; }
         public string Error { get; set; }
 
@@ -80,10 +78,8 @@ IsChannelBindingDisabled: {IsChannelBindingDisabled}";
         public static string PortNotOpen => "PortNotOpen";
         public static string Success => "Success";
 
-        public CSVComputerStatus GetCSVStatus(string computerName)
-        {
-            return new CSVComputerStatus
-            {
+        public CSVComputerStatus GetCSVStatus(string computerName) {
+            return new CSVComputerStatus {
                 Status = Error,
                 Task = "CheckAvailability",
                 ComputerName = computerName

@@ -29,7 +29,7 @@ namespace SharpHoundCommonLib.Processors
         }
 
         /// <summary>
-        /// This function should be called with the security data fetched from <see cref="GetCARegistryValues"/>.
+        /// This function should be called with the security data fetched from <see cref="GetCASecurity"/>.
         /// The resulting ACEs will contain the owner of the CA as well as Management rights.
         /// </summary>
         /// <param name="security"></param>

@@ -7,11 +7,9 @@ using System.Security.Authentication;
 
 namespace SharpHoundCommonLib.ThirdParty.PSOpenAD;
 
-internal static partial class Helpers
-{
+internal static class Helpers {
     [StructLayout(LayoutKind.Sequential)]
-    public struct SEC_CHANNEL_BINDINGS
-    {
+    public struct SEC_CHANNEL_BINDINGS {
         public UInt32 dwInitiatorAddrType;
         public UInt32 cbInitiatorLength;
         public UInt32 dwInitiatorOffset;
@@ -23,8 +21,7 @@ internal static partial class Helpers
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-    public struct SEC_WINNT_AUTH_IDENTITY_W
-    {
+    public struct SEC_WINNT_AUTH_IDENTITY_W {
         public unsafe char* User;
         public UInt32 UserLength;
         public unsafe char* Domain;
@@ -35,38 +32,33 @@ internal static partial class Helpers
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct SECURITY_INTEGER
-    {
+    public struct SECURITY_INTEGER {
         public UInt32 LowPart;
         public Int32 HighPart;
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct SecBufferDesc
-    {
+    public struct SecBufferDesc {
         public UInt32 ulVersion;
         public UInt32 cBuffers;
         public IntPtr pBuffers;
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct SecBuffer
-    {
+    public struct SecBuffer {
         public UInt32 cbBuffer;
         public UInt32 BufferType;
         public IntPtr pvBuffer;
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct SecHandle
-    {
+    public struct SecHandle {
         public UIntPtr dwLower;
         public UIntPtr dwUpper;
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct SecPkgContext_Sizes
-    {
+    public struct SecPkgContext_Sizes {
         public UInt32 cbMaxToken;
         public UInt32 cbMaxSignature;
         public UInt32 cbBlockSize;
@@ -75,24 +67,21 @@ internal static partial class Helpers
 }
 
 /// <summary>Result of <c>AcquireCredentialsHandle</c>.</summary>
-internal class SspiCredential
-{
+internal class SspiCredential {
     /// <summary>The handle to the SSPI credential.</summary>
     public SafeSspiCredentialHandle Creds { get; }
 
     /// <summary>The number of ticks (100s of nanoseconds) since 1601-01-01 until the credential expires.</summary>
-    public UInt64 Expiry { get; }
+    public ulong Expiry { get; }
 
-    public SspiCredential(SafeSspiCredentialHandle creds, UInt64 expiry)
-    {
+    public SspiCredential(SafeSspiCredentialHandle creds, ulong expiry) {
         Creds = creds;
         Expiry = expiry;
     }
 }
 
 /// <summary>Result of <c>InitializeSecurityContext</c>.</summary>
-internal class SspiSecContext
-{
+internal class SspiSecContext {
     /// <summary>The handle to the SSPI security context.</summary>
     public SafeSspiContextHandle Context { get; }
 
@@ -100,7 +89,7 @@ internal class SspiSecContext
     public byte[][] OutputBuffers { get; }
 
     /// <summary>The number of ticks (100s of nanoseconds) since 1601-01-01 until the context expires.</summary>
-    public UInt64 Expiry { get; }
+    public ulong Expiry { get; }
 
     /// <summary>The attributes used to describe the functionality available on the context.</summary>
     public InitiatorContextReturnFlags Flags { get; }
@@ -108,9 +97,8 @@ internal class SspiSecContext
     /// <summary>Whether more data is needed from the acceptor to complete the context.</summary>
     public bool MoreNeeded { get; }
 
-    public SspiSecContext(SafeSspiContextHandle context, byte[][] outputBuffers, UInt64 expiry,
-        InitiatorContextReturnFlags flags, bool moreNeeded)
-    {
+    public SspiSecContext(SafeSspiContextHandle context, byte[][] outputBuffers, ulong expiry,
+        InitiatorContextReturnFlags flags, bool moreNeeded) {
         Context = context;
         OutputBuffers = outputBuffers;
         Expiry = expiry;
@@ -119,12 +107,11 @@ internal class SspiSecContext
     }
 }
 
-internal static class SSPI
-{
-    private const Int32 SEC_I_CONTINUE_NEEDED = 0x00090312;
+internal static class SSPI {
+    private const int SEC_I_CONTINUE_NEEDED = 0x00090312;
 
     [DllImport("Secur32.dll", CharSet = CharSet.Unicode)]
-    private static unsafe extern Int32 AcquireCredentialsHandleW(
+    private static unsafe extern int AcquireCredentialsHandleW(
         [MarshalAs(UnmanagedType.LPWStr)] string? pszPrincipal,
         [MarshalAs(UnmanagedType.LPWStr)] string pPackage,
         CredentialUse fCredentialUse,
@@ -136,48 +123,48 @@ internal static class SSPI
         out Helpers.SECURITY_INTEGER ptsExpiry);
 
     [DllImport("Secur32.dll", EntryPoint = "DecryptMessage")]
-    private static extern Int32 DecryptMessageNative(
+    private static extern int DecryptMessageNative(
         SafeSspiContextHandle phContext,
         ref Helpers.SecBufferDesc pMessage,
-        UInt32 MessageSeqNo,
-        out UInt32 pfQOP);
+        uint MessageSeqNo,
+        out uint pfQOP);
 
     [DllImport("Secur32.dll")]
-    public static extern Int32 DeleteSecurityContext(
+    public static extern int DeleteSecurityContext(
         IntPtr phContext);
 
     [DllImport("Secur32.dll", EntryPoint = "EncryptMessage")]
-    private static extern Int32 EncryptMessageNative(
+    private static extern int EncryptMessageNative(
         SafeSspiContextHandle phContext,
-        UInt32 fQOP,
+        uint fQOP,
         ref Helpers.SecBufferDesc pMessage,
-        UInt32 MessageSeqNo);
+        uint MessageSeqNo);
 
     [DllImport("Secur32.dll")]
-    public static extern Int32 FreeContextBuffer(
+    public static extern int FreeContextBuffer(
         IntPtr pvContextBuffer);
 
     [DllImport("Secur32.dll")]
-    public static extern Int32 FreeCredentialsHandle(
+    public static extern int FreeCredentialsHandle(
         IntPtr phCredential);
 
     [DllImport("Secur32.dll", CharSet = CharSet.Unicode)]
-    private static unsafe extern Int32 InitializeSecurityContextW(
+    private static unsafe extern int InitializeSecurityContextW(
         Helpers.SecHandle* phCredential,
         Helpers.SecHandle* phContext,
         [MarshalAs(UnmanagedType.LPWStr)] string pszTargetName,
         InitiatorContextRequestFlags fContextReq,
-        UInt32 Reserved1,
+        uint Reserved1,
         TargetDataRep TargetDataRep,
         Helpers.SecBufferDesc* pInput,
-        UInt32 Reserved2,
+        uint Reserved2,
         Helpers.SecHandle* phNewContext,
         Helpers.SecBufferDesc* pOutput,
         out InitiatorContextReturnFlags pfContextAttr,
         out Helpers.SECURITY_INTEGER ptsExpiry);
 
     [DllImport("Secur32.dll", EntryPoint = "QueryContextAttributes")]
-    private static extern Int32 QueryContextAttributesNative(
+    private static extern int QueryContextAttributesNative(
         SafeSspiContextHandle phContext,
         SecPkgAttribute ulAttribute,
         IntPtr pBuffer);
@@ -193,39 +180,35 @@ internal static class SSPI
     /// <exception href="SspiException">Error when retrieving the credential.</exception>
     /// <see cref="https://docs.microsoft.com/en-us/windows/win32/secauthn/acquirecredentialshandle--general">AcquireCredentialsHandle</see>
     public static SspiCredential AcquireCredentialsHandle(string? principal, string package, CredentialUse usage,
-        WinNTAuthIdentity? identity)
-    {
-        string? user = identity?.Username;
-        string? domain = identity?.Domain;
-        string? pass = identity?.Password;
+        WinNTAuthIdentity? identity) {
+        var user = identity?.Username;
+        var domain = identity?.Domain;
+        var pass = identity?.Password;
 
-        unsafe
-        {
+        unsafe {
             Helpers.SEC_WINNT_AUTH_IDENTITY_W authData = new();
             Helpers.SEC_WINNT_AUTH_IDENTITY_W* authDataPtr = null;
-            fixed (char* userPtr = user, domainPtr = domain, passPtr = pass)
-            {
-                if (identity != null)
-                {
+            fixed (char* userPtr = user, domainPtr = domain, passPtr = pass) {
+                if (identity != null) {
                     authDataPtr = &authData;
                     authData.User = userPtr;
-                    authData.UserLength = (UInt16)(identity.Username?.Length ?? 0);
+                    authData.UserLength = (ushort)(identity.Username?.Length ?? 0);
                     authData.Domain = domainPtr;
-                    authData.DomainLength = (UInt16)(identity.Domain?.Length ?? 0);
+                    authData.DomainLength = (ushort)(identity.Domain?.Length ?? 0);
                     authData.Password = passPtr;
-                    authData.PasswordLength = (UInt16)(identity.Password?.Length ?? 0);
+                    authData.PasswordLength = (ushort)(identity.Password?.Length ?? 0);
                     authData.Flags = WinNTAuthIdentityFlags.SEC_WINNT_AUTH_IDENTITY_UNICODE;
                 }
 
                 SafeSspiCredentialHandle cred = new();
-                int res = AcquireCredentialsHandleW(principal, package, usage, IntPtr.Zero, authDataPtr, IntPtr.Zero,
+                var res = AcquireCredentialsHandleW(principal, package, usage, IntPtr.Zero, authDataPtr, IntPtr.Zero,
                     IntPtr.Zero, cred, out var expiryStruct);
 
                 if (res != 0)
                     throw new SspiException(res, "AcquireCredentialsHandle");
 
                 cred.SSPIFree = true;
-                UInt64 expiry = (UInt64)expiryStruct.HighPart << 32 | (UInt64)expiryStruct.LowPart;
+                var expiry = (ulong)expiryStruct.HighPart << 32 | (ulong)expiryStruct.LowPart;
                 return new SspiCredential(cred, expiry);
             }
         }
@@ -241,20 +224,16 @@ internal static class SSPI
     /// <returns>The quality of protection that had applied to the encrypted message.</returns>
     /// <exception cref="SspiException">Failure trying to decrypt the message.</exception>
     /// <see href="https://docs.microsoft.com/en-us/windows/win32/secauthn/decryptmessage--general">DecryptMessage</see>
-    public static UInt32 DecryptMessage(SafeSspiContextHandle context, Span<Helpers.SecBuffer> message, UInt32 seqNo)
-    {
-        unsafe
-        {
-            fixed (Helpers.SecBuffer* messagePtr = message)
-            {
-                Helpers.SecBufferDesc bufferDesc = new()
-                {
+    public static uint DecryptMessage(SafeSspiContextHandle context, Span<Helpers.SecBuffer> message, uint seqNo) {
+        unsafe {
+            fixed (Helpers.SecBuffer* messagePtr = message) {
+                Helpers.SecBufferDesc bufferDesc = new() {
                     ulVersion = 0,
-                    cBuffers = (UInt32)message.Length,
+                    cBuffers = (uint)message.Length,
                     pBuffers = (IntPtr)messagePtr,
                 };
 
-                int res = DecryptMessageNative(context, ref bufferDesc, seqNo, out var qop);
+                var res = DecryptMessageNative(context, ref bufferDesc, seqNo, out var qop);
                 if (res != 0)
                     throw new SspiException(res, "DecryptMessage");
 
@@ -273,21 +252,17 @@ internal static class SSPI
     /// <param name="seqNo">The sequence number to apply to the encrypted message.</param>
     /// <exception cref="SspiException">Failure trying to entry the message.</exception>
     /// <see href="https://docs.microsoft.com/en-us/windows/win32/secauthn/encryptmessage--general">EncryptMessage</see>
-    public static void EncryptMessage(SafeSspiContextHandle context, UInt32 qop, Span<Helpers.SecBuffer> message,
-        UInt32 seqNo)
-    {
-        unsafe
-        {
-            fixed (Helpers.SecBuffer* messagePtr = message)
-            {
-                Helpers.SecBufferDesc bufferDesc = new()
-                {
+    public static void EncryptMessage(SafeSspiContextHandle context, uint qop, Span<Helpers.SecBuffer> message,
+        uint seqNo) {
+        unsafe {
+            fixed (Helpers.SecBuffer* messagePtr = message) {
+                Helpers.SecBufferDesc bufferDesc = new() {
                     ulVersion = 0,
-                    cBuffers = (UInt32)message.Length,
+                    cBuffers = (uint)message.Length,
                     pBuffers = (IntPtr)messagePtr,
                 };
 
-                int res = EncryptMessageNative(context, qop, ref bufferDesc, seqNo);
+                var res = EncryptMessageNative(context, qop, ref bufferDesc, seqNo);
                 if (res != 0)
                     throw new SspiException(res, "EncryptMessage");
             }
@@ -310,34 +285,27 @@ internal static class SSPI
     /// <see href="https://docs.microsoft.com/en-us/windows/win32/secauthn/initializesecuritycontext--general">InitializeSecurityContext</see>
     public static SspiSecContext InitializeSecurityContext(SafeSspiCredentialHandle cred,
         SafeSspiContextHandle? context, string targetName, InitiatorContextRequestFlags contextReq,
-        TargetDataRep dataRep, ReadOnlySpan<Helpers.SecBuffer> input, IList<SecBufferType> outputBufferTypes)
-    {
+        TargetDataRep dataRep, ReadOnlySpan<Helpers.SecBuffer> input, IList<SecBufferType> outputBufferTypes) {
         contextReq |= InitiatorContextRequestFlags.ISC_REQ_ALLOCATE_MEMORY;
 
         Span<Helpers.SecBuffer> output = stackalloc Helpers.SecBuffer[outputBufferTypes.Count];
-        for (int i = 0; i < output.Length; i++)
-            output[i].BufferType = (UInt32)outputBufferTypes[i];
+        for (var i = 0; i < output.Length; i++)
+            output[i].BufferType = (uint)outputBufferTypes[i];
 
-        unsafe
-        {
-            fixed (Helpers.SecBuffer* inputBuffers = input, outputBuffers = output)
-            {
+        unsafe {
+            fixed (Helpers.SecBuffer* inputBuffers = input, outputBuffers = output) {
                 Helpers.SecHandle* credPtr = null;
-                if (cred != null)
-                {
+                if (cred != null) {
                     credPtr = (Helpers.SecHandle*)cred.DangerousGetHandle();
                 }
 
                 Helpers.SecHandle* inputContextPtr = null;
                 Helpers.SecHandle* outputContextPtr = null;
                 SafeSspiContextHandle newContext;
-                if (context == null || context.DangerousGetHandle() == IntPtr.Zero)
-                {
-                    newContext = new();
+                if (context == null || context.DangerousGetHandle() == IntPtr.Zero) {
+                    newContext = new SafeSspiContextHandle();
                     outputContextPtr = (Helpers.SecHandle*)newContext.DangerousGetHandle();
-                }
-                else
-                {
+                } else {
                     newContext = context;
                     inputContextPtr = (Helpers.SecHandle*)context.DangerousGetHandle();
                     outputContextPtr = inputContextPtr;
@@ -345,25 +313,23 @@ internal static class SSPI
 
                 Helpers.SecBufferDesc inputBuffer = new();
                 Helpers.SecBufferDesc* inputPtr = null;
-                if (input.Length > 0)
-                {
+                if (input.Length > 0) {
                     inputBuffer.ulVersion = 0;
-                    inputBuffer.cBuffers = (UInt32)input.Length;
+                    inputBuffer.cBuffers = (uint)input.Length;
                     inputBuffer.pBuffers = (IntPtr)inputBuffers;
                     inputPtr = &inputBuffer;
                 }
 
                 Helpers.SecBufferDesc outputBuffer = new();
                 Helpers.SecBufferDesc* outputPtr = null;
-                if (output.Length > 0)
-                {
+                if (output.Length > 0) {
                     outputBuffer.ulVersion = 0;
-                    outputBuffer.cBuffers = (UInt32)output.Length;
+                    outputBuffer.cBuffers = (uint)output.Length;
                     outputBuffer.pBuffers = (IntPtr)outputBuffers;
                     outputPtr = &outputBuffer;
                 }
 
-                int res = InitializeSecurityContextW(credPtr, inputContextPtr, targetName, contextReq, 0, dataRep,
+                var res = InitializeSecurityContextW(credPtr, inputContextPtr, targetName, contextReq, 0, dataRep,
                     inputPtr, 0, outputContextPtr, outputPtr, out var contextattr, out var expiryStruct);
 
                 if (res != 0 && res != SEC_I_CONTINUE_NEEDED)
@@ -371,28 +337,23 @@ internal static class SSPI
 
                 newContext.SSPIFree = true;
 
-                try
-                {
-                    bool moreNeeded = res == SEC_I_CONTINUE_NEEDED;
-                    UInt64 expiry = (UInt64)expiryStruct.HighPart << 32 | (UInt64)expiryStruct.LowPart;
+                try {
+                    var moreNeeded = res == SEC_I_CONTINUE_NEEDED;
+                    var expiry = (ulong)expiryStruct.HighPart << 32 | (ulong)expiryStruct.LowPart;
                     List<byte[]> outputTokens = new();
-                    foreach (Helpers.SecBuffer buffer in output)
-                    {
+                    foreach (var buffer in output) {
                         if (buffer.cbBuffer == 0)
                             continue;
 
-                        byte[] data = new byte[buffer.cbBuffer];
+                        var data = new byte[buffer.cbBuffer];
                         Marshal.Copy(buffer.pvBuffer, data, 0, data.Length);
                         outputTokens.Add(data);
                     }
 
                     return new SspiSecContext(newContext, outputTokens.ToArray(), expiry, contextattr,
                         moreNeeded);
-                }
-                finally
-                {
-                    foreach (Helpers.SecBuffer buffer in output)
-                    {
+                } finally {
+                    foreach (var buffer in output) {
                         if (buffer.pvBuffer != IntPtr.Zero)
                             FreeContextBuffer(buffer.pvBuffer);
                     }
@@ -408,44 +369,41 @@ internal static class SSPI
     /// <param name="buffer">The buffer that will store the queried value.</param>
     /// <exception cref="SspiException">Failure trying to query the requested value.</exception>
     /// <see href="https://docs.microsoft.com/en-us/windows/win32/secauthn/querycontextattributes--general">QueryContextAttributes</see>
-    public static void QueryContextAttributes(SafeSspiContextHandle context, SecPkgAttribute attribute, IntPtr buffer)
-    {
-        int res = QueryContextAttributesNative(context, attribute, buffer);
+    public static void QueryContextAttributes(SafeSspiContextHandle context, SecPkgAttribute attribute, IntPtr buffer) {
+        var res = QueryContextAttributesNative(context, attribute, buffer);
         if (res != 0)
             throw new SspiException(res, "QueryContextAttributesNative");
     }
 }
 
-public class SspiException : AuthenticationException
-{
+public class SspiException : AuthenticationException {
     public int ErrorCode { get; } = -1;
 
-    public SspiException() { }
+    public SspiException() {
+    }
 
-    public SspiException(string message) : base(message) { }
+    public SspiException(string message) : base(message) {
+    }
 
     public SspiException(string message, Exception innerException) :
-        base(message, innerException)
-    { }
+        base(message, innerException) {
+    }
 
     public SspiException(int errorCode, string method)
-        : base(GetExceptionMessage(errorCode, method))
-    {
+        : base(GetExceptionMessage(errorCode, method)) {
         ErrorCode = errorCode;
     }
 
-    private static string GetExceptionMessage(int errorCode, string? method)
-    {
-        method = String.IsNullOrWhiteSpace(method) ? "SSPI Call" : method;
-        string errMsg = new Win32Exception(errorCode).Message;
+    private static string GetExceptionMessage(int errorCode, string? method) {
+        method = string.IsNullOrWhiteSpace(method) ? "SSPI Call" : method;
+        var errMsg = new Win32Exception(errorCode).Message;
 
-        return String.Format("{0} failed ({1}, Win32ErrorCode {2} - 0x{2:X8})", method, errMsg, errorCode);
+        return string.Format("{0} failed ({1}, Win32ErrorCode {2} - 0x{2:X8})", method, errMsg, errorCode);
     }
 }
 
 /// <summary>User identity information used to acquire a credential handle.</summary>
-internal class WinNTAuthIdentity
-{
+internal class WinNTAuthIdentity {
     /// <summary>The username of the identity.</summary>
     public string? Username { get; }
 
@@ -455,16 +413,14 @@ internal class WinNTAuthIdentity
     /// <summary>The password of the identity.</summary>
     public string? Password { get; }
 
-    public WinNTAuthIdentity(string? username, string? domain, string? password)
-    {
+    public WinNTAuthIdentity(string? username, string? domain, string? password) {
         Username = username;
         Domain = domain;
         Password = password;
     }
 }
 
-internal enum CredentialUse : uint
-{
+internal enum CredentialUse : uint {
     SECPKG_CRED_INBOUND = 0x00000001,
     SECPKG_CRED_OUTBOUND = 0x00000002,
     SECPKG_CRED_BOTH = 0x00000003,
@@ -474,8 +430,7 @@ internal enum CredentialUse : uint
 }
 
 [Flags]
-internal enum InitiatorContextRequestFlags : uint
-{
+internal enum InitiatorContextRequestFlags : uint {
     ISC_REQ_DELEGATE = 0x00000001,
     ISC_REQ_MUTUAL_AUTH = 0x00000002,
     ISC_REQ_REPLAY_DETECT = 0x00000004,
@@ -506,8 +461,7 @@ internal enum InitiatorContextRequestFlags : uint
 }
 
 [Flags]
-internal enum InitiatorContextReturnFlags : uint
-{
+internal enum InitiatorContextReturnFlags : uint {
     ISC_RET_DELEGATE = 0x00000001,
     ISC_RET_MUTUAL_AUTH = 0x00000002,
     ISC_RET_REPLAY_DETECT = 0x00000004,
@@ -537,15 +491,13 @@ internal enum InitiatorContextReturnFlags : uint
     ISC_RET_CONFIDENTIALITY_ONLY = 0x40000000,
 }
 
-internal enum SecBufferFlags : uint
-{
+internal enum SecBufferFlags : uint {
     SECBUFFER_READONLY_WITH_CHECKSUM = 0x10000000,
     SECBUFFER_RESERVED = 0x60000000,
     SECBUFFER_READONLY = 0x80000000,
 }
 
-internal enum SecBufferType : uint
-{
+internal enum SecBufferType : uint {
     SECBUFFER_EMPTY = 0,
     SECBUFFER_DATA = 1,
     SECBUFFER_TOKEN = 2,
@@ -572,8 +524,7 @@ internal enum SecBufferType : uint
     SECBUFFER_PRESHARED_KEY_IDENTITY = 23,
 }
 
-internal enum SecPkgAttribute : uint
-{
+internal enum SecPkgAttribute : uint {
     SECPKG_ATTR_SIZES = 0,
     SECPKG_ATTR_NAMES = 1,
     SECPKG_ATTR_LIFESPAN = 2,
@@ -613,58 +564,51 @@ internal enum SecPkgAttribute : uint
     SECPKG_ATTR_IS_LOOPBACK = 37,
 }
 
-internal enum TargetDataRep : uint
-{
+internal enum TargetDataRep : uint {
     SECURITY_NETWORK_DREP = 0x00000000,
     SECURITY_NATIVE_DREP = 0x00000010,
 }
 
-internal enum WinNTAuthIdentityFlags : uint
-{
+internal enum WinNTAuthIdentityFlags : uint {
     SEC_WINNT_AUTH_IDENTITY_ANSI = 1,
     SEC_WINNT_AUTH_IDENTITY_UNICODE = 2,
 }
 
-internal class SafeSspiCredentialHandle : SafeHandle
-{
+internal class SafeSspiCredentialHandle : SafeHandle {
     internal bool SSPIFree = false;
 
     internal SafeSspiCredentialHandle()
-        : base(Marshal.AllocHGlobal(Marshal.SizeOf<Helpers.SecHandle>()), true)
-    { }
+        : base(Marshal.AllocHGlobal(Marshal.SizeOf<Helpers.SecHandle>()), true) {
+    }
 
     public override bool IsInvalid => handle == IntPtr.Zero;
 
-    protected override bool ReleaseHandle()
-    {
-        if (SSPIFree)
-        {
+    protected override bool ReleaseHandle() {
+        if (SSPIFree) {
             SSPI.FreeCredentialsHandle(handle);
         }
+
         Marshal.FreeHGlobal(handle);
 
         return true;
     }
 }
 
-internal class SafeSspiContextHandle : SafeHandle
-{
+internal class SafeSspiContextHandle : SafeHandle {
     internal bool SSPIFree = false;
 
     internal SafeSspiContextHandle()
-        : base(Marshal.AllocHGlobal(Marshal.SizeOf<Helpers.SecHandle>()), true)
-    { }
+        : base(Marshal.AllocHGlobal(Marshal.SizeOf<Helpers.SecHandle>()), true) {
+    }
 
     internal SafeSspiContextHandle(IntPtr handle, bool ownsHandle)
-        : base(handle, ownsHandle)
-    { }
+        : base(handle, ownsHandle) {
+    }
 
     public override bool IsInvalid => handle == IntPtr.Zero;
 
-    protected override bool ReleaseHandle()
-    {
-        if (SSPIFree)
-        {
+    protected override bool ReleaseHandle() {
+        if (SSPIFree) {
             SSPI.DeleteSecurityContext(handle);
         }
 

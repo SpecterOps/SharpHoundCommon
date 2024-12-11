@@ -14,15 +14,12 @@ interface INtlmAuthenticationHandler
 public class NtlmAuthenticationHandler : INtlmAuthenticationHandler
 {
     private readonly ILogger _logger;
-    private readonly string _host;
     private readonly string _targetService;
-    private const string NtlmAuthPackageName = "NTLM";
     public LdapAuthOptions Options { get; set; }
 
-    public NtlmAuthenticationHandler(ILogger logger, string host, string targetService)
+    public NtlmAuthenticationHandler(string targetService, ILogger logger = null)
     {
-        _logger = logger;
-        _host = host;
+        _logger = logger ?? Logging.LogProvider.CreateLogger("NtlmAuthenticationHandler");
         _targetService = targetService;
 
         Options = new LdapAuthOptions()
@@ -32,7 +29,7 @@ public class NtlmAuthenticationHandler : INtlmAuthenticationHandler
         };
     }
 
-    public async Task<Object> PerformNtlmAuthenticationAsync(INtlmTransport transport)
+    public async Task<object> PerformNtlmAuthenticationAsync(INtlmTransport transport)
     {
         using var context = new SspiContext(
                 null,
@@ -46,15 +43,12 @@ public class NtlmAuthenticationHandler : INtlmAuthenticationHandler
 
         // NEGOTIATE
         var negotiateMsgBytes = context.Step();
-        //_logger.LogDebug($"NTLM-NEGOTIATE message: {Convert.ToBase64String(negotiateMsgBytes)}");
 
         // CHALLENGE
         var challengeMessageBytes = await transport.NegotiateAsync(negotiateMsgBytes);
-        //_logger.LogDebug($"NTLM-CHALLENGE message: {Convert.ToBase64String(challengeMessageBytes)}");
 
         // AUTHENTICATE
         var authenticateMsgBytes = context.Step(challengeMessageBytes);
-        //_logger.LogDebug($"NTLM-AUTHENTICATE message: {Convert.ToBase64String(authenticateMsgBytes)}");
 
         // Perform final authentication
         var response = await transport.AuthenticateAsync(authenticateMsgBytes);

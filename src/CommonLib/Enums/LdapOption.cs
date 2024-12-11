@@ -1,7 +1,5 @@
-﻿namespace SharpHoundCommonLib.Enums
-{
-    public enum LdapOption : int
-    {
+﻿namespace SharpHoundCommonLib.Enums {
+    public enum LdapOption : int {
         Ssl = 0x0A,
         ProtocolVersion = 0x11,
         ResultCode = 0x31,

@@ -4,18 +4,14 @@ using System.Net.Http;
 
 namespace SharpHoundCommonLib.Ntlm;
 
-public interface IHttpClientFactory
-{
+public interface IHttpClientFactory {
     HttpClient CreateUnauthenticatedClient();
     HttpClient CreateAuthenticatedHttpClient(Uri Url, string authPackage = "Kerberos");
 }
 
-public class HttpClientFactory : IHttpClientFactory
-{
-    public HttpClient CreateUnauthenticatedClient()
-    {
-        var handler = new HttpClientHandler
-        {
+public class HttpClientFactory : IHttpClientFactory {
+    public HttpClient CreateUnauthenticatedClient() {
+        var handler = new HttpClientHandler {
             ServerCertificateCustomValidationCallback = (httpRequestMessage, cert, cetChain, policyErrors) => true,
             UseDefaultCredentials = false
         };
@@ -23,21 +19,15 @@ public class HttpClientFactory : IHttpClientFactory
         return new HttpClient(handler);
     }
 
-    public HttpClient CreateAuthenticatedHttpClient(Uri Url, string authPackage = "Kerberos")
-    {
-        var handler = new HttpClientHandler
-        {
-            Credentials = new CredentialCache()
-            {
+    public HttpClient CreateAuthenticatedHttpClient(Uri Url, string authPackage = "Kerberos") {
+        var handler = new HttpClientHandler {
+            Credentials = new CredentialCache() {
                 { Url, authPackage, CredentialCache.DefaultNetworkCredentials }
             },
 
             PreAuthenticate = true,
             ServerCertificateCustomValidationCallback =
-                (httpRequestMessage, cert, cetChain, policyErrors) =>
-                {
-                    return true;
-                },
+                (httpRequestMessage, cert, cetChain, policyErrors) => { return true; },
         };
 
         return new HttpClient(handler);

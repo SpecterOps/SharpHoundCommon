@@ -3,16 +3,15 @@ using SharpHoundCommonLib.Processors;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Eventing.Reader;
+using SharpHoundCommonLib.Enums;
 
-namespace SharpHoundCommonLib.OutputTypes
-{
-    public class NtlmSessionResult
-    {
+namespace SharpHoundCommonLib.OutputTypes {
+    public class NtlmSessionResult {
         public List<NtlmSession>? Sessions { get; set; }
         public long CollectionDurationMs { get; set; }
     }
+
     public class NtlmSession(
-        string host,
         DateTime? timeCreatedUtc,
         SecurityLogId id,
         string? accountSid,
@@ -22,30 +21,26 @@ namespace SharpHoundCommonLib.OutputTypes
         string? sourceIp,
         string? sourcePort,
         string packageName
-        )
-    {
-        public string Host { get; set; } = host;   // Hostname the sessions occurred on
+    ) {
         public DateTime? TimeCreatedUtc { get; set; } = timeCreatedUtc;
         public SecurityLogId Id { get; set; } = id;
         public string? AccountSid { get; set; } = accountSid;
         public string AccountName { get; set; } = accountName;
         public string? AccountDomain { get; set; } = accountDomain;
-        public string SourceHost { get; set; } = sourceHost;   // The host the auth originated from
+        public string SourceHost { get; set; } = sourceHost; // The host the auth originated from
         public string? SourceIp { get; set; } = sourceIp;
         public string? SourcePort { get; set; } = sourcePort;
         public string? PackageName { get; set; } = packageName;
 
-        public override string ToString()
-        {
+        public override string ToString() {
             var targetUser = AccountDomain + "\\" + AccountName;
             var source = (SourceIp != null || SourcePort != null) ? $"{SourceIp}:{SourcePort}" : "";
 
             return ($"  {TimeCreatedUtc?.ToLocalTime()},{Id},{targetUser},{AccountSid},{SourceHost},,{PackageName}");
         }
 
-        public static NtlmSession FromLogonEvent(string host, EventRecord evnt)
-        {
-            if (evnt.Id != 4624)
+        public static NtlmSession FromLogonEvent(EventRecord evnt) {
+            if (evnt.Id != EventIds.LogonEvent)
                 throw new ArgumentException("Not a logon event");
 
             //var subjectUserSid = eventDetail.Properties[0].Value.ToString();
@@ -72,7 +67,6 @@ namespace SharpHoundCommonLib.OutputTypes
 
 
             return new NtlmSession(
-                host,
                 evnt.TimeCreated?.ToUniversalTime(),
                 SecurityLogId.Logon,
                 targetUserSid,
@@ -85,9 +79,8 @@ namespace SharpHoundCommonLib.OutputTypes
             );
         }
 
-        public static NtlmSession FromValidateCredentialEvent(string host, EventRecord evnt)
-        {
-            if (evnt.Id != 4776)
+        public static NtlmSession FromValidateCredentialEvent(EventRecord evnt) {
+            if (evnt.Id != EventIds.ValidateCredentialsEvent)
                 throw new ArgumentException("Not a validate credential event");
 
             var packageName = evnt.Properties[0].Value.ToString();
@@ -96,7 +89,6 @@ namespace SharpHoundCommonLib.OutputTypes
             //var status = evt.Properties[3].Value.ToString();
 
             return new NtlmSession(
-                host,
                 evnt.TimeCreated?.ToUniversalTime(),
                 SecurityLogId.Logon,
                 null,

@@ -9,10 +9,8 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SharpHoundCommonLib.Processors
-{
-    public class WebClientServiceProcessor(ILogger log = null)
-    {
+namespace SharpHoundCommonLib.Processors {
+    public class WebClientServiceProcessor(ILogger log = null) {
         private readonly ILogger _log = log ?? Logging.LogProvider.CreateLogger("WebClientServiceProcessor");
 
         // Define constants
@@ -40,12 +38,11 @@ namespace SharpHoundCommonLib.Processors
             uint dwFlagsAndAttributes,
             IntPtr hTemplateFile);
 
-        public bool TestPathExists(string path)
-        {
-            using SafeFileHandle handle = CreateFile(
+        public static bool TestPathExists(string path) {
+            using var handle = CreateFile(
                 path,
-                MAXIMUM_ALLOWED,  // Request maximum allowed access
-                FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,  // Allow all share modes
+                MAXIMUM_ALLOWED, // Request maximum allowed access
+                FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, // Allow all share modes
                 IntPtr.Zero,
                 OPEN_EXISTING,
                 0,
@@ -54,10 +51,8 @@ namespace SharpHoundCommonLib.Processors
 
             var result = Marshal.GetHRForLastWin32Error();
 
-            if (handle.IsInvalid)
-            {
-                switch ((uint)result)
-                {
+            if (handle.IsInvalid) {
+                switch ((uint)result) {
                     case ERROR_ACCESS_DENIED:
                         return true;
                     case ERROR_BAD_NETPATH:
@@ -74,24 +69,17 @@ namespace SharpHoundCommonLib.Processors
             return true;
         }
 
-        public async Task<ApiResult<bool>> IsWebClientRunning(string computerName)
-        {
+        public async Task<ApiResult<bool>> IsWebClientRunning(string computerName) {
             // When the service is running, this named pipe is present
             var pipePath = @$"\\{computerName}\pipe\DAV RPC SERVICE";
 
-            return await Task.Run(() =>
-            {
-                try
-                {
-                    bool exists = TestPathExists(pipePath);
+            return await Task.Run(() => {
+                try {
+                    var exists = TestPathExists(pipePath);
 
                     return ApiResult<bool>.CreateSuccess(exists);
-
-                }
-                catch (Exception ex)
-                {
+                } catch (Exception ex) {
                     return ApiResult<bool>.CreateError(ex.ToString());
-
                 }
             });
         }

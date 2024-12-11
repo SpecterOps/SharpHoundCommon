@@ -4,10 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SharpHoundCommonLib.OutputTypes
-{
-    public enum CAEnrollmentEndpointType
-    {
+namespace SharpHoundCommonLib.OutputTypes {
+    public enum CAEnrollmentEndpointType {
         // The Certificate Authority Web Enrollment server role, an ASP web application
         WebEnrollmentApplication,
 
@@ -15,16 +13,16 @@ namespace SharpHoundCommonLib.OutputTypes
         EnrollmentWebService,
 
         // The Network Device Enrollment Service (NDES), which uses the SCEP protocol to obtain certificates.
-        NDES,                     // NDES
+        NDES, // NDES
 
         // ICertPassage Remote Protocol (MS-ICPR), an RPC protcol
-        RPC,                      // 
+        RPC, // 
 
         // The Windows Client Certificate Enrollment Protocol (MS-WCCE), a set of DCOM interfaces for certificate enrollment
         DCOM,
     }
-    public enum CAEnrollmentEndpointScanResult
-    {
+
+    public enum CAEnrollmentEndpointScanResult {
         // Endpoint is vulnerable due to using HTTP (not HTTPS) with NTLM auth (ESC8)
         Vulnerable_NtlmHttpEndpoint,
 
@@ -39,7 +37,7 @@ namespace SharpHoundCommonLib.OutputTypes
 
         // Endpoint is not vulnerable due to not existing
         NotVulnerable_PortInaccessible = 0x100,
-        
+
         // The server did not return an NTLM challenge (e.g., when Negotiate:Kerberos is enabled)
         NotVulnerable_NoNtlmChallenge,
 
@@ -57,11 +55,10 @@ namespace SharpHoundCommonLib.OutputTypes
 
         Error = 0xFFFF
     }
-    public class CAEnrollmentEndpoint(Uri url, CAEnrollmentEndpointType type, CAEnrollmentEndpointScanResult status)
-    {
+
+    public class CAEnrollmentEndpoint(Uri url, CAEnrollmentEndpointType type, CAEnrollmentEndpointScanResult status) {
         public Uri Url { get; set; } = url;
         public CAEnrollmentEndpointType Type { get; set; } = type;
         public CAEnrollmentEndpointScanResult Status { get; set; } = status;
-
     }
 }

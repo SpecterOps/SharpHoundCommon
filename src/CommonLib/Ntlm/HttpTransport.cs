@@ -13,9 +13,9 @@ public class HttpTransport : INtlmTransport
     private readonly Uri _url;
     private readonly string _authScheme;
 
-    public HttpTransport(ILogger logger, HttpClient httpClient, Uri url, string authScheme)
+    public HttpTransport(HttpClient httpClient, Uri url, string authScheme, ILogger logger = null)
     {
-        _logger = logger;
+        _logger = logger ?? Logging.LogProvider.CreateLogger(nameof(HttpTransport));
         _httpClient = httpClient;
         _url = url;
         _authScheme = authScheme;
@@ -34,7 +34,7 @@ public class HttpTransport : INtlmTransport
             throw new InvalidOperationException("No WWW-Authenticate header found in response");
         }
 
-        var authHeaders = response.Headers.WwwAuthenticate.Where(a => a.Scheme == _authScheme);
+        var authHeaders = response.Headers.WwwAuthenticate.Where(a => a.Scheme == _authScheme).ToArray();
         if (!authHeaders.Any())
         {
             throw new InvalidOperationException($"No WWW-Authenticate header found in response. Auth Scheme: {_authScheme}");

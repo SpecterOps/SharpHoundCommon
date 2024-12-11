@@ -50,12 +50,12 @@ namespace SharpHoundCommonLib.Processors {
         /// <returns></returns>
         public async Task<SessionAPIResult> ReadUserSessions(string computerName, string computerSid,
             string computerDomain, TimeSpan timeout = default) {
-
             if (timeout == default) {
                 timeout = TimeSpan.FromMinutes(2);
             }
+
             var ret = new SessionAPIResult();
-            
+
             _log.LogDebug("Running NetSessionEnum for {ObjectName}", computerName);
 
             var result = await Task.Run(() => {
@@ -138,7 +138,7 @@ namespace SharpHoundCommonLib.Processors {
                     continue;
                 }
 
-                (bool matchSuccess, string[] sids) = await _utils.GetGlobalCatalogMatches(username, computerDomain);
+                var (matchSuccess, sids) = await _utils.GetGlobalCatalogMatches(username, computerDomain);
                 if (matchSuccess) {
                     results.AddRange(
                         sids.Select(s => new Session { ComputerSID = resolvedComputerSID, UserSID = s }));
@@ -172,7 +172,7 @@ namespace SharpHoundCommonLib.Processors {
             if (timeout == default) {
                 timeout = TimeSpan.FromMinutes(2);
             }
-            
+
             _log.LogDebug("Running NetWkstaUserEnum for {ObjectName}", computerName);
 
             var result = await Task.Run(() => {
@@ -198,7 +198,7 @@ namespace SharpHoundCommonLib.Processors {
 
                 return result;
             }).TimeoutAfter(timeout);
-            
+
             if (result.IsFailed) {
                 await SendComputerStatus(new CSVComputerStatus {
                     Status = result.GetErrorStatus(),
@@ -224,7 +224,7 @@ namespace SharpHoundCommonLib.Processors {
             foreach (var wkstaUserInfo in result.Value) {
                 var domain = wkstaUserInfo.LogonDomain;
                 var username = wkstaUserInfo.Username;
-                
+
                 //If we dont have a domain or the domain has a space, ignore this object as it's unusable for us
                 if (string.IsNullOrWhiteSpace(domain) || domain.Contains(" ")) {
                     continue;
@@ -256,7 +256,7 @@ namespace SharpHoundCommonLib.Processors {
         public async Task<SessionAPIResult> ReadUserSessionsRegistry(string computerName, string computerDomain,
             string computerSid) {
             var ret = new SessionAPIResult();
-            
+
             _log.LogDebug("Running RegSessionEnum for {ObjectName}", computerName);
 
             RegistryKey key = null;
