@@ -47,7 +47,7 @@ public class LdapProducerQueryGenerator {
             if (methods.HasFlag(CollectionMethod.SPNTargets))
                 properties.AddRange(CommonProperties.SPNTargetProps);
 
-            if (methods.HasFlag(CollectionMethod.DCRegistry) || methods.HasFlag(CollectionMethod.LdapServices))
+            if (methods.IsComputerCollectionSet())
                 properties.AddRange(CommonProperties.ComputerMethodProps);
 
             if (methods.HasFlag(CollectionMethod.SPNTargets)) {
