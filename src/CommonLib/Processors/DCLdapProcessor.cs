@@ -4,6 +4,7 @@ using SharpHoundCommonLib.Enums;
 using SharpHoundCommonLib.Ntlm;
 using SharpHoundCommonLib.OutputTypes;
 using SharpHoundCommonLib.ThirdParty.PSOpenAD;
+using SharpHoundRPC.PortScanner;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
@@ -17,8 +18,7 @@ public class LdapAuthOptions {
 
 public class DCLdapProcessor {
     private readonly ILogger _log;
-    private readonly PortScanner _scanner;
-    private readonly int _portScanTimeout;
+    private readonly IPortScanner _scanner;
     private readonly int _ldapTimeout;
     private readonly Uri _ldapEndpoint;
     private readonly Uri _ldapSslEndpoint;
@@ -27,13 +27,12 @@ public class DCLdapProcessor {
     private readonly string SEC_E_BAD_BINDINGS = "80090346";
 
 
-    public DCLdapProcessor(int portScanTimeout, string dcHostname, ILogger log) {
+    public DCLdapProcessor(string dcHostname, int ldapTimeoutMs, ILogger log, IPortScanner scanner) { 
         _log = log;
-        _scanner = new PortScanner();
-        _portScanTimeout = portScanTimeout;
-        _ldapTimeout = portScanTimeout / 1000;
+        _scanner = scanner;
         _ldapEndpoint = new Uri($"ldap://{dcHostname}:389");
         _ldapSslEndpoint = new Uri($"ldaps://{dcHostname}:636");
+        _ldapTimeout = ldapTimeoutMs / 1000;
     }
 
     public async Task<LdapService> Scan() {
@@ -66,12 +65,12 @@ public class DCLdapProcessor {
     /// <returns>bool</returns>
     [ExcludeFromCodeCoverage]
     public async Task<bool> TestLdapPort() {
-        return await _scanner.CheckPort(_ldapEndpoint.Host, _ldapEndpoint.Port, _portScanTimeout);
+        return await _scanner.CheckPort(_ldapEndpoint.Host, _ldapEndpoint.Port);
     }
 
     [ExcludeFromCodeCoverage]
     public async Task<bool> TestLdapsPort() {
-        return await _scanner.CheckPort(_ldapSslEndpoint.Host, _ldapSslEndpoint.Port, _portScanTimeout);
+        return await _scanner.CheckPort(_ldapSslEndpoint.Host, _ldapSslEndpoint.Port);
     }
 
     public async Task<ApiResult<bool>> CheckIsNtlmSigningRequired() {

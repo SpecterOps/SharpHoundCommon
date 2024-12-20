@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using SharpHoundCommonLib.Processors;
+using SharpHoundRPC.PortScanner;
 
 namespace SharpHoundCommonLib {
     internal class ConnectionPoolManager : IDisposable{
@@ -15,12 +16,12 @@ namespace SharpHoundCommonLib {
         private readonly string[] _translateNames = { "Administrator", "admin" };
         private readonly ConcurrentDictionary<string, string> _resolvedIdentifiers = new(StringComparer.OrdinalIgnoreCase);
         private readonly ILogger _log;
-        private readonly PortScanner _portScanner;
+        private readonly IPortScanner _portScanner;
 
-        public ConnectionPoolManager(LdapConfig config, ILogger log = null, PortScanner scanner = null) {
+        public ConnectionPoolManager(LdapConfig config, ILogger log = null, IPortScanner scanner = null) {
             _ldapConfig = config;
             _log = log ?? Logging.LogProvider.CreateLogger("ConnectionPoolManager");
-            _portScanner = scanner ?? new PortScanner();
+            _portScanner = scanner;
         }
 
         public IAsyncEnumerable<Result<string>> RangedRetrieval(string distinguishedName,
