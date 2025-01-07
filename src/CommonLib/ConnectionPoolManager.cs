@@ -73,7 +73,7 @@ namespace SharpHoundCommonLib {
         }
 
         private bool GetPool(string identifier, out LdapConnectionPool pool) {
-            if (identifier == null) {
+            if (string.IsNullOrWhiteSpace(identifier) || identifier == ".") {
                 pool = default;
                 return false;
             }
