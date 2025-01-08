@@ -39,6 +39,7 @@ namespace SharpHoundCommonLib.Processors {
             IntPtr hTemplateFile);
 
         public static bool TestPathExists(string path) {
+            //The CreateFile API is used here because File.Create throws exceptions for pipes. Using these lower level APIs is easier to deal with
             using var handle = CreateFile(
                 path,
                 MAXIMUM_ALLOWED, // Request maximum allowed access

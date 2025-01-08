@@ -36,7 +36,7 @@ namespace SharpHoundCommonLib.OutputTypes {
             var targetUser = AccountDomain + "\\" + AccountName;
             var source = (SourceIp != null || SourcePort != null) ? $"{SourceIp}:{SourcePort}" : "";
 
-            return ($"  {TimeCreatedUtc?.ToLocalTime()},{Id},{targetUser},{AccountSid},{SourceHost},,{PackageName}");
+            return ($"{TimeCreatedUtc?.ToLocalTime()},{Id},{targetUser},{AccountSid},{SourceHost},{source},{PackageName}");
         }
 
         public static NtlmSession FromLogonEvent(EventRecord evnt) {

@@ -22,8 +22,7 @@ public class NtlmAuthenticationHandler : INtlmAuthenticationHandler
         _logger = logger ?? Logging.LogProvider.CreateLogger("NtlmAuthenticationHandler");
         _targetService = targetService;
 
-        Options = new LdapAuthOptions()
-        {
+        Options = new LdapAuthOptions {
             Signing = false,
             Bindings = null
         };

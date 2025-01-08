@@ -17,25 +17,25 @@ public class HttpNtlmAuthenticationService {
         _httpClientFactory = httpClientFactory;
     }
 
-    public async Task EnsureRequiresAuth(Uri Url, bool? useBadChannelBindings) {
-        if (Url == null)
+    public async Task EnsureRequiresAuth(Uri url, bool? useBadChannelBindings) {
+        if (url == null)
             throw new ArgumentException("Url property is null");
 
-        if (useBadChannelBindings == null && Url.Scheme == "https")
+        if (useBadChannelBindings == null && url.Scheme == "https")
             throw new ArgumentException("When using HTTPS, useBadChannelBindings must be set");
 
-        var supportedAuthSchemes = await GetSupportedNtlmAuthSchemesAsync(Url);
+        var supportedAuthSchemes = await GetSupportedNtlmAuthSchemesAsync(url);
 
-        _logger.LogDebug($"Supported NTLM auth schemes for {Url}: " + string.Join(",", supportedAuthSchemes));
+        _logger.LogDebug($"Supported NTLM auth schemes for {url}: " + string.Join(",", supportedAuthSchemes));
 
         foreach (var authScheme in supportedAuthSchemes) {
             if (useBadChannelBindings == null) {
-                await AuthWithBadChannelBindings(Url, authScheme);
+                await AuthWithBadChannelBindings(url, authScheme);
             } else {
                 if ((bool)useBadChannelBindings) {
-                    await AuthWithBadChannelBindings(Url, authScheme);
+                    await AuthWithBadChannelBindings(url, authScheme);
                 } else {
-                    await AuthWithChannelBindingAsync(Url, authScheme);
+                    await AuthWithChannelBindingAsync(url, authScheme);
                 }
             }
 
