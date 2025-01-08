@@ -3,7 +3,7 @@
         <TargetFramework>net472</TargetFramework>
         <OutputType>library</OutputType>
         <PackageId>SharpHoundRPC</PackageId>
-        <LangVersion>9</LangVersion>
+        <LangVersion>default</LangVersion>
         <Authors>Rohan Vazarkar</Authors>
         <Company>SpecterOps</Company>
         <PackageDescription>SAM/LSA Wrapper for C# BloodHound tasks</PackageDescription>
@@ -17,9 +17,14 @@
         <DebugType>full</DebugType>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="System.ValueTuple" Version="4.5.0"/>
+        <PackageReference Include="System.ValueTuple" Version="4.5.0" />
     </ItemGroup>
     <ItemGroup>
-        <Folder Include="Properties"/>
+        <Folder Include="Registry\" />
+        <Folder Include="PortScanner\" />
+        <Folder Include="Properties" />
+    </ItemGroup>
+    <ItemGroup>
+      <Reference Include="System.Management" />
     </ItemGroup>
 </Project>

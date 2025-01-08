@@ -671,7 +671,7 @@ namespace SharpHoundCommonLib {
         /// <param name="hostname"></param>
         /// <returns></returns>
         private async Task<(bool Success, NetAPIStructs.WorkstationInfo100 Info)> GetWorkstationInfo(string hostname) {
-            if (!await _portScanner.CheckPort(hostname))
+            if (!await _portScanner.CheckPort(hostname, 445))
                 return (false, default);
 
             var result = _nativeMethods.CallNetWkstaGetInfo(hostname);

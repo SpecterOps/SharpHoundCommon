@@ -27,14 +27,15 @@ namespace SharpHoundCommonLib.Enums {
         WebClientService = 1 << 21,
         SmbInfo = 1 << 22,
         EventLogs = 1 << 23,
+        Registry = 1 << 24,
         LocalGroups = DCOM | RDP | LocalAdmin | PSRemote,
-        ComputerOnly = LocalGroups | Session | UserRights | CARegistry | DCRegistry | WebClientService | SmbInfo,
+        ComputerOnly = LocalGroups | Session | UserRights | CARegistry | DCRegistry | WebClientService | SmbInfo | EventLogs | Registry,
         DCOnly = ACL | Container | Group | ObjectProps | Trusts | GPOLocalGroup | CertServices | LdapServices | SmbInfo,
 
         Default = Group | Session | Trusts | ACL | ObjectProps | LocalGroups | SPNTargets | Container | CertServices |
                   LdapServices | SmbInfo,
 
         All = Default | LoggedOn | GPOLocalGroup | UserRights | CARegistry | DCRegistry | WebClientService |
-              LdapServices
+              LdapServices | Registry
     }
 }

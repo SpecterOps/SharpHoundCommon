@@ -26,6 +26,7 @@ namespace SharpHoundCommonLib.OutputTypes {
         public LdapService? LdapServices { get; set; }
         public ApiResult<SmbInfo>? SmbInfo { get; set; }
         public ApiResult<NtlmSessionResult>? NtlmSessions { get; set; }
+        public ApiResult<RegistryData> RegistryData { get; set; }
 #pragma warning restore CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
     }
 

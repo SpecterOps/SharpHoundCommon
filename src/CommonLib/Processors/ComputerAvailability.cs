@@ -112,8 +112,8 @@ namespace SharpHoundCommonLib.Processors
                     Connectable = true,
                     Error = null
                 };
-            
-            if (!await _scanner.CheckPort(computerName, timeout: _scanTimeout))
+
+            if (!await _scanner.CheckPort(computerName, 445))
             {
                 _log.LogTrace("{ComputerName} is not available because port 445 is unavailable", computerName);
                 await SendComputerStatus(new CSVComputerStatus
