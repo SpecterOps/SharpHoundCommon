@@ -73,14 +73,14 @@ namespace SharpHoundCommonLib {
         }
 
         private bool GetPool(string identifier, out LdapConnectionPool pool) {
-            if (string.IsNullOrWhiteSpace(identifier) || identifier == ".") {
+            if (string.IsNullOrWhiteSpace(identifier)) {
                 pool = default;
                 return false;
             }
 
             var resolved = ResolveIdentifier(identifier);
             if (!_pools.TryGetValue(resolved, out pool)) {
-                pool = new LdapConnectionPool(identifier, resolved, _ldapConfig,scanner: _portScanner);
+                pool = new LdapConnectionPool(identifier, resolved, _ldapConfig, scanner: _portScanner);
                 _pools.TryAdd(resolved, pool);
             }
 
@@ -96,6 +96,7 @@ namespace SharpHoundCommonLib {
             if (globalCatalog) {
                 return await pool.GetGlobalCatalogConnectionAsync();
             }
+
             return await pool.GetConnectionAsync();
         }
     

@@ -31,6 +31,7 @@ namespace SharpHoundCommonLib {
         private const int BackoffDelayMultiplier = 2;
         private const int MaxRetries = 3;
         private static readonly ConcurrentDictionary<string, NetAPIStructs.DomainControllerInfo?> DCInfoCache = new();
+        private static readonly ConcurrentHashSet _blacklistedDomains = new();
 
         public LdapConnectionPool(string identifier, string poolIdentifier, LdapConfig config, PortScanner scanner = null, NativeMethods nativeMethods = null, ILogger log = null) {
             _connections = new ConcurrentBag<LdapConnectionWrapper>();
@@ -595,6 +596,10 @@ namespace SharpHoundCommonLib {
         }
 
         public async Task<(bool Success, LdapConnectionWrapper ConnectionWrapper, string Message)> GetConnectionAsync() {
+            if (_blacklistedDomains.Contains(_identifier)) {
+                return (false, null, $"Identifier {_identifier} blacklisted for connection attempt");
+            }
+
             if (!_connections.TryTake(out var connectionWrapper)) {
                 var (success, connection, message) = await CreateNewConnection();
                 if (!success) {
@@ -691,6 +696,7 @@ namespace SharpHoundCommonLib {
                     _log.LogDebug(
                         "Could not get domain object from GetDomain, unable to create ldap connection for domain {Domain}",
                         _identifier);
+                    _blacklistedDomains.Add(_identifier);
                     return (false, null, "Unable to get domain object for further strategies");
                 }
                 tempDomainName = domainObject.Name.ToUpper().Trim();
@@ -725,6 +731,7 @@ namespace SharpHoundCommonLib {
                 }
             } catch (Exception e) {
                 _log.LogInformation(e, "We will not be able to connect to domain {Domain} by any strategy, leaving it.", _identifier);
+                _blacklistedDomains.Add(_identifier);
             }
 
             return (false, null, "All attempted connections failed");
