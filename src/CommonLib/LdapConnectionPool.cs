@@ -618,6 +618,10 @@ namespace SharpHoundCommonLib {
         }
 
         public async Task<(bool Success, LdapConnectionWrapper ConnectionWrapper, string Message)> GetGlobalCatalogConnectionAsync() {
+            if (_blacklistedDomains.Contains(_identifier)) {
+                return (false, null, $"Identifier {_identifier} blacklisted for connection attempt");
+            }
+            
             if (!_globalCatalogConnection.TryTake(out var connectionWrapper)) {
                 var (success, connection, message) = await CreateNewConnection(true);
                 if (!success) {
