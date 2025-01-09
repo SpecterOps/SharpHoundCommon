@@ -31,6 +31,8 @@ namespace SharpHoundCommonLib {
         private const int BackoffDelayMultiplier = 2;
         private const int MaxRetries = 3;
         private static readonly ConcurrentDictionary<string, NetAPIStructs.DomainControllerInfo?> DCInfoCache = new();
+
+        // Tracks domains we know we've determined we shouldn't try to connect to
         private static readonly ConcurrentHashSet _excludedDomains = new();
 
         public LdapConnectionPool(string identifier, string poolIdentifier, LdapConfig config, PortScanner scanner = null, NativeMethods nativeMethods = null, ILogger log = null) {
