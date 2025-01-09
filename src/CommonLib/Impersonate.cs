@@ -86,11 +86,11 @@ namespace Impersonate {
         /// <summary>
         /// Begins impersonation with the given credentials, Logon type and Logon provider.
         /// </summary>
-        ///<param name = "userName" > Name of the user.</param>
-        ///<param name = "domainName" > Name of the domain.</param>
-        ///<param name = "password" > The password. <see cref = "System.String" /></ param >
-        ///< param name="logonType">Type of the logon.</param>
-        ///<param name = "logonProvider" > The logon provider. <see cref = "Mit.Sharepoint.WebParts.EventLogQuery.Network.LogonProvider" /></ param >
+        ///<param name="userName" > Name of the user.</param>
+        ///<param name="domainName" > Name of the domain.</param>
+        ///<param name="password" > The password.</param >
+        ///<param name="logonType">Type of the logon.</param>
+        ///<param name="logonProvider" > The logon provider. <see cref="Mit.Sharepoint.WebParts.EventLogQuery.Network.LogonProvider"/></param >
         public Impersonator(string userName, string domainName, string password, LogonType logonType,
             LogonProvider logonProvider) {
             Impersonate(userName, domainName, password, logonType, logonProvider);
@@ -125,10 +125,11 @@ namespace Impersonate {
         /// </summary>
         ///<param name = "userName" > Name of the user.</param>
         ///<param name = "domainName" > Name of the domain.</param>
-        ///<param name = "password" > The password. <see cref = "System.String" /></ param >
-        ///< param name="logonType">Type of the logon.</param>
+        ///<param name = "password" > The password. <see cref = "System.String" /></param >
+        ///<param name="logonType">Type of the logon.</param>
         ///<param name = "logonProvider" > The logon provider. <see cref = "Mit.Sharepoint.WebParts.EventLogQuery.Network.LogonProvider" /></ param >
-        public void Impersonate(string userName, string domainName, string password, LogonType logonType = LogonType.LOGON32_LOGON_INTERACTIVE,
+        public void Impersonate(string userName, string domainName, string password,
+            LogonType logonType = LogonType.LOGON32_LOGON_INTERACTIVE,
             LogonProvider logonProvider = LogonProvider.LOGON32_PROVIDER_DEFAULT) {
             UndoImpersonation();
 
@@ -149,14 +150,11 @@ namespace Impersonate {
                             ref logonTokenDuplicate) != 0) {
                         var wi = new WindowsIdentity(logonTokenDuplicate);
                         wi.Impersonate(); // discard the returned identity context (which is the context of the application pool)
-                    }
-                    else
+                    } else
                         throw new Win32Exception(Marshal.GetLastWin32Error());
-                }
-                else
+                } else
                     throw new Win32Exception(Marshal.GetLastWin32Error());
-            }
-            finally {
+            } finally {
                 if (logonToken != IntPtr.Zero)
                     Win32NativeMethods.CloseHandle(logonToken);
 

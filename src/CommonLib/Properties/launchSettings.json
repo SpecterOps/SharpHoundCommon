@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "SharpHoundCommonLib": {
+      "commandName": "Project",
+      "commandLineArgs": "-C CertServices"
+    }
+  }
+}

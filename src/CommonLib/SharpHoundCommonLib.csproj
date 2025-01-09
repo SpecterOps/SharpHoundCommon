@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net462</TargetFramework>
+        <TargetFramework>net472</TargetFramework>
         <OutputType>library</OutputType>
         <PackageId>SharpHoundCommon</PackageId>
         <LangVersion>default</LangVersion>
@@ -26,6 +26,7 @@
         <Reference Include="System.DirectoryServices" />
         <Reference Include="System.DirectoryServices.AccountManagement" />
         <Reference Include="System.DirectoryServices.Protocols" />
+        <Reference Include="System.Net.Http" />
     </ItemGroup>
     <ItemGroup>
         <Folder Include="Properties" />
@@ -35,6 +36,7 @@
     </ItemGroup>
     <PropertyGroup>
         <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
+        <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     </PropertyGroup>
     <Target Name="CopyProjectReferencesToPackage" DependsOnTargets="BuildOnlySettings;ResolveReferences">
         <ItemGroup>
