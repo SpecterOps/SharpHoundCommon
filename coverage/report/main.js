@@ -230,8 +230,8 @@ var assemblies = [
       { "name": "SharpHoundCommonLib.AsyncEnumerable", "rp": "SharpHoundCommonLib_AsyncEnumerable.html", "cl": 8, "ucl": 1, "cal": 9, "tl": 23, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.Cache", "rp": "SharpHoundCommonLib_Cache.html", "cl": 49, "ucl": 46, "cal": 95, "tl": 193, "ct": "LineCoverage", "mc": "-", "cb": 7, "tb": 36, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.CommonLib", "rp": "SharpHoundCommonLib_CommonLib.html", "cl": 0, "ucl": 20, "cal": 20, "tl": 47, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 8, "lch": [], "bch": [], "hc": [] },
-      { "name": "SharpHoundCommonLib.ConcurrentHashSet", "rp": "SharpHoundCommonLib_ConcurrentHashSet.html", "cl": 12, "ucl": 10, "cal": 22, "tl": 60, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
-      { "name": "SharpHoundCommonLib.ConnectionPoolManager", "rp": "SharpHoundCommonLib_ConnectionPoolManager.html", "cl": 41, "ucl": 66, "cal": 107, "tl": 175, "ct": "LineCoverage", "mc": "-", "cb": 14, "tb": 46, "lch": [], "bch": [], "hc": [] },
+      { "name": "SharpHoundCommonLib.ConcurrentHashSet", "rp": "SharpHoundCommonLib_ConcurrentHashSet.html", "cl": 15, "ucl": 7, "cal": 22, "tl": 60, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
+      { "name": "SharpHoundCommonLib.ConnectionPoolManager", "rp": "SharpHoundCommonLib_ConnectionPoolManager.html", "cl": 41, "ucl": 66, "cal": 107, "tl": 176, "ct": "LineCoverage", "mc": "-", "cb": 14, "tb": 46, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.CSVComputerStatus", "rp": "SharpHoundCommonLib_CSVComputerStatus.html", "cl": 3, "ucl": 20, "cal": 23, "tl": 47, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 14, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.DirectoryEntryWrapper", "rp": "SharpHoundCommonLib_DirectoryEntryWrapper.html", "cl": 14, "ucl": 112, "cal": 126, "tl": 188, "ct": "LineCoverage", "mc": "-", "cb": 1, "tb": 44, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.DirectoryObjects.DirectoryObjectExtensions", "rp": "SharpHoundCommonLib_DirectoryObjectExtensions.html", "cl": 42, "ucl": 0, "cal": 42, "tl": 71, "ct": "LineCoverage", "mc": "-", "cb": 22, "tb": 24, "lch": [], "bch": [], "hc": [] },
@@ -244,7 +244,7 @@ var assemblies = [
       { "name": "SharpHoundCommonLib.GeneratedLdapParameters", "rp": "SharpHoundCommonLib_GeneratedLdapParameters.html", "cl": 0, "ucl": 2, "cal": 2, "tl": 155, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.Helpers", "rp": "SharpHoundCommonLib_Helpers.html", "cl": 116, "ucl": 48, "cal": 164, "tl": 309, "ct": "LineCoverage", "mc": "-", "cb": 49, "tb": 60, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.LdapConfig", "rp": "SharpHoundCommonLib_LdapConfig.html", "cl": 13, "ucl": 24, "cal": 37, "tl": 56, "ct": "LineCoverage", "mc": "-", "cb": 2, "tb": 16, "lch": [], "bch": [], "hc": [] },
-      { "name": "SharpHoundCommonLib.LdapConnectionPool", "rp": "SharpHoundCommonLib_LdapConnectionPool.html", "cl": 99, "ucl": 521, "cal": 620, "tl": 911, "ct": "LineCoverage", "mc": "-", "cb": 37, "tb": 364, "lch": [], "bch": [], "hc": [] },
+      { "name": "SharpHoundCommonLib.LdapConnectionPool", "rp": "SharpHoundCommonLib_LdapConnectionPool.html", "cl": 105, "ucl": 522, "cal": 627, "tl": 924, "ct": "LineCoverage", "mc": "-", "cb": 38, "tb": 368, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.LdapConnectionWrapper", "rp": "SharpHoundCommonLib_LdapConnectionWrapper.html", "cl": 0, "ucl": 62, "cal": 62, "tl": 97, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 26, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.LdapProducerQueryGenerator", "rp": "SharpHoundCommonLib_LdapProducerQueryGenerator.html", "cl": 0, "ucl": 108, "cal": 108, "tl": 155, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 58, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.LDAPQueries.CommonFilters", "rp": "SharpHoundCommonLib_CommonFilters.html", "cl": 1, "ucl": 13, "cal": 14, "tl": 29, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
@@ -402,13 +402,13 @@ var riskHotspots = [
       { "value": 0, "exceeded": false },
     ]},
   {
-    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.LdapConnectionPool", "reportPath": "SharpHoundCommonLib_LdapConnectionPool.html", "methodName": "RangedRetrieval()", "methodShortName": "RangedRetrieval()", "fileIndex": 0, "line": 384,
+    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.LdapConnectionPool", "reportPath": "SharpHoundCommonLib_LdapConnectionPool.html", "methodName": "RangedRetrieval()", "methodShortName": "RangedRetrieval()", "fileIndex": 0, "line": 387,
     "metrics": [
       { "value": 77, "exceeded": true },
       { "value": 0, "exceeded": false },
     ]},
   {
-    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.LdapConnectionPool", "reportPath": "SharpHoundCommonLib_LdapConnectionPool.html", "methodName": "PagedQuery()", "methodShortName": "PagedQuery()", "fileIndex": 0, "line": 199,
+    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.LdapConnectionPool", "reportPath": "SharpHoundCommonLib_LdapConnectionPool.html", "methodName": "PagedQuery()", "methodShortName": "PagedQuery()", "fileIndex": 0, "line": 202,
     "metrics": [
       { "value": 74, "exceeded": true },
       { "value": 0, "exceeded": false },
@@ -420,7 +420,7 @@ var riskHotspots = [
       { "value": 0, "exceeded": false },
     ]},
   {
-    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.LdapConnectionPool", "reportPath": "SharpHoundCommonLib_LdapConnectionPool.html", "methodName": "Query()", "methodShortName": "Query()", "fileIndex": 0, "line": 62,
+    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.LdapConnectionPool", "reportPath": "SharpHoundCommonLib_LdapConnectionPool.html", "methodName": "Query()", "methodShortName": "Query()", "fileIndex": 0, "line": 65,
     "metrics": [
       { "value": 67, "exceeded": true },
       { "value": 0, "exceeded": false },
@@ -510,7 +510,7 @@ var riskHotspots = [
       { "value": 0, "exceeded": false },
     ]},
   {
-    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.LdapConnectionPool", "reportPath": "SharpHoundCommonLib_LdapConnectionPool.html", "methodName": "CreateNewConnection()", "methodShortName": "CreateNewConnection()", "fileIndex": 0, "line": 649,
+    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.LdapConnectionPool", "reportPath": "SharpHoundCommonLib_LdapConnectionPool.html", "methodName": "CreateNewConnection()", "methodShortName": "CreateNewConnection()", "fileIndex": 0, "line": 660,
     "metrics": [
       { "value": 32, "exceeded": true },
       { "value": 0, "exceeded": false },
