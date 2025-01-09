@@ -168,8 +168,8 @@ namespace SharpHoundCommonLib {
                 //pass
             }
 
-            using (var ctx = new PrincipalContext(ContextType.Domain)) {
-                try {
+            try {
+                using (var ctx = new PrincipalContext(ContextType.Domain)) {
                     var principal = Principal.FindByIdentity(ctx, IdentityType.Sid, sid);
                     if (principal != null) {
                         var entry = ((DirectoryEntry)principal.GetUnderlyingObject()).ToDirectoryObject();
@@ -178,10 +178,11 @@ namespace SharpHoundCommonLib {
                             return (true, type);
                         }
                     }
-                } catch {
-                    //pass
                 }
+            } catch {
+                //pass
             }
+           
 
             return (false, Label.Base);
         }
@@ -212,8 +213,8 @@ namespace SharpHoundCommonLib {
                 //pass
             }
 
-            using (var ctx = new PrincipalContext(ContextType.Domain)) {
-                try {
+            try {
+                using (var ctx = new PrincipalContext(ContextType.Domain)) {
                     var principal = Principal.FindByIdentity(ctx, IdentityType.Guid, guid);
                     if (principal != null) {
                         var entry = ((DirectoryEntry)principal.GetUnderlyingObject()).ToDirectoryObject();
@@ -222,10 +223,11 @@ namespace SharpHoundCommonLib {
                             return (true, type);
                         }
                     }
-                } catch {
-                    //pass
                 }
+            } catch {
+                //pass
             }
+            
 
             return (false, Label.Base);
         }
@@ -313,7 +315,7 @@ namespace SharpHoundCommonLib {
             return (false, null);
         }
 
-        public async Task<(bool Success, string DomainName)> GetDomainNameFromSid(string sid) {
+        public virtual async Task<(bool Success, string DomainName)> GetDomainNameFromSid(string sid) {
             string domainSid;
             try {
                 domainSid = new SecurityIdentifier(sid).AccountDomainSid?.Value.ToUpper();
@@ -345,8 +347,8 @@ namespace SharpHoundCommonLib {
                 return (true, domainName);
             }
 
-            using (var ctx = new PrincipalContext(ContextType.Domain)) {
-                try {
+            try {
+                using (var ctx = new PrincipalContext(ContextType.Domain)) {
                     var principal = Principal.FindByIdentity(ctx, IdentityType.Sid, sid);
                     if (principal != null) {
                         var dn = principal.DistinguishedName;
@@ -355,10 +357,11 @@ namespace SharpHoundCommonLib {
                             return (true, Helpers.DistinguishedNameToDomain(dn));
                         }
                     }
-                } catch {
-                    //pass
                 }
+            } catch {
+                //pass
             }
+            
 
             return (false, string.Empty);
         }
@@ -405,7 +408,7 @@ namespace SharpHoundCommonLib {
             return (false, string.Empty);
         }
 
-        public async Task<(bool Success, string DomainSid)> GetDomainSidFromDomainName(string domainName) {
+        public virtual async Task<(bool Success, string DomainSid)> GetDomainSidFromDomainName(string domainName) {
             if (Cache.GetDomainSidMapping(domainName, out var domainSid)) return (true, domainSid);
 
             try {
@@ -877,8 +880,8 @@ namespace SharpHoundCommonLib {
                 return (true, principal);
             }
 
-            using (var ctx = new PrincipalContext(ContextType.Domain)) {
-                try {
+            try {
+                using (var ctx = new PrincipalContext(ContextType.Domain)) {
                     var lookupPrincipal =
                         Principal.FindByIdentity(ctx, IdentityType.DistinguishedName, distinguishedName);
                     if (lookupPrincipal != null) {
@@ -896,11 +899,12 @@ namespace SharpHoundCommonLib {
                     }
 
                     return (false, default);
-                } catch {
-                    _unresolvablePrincipals.Add(distinguishedName);
-                    return (false, default);
                 }
+            } catch {
+                _unresolvablePrincipals.Add(distinguishedName);
+                return (false, default);
             }
+            
         }
 
         public async Task<(bool Success, string DSHeuristics)> GetDSHueristics(string domain, string dn) {
@@ -934,7 +938,7 @@ namespace SharpHoundCommonLib {
                 OutputBase output = principal.ObjectType switch {
                     Label.User => new User(),
                     Label.Computer => new Computer(),
-                    Label.Group => new OutputTypes.Group(),
+                    Label.Group => new Group(),
                     Label.GPO => new GPO(),
                     Label.Domain => new OutputTypes.Domain(),
                     Label.OU => new OU(),
@@ -957,7 +961,7 @@ namespace SharpHoundCommonLib {
                 yield return entdc;
             }
         }
-
+        
         private async IAsyncEnumerable<Group> GetEnterpriseDCGroups() {
             var grouped = new ConcurrentDictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
             var forestSidToName = new ConcurrentDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -968,7 +972,7 @@ namespace SharpHoundCommonLib {
                     await GetDomainSidFromDomainName(forestName) is (true, var forestDomainSid)) {
                     forestSidToName.TryAdd(forestDomainSid, forestName);
                     if (!grouped.ContainsKey(forestDomainSid)) {
-                        grouped[forestDomainSid] = new List<string>();
+                        grouped[forestDomainSid] = [];
                     }
 
                     foreach (var k in domainSid) {
@@ -978,10 +982,13 @@ namespace SharpHoundCommonLib {
             }
 
             foreach (var f in grouped) {
-                var group = new Group { ObjectIdentifier = $"{f.Key}-S-1-5-9" };
-                group.Properties.Add("name", $"ENTERPRISE DOMAIN CONTROLLERS@{forestSidToName[f.Key]}".ToUpper());
+                if (!forestSidToName.TryGetValue(f.Key, out var forestName)) {
+                    continue;
+                }
+                var group = new Group { ObjectIdentifier = $"{forestName}-S-1-5-9" };
+                group.Properties.Add("name", $"ENTERPRISE DOMAIN CONTROLLERS@{forestName}".ToUpper());
                 group.Properties.Add("domainsid", f.Key);
-                group.Properties.Add("domain", forestSidToName[f.Key]);
+                group.Properties.Add("domain", forestName);
                 group.Members = f.Value.Select(x => new TypedPrincipal(x, Label.Computer)).ToArray();
                 yield return group;
             }

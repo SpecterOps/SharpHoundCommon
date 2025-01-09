@@ -20,6 +20,7 @@ namespace SharpHoundCommonLib.OutputTypes
         public DCRegistryData DCRegistryData { get; set; } = new();
         public ComputerStatus Status { get; set; }
         public bool IsDC { get; set; }
+        public bool UnconstrainedDelegation { get; set; }
         public string DomainSID { get; set; }
     }
 

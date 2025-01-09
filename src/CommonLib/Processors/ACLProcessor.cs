@@ -15,10 +15,11 @@ using SharpHoundCommonLib.OutputTypes;
 namespace SharpHoundCommonLib.Processors {
     public class ACLProcessor {
         private static readonly Dictionary<Label, string> BaseGuids;
-        private static readonly ConcurrentDictionary<string, string> GuidMap = new();
+        private readonly ConcurrentDictionary<string, string> _guidMap = new();
         private readonly ILogger _log;
         private readonly ILdapUtils _utils;
-        private static readonly HashSet<string> BuiltDomainCaches = new(StringComparer.OrdinalIgnoreCase);
+        private readonly ConcurrentHashSet _builtDomainCaches = new(StringComparer.OrdinalIgnoreCase);
+        private readonly object _lock = new();
 
         static ACLProcessor() {
             //Create a dictionary with the base GUIDs of each object type
@@ -50,8 +51,16 @@ namespace SharpHoundCommonLib.Processors {
         ///     LAPS
         /// </summary>
         private async Task BuildGuidCache(string domain) {
-            BuiltDomainCaches.Add(domain);
-            await foreach (var result in _utils.Query(new LdapQueryParameters {
+            lock (_lock) {
+                if (_builtDomainCaches.Contains(domain)) {
+                    return;
+                }
+
+                _builtDomainCaches.Add(domain);
+            }
+            
+            _log.LogInformation("Building GUID Cache for {Domain}", domain);
+            await foreach (var result in _utils.PagedQuery(new LdapQueryParameters {
                                DomainName = domain,
                                LDAPFilter = "(schemaIDGUID=*)",
                                NamingContext = NamingContext.Schema,
@@ -59,19 +68,31 @@ namespace SharpHoundCommonLib.Processors {
                            })) {
                 if (result.IsSuccess) {
                     if (!result.Value.TryGetProperty(LDAPProperties.Name, out var name) ||
-                        !result.Value.TryGetGuid(out var guid)) {
+                        !result.Value.TryGetByteProperty(LDAPProperties.SchemaIDGUID, out var schemaGuid)) {
                         continue;
                     }
 
                     name = name.ToLower();
-                    if (name is LDAPProperties.LAPSPassword or LDAPProperties.LegacyLAPSPassword) {
-                        _log.LogDebug("Found GUID for ACL Right {Name}: {Guid} in domain {Domain}", name, guid, domain);
-                        GuidMap.TryAdd(guid, name);
+
+                    string guid;
+                    try
+                    {
+                        guid = new Guid(schemaGuid).ToString();
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+                    
+                    if (name is LDAPProperties.LAPSPlaintextPassword or LDAPProperties.LAPSEncryptedPassword or LDAPProperties.LegacyLAPSPassword) {
+                        _log.LogInformation("Found GUID for ACL Right {Name}: {Guid} in domain {Domain}", name, guid, domain);
+                        _guidMap.TryAdd(guid, name);
                     }
                 } else {
                     _log.LogDebug("Error while building GUID cache for {Domain}: {Message}", domain, result.Error);
                 }
             }
+            
         }
 
         /// <summary>
@@ -125,17 +146,21 @@ namespace SharpHoundCommonLib.Processors {
             string aceType, string inheritedObjectType) {
             var hash = identityReference + rights + aceType + inheritedObjectType;
             /*
-             * We're using MD5 because its fast and this data isn't cryptographically important.
+             * We're using SHA1 because its fast and this data isn't cryptographically important.
              * Additionally, the chances of a collision in our data size is miniscule and irrelevant.
+             * We cannot use MD5 as it is not FIPS compliant and environments can enforce this setting
              */
-            using (var md5 = MD5.Create()) {
-                var bytes = md5.ComputeHash(Encoding.UTF8.GetBytes(hash));
-                var builder = new StringBuilder();
-                foreach (var b in bytes) {
-                    builder.Append(b.ToString("x2"));
+            try
+            {
+                using (var sha1 = SHA1.Create())
+                {
+                    var bytes = sha1.ComputeHash(Encoding.UTF8.GetBytes(hash));
+                    return BitConverter.ToString(bytes).Replace("-", string.Empty).ToUpper();
                 }
-
-                return builder.ToString();
+            }
+            catch
+            {
+                return "";
             }
         }
 
@@ -199,8 +224,12 @@ namespace SharpHoundCommonLib.Processors {
                 //Lowercase this just in case. As far as I know it should always come back that way anyways, but better safe than sorry
                 var aceType = ace.ObjectType().ToString().ToLower();
                 var inheritanceType = ace.InheritedObjectType();
-                
-                yield return CalculateInheritanceHash(ir, aceRights, aceType, inheritanceType);
+
+                var hash = CalculateInheritanceHash(ir, aceRights, aceType, inheritanceType);
+                if (!string.IsNullOrEmpty(hash))
+                {
+                    yield return hash;
+                }
             }
         }
 
@@ -217,9 +246,7 @@ namespace SharpHoundCommonLib.Processors {
         public async IAsyncEnumerable<ACE> ProcessACL(byte[] ntSecurityDescriptor, string objectDomain,
             Label objectType,
             bool hasLaps, string objectName = "") {
-            if (!BuiltDomainCaches.Contains(objectDomain)) {
-                await BuildGuidCache(objectDomain);
-            }
+            await BuildGuidCache(objectDomain);
 
             if (ntSecurityDescriptor == null) {
                 _log.LogDebug("Security Descriptor is null for {Name}", objectName);
@@ -245,7 +272,8 @@ namespace SharpHoundCommonLib.Processors {
                         PrincipalType = resolvedOwner.ObjectType,
                         PrincipalSID = resolvedOwner.ObjectIdentifier,
                         RightName = EdgeNames.Owns,
-                        IsInherited = false
+                        IsInherited = false,
+                        InheritanceHash = ""
                     };
                 } else {
                     _log.LogTrace("Failed to resolve owner for {Name}", objectName);
@@ -253,7 +281,8 @@ namespace SharpHoundCommonLib.Processors {
                         PrincipalType = Label.Base,
                         PrincipalSID = ownerSid,
                         RightName = EdgeNames.Owns,
-                        IsInherited = false
+                        IsInherited = false,
+                        InheritanceHash = ""
                     };
                 }
             }
@@ -287,8 +316,6 @@ namespace SharpHoundCommonLib.Processors {
                 if (inherited) {
                     aceInheritanceHash = CalculateInheritanceHash(ir, aceRights, aceType, ace.InheritedObjectType());
                 }
-
-                GuidMap.TryGetValue(aceType, out var mappedGuid);
 
                 _log.LogTrace("Processing ACE with rights {Rights} and guid {GUID} on object {Name}", aceRights,
                     aceType, objectName);
@@ -402,14 +429,23 @@ namespace SharpHoundCommonLib.Processors {
                                     RightName = EdgeNames.AllExtendedRights,
                                     InheritanceHash = aceInheritanceHash
                                 };
-                            else if (mappedGuid is LDAPProperties.LegacyLAPSPassword or LDAPProperties.LAPSPassword)
-                                yield return new ACE {
-                                    PrincipalType = resolvedPrincipal.ObjectType,
-                                    PrincipalSID = resolvedPrincipal.ObjectIdentifier,
-                                    IsInherited = inherited,
-                                    RightName = EdgeNames.ReadLAPSPassword,
-                                    InheritanceHash = aceInheritanceHash
-                                };
+                            else if (_guidMap.TryGetValue(aceType, out var lapsAttribute))
+                            {
+                                // Compare the retrieved attribute name against LDAPProperties values
+                                if (lapsAttribute == LDAPProperties.LegacyLAPSPassword ||
+                                    lapsAttribute == LDAPProperties.LAPSPlaintextPassword ||
+                                    lapsAttribute == LDAPProperties.LAPSEncryptedPassword)
+                                {
+                                    yield return new ACE
+                                    {
+                                        PrincipalType = resolvedPrincipal.ObjectType,
+                                        PrincipalSID = resolvedPrincipal.ObjectIdentifier,
+                                        IsInherited = inherited,
+                                        RightName = EdgeNames.ReadLAPSPassword,
+                                        InheritanceHash = aceInheritanceHash
+                                    };
+                                }
+                            }
                         }
                     } else if (objectType == Label.CertTemplate) {
                         if (aceType is ACEGuids.AllGuid or "")
