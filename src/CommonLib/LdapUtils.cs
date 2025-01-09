@@ -972,7 +972,7 @@ namespace SharpHoundCommonLib {
                     await GetDomainSidFromDomainName(forestName) is (true, var forestDomainSid)) {
                     forestSidToName.TryAdd(forestDomainSid, forestName);
                     if (!grouped.ContainsKey(forestDomainSid)) {
-                        grouped[forestDomainSid] = [];
+                        grouped[forestDomainSid] = new();
                     }
 
                     foreach (var k in domainSid) {
