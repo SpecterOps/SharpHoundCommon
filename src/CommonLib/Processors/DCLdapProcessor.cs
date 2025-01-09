@@ -61,8 +61,6 @@ public class DCLdapProcessor {
     /// <summary>
     /// Tests if the specified Ldap port is open
     /// </summary>
-    /// <param name="target">Hostname of the machine</param>
-    /// <param name="target">TCP port being tested</param>
     /// <returns>bool</returns>
     [ExcludeFromCodeCoverage]
     public async Task<bool> TestLdapPort() {

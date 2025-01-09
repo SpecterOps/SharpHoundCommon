@@ -149,10 +149,12 @@ namespace SharpHoundCommonLib.Processors
         }
         
         /// <summary>
-        /// This function should be called with the enrollment data fetched from <see cref="GetCARegistryValues"/>.
-        /// The resulting items will contain enrollment agent restrictions
+        /// This function will retrieve the enrollment agent restrictions from a ca
         /// </summary>
-        /// <param name="enrollmentAgentRestrictions"></param>
+        /// <param name="caName"></param>
+        /// <param name="objectDomain"></param>
+        /// <param name="computerName"></param>
+        /// <param name="computerObjectId"></param>
         /// <returns></returns>
         public async Task<EnrollmentAgentRegistryAPIResult> ProcessEAPermissions(string caName, string objectDomain, string computerName, string computerObjectId)
         {
@@ -245,7 +247,6 @@ namespace SharpHoundCommonLib.Processors
         /// <param name="target"></param>
         /// <param name="caName"></param>
         /// <returns></returns>
-        /// <exception cref="Exception"></exception>
         [ExcludeFromCodeCoverage]
         public BoolRegistryAPIResult IsUserSpecifiesSanEnabled(string target, string caName)
         {
@@ -281,7 +282,6 @@ namespace SharpHoundCommonLib.Processors
         /// <param name="target"></param>
         /// <param name="caName"></param>
         /// <returns></returns>
-        /// <exception cref="Exception"></exception>
         [ExcludeFromCodeCoverage]
         public BoolRegistryAPIResult RoleSeparationEnabled(string target, string caName)
         {

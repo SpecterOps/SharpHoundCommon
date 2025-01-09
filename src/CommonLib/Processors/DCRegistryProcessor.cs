@@ -24,7 +24,6 @@ namespace SharpHoundCommonLib.Processors
         /// <remarks>https://support.microsoft.com/en-us/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16</remarks>
         /// <param name="target"></param>
         /// <returns>IntRegistryAPIResult</returns>
-        /// <exception cref="Exception"></exception>
         [ExcludeFromCodeCoverage]
         public IntRegistryAPIResult GetCertificateMappingMethods(string target)
         {
@@ -57,7 +56,6 @@ namespace SharpHoundCommonLib.Processors
         /// <remarks>https://support.microsoft.com/en-us/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16</remarks>
         /// <param name="target"></param>
         /// <returns>IntRegistryAPIResult</returns>
-        /// <exception cref="Exception"></exception>
         [ExcludeFromCodeCoverage]
         public IntRegistryAPIResult GetStrongCertificateBindingEnforcement(string target)
         {
