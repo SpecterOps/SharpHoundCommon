@@ -1232,7 +1232,15 @@ namespace SharpHoundCommonLib {
                 case Label.User:
                 case Label.Group:
                 case Label.Base:
-                    displayName = $"{samAccountName}@{domain}";
+                    if (!string.IsNullOrWhiteSpace(samAccountName)) {
+                        displayName = $"{samAccountName}@{domain}";    
+                    }else if (directoryObject.TryGetProperty(LDAPProperties.CanonicalName, out var canonicalName)) {
+                        displayName = $"{canonicalName}@{domain}";
+                    }else if (directoryObject.TryGetProperty(LDAPProperties.Name, out var name)) {
+                        displayName = $"{name}@{domain}";
+                    } else {
+                        displayName = $"UNKNOWN@{domain}";
+                    }
                     break;
                 case Label.Computer: {
                     var shortName = samAccountName?.TrimEnd('$');
