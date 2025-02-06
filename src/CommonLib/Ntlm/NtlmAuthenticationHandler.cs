@@ -11,6 +11,9 @@ interface INtlmAuthenticationHandler
     Task<object> PerformNtlmAuthenticationAsync(INtlmTransport transport);
 }
 
+/// <summary>
+/// Uses an implementation of transports to actually perform the NTLM authentication. 
+/// </summary>
 public class NtlmAuthenticationHandler : INtlmAuthenticationHandler
 {
     private readonly ILogger _logger;

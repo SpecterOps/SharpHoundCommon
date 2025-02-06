@@ -3,7 +3,7 @@ using System.Text;
 
 namespace SharpHoundCommonLib.OutputTypes
 {
-    public class UserRightsAssignmentAPIResult : APIResult
+    public class UserRightsAssignmentAPIResult : APIResult.APIResult
     {
         public string Privilege { get; set; }
         public TypedPrincipal[] Results { get; set; } = Array.Empty<TypedPrincipal>();

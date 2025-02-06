@@ -1,11 +1,17 @@
-﻿#nullable enable
+﻿/*
+ * Taken from https://github.com/jborean93/PSOpenAD/blob/90f92c2c4905acc61c67a85021ab7b6d09045eee/src/PSOpenAD/Authentication.cs
+ * GSSAPI code removed as it is unused
+ * Small modifications done to fix PS -> c# translation errors
+ */
 using System;
 using System.Buffers;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 namespace SharpHoundCommonLib.ThirdParty.PSOpenAD;
 
-public enum AuthenticationMethod {
+public enum AuthenticationMethod
+{
     /// <summary>Selects the best auth mechanism available.</summary>
     Default,
 
@@ -25,13 +31,14 @@ public enum AuthenticationMethod {
 
     /// <summary>Authentication using a client provided X.509 Certificate for LDAP or StartTLS.</summary>
     Certificate,
-
+    
     // <summary>Authentication using NTLM</summary>
     NTLM
 }
 
 /// <summary>Details on an authentication mechanism for the local client.</summary>
-public sealed class AuthenticationProvider {
+public sealed class AuthenticationProvider
+{
     /// <summary>The authentication mechanism this represents.</summary>
     public AuthenticationMethod Method { get; }
 
@@ -48,7 +55,8 @@ public sealed class AuthenticationProvider {
     public string Details { get; }
 
     public AuthenticationProvider(AuthenticationMethod method, string saslId, bool available, bool canSign,
-        string details) {
+        string details)
+    {
         Method = method;
         SaslId = saslId;
         Available = available;
@@ -57,7 +65,8 @@ public sealed class AuthenticationProvider {
     }
 }
 
-internal enum GssapiProvider {
+internal enum GssapiProvider
+{
     None,
     MIT,
     Heimdal,
@@ -66,14 +75,16 @@ internal enum GssapiProvider {
 }
 
 [Flags]
-internal enum SASLSecurityFlags : byte {
+internal enum SASLSecurityFlags : byte
+{
     None = 0,
     NoSecurity = 1,
     Integrity = 2,
     Confidentiality = 4,
 }
 
-public class ChannelBindings {
+public class ChannelBindings
+{
     public int InitiatorAddrType { get; set; }
     public byte[]? InitiatorAddr { get; set; }
     public int AcceptorAddrType { get; set; }
@@ -81,7 +92,8 @@ public class ChannelBindings {
     public byte[]? ApplicationData { get; set; }
 }
 
-internal abstract class SecurityContext : IDisposable {
+internal abstract class SecurityContext : IDisposable
+{
     public bool Complete { get; internal set; }
     public bool IntegrityAvailable { get; internal set; }
     public bool ConfidentialityAvailable { get; internal set; }
@@ -90,16 +102,18 @@ internal abstract class SecurityContext : IDisposable {
     public abstract byte[] Wrap(ReadOnlySpan<byte> data, bool encrypt);
     public abstract byte[] Unwrap(ReadOnlySpan<byte> data);
 
-    public abstract uint MaxWrapSize(uint outputSize, bool confReq);
+    public abstract UInt32 MaxWrapSize(UInt32 outputSize, bool confReq);
 
     public abstract void Dispose();
     ~SecurityContext() => Dispose();
 }
 
-internal class ExternalContext : SecurityContext {
+internal class ExternalContext : SecurityContext
+{
     private bool _called;
 
-    public override byte[] Step(byte[]? inputToken = null) {
+    public override byte[] Step(byte[]? inputToken = null)
+    {
         // No actual tokens are exchanged but we need to return at least 1 empty array and set it to be completed
         // on the next call
         Complete = _called;
@@ -111,44 +125,46 @@ internal class ExternalContext : SecurityContext {
     public override byte[] Wrap(ReadOnlySpan<byte> data, bool encrypt) => Array.Empty<byte>();
     public override byte[] Unwrap(ReadOnlySpan<byte> data) => Array.Empty<byte>();
     public override uint MaxWrapSize(uint outputSize, bool confReq) => 0;
-
-    public override void Dispose() {
-    }
+    public override void Dispose()
+    { }
 }
 
-internal class SspiContext : SecurityContext {
+internal class SspiContext : SecurityContext
+{
     private readonly SafeSspiCredentialHandle _credential;
     private readonly byte[]? _bindingData;
     private readonly string _targetSpn;
     private readonly InitiatorContextRequestFlags _flags = InitiatorContextRequestFlags.ISC_REQ_MUTUAL_AUTH;
     private SafeSspiContextHandle? _context;
-    private uint _blockSize = 0;
-    private uint _trailerSize = 0;
-    private uint _seqNo = 0;
+    private UInt32 _blockSize = 0;
+    private UInt32 _trailerSize = 0;
+    private UInt32 _seqNo = 0;
 
     public SspiContext(string? username, string? password, AuthenticationMethod method, string target,
-        ChannelBindings? channelBindings, bool integrity, bool confidentiality) {
+        ChannelBindings? channelBindings, bool integrity, bool confidentiality)
+    {
         _bindingData = CreateChannelBindings(channelBindings);
         _targetSpn = target;
 
-        var package = Enum.GetName(typeof(AuthenticationMethod), method);
+        string package = method == AuthenticationMethod.Kerberos ? "Kerberos" : "Negotiate";
         WinNTAuthIdentity? identity = null;
-        if (!string.IsNullOrEmpty(username) || !string.IsNullOrEmpty(password)) {
+        if (!string.IsNullOrEmpty(username) || !string.IsNullOrEmpty(password))
+        {
             string? domain = null;
-            if (username?.Contains("\\") == true) {
-                var stringSplit = username.Split(['\\'], 2);
+            if (username?.Contains("\\") == true)
+            {
+                string[] stringSplit = username.Split(['\\'], 2);
                 domain = stringSplit[0];
                 username = stringSplit[1];
             }
 
             identity = new WinNTAuthIdentity(username, domain, password);
         }
-
         _credential = SSPI.AcquireCredentialsHandle(null, package, CredentialUse.SECPKG_CRED_OUTBOUND,
             identity).Creds;
 
         const InitiatorContextRequestFlags integrityFlags = InitiatorContextRequestFlags.ISC_REQ_INTEGRITY |
-                                                            InitiatorContextRequestFlags.ISC_REQ_SEQUENCE_DETECT;
+            InitiatorContextRequestFlags.ISC_REQ_SEQUENCE_DETECT;
 
         if (integrity)
             _flags |= integrityFlags;
@@ -156,47 +172,56 @@ internal class SspiContext : SecurityContext {
         if (confidentiality)
             _flags |= integrityFlags | InitiatorContextRequestFlags.ISC_REQ_CONFIDENTIALITY;
 
-        if (method == AuthenticationMethod.Kerberos) {
+        if (method == AuthenticationMethod.Kerberos)
+        {
             // Kerberos uses a special SASL wrapping mechanism and always requires integrity
             _flags |= integrityFlags;
-        } else if (!integrity && !confidentiality) {
+        }
+        else if (!integrity && !confidentiality)
+        {
             // GSS-SPNEGO uses the context flags to determine the protection applied and Kerberos always sets
             // INTEG by default. By setting this flag we unset INTEG allowing it to be used without any protection.
             _flags |= InitiatorContextRequestFlags.ISC_REQ_NO_INTEGRITY;
         }
     }
 
-    public override byte[] Step(byte[]? inputToken = null) {
-        var bufferCount = 0;
+    public override byte[] Step(byte[]? inputToken = null)
+    {
+        int bufferCount = 0;
         if (inputToken != null)
             bufferCount++;
 
         if (_bindingData != null)
             bufferCount++;
 
-        unsafe {
-            fixed (byte* input = inputToken, cbBuffer = _bindingData) {
+        unsafe
+        {
+            fixed (byte* input = inputToken, cbBuffer = _bindingData)
+            {
                 Span<Helpers.SecBuffer> inputBuffers = stackalloc Helpers.SecBuffer[bufferCount];
-                var idx = 0;
+                int idx = 0;
 
-                if (inputToken != null) {
-                    inputBuffers[idx].cbBuffer = (uint)inputToken.Length;
-                    inputBuffers[idx].BufferType = (uint)SecBufferType.SECBUFFER_TOKEN;
+                if (inputToken != null)
+                {
+                    inputBuffers[idx].cbBuffer = (UInt32)inputToken.Length;
+                    inputBuffers[idx].BufferType = (UInt32)SecBufferType.SECBUFFER_TOKEN;
                     inputBuffers[idx].pvBuffer = (IntPtr)input;
                     idx++;
                 }
 
-                if (_bindingData != null) {
-                    inputBuffers[idx].cbBuffer = (uint)_bindingData.Length;
-                    inputBuffers[idx].BufferType = (uint)SecBufferType.SECBUFFER_CHANNEL_BINDINGS;
+                if (_bindingData != null)
+                {
+                    inputBuffers[idx].cbBuffer = (UInt32)_bindingData.Length;
+                    inputBuffers[idx].BufferType = (UInt32)SecBufferType.SECBUFFER_CHANNEL_BINDINGS;
                     inputBuffers[idx].pvBuffer = (IntPtr)cbBuffer;
                 }
 
-                var context = SSPI.InitializeSecurityContext(_credential, _context, _targetSpn, _flags,
-                    TargetDataRep.SECURITY_NATIVE_DREP, inputBuffers, [SecBufferType.SECBUFFER_TOKEN]);
+                SspiSecContext context = SSPI.InitializeSecurityContext(_credential, _context, _targetSpn, _flags,
+                    TargetDataRep.SECURITY_NATIVE_DREP, inputBuffers, new[] { SecBufferType.SECBUFFER_TOKEN, });
                 _context = context.Context;
 
-                if (!context.MoreNeeded) {
+                if (!context.MoreNeeded)
+                {
                     Complete = true;
                     IntegrityAvailable =
                         (context.Flags & InitiatorContextReturnFlags.ISC_RET_INTEGRITY) != 0;
@@ -204,7 +229,8 @@ internal class SspiContext : SecurityContext {
                         (context.Flags & InitiatorContextReturnFlags.ISC_RET_CONFIDENTIALITY) != 0;
 
                     Span<Helpers.SecPkgContext_Sizes> sizes = stackalloc Helpers.SecPkgContext_Sizes[1];
-                    fixed (Helpers.SecPkgContext_Sizes* sizesPtr = sizes) {
+                    fixed (Helpers.SecPkgContext_Sizes* sizesPtr = sizes)
+                    {
                         SSPI.QueryContextAttributes(_context, SecPkgAttribute.SECPKG_ATTR_SIZES,
                             (IntPtr)sizesPtr);
 
@@ -218,36 +244,41 @@ internal class SspiContext : SecurityContext {
         }
     }
 
-    public override byte[] Wrap(ReadOnlySpan<byte> data, bool encrypt) {
+    public override byte[] Wrap(ReadOnlySpan<byte> data, bool encrypt)
+    {
         if (_context == null || !Complete)
             throw new InvalidOperationException("Cannot wrap without a completed context");
 
-        unsafe {
-            var shared = ArrayPool<byte>.Shared;
-            var token = shared.Rent((int)_trailerSize);
-            var padding = shared.Rent((int)_blockSize);
+        unsafe
+        {
+            ArrayPool<byte> shared = ArrayPool<byte>.Shared;
+            byte[] token = shared.Rent((int)_trailerSize);
+            byte[] padding = shared.Rent((int)_blockSize);
 
-            try {
-                fixed (byte* tokenPtr = token, dataPtr = data, paddingPtr = padding) {
+            try
+            {
+                fixed (byte* tokenPtr = token, dataPtr = data, paddingPtr = padding)
+                {
                     Span<Helpers.SecBuffer> buffers = stackalloc Helpers.SecBuffer[3];
-                    buffers[0].BufferType = (uint)SecBufferType.SECBUFFER_TOKEN;
+                    buffers[0].BufferType = (UInt32)SecBufferType.SECBUFFER_TOKEN;
                     buffers[0].cbBuffer = _trailerSize;
                     buffers[0].pvBuffer = (IntPtr)tokenPtr;
 
-                    buffers[1].BufferType = (uint)SecBufferType.SECBUFFER_DATA;
-                    buffers[1].cbBuffer = (uint)data.Length;
+                    buffers[1].BufferType = (UInt32)SecBufferType.SECBUFFER_DATA;
+                    buffers[1].cbBuffer = (UInt32)data.Length;
                     buffers[1].pvBuffer = (IntPtr)dataPtr;
 
-                    buffers[2].BufferType = (uint)SecBufferType.SECBUFFER_PADDING;
+                    buffers[2].BufferType = (UInt32)SecBufferType.SECBUFFER_PADDING;
                     buffers[2].cbBuffer = _blockSize;
                     buffers[2].pvBuffer = (IntPtr)paddingPtr;
 
-                    var qop = encrypt ? 0 : 0x80000001; // SECQOP_WRAP_NO_ENCRYPT
+                    UInt32 qop = encrypt ? 0 : 0x80000001; // SECQOP_WRAP_NO_ENCRYPT
                     SSPI.EncryptMessage(_context, qop, buffers, NextSeqNo());
 
-                    var wrapped = new byte[buffers[0].cbBuffer + buffers[1].cbBuffer + buffers[2].cbBuffer];
-                    var offset = 0;
-                    if (buffers[0].cbBuffer > 0) {
+                    byte[] wrapped = new byte[buffers[0].cbBuffer + buffers[1].cbBuffer + buffers[2].cbBuffer];
+                    int offset = 0;
+                    if (buffers[0].cbBuffer > 0)
+                    {
                         Buffer.BlockCopy(token, 0, wrapped, offset, (int)buffers[0].cbBuffer);
                         offset += (int)buffers[0].cbBuffer;
                     }
@@ -255,38 +286,44 @@ internal class SspiContext : SecurityContext {
                     Marshal.Copy((IntPtr)dataPtr, wrapped, offset, (int)buffers[1].cbBuffer);
                     offset += (int)buffers[1].cbBuffer;
 
-                    if (buffers[2].cbBuffer > 0) {
+                    if (buffers[2].cbBuffer > 0)
+                    {
                         Buffer.BlockCopy(padding, 0, wrapped, offset, (int)buffers[2].cbBuffer);
                         offset += (int)buffers[2].cbBuffer;
                     }
 
                     return wrapped;
                 }
-            } finally {
+            }
+            finally
+            {
                 shared.Return(token);
                 shared.Return(padding);
             }
         }
     }
 
-    public override byte[] Unwrap(ReadOnlySpan<byte> data) {
+    public override byte[] Unwrap(ReadOnlySpan<byte> data)
+    {
         if (_context == null || !Complete)
             throw new InvalidOperationException("Cannot wrap without a completed context");
 
-        unsafe {
-            fixed (byte* dataPtr = data) {
+        unsafe
+        {
+            fixed (byte* dataPtr = data)
+            {
                 Span<Helpers.SecBuffer> buffers = stackalloc Helpers.SecBuffer[2];
-                buffers[0].BufferType = (uint)SecBufferType.SECBUFFER_STREAM;
-                buffers[0].cbBuffer = (uint)data.Length;
+                buffers[0].BufferType = (UInt32)SecBufferType.SECBUFFER_STREAM;
+                buffers[0].cbBuffer = (UInt32)data.Length;
                 buffers[0].pvBuffer = (IntPtr)dataPtr;
 
-                buffers[1].BufferType = (uint)SecBufferType.SECBUFFER_DATA;
+                buffers[1].BufferType = (UInt32)SecBufferType.SECBUFFER_DATA;
                 buffers[1].cbBuffer = 0;
                 buffers[1].pvBuffer = IntPtr.Zero;
 
                 SSPI.DecryptMessage(_context, buffers, NextSeqNo());
 
-                var unwrapped = new byte[buffers[1].cbBuffer];
+                byte[] unwrapped = new byte[buffers[1].cbBuffer];
                 Marshal.Copy(buffers[1].pvBuffer, unwrapped, 0, unwrapped.Length);
 
                 return unwrapped;
@@ -294,45 +331,51 @@ internal class SspiContext : SecurityContext {
         }
     }
 
-    public override uint MaxWrapSize(uint outputSize, bool confReq) {
-        throw new NotImplementedException(); // Not used in SSPI.
+    public override UInt32 MaxWrapSize(UInt32 outputSize, bool confReq) {
+        return default; // Not used in SSPI. Unimplemented
     }
 
-    private byte[]? CreateChannelBindings(ChannelBindings? bindings) {
+    private byte[]? CreateChannelBindings(ChannelBindings? bindings)
+    {
         if (bindings == null)
             return null;
 
-        var structOffset = Marshal.SizeOf<Helpers.SEC_CHANNEL_BINDINGS>();
-        var binaryLength = bindings.InitiatorAddr?.Length ?? 0 + bindings.AcceptorAddr?.Length ?? 0 +
+        int structOffset = Marshal.SizeOf<Helpers.SEC_CHANNEL_BINDINGS>();
+        int binaryLength = bindings.InitiatorAddr?.Length ?? 0 + bindings.AcceptorAddr?.Length ?? 0 +
             bindings.ApplicationData?.Length ?? 0;
-        var bindingData = new byte[structOffset + binaryLength];
-        unsafe {
-            fixed (byte* bindingPtr = bindingData) {
-                var bindingStruct = (Helpers.SEC_CHANNEL_BINDINGS*)bindingPtr;
+        byte[] bindingData = new byte[structOffset + binaryLength];
+        unsafe
+        {
+            fixed (byte* bindingPtr = bindingData)
+            {
+                Helpers.SEC_CHANNEL_BINDINGS* bindingStruct = (Helpers.SEC_CHANNEL_BINDINGS*)bindingPtr;
 
-                bindingStruct->dwInitiatorAddrType = (uint)bindings.InitiatorAddrType;
-                if (bindings.InitiatorAddr != null) {
-                    bindingStruct->cbInitiatorLength = (uint)bindings.InitiatorAddr.Length;
-                    bindingStruct->dwInitiatorOffset = (uint)structOffset;
+                bindingStruct->dwInitiatorAddrType = (UInt32)bindings.InitiatorAddrType;
+                if (bindings.InitiatorAddr != null)
+                {
+                    bindingStruct->cbInitiatorLength = (UInt32)bindings.InitiatorAddr.Length;
+                    bindingStruct->dwInitiatorOffset = (UInt32)structOffset;
                     Buffer.BlockCopy(bindings.InitiatorAddr, 0, bindingData, structOffset,
                         bindings.InitiatorAddr.Length);
 
                     structOffset += bindings.InitiatorAddr.Length;
                 }
 
-                bindingStruct->dwAcceptorAddrType = (uint)bindings.AcceptorAddrType;
-                if (bindings.AcceptorAddr != null) {
-                    bindingStruct->cbAcceptorLength = (uint)bindings.AcceptorAddr.Length;
-                    bindingStruct->dwAcceptorOffset = (uint)structOffset;
+                bindingStruct->dwAcceptorAddrType = (UInt32)bindings.AcceptorAddrType;
+                if (bindings.AcceptorAddr != null)
+                {
+                    bindingStruct->cbAcceptorLength = (UInt32)bindings.AcceptorAddr.Length;
+                    bindingStruct->dwAcceptorOffset = (UInt32)structOffset;
                     Buffer.BlockCopy(bindings.AcceptorAddr, 0, bindingData, structOffset,
                         bindings.AcceptorAddr.Length);
 
                     structOffset += bindings.AcceptorAddr.Length;
                 }
 
-                if (bindings.ApplicationData != null) {
-                    bindingStruct->cbApplicationDataLength = (uint)bindings.ApplicationData.Length;
-                    bindingStruct->dwApplicationDataOffset = (uint)structOffset;
+                if (bindings.ApplicationData != null)
+                {
+                    bindingStruct->cbApplicationDataLength = (UInt32)bindings.ApplicationData.Length;
+                    bindingStruct->dwApplicationDataOffset = (UInt32)structOffset;
                     Buffer.BlockCopy(bindings.ApplicationData, 0, bindingData, structOffset,
                         bindings.ApplicationData.Length);
                 }
@@ -342,16 +385,17 @@ internal class SspiContext : SecurityContext {
         return bindingData;
     }
 
-    private uint NextSeqNo() {
-        var seqNo = _seqNo;
+    private UInt32 NextSeqNo()
+    {
+        UInt32 seqNo = _seqNo;
         _seqNo++;
 
         return seqNo;
     }
 
-    public override void Dispose() {
+    public override void Dispose()
+    {
         _credential.Dispose();
         _context?.Dispose();
     }
 }
-#nullable disable

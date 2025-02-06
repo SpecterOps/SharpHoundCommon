@@ -7,8 +7,12 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
 using System.Threading.Tasks;
+using SharpHoundCommonLib.OutputTypes.APIResult;
 
 namespace SharpHoundCommonLib.Processors {
+    /// <summary>
+    /// This processor, given an Enrollment Certificate Authority, checks the HTTP endpoints for specific NTLM settings (http enablement, channel bindings)
+    /// </summary>
     public class CAEnrollmentProcessor {
         private readonly string _caDnsHostname;
         private readonly string _caName;
@@ -30,8 +34,8 @@ namespace SharpHoundCommonLib.Processors {
         }
 
 
-        public async Task<IEnumerable<ApiResult<CAEnrollmentEndpoint>>> ScanAsync() {
-            var endpoints = new List<ApiResult<CAEnrollmentEndpoint>>();
+        public async Task<IEnumerable<APIResult<CAEnrollmentEndpoint>>> ScanAsync() {
+            var endpoints = new List<APIResult<CAEnrollmentEndpoint>>();
 
             try {
                 var webEnrollmentTask = ScanHttpEndpoint(CAEnrollmentEndpointType.WebEnrollmentApplication);
@@ -51,9 +55,9 @@ namespace SharpHoundCommonLib.Processors {
             return endpoints;
         }
 
-        private async Task<IEnumerable<ApiResult<CAEnrollmentEndpoint>>>
+        private async Task<IEnumerable<APIResult<CAEnrollmentEndpoint>>>
             ScanHttpEndpoint(CAEnrollmentEndpointType type) {
-            var endpoints = new List<ApiResult<CAEnrollmentEndpoint>>();
+            var endpoints = new List<APIResult<CAEnrollmentEndpoint>>();
             var (httpUrl, httpsUrl) = BuildEnrollmentUrls(type);
 
 
@@ -72,9 +76,6 @@ namespace SharpHoundCommonLib.Processors {
                 CAEnrollmentEndpointScanResult.Vulnerable_NtlmHttpsNoChannelBinding
             );
             endpoints.Add(esc8Https);
-
-            // TODO: For completeness/awareness, check if the endpoint is accessible via NTLM with valid Channel Bindings?
-
             return endpoints;
         }
 
@@ -94,7 +95,7 @@ namespace SharpHoundCommonLib.Processors {
         }
 
 
-        private async Task<ApiResult<CAEnrollmentEndpoint>> GetNtlmEndpoint(Uri url, bool? useBadChannelBinding,
+        private async Task<APIResult<CAEnrollmentEndpoint>> GetNtlmEndpoint(Uri url, bool? useBadChannelBinding,
             CAEnrollmentEndpointType type, CAEnrollmentEndpointScanResult scanResult) {
             var authService = new HttpNtlmAuthenticationService(
                 new HttpClientFactory()
@@ -104,7 +105,7 @@ namespace SharpHoundCommonLib.Processors {
 
             try {
                 await authService.EnsureRequiresAuth(url, useBadChannelBinding);
-                return ApiResult<CAEnrollmentEndpoint>.CreateSuccess(output);
+                return APIResult<CAEnrollmentEndpoint>.Success(output);
             } catch (HttpRequestException ex) {
                 if (ex.InnerException is WebException) {
                     var webEx = (WebException)ex.InnerException;
@@ -112,11 +113,11 @@ namespace SharpHoundCommonLib.Processors {
 
                     if (webEx.InnerException is SocketException) {
                         output.Status = CAEnrollmentEndpointScanResult.NotVulnerable_PortInaccessible;
-                        return ApiResult<CAEnrollmentEndpoint>.CreateSuccess(output);
+                        return APIResult<CAEnrollmentEndpoint>.Success(output);
                     }
 
                     if (webEx.Status == WebExceptionStatus.NameResolutionFailure) {
-                        return ApiResult<CAEnrollmentEndpoint>.CreateError("Could not resolve hostname");
+                        return APIResult<CAEnrollmentEndpoint>.Failure("Could not resolve hostname");
                     }
 
                     if (webEx.Response is HttpWebResponse httpResponse) {
@@ -131,47 +132,47 @@ namespace SharpHoundCommonLib.Processors {
                                 output.Status = CAEnrollmentEndpointScanResult.NotVulnerable_PathForbidden;
                                 break;
                             default:
-                                return ApiResult<CAEnrollmentEndpoint>
-                                    .CreateError(
+                                return APIResult<CAEnrollmentEndpoint>
+                                    .Failure(
                                         $"Unexpected status code '{statusCode}' for the URL {url}. UseBadChannelBindings: {useBadChannelBinding}");
                         }
 
-                        return ApiResult<CAEnrollmentEndpoint>.CreateSuccess(output);
+                        return APIResult<CAEnrollmentEndpoint>.Success(output);
                     }
                     Console.WriteLine($"WebException occurred: {ex}");
 
-                    return ApiResult<CAEnrollmentEndpoint>
-                        .CreateError(
+                    return APIResult<CAEnrollmentEndpoint>
+                        .Failure(
                             $"Unhandled WebException. Url: {url}. Exception: {webEx}. Inner: {webEx.InnerException}  Data: {webEx.Data}");
                 }
 
-                return ApiResult<CAEnrollmentEndpoint>
-                    .CreateError(
+                return APIResult<CAEnrollmentEndpoint>
+                    .Failure(
                         $"HttpRequestException occured checking NTLM accessibility for URL: {url}. Exception: {ex}");
             } catch (HttpUnauthorizedException ex) {
                 if (useBadChannelBinding == true) {
                     output.Status = CAEnrollmentEndpointScanResult.NotVulnerable_NtlmChannelBindingRequired;
-                    return ApiResult<CAEnrollmentEndpoint>.CreateSuccess(output);
+                    return APIResult<CAEnrollmentEndpoint>.Success(output);
                 }
 
-                return ApiResult<CAEnrollmentEndpoint>
-                    .CreateError(
+                return APIResult<CAEnrollmentEndpoint>
+                    .Failure(
                         $"401 Unauthorized exception checking NTLM accessibility for URL: {url}. Exception: {ex}");
             } catch (HttpForbiddenException) {
                 output.Status = CAEnrollmentEndpointScanResult.NotVulnerable_PathForbidden;
-                return ApiResult<CAEnrollmentEndpoint>
-                    .CreateSuccess(output);
+                return APIResult<CAEnrollmentEndpoint>
+                    .Success(output);
             } catch (HttpServerErrorException) {
                 output.Status = CAEnrollmentEndpointScanResult.NotVulnerable_PathNotFound;
-                return ApiResult<CAEnrollmentEndpoint>
-                    .CreateSuccess(output);
+                return APIResult<CAEnrollmentEndpoint>
+                    .Success(output);
             } catch (MissingChallengeException) {
                 output.Status = CAEnrollmentEndpointScanResult.NotVulnerable_NoNtlmChallenge;
-                return ApiResult<CAEnrollmentEndpoint>
-                    .CreateSuccess(output);
+                return APIResult<CAEnrollmentEndpoint>
+                    .Success(output);
             } catch (Exception ex) {
-                return ApiResult<CAEnrollmentEndpoint>
-                    .CreateError(
+                return APIResult<CAEnrollmentEndpoint>
+                    .Failure(
                         $"Unhandled exception checking NTLM accessibility for URL: {url}. BadChannelBindings: {useBadChannelBinding}.  Exception: {ex}");
             }
         }

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using SharpHoundCommonLib.OutputTypes.APIResult;
 
 namespace SharpHoundCommonLib.OutputTypes {
     /// <summary>
@@ -22,18 +23,18 @@ namespace SharpHoundCommonLib.OutputTypes {
         public string DomainSID { get; set; }
 
 #pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
-        public ApiResult<bool> IsWebClientRunning { get; set; }
+        public APIResult<bool> IsWebClientRunning { get; set; }
         public LdapService? LdapServices { get; set; }
-        public ApiResult<SmbInfo>? SmbInfo { get; set; }
-        public ApiResult<NtlmSessionResult>? NtlmSessions { get; set; }
+        public APIResult<SmbInfo>? SmbInfo { get; set; }
+        public APIResult<NtlmSessionResult>? NtlmSessions { get; set; }
 #pragma warning restore CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
     }
 
     public class LdapService(
         bool hasLdap,
         bool hasLdaps,
-        ApiResult<bool> isSigningRequired,
-        ApiResult<bool> isChannelBindingRequired) {
+        APIResult<bool> isSigningRequired,
+        APIResult<bool> isChannelBindingRequired) {
         // Is the LDAP port accesible?
         public bool HasLdap { get; set; } = hasLdap;
 
@@ -41,10 +42,10 @@ namespace SharpHoundCommonLib.OutputTypes {
         public bool HasLdaps { get; set; } = hasLdaps;
 
         // For LDAP, is signing required?
-        public ApiResult<bool> IsSigningRequired { get; set; } = isSigningRequired;
+        public APIResult<bool> IsSigningRequired { get; set; } = isSigningRequired;
 
         // For LDAPS, is EPA(ChannelBinding) required?
-        public ApiResult<bool> IsChannelBindingDisabled { get; set; } = isChannelBindingRequired;
+        public APIResult<bool> IsChannelBindingDisabled { get; set; } = isChannelBindingRequired;
 
         public override string ToString() {
             return $"""
@@ -65,8 +66,8 @@ namespace SharpHoundCommonLib.OutputTypes {
     }
 
     public class DCRegistryData {
-        public IntRegistryAPIResult CertificateMappingMethods { get; set; }
-        public IntRegistryAPIResult StrongCertificateBindingEnforcement { get; set; }
+        public APIResult<int> CertificateMappingMethods { get; set; }
+        public APIResult<int> StrongCertificateBindingEnforcement { get; set; }
     }
 
     public class ComputerStatus {

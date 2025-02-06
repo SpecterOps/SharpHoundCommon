@@ -8,6 +8,11 @@ using System.Threading.Tasks;
 
 namespace SharpHoundCommonLib.Ntlm;
 
+/// <summary>
+/// This has been implemented as a bespoke service in order to allow us to change channel bindings. This is not possible with the built in NTLM functions
+/// This service uses HTTP to authenticate over NTLM to computers. During the authentication process you can specify channel binding settings which is important
+/// for our workflow.
+/// </summary>
 public class HttpNtlmAuthenticationService {
     private readonly ILogger _logger;
     private readonly IHttpClientFactory _httpClientFactory;

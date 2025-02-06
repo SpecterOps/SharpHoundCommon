@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using SharpHoundCommonLib.OutputTypes;
 using System.Net;
+using SharpHoundCommonLib.OutputTypes.APIResult;
 
 namespace SharpHoundCommonLib.Processors {
     [Flags]
@@ -134,7 +135,7 @@ namespace SharpHoundCommonLib.Processors {
 
         #endregion // Event Log XPath Queries
 
-        public ApiResult<NtlmSessionResult> ReadEvents() {
+        public APIResult<NtlmSessionResult> ReadEvents() {
             var result = new NtlmSessionResult();
             string query;
             var timeFilterMs = TimeSpan.FromDays(numDays).TotalMilliseconds;
@@ -161,11 +162,11 @@ namespace SharpHoundCommonLib.Processors {
                 log.LogDebug(
                     $"Processed {result.Sessions.Count} event logs in {sw.Elapsed}. Event Log Collection Type: {collectionType}");
 
-                return ApiResult<NtlmSessionResult>.CreateSuccess(result);
+                return APIResult<NtlmSessionResult>.Success(result);
             } catch (UnauthorizedAccessException) {
-                return ApiResult<NtlmSessionResult>.CreateError("Access Denied");
+                return APIResult<NtlmSessionResult>.Failure("Access Denied");
             } catch (Exception ex) {
-                return ApiResult<NtlmSessionResult>.CreateError($"Unexpected exception: {ex}");
+                return APIResult<NtlmSessionResult>.Failure($"Unexpected exception: {ex}");
             }
         }
 

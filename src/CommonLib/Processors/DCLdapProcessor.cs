@@ -1,5 +1,4 @@
-﻿#nullable enable
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using SharpHoundCommonLib.Enums;
 using SharpHoundCommonLib.Ntlm;
 using SharpHoundCommonLib.OutputTypes;
@@ -7,6 +6,7 @@ using SharpHoundCommonLib.ThirdParty.PSOpenAD;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
+using SharpHoundCommonLib.OutputTypes.APIResult;
 
 namespace SharpHoundCommonLib.Processors;
 
@@ -15,6 +15,9 @@ public class LdapAuthOptions {
     public ChannelBindings? Bindings { get; set; }
 }
 
+/// <summary>
+/// This processor checks if LDAP is requiring signing, as well as if channel binding is disabled. This is only used for domain controllers
+/// </summary>
 public class DCLdapProcessor {
     private readonly ILogger _log;
     private readonly PortScanner _scanner;
@@ -39,7 +42,7 @@ public class DCLdapProcessor {
     public async Task<LdapService> Scan() {
         var hasLdap = await TestLdapPort();
         var hasLdaps = await TestLdapsPort();
-        ApiResult<bool> isSigningRequired = new(),
+        APIResult<bool> isSigningRequired = new(),
             isChannelBindingDisabled = new();
 
         if (hasLdap) {
@@ -72,16 +75,16 @@ public class DCLdapProcessor {
         return await _scanner.CheckPort(_ldapSslEndpoint.Host, _ldapSslEndpoint.Port, _portScanTimeout);
     }
 
-    public async Task<ApiResult<bool>> CheckIsNtlmSigningRequired() {
+    public async Task<APIResult<bool>> CheckIsNtlmSigningRequired() {
         try {
             var options = new LdapAuthOptions() {
                 Signing = false
             };
             var accessibleWithoutSigning = await Authenticate(_ldapEndpoint, options);
 
-            return ApiResult<bool>.CreateSuccess(accessibleWithoutSigning == false);
+            return APIResult<bool>.Success(accessibleWithoutSigning == false);
         } catch (Exception ex) {
-            return ApiResult<bool>.CreateError($"CheckIsNtlmSigningRequired failed: {ex}");
+            return APIResult<bool>.Failure($"CheckIsNtlmSigningRequired failed: {ex}");
         }
     }
 
@@ -93,7 +96,7 @@ public class DCLdapProcessor {
     // 3) Correct bindings to ensure NTLM auth is enabled
     // However, as of right now we only do #2. We can't do #1 right now since the
     // Window's SSPI APIs (InitSecurityContext) always add channel bindings.
-    public async Task<ApiResult<bool>> CheckIsChannelBindingDisabled() {
+    public async Task<APIResult<bool>> CheckIsChannelBindingDisabled() {
         try {
             // 1) Can we connect with *invalid* bindings
 
@@ -105,12 +108,18 @@ public class DCLdapProcessor {
                 Bindings = bindings
             });
 
-            return ApiResult<bool>.CreateSuccess(accessibleWithNoBindings);
+            return APIResult<bool>.Success(accessibleWithNoBindings);
         } catch (Exception ex) {
-            return ApiResult<bool>.CreateError($"CheckIsNtlmSigningRequired failed: {ex}");
+            return APIResult<bool>.Failure($"CheckIsNtlmSigningRequired failed: {ex}");
         }
     }
 
+    /// <summary>
+    /// Uses the LDAP transport to perform NTLM authentication and retrieve settings
+    /// </summary>
+    /// <param name="endpoint"></param>
+    /// <param name="options"></param>
+    /// <returns></returns>
     private async Task<bool> Authenticate(Uri endpoint, LdapAuthOptions options) {
         var host = endpoint.Host;
         var auth = new NtlmAuthenticationHandler($"LDAP/{host.ToUpper()}") {
@@ -161,5 +170,3 @@ public class DCLdapProcessor {
         return false;
     }
 }
-
-#nullable disable

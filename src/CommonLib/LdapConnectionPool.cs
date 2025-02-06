@@ -868,7 +868,6 @@ namespace SharpHoundCommonLib {
                 //Attempt an initial bind. If this fails, likely auth is invalid, or its not a valid target
                 connection.Bind();
             } catch (LdapException e) {
-                //TODO: Maybe look at this and find a better way?
                 if (e.ErrorCode is (int)LdapErrorCodes.InvalidCredentials
                     or (int)ResultCode.InappropriateAuthentication) {
                     connection.Dispose();

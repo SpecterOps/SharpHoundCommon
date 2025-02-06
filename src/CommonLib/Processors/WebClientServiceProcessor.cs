@@ -8,8 +8,13 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using SharpHoundCommonLib.OutputTypes.APIResult;
 
 namespace SharpHoundCommonLib.Processors {
+    /// <summary>
+    /// This processor checks for the presence of web clients on computers by checking for the existence of a particular named pipe.
+    /// </summary>
+    /// <param name="log"></param>
     public class WebClientServiceProcessor(ILogger log = null) {
         private readonly ILogger _log = log ?? Logging.LogProvider.CreateLogger("WebClientServiceProcessor");
 
@@ -70,7 +75,7 @@ namespace SharpHoundCommonLib.Processors {
             return true;
         }
 
-        public async Task<ApiResult<bool>> IsWebClientRunning(string computerName) {
+        public async Task<APIResult<bool>> IsWebClientRunning(string computerName) {
             // When the service is running, this named pipe is present
             var pipePath = @$"\\{computerName}\pipe\DAV RPC SERVICE";
 
@@ -78,9 +83,9 @@ namespace SharpHoundCommonLib.Processors {
                 try {
                     var exists = TestPathExists(pipePath);
 
-                    return ApiResult<bool>.CreateSuccess(exists);
+                    return APIResult<bool>.Success(exists);
                 } catch (Exception ex) {
-                    return ApiResult<bool>.CreateError(ex.ToString());
+                    return APIResult<bool>.Failure(ex.ToString());
                 }
             });
         }

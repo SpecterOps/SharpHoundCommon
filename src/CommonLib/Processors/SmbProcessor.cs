@@ -1,18 +1,26 @@
-﻿#nullable enable
-
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using SharpHoundCommonLib.OutputTypes;
 using System;
 using System.Collections.Specialized;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using SharpHoundCommonLib.OutputTypes.APIResult;
 
 namespace SharpHoundCommonLib.Processors {
-    public class SmbProcessor(int timeoutMs, ILogger? log = null) {
+    /// <summary>
+    /// This processor implements the SMB negotation process in order to retrieve several pieces of information from a host, notable whether NTLM signing is enabled
+    /// This processor will also provide some extra data  from the computer which we might be able to use elsewhere. There are a lot of byte streams in this class which
+    /// are well defined and should not be altered, as they are part of the SMB spec
+    ///
+    /// A significant portion of the SMB packet documentation was retrieved from https://github.com/FeigongSec/NTLMINFO/blob/main/SmbInfo/SmbInfo/Program.cs
+    /// </summary>
+    /// <param name="timeoutMs"></param>
+    /// <param name="log"></param>
+    public class SmbProcessor(int timeoutMs, ILogger log = null) {
         private readonly ILogger _log = log ?? Logging.LogProvider.CreateLogger("SmbProcessor");
 
-        public async Task<ApiResult<SmbInfo>> Scan(string host) {
+        public async Task<APIResult<SmbInfo>> Scan(string host) {
             var scanner = new SmbScanner();
             var result = await scanner.Scan(host, 445, timeoutMs);
 
@@ -24,9 +32,9 @@ namespace SharpHoundCommonLib.Processors {
                     DnsComputerName = result.Info.DnsComputerName,
                 };
 
-                return ApiResult<SmbInfo>.CreateSuccess(info);
+                return APIResult<SmbInfo>.Success(info);
             } else {
-                return ApiResult<SmbInfo>.CreateError(result.ErrorMessage ?? "Unknown error");
+                return APIResult<SmbInfo>.Failure(result.ErrorMessage ?? "Unknown error");
             }
         }
     }
@@ -45,8 +53,8 @@ namespace SharpHoundCommonLib.Processors {
 
         public string Host { get; set; }
         public bool Success { get; set; }
-        public string? ErrorMessage { get; set; }
-        public NTLMInfo? Info { get; set; }
+        public string ErrorMessage { get; set; }
+        public NTLMInfo Info { get; set; }
         public SmbVersion SmbVersion { get; set; }
     }
 
@@ -63,32 +71,32 @@ namespace SharpHoundCommonLib.Processors {
             }
         }
 
-        public OrderedDictionary? Packet_SMB_Header { get; set; }
-        public OrderedDictionary? Packet_SMB2_Header { get; set; }
-        public OrderedDictionary? Packet_SMB_Data { get; set; }
-        public OrderedDictionary? Packet_SMB2_Data { get; set; }
-        public OrderedDictionary? Packet_NTLMSSP_Negotiate { get; set; }
-        public OrderedDictionary? Packet_NTLMSSP_Auth { get; set; }
-        public OrderedDictionary? Packet_RPC_Data { get; set; }
-        public OrderedDictionary? Packet_SCM_Data { get; set; }
+        public OrderedDictionary Packet_SMB_Header { get; set; }
+        public OrderedDictionary Packet_SMB2_Header { get; set; }
+        public OrderedDictionary Packet_SMB_Data { get; set; }
+        public OrderedDictionary Packet_SMB2_Data { get; set; }
+        public OrderedDictionary Packet_NTLMSSP_Negotiate { get; set; }
+        public OrderedDictionary Packet_NTLMSSP_Auth { get; set; }
+        public OrderedDictionary Packet_RPC_Data { get; set; }
+        public OrderedDictionary Packet_SCM_Data { get; set; }
         public bool SMB_Signing { get; set; }
-        public byte[]? SMB_Session_ID { get; set; }
+        public byte[] SMB_Session_ID { get; set; }
         public byte[] SMB_Session_Key_Length { get; set; }
         public byte[] SMB_Negotiate_Flags { get; set; }
-        public byte[]? Session_Key { get; set; }
+        public byte[] Session_Key { get; set; }
     }
 
     public class NTLMInfo {
-        public string? NativeOs { get; set; }
-        public string? NativeLanManager { get; set; }
-        public string? NbtDomainName { get; set; }
-        public string? NbtComputer { get; set; }
-        public string? DomainName { get; set; }
+        public string NativeOs { get; set; }
+        public string NativeLanManager { get; set; }
+        public string NbtDomainName { get; set; }
+        public string NbtComputer { get; set; }
+        public string DomainName { get; set; }
         public short OsBuildNumber { get; set; }
-        public string? OsVersion { get; set; }
-        public string? DnsComputerName { get; set; }
-        public string? DnsDomainName { get; set; }
-        public string? DnsTreeName { get; set; }
+        public string OsVersion { get; set; }
+        public string DnsComputerName { get; set; }
+        public string DnsDomainName { get; set; }
+        public string DnsTreeName { get; set; }
         public DateTime TimeStamp { get; set; }
         public bool SmbSigning { get; set; }
 
@@ -149,7 +157,7 @@ namespace SharpHoundCommonLib.Processors {
                 SmbVersion = SmbVersion.Unknown
             };
 
-            TcpClient? smbClient = null;
+            TcpClient smbClient = null;
 
             try {
                 smbClient = await ConnectAsync(host, port, timeoutMs);
@@ -173,14 +181,14 @@ namespace SharpHoundCommonLib.Processors {
                     smbClientReceive =
                         await SendStreamAsync(smbClientStream, GetNegotiateSMBv1Data(), operationCts.Token);
 
-                    var singingEnabled = BitConverter.ToString(smbClientReceive).Replace("-", "").Substring(78, 2) ==
+                    var signingEnabled = BitConverter.ToString(smbClientReceive).Replace("-", "").Substring(78, 2) ==
                                          "0F";
 
                     smbClientReceive = await SendStreamAsync(smbClientStream, GetNTLMSSPNegotiatev1Data(),
                         operationCts.Token);
 
                     int len = BitConverter.ToInt16(smbClientReceive, 43);
-                    string[]? ss = null;
+                    string[] ss;
 
                     if (Encoding.Unicode.GetString(smbClientReceive, len + 47, smbClientReceive.Length - len - 47)
                         .Split('\0')[0].ToLower().Contains("windows")) {
@@ -195,7 +203,7 @@ namespace SharpHoundCommonLib.Processors {
                         result.Info = NTLMInfo.FromBytes(smbClientReceive);
                         result.Info.NativeOs = ss[0];
                         result.Info.NativeLanManager = ss[1];
-                        result.Info.SmbSigning = singingEnabled;
+                        result.Info.SmbSigning = signingEnabled;
                     }
 
                     result.SmbVersion = SmbVersion.SMBv1;
@@ -218,7 +226,7 @@ namespace SharpHoundCommonLib.Processors {
                         return result;
                     }
 
-                    var signingEnabled = BitConverter.ToString(new byte[] { smbClientReceive[70] }) == "03";
+                    var signingEnabled = BitConverter.ToString([smbClientReceive[70]]) == "03";
                     var smbPackets = new SMBPacket(signingEnabled);
 
 
@@ -275,19 +283,19 @@ namespace SharpHoundCommonLib.Processors {
             return bytesReceived;
         }
 
+        //TODO: Change these to returns
         private static byte[] GetNtbiosTCPData() {
-            byte[] NetbiosTCPData = {
+            return [
                 0x81, 0x00, 0x00, 0x44, 0x20, 0x43, 0x4b, 0x46, 0x44, 0x45, 0x4e, 0x45, 0x43, 0x46, 0x44, 0x45, 0x46,
                 0x46, 0x43, 0x46, 0x47, 0x45, 0x46, 0x46, 0x43, 0x43, 0x41, 0x43, 0x41, 0x43, 0x41, 0x43, 0x41, 0x43,
                 0x41, 0x43, 0x41, 0x00, 0x20, 0x43, 0x41, 0x43, 0x41, 0x43, 0x41, 0x43, 0x41, 0x43, 0x41, 0x43, 0x41,
                 0x43, 0x41, 0x43, 0x41, 0x43, 0x41, 0x43, 0x41, 0x43, 0x41, 0x43, 0x41, 0x43, 0x41, 0x43, 0x41, 0x43,
                 0x41, 0x41, 0x41, 0x00
-            };
-            return NetbiosTCPData;
+            ];
         }
 
         private static byte[] GetNegotiateSMBv1Data() {
-            byte[] NegotiateSMBv1Data = {
+            return [
                 0x00, 0x00, 0x00, 0x85, 0xFF, 0x53, 0x4D, 0x42, 0x72, 0x00, 0x00, 0x00, 0x00, 0x18, 0x53, 0xC8,
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFE,
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x62, 0x00, 0x02, 0x50, 0x43, 0x20, 0x4E, 0x45, 0x54, 0x57, 0x4F,
@@ -297,12 +305,11 @@ namespace SharpHoundCommonLib.Processors {
                 0x73, 0x20, 0x33, 0x2E, 0x31, 0x61, 0x00, 0x02, 0x4C, 0x4D, 0x31, 0x2E, 0x32, 0x58, 0x30, 0x30,
                 0x32, 0x00, 0x02, 0x4C, 0x41, 0x4E, 0x4D, 0x41, 0x4E, 0x32, 0x2E, 0x31, 0x00, 0x02, 0x4E, 0x54,
                 0x20, 0x4C, 0x4D, 0x20, 0x30, 0x2E, 0x31, 0x32, 0x00
-            };
-            return NegotiateSMBv1Data;
+            ];
         }
 
         private static byte[] GetNTLMSSPNegotiatev1Data() {
-            byte[] NTLMSSPNegotiatev1Data = {
+            return [
                 0x00, 0x00, 0x01, 0x0A, 0xFF, 0x53, 0x4D, 0x42, 0x73, 0x00, 0x00, 0x00, 0x00, 0x18, 0x07, 0xC8,
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFE,
                 0x00, 0x00, 0x40, 0x00, 0x0C, 0xFF, 0x00, 0x0A, 0x01, 0x04, 0x41, 0x32, 0x00, 0x00, 0x00, 0x00,
@@ -321,12 +328,11 @@ namespace SharpHoundCommonLib.Processors {
                 0x73, 0x00, 0x20, 0x00, 0x53, 0x00, 0x65, 0x00, 0x72, 0x00, 0x76, 0x00, 0x65, 0x00,
                 0x72, 0x00, 0x20, 0x00, 0x32, 0x00, 0x30, 0x00, 0x30, 0x00, 0x33, 0x00, 0x20, 0x00,
                 0x35, 0x00, 0x2E, 0x00, 0x32, 0x00, 0x00, 0x00, 0x00, 0x00
-            };
-            return NTLMSSPNegotiatev1Data;
+            ];
         }
 
         private static byte[] GetNegotiateSMBv2Data1() {
-            byte[] NegotiateSMBData = {
+            return [
                 0x00, 0x00, 0x00, 0x45, 0xFF, 0x53, 0x4D, 0x42, 0x72, 0x00,
                 0x00, 0x00, 0x00, 0x18, 0x01, 0x48, 0x00, 0x00, 0x00, 0x00,
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF,
@@ -335,12 +341,11 @@ namespace SharpHoundCommonLib.Processors {
                 0x00, 0x02, 0x53, 0x4D, 0x42, 0x20, 0x32, 0x2E, 0x30, 0x30,
                 0x32, 0x00, 0x02, 0x53, 0x4D, 0x42, 0x20, 0x32, 0x2E, 0x3F,
                 0x3F, 0x3F, 0x00
-            };
-            return NegotiateSMBData;
+            ];
         }
 
         private static byte[] GetNegotiateSMBv2Data2() {
-            byte[] NegotiateSMB2Data = {
+            return [
                 0x00, 0x00, 0x00, 0x68, 0xFE, 0x53, 0x4D, 0x42, 0x40, 0x00,
                 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00,
@@ -352,12 +357,11 @@ namespace SharpHoundCommonLib.Processors {
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                 0x00, 0x00, 0x00, 0x00, 0x02, 0x02, 0x10, 0x02
-            };
-            return NegotiateSMB2Data;
+            ];
         }
 
         private static byte[] GetNTLMSSPNegotiatev2Data(SMBPacket SMBPackets) {
-            byte[] NTLMSSPNegotiateData = {
+            return [
                 0x00, 0x00, 0x00, 0x9A, 0xFE, 0x53, 0x4D, 0x42, 0x40, 0x00,
                 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00,
@@ -376,10 +380,7 @@ namespace SharpHoundCommonLib.Processors {
                 SMBPackets.SMB_Negotiate_Flags[2], SMBPackets.SMB_Negotiate_Flags[3],
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-            };
-            return NTLMSSPNegotiateData;
+            ];
         }
     }
 }
-
-#nullable disable

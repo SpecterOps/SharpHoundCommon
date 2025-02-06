@@ -26,9 +26,9 @@ namespace SharpHoundCommonLib
 
     public class MockRegistryKey : IRegistryKey
     {
-        public virtual object GetValue(string subkey, string name)
-        {
-            throw new System.NotImplementedException();
+        public virtual object GetValue(string subkey, string name) {
+            //Unimplemented
+            return default;
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿#nullable enable
-
+﻿
 using Microsoft.Extensions.Logging;
 using SharpHoundCommonLib.Enums;
 using System;
@@ -46,13 +45,6 @@ public class LdapTransport(ILogger logger, Uri ldapEndpoint) : INtlmTransport, I
                         LdapOption.ServerCertificate,
                         Marshal.GetFunctionPointerForDelegate<VerifyServerCert>((connection, serverCert) => true)
                     );
-
-                    // Not necessary to call. Internally, it automagically sets it via the LDAPS port specified
-                    //_ldap.SetOption(LdapOption.Ssl, LdapOptionValue.On);
-
-                    // Not setting Signing/Encryption since the API returns LDAP_UNWILLING_TO_PERFORM when SSL is enabled
-                    //_ldap.SetOption(LdapOption.Sign, LdapOptionValue.On);
-                    //_ldap.SetOption(LdapOption.Encrypt, LdapOptionValue.On);
                 }
 
                 _ldap.Connect(timeout);
@@ -94,5 +86,3 @@ public class LdapTransport(ILogger logger, Uri ldapEndpoint) : INtlmTransport, I
         }
     }
 }
-
-#nullable disable

@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace SharpHoundCommonLib.Ntlm;
 
+/// <summary>
+/// This class handles the Authenticate and Negotiate parts of an NTLM challenge/response flow specifically for HTTP transport
+/// </summary>
 public class HttpTransport : INtlmTransport
 {
     private readonly ILogger _logger;
@@ -49,7 +52,7 @@ public class HttpTransport : INtlmTransport
         return Convert.FromBase64String(challengeMessageB64);
     }
 
-    public async Task<Object> AuthenticateAsync(byte[] authenticateMessage)
+    public async Task<object> AuthenticateAsync(byte[] authenticateMessage)
     {
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, _url);
         var messageBase64 = Convert.ToBase64String(authenticateMessage);

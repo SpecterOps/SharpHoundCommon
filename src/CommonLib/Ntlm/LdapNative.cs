@@ -22,6 +22,10 @@ public class SafeLdapHandle : SafeHandleZeroOrMinusOneIsInvalid {
     }
 }
 
+/// <summary>
+/// Reimplementation of the LdapConnection using native win32 API calls. The big missing part from the framework implementation is the ability to specify channel bindings.
+/// Unfortunately, this is necessary for us to retrieve certain information for NTLM
+/// </summary>
 public class LdapConnection : IDisposable {
     private SafeLdapHandle? _handle;
     private bool _disposed;
@@ -225,6 +229,7 @@ public class LdapConnection : IDisposable {
                 Marshal.FreeHGlobal(credPtr);
             }
 
+            //TODO: Look into this more before merging.
             // Freeing the memory always results in crashes. Is it managed by something else?
             //if (response != IntPtr.Zero)
             //{
@@ -280,7 +285,7 @@ public class NativeMethods {
 
     [DllImport("Wldap32.dll", CallingConvention = CallingConvention.Cdecl)]
     public static extern void ldap_memfree(IntPtr ptr);
-
+    
     [DllImport("Wldap32.dll", EntryPoint = "ldap_sasl_bind_s", CallingConvention = CallingConvention.Cdecl)]
     public static extern int ldap_sasl_bind_s(
         SafeLdapHandle ld,

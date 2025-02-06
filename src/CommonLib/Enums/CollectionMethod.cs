@@ -26,7 +26,8 @@ namespace SharpHoundCommonLib.Enums {
         LdapServices = 1 << 19,
         WebClientService = 1 << 21,
         SmbInfo = 1 << 22,
-        EventLogs = 1 << 23,
+        //TODO: Re-introduce this when we're ready for Event Log collection
+        //EventLogs = 1 << 23,
         LocalGroups = DCOM | RDP | LocalAdmin | PSRemote,
         ComputerOnly = LocalGroups | Session | UserRights | CARegistry | DCRegistry | WebClientService | SmbInfo,
         DCOnly = ACL | Container | Group | ObjectProps | Trusts | GPOLocalGroup | CertServices | LdapServices | SmbInfo,
