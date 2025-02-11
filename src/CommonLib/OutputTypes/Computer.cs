@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using SharpHoundCommonLib.OutputTypes.APIResult;
 
 namespace SharpHoundCommonLib.OutputTypes {
     /// <summary>

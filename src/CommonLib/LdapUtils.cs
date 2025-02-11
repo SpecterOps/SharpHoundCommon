@@ -982,6 +982,7 @@ namespace SharpHoundCommonLib {
 
             foreach (var f in grouped) {
                 if (!forestSidToName.TryGetValue(f.Key, out var forestName)) {
+                    _log.LogWarning("Could not get a mapped value for well known principal {Key}", f.Key);
                     continue;
                 }
 

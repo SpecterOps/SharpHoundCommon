@@ -7,7 +7,6 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using SharpHoundCommonLib.OutputTypes;
 using System.Net;
-using SharpHoundCommonLib.OutputTypes.APIResult;
 
 namespace SharpHoundCommonLib.Processors {
     [Flags]

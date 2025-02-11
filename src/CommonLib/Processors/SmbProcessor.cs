@@ -5,7 +5,6 @@ using System.Collections.Specialized;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
-using SharpHoundCommonLib.OutputTypes.APIResult;
 
 namespace SharpHoundCommonLib.Processors {
     /// <summary>

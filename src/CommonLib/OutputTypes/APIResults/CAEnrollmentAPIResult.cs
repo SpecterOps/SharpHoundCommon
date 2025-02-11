@@ -1,6 +1,6 @@
 namespace SharpHoundCommonLib.OutputTypes;
 
-public class CAEnrollmentAPIResult : APIResult.APIResult{
+public class CAEnrollmentAPIResult : APIResult{
     public CAEnrollmentEndpoint Result { get; set; }
     
     public static CAEnrollmentAPIResult Fail(string error) {

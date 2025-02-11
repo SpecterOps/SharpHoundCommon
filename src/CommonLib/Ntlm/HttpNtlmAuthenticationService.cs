@@ -35,10 +35,10 @@ public class HttpNtlmAuthenticationService {
 
         foreach (var authScheme in supportedAuthSchemes) {
             if (useBadChannelBindings == null) {
-                await AuthWithBadChannelBindings(url, authScheme);
+                await AuthWithBadChannelBindingsAsync(url, authScheme);
             } else {
                 if ((bool)useBadChannelBindings) {
-                    await AuthWithBadChannelBindings(url, authScheme);
+                    await AuthWithBadChannelBindingsAsync(url, authScheme);
                 } else {
                     await AuthWithChannelBindingAsync(url, authScheme);
                 }
@@ -88,7 +88,7 @@ public class HttpNtlmAuthenticationService {
         return schemes;
     }
 
-    private async Task AuthWithBadChannelBindings(Uri url, string authScheme) {
+    private async Task AuthWithBadChannelBindingsAsync(Uri url, string authScheme) {
         var httpClient = _httpClientFactory.CreateUnauthenticatedClient();
         var transport = new HttpTransport(httpClient, url, authScheme, _logger);
         var ntlmAuthHandler = new NtlmAuthenticationHandler($"HTTP/{url.Host}");

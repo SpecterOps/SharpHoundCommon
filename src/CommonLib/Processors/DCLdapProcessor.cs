@@ -6,7 +6,6 @@ using SharpHoundCommonLib.ThirdParty.PSOpenAD;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
-using SharpHoundCommonLib.OutputTypes.APIResult;
 
 namespace SharpHoundCommonLib.Processors;
 

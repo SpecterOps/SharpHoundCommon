@@ -3,7 +3,7 @@ using System.Text;
 
 namespace SharpHoundCommonLib.OutputTypes
 {
-    public class LocalGroupAPIResult : APIResult.APIResult
+    public class LocalGroupAPIResult : APIResult
     {
         public string ObjectIdentifier { get; set; }
         public string Name { get; set; }

@@ -1,6 +1,4 @@
-﻿using SharpHoundCommonLib.OutputTypes.APIResult;
-
-namespace SharpHoundCommonLib.OutputTypes
+﻿namespace SharpHoundCommonLib.OutputTypes
 {
     public class EnterpriseCA : OutputBase
     {

@@ -1,5 +1,4 @@
-﻿using SharpHoundCommonLib.OutputTypes.APIResult;
-using SharpHoundCommonLib.Processors;
+﻿using SharpHoundCommonLib.Processors;
 
 namespace SharpHoundCommonLib.OutputTypes
 {
