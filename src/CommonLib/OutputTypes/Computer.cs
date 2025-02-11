@@ -15,7 +15,7 @@ namespace SharpHoundCommonLib.OutputTypes {
         public SessionAPIResult PrivilegedSessions { get; set; } = new();
         public SessionAPIResult RegistrySessions { get; set; } = new();
         public LocalGroupAPIResult[] LocalGroups { get; set; } = Array.Empty<LocalGroupAPIResult>();
-        public UserRightsAssignmentAPIResult[] UserRights { get; set; } = [];
+        public UserRightsAssignmentAPIResult[] UserRights { get; set; } = Array.Empty<UserRightsAssignmentAPIResult>();
         public DCRegistryData DCRegistryData { get; set; } = new();
         public ComputerStatus Status { get; set; }
         public bool IsDC { get; set; }
