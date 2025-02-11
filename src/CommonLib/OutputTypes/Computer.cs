@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace SharpHoundCommonLib.OutputTypes {
     /// <summary>
@@ -13,7 +14,7 @@ namespace SharpHoundCommonLib.OutputTypes {
         public SessionAPIResult Sessions { get; set; } = new();
         public SessionAPIResult PrivilegedSessions { get; set; } = new();
         public SessionAPIResult RegistrySessions { get; set; } = new();
-        public LocalGroupAPIResult[] LocalGroups { get; set; } = [];
+        public LocalGroupAPIResult[] LocalGroups { get; set; } = Array.Empty<LocalGroupAPIResult>();
         public UserRightsAssignmentAPIResult[] UserRights { get; set; } = [];
         public DCRegistryData DCRegistryData { get; set; } = new();
         public ComputerStatus Status { get; set; }
