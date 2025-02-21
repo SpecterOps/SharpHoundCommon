@@ -1232,6 +1232,12 @@ references:
   commentId: F:SharpHoundCommonLib.Enums.CollectionMethod.Group
   fullName: SharpHoundCommonLib.Enums.CollectionMethod.Group
   nameWithType: CollectionMethod.Group
+- uid: SharpHoundCommonLib.Enums.CollectionMethod.LdapServices
+  name: LdapServices
+  href: api/SharpHoundCommonLib.Enums.CollectionMethod.html#SharpHoundCommonLib_Enums_CollectionMethod_LdapServices
+  commentId: F:SharpHoundCommonLib.Enums.CollectionMethod.LdapServices
+  fullName: SharpHoundCommonLib.Enums.CollectionMethod.LdapServices
+  nameWithType: CollectionMethod.LdapServices
 - uid: SharpHoundCommonLib.Enums.CollectionMethod.LocalAdmin
   name: LocalAdmin
   href: api/SharpHoundCommonLib.Enums.CollectionMethod.html#SharpHoundCommonLib_Enums_CollectionMethod_LocalAdmin
@@ -1292,6 +1298,12 @@ references:
   commentId: F:SharpHoundCommonLib.Enums.CollectionMethod.SessionLoop
   fullName: SharpHoundCommonLib.Enums.CollectionMethod.SessionLoop
   nameWithType: CollectionMethod.SessionLoop
+- uid: SharpHoundCommonLib.Enums.CollectionMethod.SmbInfo
+  name: SmbInfo
+  href: api/SharpHoundCommonLib.Enums.CollectionMethod.html#SharpHoundCommonLib_Enums_CollectionMethod_SmbInfo
+  commentId: F:SharpHoundCommonLib.Enums.CollectionMethod.SmbInfo
+  fullName: SharpHoundCommonLib.Enums.CollectionMethod.SmbInfo
+  nameWithType: CollectionMethod.SmbInfo
 - uid: SharpHoundCommonLib.Enums.CollectionMethod.SPNTargets
   name: SPNTargets
   href: api/SharpHoundCommonLib.Enums.CollectionMethod.html#SharpHoundCommonLib_Enums_CollectionMethod_SPNTargets
@@ -1310,6 +1322,12 @@ references:
   commentId: F:SharpHoundCommonLib.Enums.CollectionMethod.UserRights
   fullName: SharpHoundCommonLib.Enums.CollectionMethod.UserRights
   nameWithType: CollectionMethod.UserRights
+- uid: SharpHoundCommonLib.Enums.CollectionMethod.WebClientService
+  name: WebClientService
+  href: api/SharpHoundCommonLib.Enums.CollectionMethod.html#SharpHoundCommonLib_Enums_CollectionMethod_WebClientService
+  commentId: F:SharpHoundCommonLib.Enums.CollectionMethod.WebClientService
+  fullName: SharpHoundCommonLib.Enums.CollectionMethod.WebClientService
+  nameWithType: CollectionMethod.WebClientService
 - uid: SharpHoundCommonLib.Enums.CommonOids
   name: CommonOids
   href: api/SharpHoundCommonLib.Enums.CommonOids.html
@@ -1646,6 +1664,24 @@ references:
   commentId: F:SharpHoundCommonLib.Enums.EdgeNames.WriteSPN
   fullName: SharpHoundCommonLib.Enums.EdgeNames.WriteSPN
   nameWithType: EdgeNames.WriteSPN
+- uid: SharpHoundCommonLib.Enums.EventIds
+  name: EventIds
+  href: api/SharpHoundCommonLib.Enums.EventIds.html
+  commentId: T:SharpHoundCommonLib.Enums.EventIds
+  fullName: SharpHoundCommonLib.Enums.EventIds
+  nameWithType: EventIds
+- uid: SharpHoundCommonLib.Enums.EventIds.LogonEvent
+  name: LogonEvent
+  href: api/SharpHoundCommonLib.Enums.EventIds.html#SharpHoundCommonLib_Enums_EventIds_LogonEvent
+  commentId: F:SharpHoundCommonLib.Enums.EventIds.LogonEvent
+  fullName: SharpHoundCommonLib.Enums.EventIds.LogonEvent
+  nameWithType: EventIds.LogonEvent
+- uid: SharpHoundCommonLib.Enums.EventIds.ValidateCredentialsEvent
+  name: ValidateCredentialsEvent
+  href: api/SharpHoundCommonLib.Enums.EventIds.html#SharpHoundCommonLib_Enums_EventIds_ValidateCredentialsEvent
+  commentId: F:SharpHoundCommonLib.Enums.EventIds.ValidateCredentialsEvent
+  fullName: SharpHoundCommonLib.Enums.EventIds.ValidateCredentialsEvent
+  nameWithType: EventIds.ValidateCredentialsEvent
 - uid: SharpHoundCommonLib.Enums.KerberosEncryptionTypes
   name: KerberosEncryptionTypes
   href: api/SharpHoundCommonLib.Enums.KerberosEncryptionTypes.html
@@ -1820,12 +1856,24 @@ references:
   commentId: F:SharpHoundCommonLib.Enums.LdapErrorCodes.LocalError
   fullName: SharpHoundCommonLib.Enums.LdapErrorCodes.LocalError
   nameWithType: LdapErrorCodes.LocalError
+- uid: SharpHoundCommonLib.Enums.LdapErrorCodes.SaslBindInProgress
+  name: SaslBindInProgress
+  href: api/SharpHoundCommonLib.Enums.LdapErrorCodes.html#SharpHoundCommonLib_Enums_LdapErrorCodes_SaslBindInProgress
+  commentId: F:SharpHoundCommonLib.Enums.LdapErrorCodes.SaslBindInProgress
+  fullName: SharpHoundCommonLib.Enums.LdapErrorCodes.SaslBindInProgress
+  nameWithType: LdapErrorCodes.SaslBindInProgress
 - uid: SharpHoundCommonLib.Enums.LdapErrorCodes.ServerDown
   name: ServerDown
   href: api/SharpHoundCommonLib.Enums.LdapErrorCodes.html#SharpHoundCommonLib_Enums_LdapErrorCodes_ServerDown
   commentId: F:SharpHoundCommonLib.Enums.LdapErrorCodes.ServerDown
   fullName: SharpHoundCommonLib.Enums.LdapErrorCodes.ServerDown
   nameWithType: LdapErrorCodes.ServerDown
+- uid: SharpHoundCommonLib.Enums.LdapErrorCodes.StrongAuthRequired
+  name: StrongAuthRequired
+  href: api/SharpHoundCommonLib.Enums.LdapErrorCodes.html#SharpHoundCommonLib_Enums_LdapErrorCodes_StrongAuthRequired
+  commentId: F:SharpHoundCommonLib.Enums.LdapErrorCodes.StrongAuthRequired
+  fullName: SharpHoundCommonLib.Enums.LdapErrorCodes.StrongAuthRequired
+  nameWithType: LdapErrorCodes.StrongAuthRequired
 - uid: SharpHoundCommonLib.Enums.LdapErrorCodes.Success
   name: Success
   href: api/SharpHoundCommonLib.Enums.LdapErrorCodes.html#SharpHoundCommonLib_Enums_LdapErrorCodes_Success
@@ -1880,6 +1928,114 @@ references:
   commentId: F:SharpHoundCommonLib.Enums.LdapFailureReason.Unknown
   fullName: SharpHoundCommonLib.Enums.LdapFailureReason.Unknown
   nameWithType: LdapFailureReason.Unknown
+- uid: SharpHoundCommonLib.Enums.LdapOption
+  name: LdapOption
+  href: api/SharpHoundCommonLib.Enums.LdapOption.html
+  commentId: T:SharpHoundCommonLib.Enums.LdapOption
+  fullName: SharpHoundCommonLib.Enums.LdapOption
+  nameWithType: LdapOption
+- uid: SharpHoundCommonLib.Enums.LdapOption.Encrypt
+  name: Encrypt
+  href: api/SharpHoundCommonLib.Enums.LdapOption.html#SharpHoundCommonLib_Enums_LdapOption_Encrypt
+  commentId: F:SharpHoundCommonLib.Enums.LdapOption.Encrypt
+  fullName: SharpHoundCommonLib.Enums.LdapOption.Encrypt
+  nameWithType: LdapOption.Encrypt
+- uid: SharpHoundCommonLib.Enums.LdapOption.ProtocolVersion
+  name: ProtocolVersion
+  href: api/SharpHoundCommonLib.Enums.LdapOption.html#SharpHoundCommonLib_Enums_LdapOption_ProtocolVersion
+  commentId: F:SharpHoundCommonLib.Enums.LdapOption.ProtocolVersion
+  fullName: SharpHoundCommonLib.Enums.LdapOption.ProtocolVersion
+  nameWithType: LdapOption.ProtocolVersion
+- uid: SharpHoundCommonLib.Enums.LdapOption.ResultCode
+  name: ResultCode
+  href: api/SharpHoundCommonLib.Enums.LdapOption.html#SharpHoundCommonLib_Enums_LdapOption_ResultCode
+  commentId: F:SharpHoundCommonLib.Enums.LdapOption.ResultCode
+  fullName: SharpHoundCommonLib.Enums.LdapOption.ResultCode
+  nameWithType: LdapOption.ResultCode
+- uid: SharpHoundCommonLib.Enums.LdapOption.ServerCertificate
+  name: ServerCertificate
+  href: api/SharpHoundCommonLib.Enums.LdapOption.html#SharpHoundCommonLib_Enums_LdapOption_ServerCertificate
+  commentId: F:SharpHoundCommonLib.Enums.LdapOption.ServerCertificate
+  fullName: SharpHoundCommonLib.Enums.LdapOption.ServerCertificate
+  nameWithType: LdapOption.ServerCertificate
+- uid: SharpHoundCommonLib.Enums.LdapOption.ServerError
+  name: ServerError
+  href: api/SharpHoundCommonLib.Enums.LdapOption.html#SharpHoundCommonLib_Enums_LdapOption_ServerError
+  commentId: F:SharpHoundCommonLib.Enums.LdapOption.ServerError
+  fullName: SharpHoundCommonLib.Enums.LdapOption.ServerError
+  nameWithType: LdapOption.ServerError
+- uid: SharpHoundCommonLib.Enums.LdapOption.Sign
+  name: Sign
+  href: api/SharpHoundCommonLib.Enums.LdapOption.html#SharpHoundCommonLib_Enums_LdapOption_Sign
+  commentId: F:SharpHoundCommonLib.Enums.LdapOption.Sign
+  fullName: SharpHoundCommonLib.Enums.LdapOption.Sign
+  nameWithType: LdapOption.Sign
+- uid: SharpHoundCommonLib.Enums.LdapOption.Ssl
+  name: Ssl
+  href: api/SharpHoundCommonLib.Enums.LdapOption.html#SharpHoundCommonLib_Enums_LdapOption_Ssl
+  commentId: F:SharpHoundCommonLib.Enums.LdapOption.Ssl
+  fullName: SharpHoundCommonLib.Enums.LdapOption.Ssl
+  nameWithType: LdapOption.Ssl
+- uid: SharpHoundCommonLib.Enums.LdapOption.Timeout
+  name: Timeout
+  href: api/SharpHoundCommonLib.Enums.LdapOption.html#SharpHoundCommonLib_Enums_LdapOption_Timeout
+  commentId: F:SharpHoundCommonLib.Enums.LdapOption.Timeout
+  fullName: SharpHoundCommonLib.Enums.LdapOption.Timeout
+  nameWithType: LdapOption.Timeout
+- uid: SharpHoundCommonLib.Enums.LdapOptionValue
+  name: LdapOptionValue
+  href: api/SharpHoundCommonLib.Enums.LdapOptionValue.html
+  commentId: T:SharpHoundCommonLib.Enums.LdapOptionValue
+  fullName: SharpHoundCommonLib.Enums.LdapOptionValue
+  nameWithType: LdapOptionValue
+- uid: SharpHoundCommonLib.Enums.LdapOptionValue.Off
+  name: Off
+  href: api/SharpHoundCommonLib.Enums.LdapOptionValue.html#SharpHoundCommonLib_Enums_LdapOptionValue_Off
+  commentId: F:SharpHoundCommonLib.Enums.LdapOptionValue.Off
+  fullName: SharpHoundCommonLib.Enums.LdapOptionValue.Off
+  nameWithType: LdapOptionValue.Off
+- uid: SharpHoundCommonLib.Enums.LdapOptionValue.On
+  name: On
+  href: api/SharpHoundCommonLib.Enums.LdapOptionValue.html#SharpHoundCommonLib_Enums_LdapOptionValue_On
+  commentId: F:SharpHoundCommonLib.Enums.LdapOptionValue.On
+  fullName: SharpHoundCommonLib.Enums.LdapOptionValue.On
+  nameWithType: LdapOptionValue.On
+- uid: SharpHoundCommonLib.Enums.LdapOptionValue.Version3
+  name: Version3
+  href: api/SharpHoundCommonLib.Enums.LdapOptionValue.html#SharpHoundCommonLib_Enums_LdapOptionValue_Version3
+  commentId: F:SharpHoundCommonLib.Enums.LdapOptionValue.Version3
+  fullName: SharpHoundCommonLib.Enums.LdapOptionValue.Version3
+  nameWithType: LdapOptionValue.Version3
+- uid: SharpHoundCommonLib.Enums.LdapSupportedSaslMechanisms
+  name: LdapSupportedSaslMechanisms
+  href: api/SharpHoundCommonLib.Enums.LdapSupportedSaslMechanisms.html
+  commentId: T:SharpHoundCommonLib.Enums.LdapSupportedSaslMechanisms
+  fullName: SharpHoundCommonLib.Enums.LdapSupportedSaslMechanisms
+  nameWithType: LdapSupportedSaslMechanisms
+- uid: SharpHoundCommonLib.Enums.LdapSupportedSaslMechanisms.DIGEST_MD5
+  name: DIGEST_MD5
+  href: api/SharpHoundCommonLib.Enums.LdapSupportedSaslMechanisms.html#SharpHoundCommonLib_Enums_LdapSupportedSaslMechanisms_DIGEST_MD5
+  commentId: F:SharpHoundCommonLib.Enums.LdapSupportedSaslMechanisms.DIGEST_MD5
+  fullName: SharpHoundCommonLib.Enums.LdapSupportedSaslMechanisms.DIGEST_MD5
+  nameWithType: LdapSupportedSaslMechanisms.DIGEST_MD5
+- uid: SharpHoundCommonLib.Enums.LdapSupportedSaslMechanisms.EXTERNAL
+  name: EXTERNAL
+  href: api/SharpHoundCommonLib.Enums.LdapSupportedSaslMechanisms.html#SharpHoundCommonLib_Enums_LdapSupportedSaslMechanisms_EXTERNAL
+  commentId: F:SharpHoundCommonLib.Enums.LdapSupportedSaslMechanisms.EXTERNAL
+  fullName: SharpHoundCommonLib.Enums.LdapSupportedSaslMechanisms.EXTERNAL
+  nameWithType: LdapSupportedSaslMechanisms.EXTERNAL
+- uid: SharpHoundCommonLib.Enums.LdapSupportedSaslMechanisms.GSS_SPNEGO
+  name: GSS_SPNEGO
+  href: api/SharpHoundCommonLib.Enums.LdapSupportedSaslMechanisms.html#SharpHoundCommonLib_Enums_LdapSupportedSaslMechanisms_GSS_SPNEGO
+  commentId: F:SharpHoundCommonLib.Enums.LdapSupportedSaslMechanisms.GSS_SPNEGO
+  fullName: SharpHoundCommonLib.Enums.LdapSupportedSaslMechanisms.GSS_SPNEGO
+  nameWithType: LdapSupportedSaslMechanisms.GSS_SPNEGO
+- uid: SharpHoundCommonLib.Enums.LdapSupportedSaslMechanisms.GSSAPI
+  name: GSSAPI
+  href: api/SharpHoundCommonLib.Enums.LdapSupportedSaslMechanisms.html#SharpHoundCommonLib_Enums_LdapSupportedSaslMechanisms_GSSAPI
+  commentId: F:SharpHoundCommonLib.Enums.LdapSupportedSaslMechanisms.GSSAPI
+  fullName: SharpHoundCommonLib.Enums.LdapSupportedSaslMechanisms.GSSAPI
+  nameWithType: LdapSupportedSaslMechanisms.GSSAPI
 - uid: SharpHoundCommonLib.Enums.LSAPrivileges
   name: LSAPrivileges
   href: api/SharpHoundCommonLib.Enums.LSAPrivileges.html
@@ -3198,6 +3354,19 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.Helpers.DomainNameToDistinguishedName
   nameWithType: Helpers.DomainNameToDistinguishedName
+- uid: SharpHoundCommonLib.Helpers.DumpDirectoryObject(SharpHoundCommonLib.IDirectoryObject)
+  name: DumpDirectoryObject(IDirectoryObject)
+  href: api/SharpHoundCommonLib.Helpers.html#SharpHoundCommonLib_Helpers_DumpDirectoryObject_SharpHoundCommonLib_IDirectoryObject_
+  commentId: M:SharpHoundCommonLib.Helpers.DumpDirectoryObject(SharpHoundCommonLib.IDirectoryObject)
+  fullName: SharpHoundCommonLib.Helpers.DumpDirectoryObject(SharpHoundCommonLib.IDirectoryObject)
+  nameWithType: Helpers.DumpDirectoryObject(IDirectoryObject)
+- uid: SharpHoundCommonLib.Helpers.DumpDirectoryObject*
+  name: DumpDirectoryObject
+  href: api/SharpHoundCommonLib.Helpers.html#SharpHoundCommonLib_Helpers_DumpDirectoryObject_
+  commentId: Overload:SharpHoundCommonLib.Helpers.DumpDirectoryObject
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Helpers.DumpDirectoryObject
+  nameWithType: Helpers.DumpDirectoryObject
 - uid: SharpHoundCommonLib.Helpers.GetRegistryKeyData(System.String,System.String,System.String,ILogger)
   name: GetRegistryKeyData(String, String, String, ILogger)
   href: api/SharpHoundCommonLib.Helpers.html#SharpHoundCommonLib_Helpers_GetRegistryKeyData_System_String_System_String_System_String_ILogger_
@@ -6165,6 +6334,608 @@ references:
   fullName.vb: SharpHoundCommonLib.NoOpLogger.Log(Of TState)(LogLevel, EventId, TState, System.Exception, System.Func(Of TState, System.Exception, System.String))
   nameWithType: NoOpLogger.Log<TState>(LogLevel, EventId, TState, Exception, Func<TState, Exception, String>)
   nameWithType.vb: NoOpLogger.Log(Of TState)(LogLevel, EventId, TState, Exception, Func(Of TState, Exception, String))
+- uid: SharpHoundCommonLib.Ntlm
+  name: SharpHoundCommonLib.Ntlm
+  href: api/SharpHoundCommonLib.Ntlm.html
+  commentId: N:SharpHoundCommonLib.Ntlm
+  fullName: SharpHoundCommonLib.Ntlm
+  nameWithType: SharpHoundCommonLib.Ntlm
+- uid: SharpHoundCommonLib.Ntlm.BERVAL
+  name: BERVAL
+  href: api/SharpHoundCommonLib.Ntlm.BERVAL.html
+  commentId: T:SharpHoundCommonLib.Ntlm.BERVAL
+  fullName: SharpHoundCommonLib.Ntlm.BERVAL
+  nameWithType: BERVAL
+- uid: SharpHoundCommonLib.Ntlm.BERVAL.bv_len
+  name: bv_len
+  href: api/SharpHoundCommonLib.Ntlm.BERVAL.html#SharpHoundCommonLib_Ntlm_BERVAL_bv_len
+  commentId: F:SharpHoundCommonLib.Ntlm.BERVAL.bv_len
+  fullName: SharpHoundCommonLib.Ntlm.BERVAL.bv_len
+  nameWithType: BERVAL.bv_len
+- uid: SharpHoundCommonLib.Ntlm.BERVAL.bv_val
+  name: bv_val
+  href: api/SharpHoundCommonLib.Ntlm.BERVAL.html#SharpHoundCommonLib_Ntlm_BERVAL_bv_val
+  commentId: F:SharpHoundCommonLib.Ntlm.BERVAL.bv_val
+  fullName: SharpHoundCommonLib.Ntlm.BERVAL.bv_val
+  nameWithType: BERVAL.bv_val
+- uid: SharpHoundCommonLib.Ntlm.HttpClientFactory
+  name: HttpClientFactory
+  href: api/SharpHoundCommonLib.Ntlm.HttpClientFactory.html
+  commentId: T:SharpHoundCommonLib.Ntlm.HttpClientFactory
+  fullName: SharpHoundCommonLib.Ntlm.HttpClientFactory
+  nameWithType: HttpClientFactory
+- uid: SharpHoundCommonLib.Ntlm.HttpClientFactory.CreateAuthenticatedHttpClient(System.Uri,System.String)
+  name: CreateAuthenticatedHttpClient(Uri, String)
+  href: api/SharpHoundCommonLib.Ntlm.HttpClientFactory.html#SharpHoundCommonLib_Ntlm_HttpClientFactory_CreateAuthenticatedHttpClient_System_Uri_System_String_
+  commentId: M:SharpHoundCommonLib.Ntlm.HttpClientFactory.CreateAuthenticatedHttpClient(System.Uri,System.String)
+  fullName: SharpHoundCommonLib.Ntlm.HttpClientFactory.CreateAuthenticatedHttpClient(System.Uri, System.String)
+  nameWithType: HttpClientFactory.CreateAuthenticatedHttpClient(Uri, String)
+- uid: SharpHoundCommonLib.Ntlm.HttpClientFactory.CreateAuthenticatedHttpClient*
+  name: CreateAuthenticatedHttpClient
+  href: api/SharpHoundCommonLib.Ntlm.HttpClientFactory.html#SharpHoundCommonLib_Ntlm_HttpClientFactory_CreateAuthenticatedHttpClient_
+  commentId: Overload:SharpHoundCommonLib.Ntlm.HttpClientFactory.CreateAuthenticatedHttpClient
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Ntlm.HttpClientFactory.CreateAuthenticatedHttpClient
+  nameWithType: HttpClientFactory.CreateAuthenticatedHttpClient
+- uid: SharpHoundCommonLib.Ntlm.HttpClientFactory.CreateUnauthenticatedClient
+  name: CreateUnauthenticatedClient()
+  href: api/SharpHoundCommonLib.Ntlm.HttpClientFactory.html#SharpHoundCommonLib_Ntlm_HttpClientFactory_CreateUnauthenticatedClient
+  commentId: M:SharpHoundCommonLib.Ntlm.HttpClientFactory.CreateUnauthenticatedClient
+  fullName: SharpHoundCommonLib.Ntlm.HttpClientFactory.CreateUnauthenticatedClient()
+  nameWithType: HttpClientFactory.CreateUnauthenticatedClient()
+- uid: SharpHoundCommonLib.Ntlm.HttpClientFactory.CreateUnauthenticatedClient*
+  name: CreateUnauthenticatedClient
+  href: api/SharpHoundCommonLib.Ntlm.HttpClientFactory.html#SharpHoundCommonLib_Ntlm_HttpClientFactory_CreateUnauthenticatedClient_
+  commentId: Overload:SharpHoundCommonLib.Ntlm.HttpClientFactory.CreateUnauthenticatedClient
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Ntlm.HttpClientFactory.CreateUnauthenticatedClient
+  nameWithType: HttpClientFactory.CreateUnauthenticatedClient
+- uid: SharpHoundCommonLib.Ntlm.HttpNtlmAuthenticationService
+  name: HttpNtlmAuthenticationService
+  href: api/SharpHoundCommonLib.Ntlm.HttpNtlmAuthenticationService.html
+  commentId: T:SharpHoundCommonLib.Ntlm.HttpNtlmAuthenticationService
+  fullName: SharpHoundCommonLib.Ntlm.HttpNtlmAuthenticationService
+  nameWithType: HttpNtlmAuthenticationService
+- uid: SharpHoundCommonLib.Ntlm.HttpNtlmAuthenticationService.#ctor(SharpHoundCommonLib.Ntlm.IHttpClientFactory,ILogger)
+  name: HttpNtlmAuthenticationService(IHttpClientFactory, ILogger)
+  href: api/SharpHoundCommonLib.Ntlm.HttpNtlmAuthenticationService.html#SharpHoundCommonLib_Ntlm_HttpNtlmAuthenticationService__ctor_SharpHoundCommonLib_Ntlm_IHttpClientFactory_ILogger_
+  commentId: M:SharpHoundCommonLib.Ntlm.HttpNtlmAuthenticationService.#ctor(SharpHoundCommonLib.Ntlm.IHttpClientFactory,ILogger)
+  fullName: SharpHoundCommonLib.Ntlm.HttpNtlmAuthenticationService.HttpNtlmAuthenticationService(SharpHoundCommonLib.Ntlm.IHttpClientFactory, ILogger)
+  nameWithType: HttpNtlmAuthenticationService.HttpNtlmAuthenticationService(IHttpClientFactory, ILogger)
+- uid: SharpHoundCommonLib.Ntlm.HttpNtlmAuthenticationService.#ctor*
+  name: HttpNtlmAuthenticationService
+  href: api/SharpHoundCommonLib.Ntlm.HttpNtlmAuthenticationService.html#SharpHoundCommonLib_Ntlm_HttpNtlmAuthenticationService__ctor_
+  commentId: Overload:SharpHoundCommonLib.Ntlm.HttpNtlmAuthenticationService.#ctor
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Ntlm.HttpNtlmAuthenticationService.HttpNtlmAuthenticationService
+  nameWithType: HttpNtlmAuthenticationService.HttpNtlmAuthenticationService
+- uid: SharpHoundCommonLib.Ntlm.HttpNtlmAuthenticationService.EnsureRequiresAuth(System.Uri,System.Nullable{System.Boolean})
+  name: EnsureRequiresAuth(Uri, Nullable<Boolean>)
+  href: api/SharpHoundCommonLib.Ntlm.HttpNtlmAuthenticationService.html#SharpHoundCommonLib_Ntlm_HttpNtlmAuthenticationService_EnsureRequiresAuth_System_Uri_System_Nullable_System_Boolean__
+  commentId: M:SharpHoundCommonLib.Ntlm.HttpNtlmAuthenticationService.EnsureRequiresAuth(System.Uri,System.Nullable{System.Boolean})
+  name.vb: EnsureRequiresAuth(Uri, Nullable(Of Boolean))
+  fullName: SharpHoundCommonLib.Ntlm.HttpNtlmAuthenticationService.EnsureRequiresAuth(System.Uri, System.Nullable<System.Boolean>)
+  fullName.vb: SharpHoundCommonLib.Ntlm.HttpNtlmAuthenticationService.EnsureRequiresAuth(System.Uri, System.Nullable(Of System.Boolean))
+  nameWithType: HttpNtlmAuthenticationService.EnsureRequiresAuth(Uri, Nullable<Boolean>)
+  nameWithType.vb: HttpNtlmAuthenticationService.EnsureRequiresAuth(Uri, Nullable(Of Boolean))
+- uid: SharpHoundCommonLib.Ntlm.HttpNtlmAuthenticationService.EnsureRequiresAuth*
+  name: EnsureRequiresAuth
+  href: api/SharpHoundCommonLib.Ntlm.HttpNtlmAuthenticationService.html#SharpHoundCommonLib_Ntlm_HttpNtlmAuthenticationService_EnsureRequiresAuth_
+  commentId: Overload:SharpHoundCommonLib.Ntlm.HttpNtlmAuthenticationService.EnsureRequiresAuth
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Ntlm.HttpNtlmAuthenticationService.EnsureRequiresAuth
+  nameWithType: HttpNtlmAuthenticationService.EnsureRequiresAuth
+- uid: SharpHoundCommonLib.Ntlm.HttpTransport
+  name: HttpTransport
+  href: api/SharpHoundCommonLib.Ntlm.HttpTransport.html
+  commentId: T:SharpHoundCommonLib.Ntlm.HttpTransport
+  fullName: SharpHoundCommonLib.Ntlm.HttpTransport
+  nameWithType: HttpTransport
+- uid: SharpHoundCommonLib.Ntlm.HttpTransport.#ctor(System.Net.Http.HttpClient,System.Uri,System.String,ILogger)
+  name: HttpTransport(HttpClient, Uri, String, ILogger)
+  href: api/SharpHoundCommonLib.Ntlm.HttpTransport.html#SharpHoundCommonLib_Ntlm_HttpTransport__ctor_System_Net_Http_HttpClient_System_Uri_System_String_ILogger_
+  commentId: M:SharpHoundCommonLib.Ntlm.HttpTransport.#ctor(System.Net.Http.HttpClient,System.Uri,System.String,ILogger)
+  fullName: SharpHoundCommonLib.Ntlm.HttpTransport.HttpTransport(System.Net.Http.HttpClient, System.Uri, System.String, ILogger)
+  nameWithType: HttpTransport.HttpTransport(HttpClient, Uri, String, ILogger)
+- uid: SharpHoundCommonLib.Ntlm.HttpTransport.#ctor*
+  name: HttpTransport
+  href: api/SharpHoundCommonLib.Ntlm.HttpTransport.html#SharpHoundCommonLib_Ntlm_HttpTransport__ctor_
+  commentId: Overload:SharpHoundCommonLib.Ntlm.HttpTransport.#ctor
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Ntlm.HttpTransport.HttpTransport
+  nameWithType: HttpTransport.HttpTransport
+- uid: SharpHoundCommonLib.Ntlm.HttpTransport.AuthenticateAsync(System.Byte[])
+  name: AuthenticateAsync(Byte[])
+  href: api/SharpHoundCommonLib.Ntlm.HttpTransport.html#SharpHoundCommonLib_Ntlm_HttpTransport_AuthenticateAsync_System_Byte___
+  commentId: M:SharpHoundCommonLib.Ntlm.HttpTransport.AuthenticateAsync(System.Byte[])
+  name.vb: AuthenticateAsync(Byte())
+  fullName: SharpHoundCommonLib.Ntlm.HttpTransport.AuthenticateAsync(System.Byte[])
+  fullName.vb: SharpHoundCommonLib.Ntlm.HttpTransport.AuthenticateAsync(System.Byte())
+  nameWithType: HttpTransport.AuthenticateAsync(Byte[])
+  nameWithType.vb: HttpTransport.AuthenticateAsync(Byte())
+- uid: SharpHoundCommonLib.Ntlm.HttpTransport.AuthenticateAsync*
+  name: AuthenticateAsync
+  href: api/SharpHoundCommonLib.Ntlm.HttpTransport.html#SharpHoundCommonLib_Ntlm_HttpTransport_AuthenticateAsync_
+  commentId: Overload:SharpHoundCommonLib.Ntlm.HttpTransport.AuthenticateAsync
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Ntlm.HttpTransport.AuthenticateAsync
+  nameWithType: HttpTransport.AuthenticateAsync
+- uid: SharpHoundCommonLib.Ntlm.HttpTransport.NegotiateAsync(System.Byte[])
+  name: NegotiateAsync(Byte[])
+  href: api/SharpHoundCommonLib.Ntlm.HttpTransport.html#SharpHoundCommonLib_Ntlm_HttpTransport_NegotiateAsync_System_Byte___
+  commentId: M:SharpHoundCommonLib.Ntlm.HttpTransport.NegotiateAsync(System.Byte[])
+  name.vb: NegotiateAsync(Byte())
+  fullName: SharpHoundCommonLib.Ntlm.HttpTransport.NegotiateAsync(System.Byte[])
+  fullName.vb: SharpHoundCommonLib.Ntlm.HttpTransport.NegotiateAsync(System.Byte())
+  nameWithType: HttpTransport.NegotiateAsync(Byte[])
+  nameWithType.vb: HttpTransport.NegotiateAsync(Byte())
+- uid: SharpHoundCommonLib.Ntlm.HttpTransport.NegotiateAsync*
+  name: NegotiateAsync
+  href: api/SharpHoundCommonLib.Ntlm.HttpTransport.html#SharpHoundCommonLib_Ntlm_HttpTransport_NegotiateAsync_
+  commentId: Overload:SharpHoundCommonLib.Ntlm.HttpTransport.NegotiateAsync
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Ntlm.HttpTransport.NegotiateAsync
+  nameWithType: HttpTransport.NegotiateAsync
+- uid: SharpHoundCommonLib.Ntlm.IHttpClientFactory
+  name: IHttpClientFactory
+  href: api/SharpHoundCommonLib.Ntlm.IHttpClientFactory.html
+  commentId: T:SharpHoundCommonLib.Ntlm.IHttpClientFactory
+  fullName: SharpHoundCommonLib.Ntlm.IHttpClientFactory
+  nameWithType: IHttpClientFactory
+- uid: SharpHoundCommonLib.Ntlm.IHttpClientFactory.CreateAuthenticatedHttpClient(System.Uri,System.String)
+  name: CreateAuthenticatedHttpClient(Uri, String)
+  href: api/SharpHoundCommonLib.Ntlm.IHttpClientFactory.html#SharpHoundCommonLib_Ntlm_IHttpClientFactory_CreateAuthenticatedHttpClient_System_Uri_System_String_
+  commentId: M:SharpHoundCommonLib.Ntlm.IHttpClientFactory.CreateAuthenticatedHttpClient(System.Uri,System.String)
+  fullName: SharpHoundCommonLib.Ntlm.IHttpClientFactory.CreateAuthenticatedHttpClient(System.Uri, System.String)
+  nameWithType: IHttpClientFactory.CreateAuthenticatedHttpClient(Uri, String)
+- uid: SharpHoundCommonLib.Ntlm.IHttpClientFactory.CreateAuthenticatedHttpClient*
+  name: CreateAuthenticatedHttpClient
+  href: api/SharpHoundCommonLib.Ntlm.IHttpClientFactory.html#SharpHoundCommonLib_Ntlm_IHttpClientFactory_CreateAuthenticatedHttpClient_
+  commentId: Overload:SharpHoundCommonLib.Ntlm.IHttpClientFactory.CreateAuthenticatedHttpClient
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Ntlm.IHttpClientFactory.CreateAuthenticatedHttpClient
+  nameWithType: IHttpClientFactory.CreateAuthenticatedHttpClient
+- uid: SharpHoundCommonLib.Ntlm.IHttpClientFactory.CreateUnauthenticatedClient
+  name: CreateUnauthenticatedClient()
+  href: api/SharpHoundCommonLib.Ntlm.IHttpClientFactory.html#SharpHoundCommonLib_Ntlm_IHttpClientFactory_CreateUnauthenticatedClient
+  commentId: M:SharpHoundCommonLib.Ntlm.IHttpClientFactory.CreateUnauthenticatedClient
+  fullName: SharpHoundCommonLib.Ntlm.IHttpClientFactory.CreateUnauthenticatedClient()
+  nameWithType: IHttpClientFactory.CreateUnauthenticatedClient()
+- uid: SharpHoundCommonLib.Ntlm.IHttpClientFactory.CreateUnauthenticatedClient*
+  name: CreateUnauthenticatedClient
+  href: api/SharpHoundCommonLib.Ntlm.IHttpClientFactory.html#SharpHoundCommonLib_Ntlm_IHttpClientFactory_CreateUnauthenticatedClient_
+  commentId: Overload:SharpHoundCommonLib.Ntlm.IHttpClientFactory.CreateUnauthenticatedClient
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Ntlm.IHttpClientFactory.CreateUnauthenticatedClient
+  nameWithType: IHttpClientFactory.CreateUnauthenticatedClient
+- uid: SharpHoundCommonLib.Ntlm.INtlmTransport
+  name: INtlmTransport
+  href: api/SharpHoundCommonLib.Ntlm.INtlmTransport.html
+  commentId: T:SharpHoundCommonLib.Ntlm.INtlmTransport
+  fullName: SharpHoundCommonLib.Ntlm.INtlmTransport
+  nameWithType: INtlmTransport
+- uid: SharpHoundCommonLib.Ntlm.INtlmTransport.AuthenticateAsync(System.Byte[])
+  name: AuthenticateAsync(Byte[])
+  href: api/SharpHoundCommonLib.Ntlm.INtlmTransport.html#SharpHoundCommonLib_Ntlm_INtlmTransport_AuthenticateAsync_System_Byte___
+  commentId: M:SharpHoundCommonLib.Ntlm.INtlmTransport.AuthenticateAsync(System.Byte[])
+  name.vb: AuthenticateAsync(Byte())
+  fullName: SharpHoundCommonLib.Ntlm.INtlmTransport.AuthenticateAsync(System.Byte[])
+  fullName.vb: SharpHoundCommonLib.Ntlm.INtlmTransport.AuthenticateAsync(System.Byte())
+  nameWithType: INtlmTransport.AuthenticateAsync(Byte[])
+  nameWithType.vb: INtlmTransport.AuthenticateAsync(Byte())
+- uid: SharpHoundCommonLib.Ntlm.INtlmTransport.AuthenticateAsync*
+  name: AuthenticateAsync
+  href: api/SharpHoundCommonLib.Ntlm.INtlmTransport.html#SharpHoundCommonLib_Ntlm_INtlmTransport_AuthenticateAsync_
+  commentId: Overload:SharpHoundCommonLib.Ntlm.INtlmTransport.AuthenticateAsync
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Ntlm.INtlmTransport.AuthenticateAsync
+  nameWithType: INtlmTransport.AuthenticateAsync
+- uid: SharpHoundCommonLib.Ntlm.INtlmTransport.NegotiateAsync(System.Byte[])
+  name: NegotiateAsync(Byte[])
+  href: api/SharpHoundCommonLib.Ntlm.INtlmTransport.html#SharpHoundCommonLib_Ntlm_INtlmTransport_NegotiateAsync_System_Byte___
+  commentId: M:SharpHoundCommonLib.Ntlm.INtlmTransport.NegotiateAsync(System.Byte[])
+  name.vb: NegotiateAsync(Byte())
+  fullName: SharpHoundCommonLib.Ntlm.INtlmTransport.NegotiateAsync(System.Byte[])
+  fullName.vb: SharpHoundCommonLib.Ntlm.INtlmTransport.NegotiateAsync(System.Byte())
+  nameWithType: INtlmTransport.NegotiateAsync(Byte[])
+  nameWithType.vb: INtlmTransport.NegotiateAsync(Byte())
+- uid: SharpHoundCommonLib.Ntlm.INtlmTransport.NegotiateAsync*
+  name: NegotiateAsync
+  href: api/SharpHoundCommonLib.Ntlm.INtlmTransport.html#SharpHoundCommonLib_Ntlm_INtlmTransport_NegotiateAsync_
+  commentId: Overload:SharpHoundCommonLib.Ntlm.INtlmTransport.NegotiateAsync
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Ntlm.INtlmTransport.NegotiateAsync
+  nameWithType: INtlmTransport.NegotiateAsync
+- uid: SharpHoundCommonLib.Ntlm.LDAP_TIMEVAL
+  name: LDAP_TIMEVAL
+  href: api/SharpHoundCommonLib.Ntlm.LDAP_TIMEVAL.html
+  commentId: T:SharpHoundCommonLib.Ntlm.LDAP_TIMEVAL
+  fullName: SharpHoundCommonLib.Ntlm.LDAP_TIMEVAL
+  nameWithType: LDAP_TIMEVAL
+- uid: SharpHoundCommonLib.Ntlm.LDAP_TIMEVAL.tv_sec
+  name: tv_sec
+  href: api/SharpHoundCommonLib.Ntlm.LDAP_TIMEVAL.html#SharpHoundCommonLib_Ntlm_LDAP_TIMEVAL_tv_sec
+  commentId: F:SharpHoundCommonLib.Ntlm.LDAP_TIMEVAL.tv_sec
+  fullName: SharpHoundCommonLib.Ntlm.LDAP_TIMEVAL.tv_sec
+  nameWithType: LDAP_TIMEVAL.tv_sec
+- uid: SharpHoundCommonLib.Ntlm.LDAP_TIMEVAL.tv_usec
+  name: tv_usec
+  href: api/SharpHoundCommonLib.Ntlm.LDAP_TIMEVAL.html#SharpHoundCommonLib_Ntlm_LDAP_TIMEVAL_tv_usec
+  commentId: F:SharpHoundCommonLib.Ntlm.LDAP_TIMEVAL.tv_usec
+  fullName: SharpHoundCommonLib.Ntlm.LDAP_TIMEVAL.tv_usec
+  nameWithType: LDAP_TIMEVAL.tv_usec
+- uid: SharpHoundCommonLib.Ntlm.LdapConnection
+  name: LdapConnection
+  href: api/SharpHoundCommonLib.Ntlm.LdapConnection.html
+  commentId: T:SharpHoundCommonLib.Ntlm.LdapConnection
+  fullName: SharpHoundCommonLib.Ntlm.LdapConnection
+  nameWithType: LdapConnection
+- uid: SharpHoundCommonLib.Ntlm.LdapConnection.CheckError(System.Int32,System.String)
+  name: CheckError(Int32, String)
+  href: api/SharpHoundCommonLib.Ntlm.LdapConnection.html#SharpHoundCommonLib_Ntlm_LdapConnection_CheckError_System_Int32_System_String_
+  commentId: M:SharpHoundCommonLib.Ntlm.LdapConnection.CheckError(System.Int32,System.String)
+  fullName: SharpHoundCommonLib.Ntlm.LdapConnection.CheckError(System.Int32, System.String)
+  nameWithType: LdapConnection.CheckError(Int32, String)
+- uid: SharpHoundCommonLib.Ntlm.LdapConnection.CheckError*
+  name: CheckError
+  href: api/SharpHoundCommonLib.Ntlm.LdapConnection.html#SharpHoundCommonLib_Ntlm_LdapConnection_CheckError_
+  commentId: Overload:SharpHoundCommonLib.Ntlm.LdapConnection.CheckError
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Ntlm.LdapConnection.CheckError
+  nameWithType: LdapConnection.CheckError
+- uid: SharpHoundCommonLib.Ntlm.LdapConnection.Connect(System.Int32)
+  name: Connect(Int32)
+  href: api/SharpHoundCommonLib.Ntlm.LdapConnection.html#SharpHoundCommonLib_Ntlm_LdapConnection_Connect_System_Int32_
+  commentId: M:SharpHoundCommonLib.Ntlm.LdapConnection.Connect(System.Int32)
+  fullName: SharpHoundCommonLib.Ntlm.LdapConnection.Connect(System.Int32)
+  nameWithType: LdapConnection.Connect(Int32)
+- uid: SharpHoundCommonLib.Ntlm.LdapConnection.Connect*
+  name: Connect
+  href: api/SharpHoundCommonLib.Ntlm.LdapConnection.html#SharpHoundCommonLib_Ntlm_LdapConnection_Connect_
+  commentId: Overload:SharpHoundCommonLib.Ntlm.LdapConnection.Connect
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Ntlm.LdapConnection.Connect
+  nameWithType: LdapConnection.Connect
+- uid: SharpHoundCommonLib.Ntlm.LdapConnection.Dispose
+  name: Dispose()
+  href: api/SharpHoundCommonLib.Ntlm.LdapConnection.html#SharpHoundCommonLib_Ntlm_LdapConnection_Dispose
+  commentId: M:SharpHoundCommonLib.Ntlm.LdapConnection.Dispose
+  fullName: SharpHoundCommonLib.Ntlm.LdapConnection.Dispose()
+  nameWithType: LdapConnection.Dispose()
+- uid: SharpHoundCommonLib.Ntlm.LdapConnection.Dispose*
+  name: Dispose
+  href: api/SharpHoundCommonLib.Ntlm.LdapConnection.html#SharpHoundCommonLib_Ntlm_LdapConnection_Dispose_
+  commentId: Overload:SharpHoundCommonLib.Ntlm.LdapConnection.Dispose
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Ntlm.LdapConnection.Dispose
+  nameWithType: LdapConnection.Dispose
+- uid: SharpHoundCommonLib.Ntlm.LdapConnection.Handle
+  name: Handle
+  href: api/SharpHoundCommonLib.Ntlm.LdapConnection.html#SharpHoundCommonLib_Ntlm_LdapConnection_Handle
+  commentId: P:SharpHoundCommonLib.Ntlm.LdapConnection.Handle
+  fullName: SharpHoundCommonLib.Ntlm.LdapConnection.Handle
+  nameWithType: LdapConnection.Handle
+- uid: SharpHoundCommonLib.Ntlm.LdapConnection.Handle*
+  name: Handle
+  href: api/SharpHoundCommonLib.Ntlm.LdapConnection.html#SharpHoundCommonLib_Ntlm_LdapConnection_Handle_
+  commentId: Overload:SharpHoundCommonLib.Ntlm.LdapConnection.Handle
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Ntlm.LdapConnection.Handle
+  nameWithType: LdapConnection.Handle
+- uid: SharpHoundCommonLib.Ntlm.LdapConnection.Initialize(System.String,System.Int32)
+  name: Initialize(String, Int32)
+  href: api/SharpHoundCommonLib.Ntlm.LdapConnection.html#SharpHoundCommonLib_Ntlm_LdapConnection_Initialize_System_String_System_Int32_
+  commentId: M:SharpHoundCommonLib.Ntlm.LdapConnection.Initialize(System.String,System.Int32)
+  fullName: SharpHoundCommonLib.Ntlm.LdapConnection.Initialize(System.String, System.Int32)
+  nameWithType: LdapConnection.Initialize(String, Int32)
+- uid: SharpHoundCommonLib.Ntlm.LdapConnection.Initialize*
+  name: Initialize
+  href: api/SharpHoundCommonLib.Ntlm.LdapConnection.html#SharpHoundCommonLib_Ntlm_LdapConnection_Initialize_
+  commentId: Overload:SharpHoundCommonLib.Ntlm.LdapConnection.Initialize
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Ntlm.LdapConnection.Initialize
+  nameWithType: LdapConnection.Initialize
+- uid: SharpHoundCommonLib.Ntlm.LdapConnection.SaslBind(System.String,System.String,System.Byte[])
+  name: SaslBind(String, String, Byte[])
+  href: api/SharpHoundCommonLib.Ntlm.LdapConnection.html#SharpHoundCommonLib_Ntlm_LdapConnection_SaslBind_System_String_System_String_System_Byte___
+  commentId: M:SharpHoundCommonLib.Ntlm.LdapConnection.SaslBind(System.String,System.String,System.Byte[])
+  name.vb: SaslBind(String, String, Byte())
+  fullName: SharpHoundCommonLib.Ntlm.LdapConnection.SaslBind(System.String, System.String, System.Byte[])
+  fullName.vb: SharpHoundCommonLib.Ntlm.LdapConnection.SaslBind(System.String, System.String, System.Byte())
+  nameWithType: LdapConnection.SaslBind(String, String, Byte[])
+  nameWithType.vb: LdapConnection.SaslBind(String, String, Byte())
+- uid: SharpHoundCommonLib.Ntlm.LdapConnection.SaslBind*
+  name: SaslBind
+  href: api/SharpHoundCommonLib.Ntlm.LdapConnection.html#SharpHoundCommonLib_Ntlm_LdapConnection_SaslBind_
+  commentId: Overload:SharpHoundCommonLib.Ntlm.LdapConnection.SaslBind
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Ntlm.LdapConnection.SaslBind
+  nameWithType: LdapConnection.SaslBind
+- uid: SharpHoundCommonLib.Ntlm.LdapConnection.SetOption(SharpHoundCommonLib.Enums.LdapOption,SharpHoundCommonLib.Enums.LdapOptionValue)
+  name: SetOption(LdapOption, LdapOptionValue)
+  href: api/SharpHoundCommonLib.Ntlm.LdapConnection.html#SharpHoundCommonLib_Ntlm_LdapConnection_SetOption_SharpHoundCommonLib_Enums_LdapOption_SharpHoundCommonLib_Enums_LdapOptionValue_
+  commentId: M:SharpHoundCommonLib.Ntlm.LdapConnection.SetOption(SharpHoundCommonLib.Enums.LdapOption,SharpHoundCommonLib.Enums.LdapOptionValue)
+  fullName: SharpHoundCommonLib.Ntlm.LdapConnection.SetOption(SharpHoundCommonLib.Enums.LdapOption, SharpHoundCommonLib.Enums.LdapOptionValue)
+  nameWithType: LdapConnection.SetOption(LdapOption, LdapOptionValue)
+- uid: SharpHoundCommonLib.Ntlm.LdapConnection.SetOption(SharpHoundCommonLib.Enums.LdapOption,System.IntPtr)
+  name: SetOption(LdapOption, IntPtr)
+  href: api/SharpHoundCommonLib.Ntlm.LdapConnection.html#SharpHoundCommonLib_Ntlm_LdapConnection_SetOption_SharpHoundCommonLib_Enums_LdapOption_System_IntPtr_
+  commentId: M:SharpHoundCommonLib.Ntlm.LdapConnection.SetOption(SharpHoundCommonLib.Enums.LdapOption,System.IntPtr)
+  fullName: SharpHoundCommonLib.Ntlm.LdapConnection.SetOption(SharpHoundCommonLib.Enums.LdapOption, System.IntPtr)
+  nameWithType: LdapConnection.SetOption(LdapOption, IntPtr)
+- uid: SharpHoundCommonLib.Ntlm.LdapConnection.SetOption*
+  name: SetOption
+  href: api/SharpHoundCommonLib.Ntlm.LdapConnection.html#SharpHoundCommonLib_Ntlm_LdapConnection_SetOption_
+  commentId: Overload:SharpHoundCommonLib.Ntlm.LdapConnection.SetOption
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Ntlm.LdapConnection.SetOption
+  nameWithType: LdapConnection.SetOption
+- uid: SharpHoundCommonLib.Ntlm.LdapNativeException
+  name: LdapNativeException
+  href: api/SharpHoundCommonLib.Ntlm.LdapNativeException.html
+  commentId: T:SharpHoundCommonLib.Ntlm.LdapNativeException
+  fullName: SharpHoundCommonLib.Ntlm.LdapNativeException
+  nameWithType: LdapNativeException
+- uid: SharpHoundCommonLib.Ntlm.LdapNativeException.#ctor(System.String,System.Int32,System.String)
+  name: LdapNativeException(String, Int32, String)
+  href: api/SharpHoundCommonLib.Ntlm.LdapNativeException.html#SharpHoundCommonLib_Ntlm_LdapNativeException__ctor_System_String_System_Int32_System_String_
+  commentId: M:SharpHoundCommonLib.Ntlm.LdapNativeException.#ctor(System.String,System.Int32,System.String)
+  fullName: SharpHoundCommonLib.Ntlm.LdapNativeException.LdapNativeException(System.String, System.Int32, System.String)
+  nameWithType: LdapNativeException.LdapNativeException(String, Int32, String)
+- uid: SharpHoundCommonLib.Ntlm.LdapNativeException.#ctor*
+  name: LdapNativeException
+  href: api/SharpHoundCommonLib.Ntlm.LdapNativeException.html#SharpHoundCommonLib_Ntlm_LdapNativeException__ctor_
+  commentId: Overload:SharpHoundCommonLib.Ntlm.LdapNativeException.#ctor
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Ntlm.LdapNativeException.LdapNativeException
+  nameWithType: LdapNativeException.LdapNativeException
+- uid: SharpHoundCommonLib.Ntlm.LdapNativeException.ErrorCode
+  name: ErrorCode
+  href: api/SharpHoundCommonLib.Ntlm.LdapNativeException.html#SharpHoundCommonLib_Ntlm_LdapNativeException_ErrorCode
+  commentId: P:SharpHoundCommonLib.Ntlm.LdapNativeException.ErrorCode
+  fullName: SharpHoundCommonLib.Ntlm.LdapNativeException.ErrorCode
+  nameWithType: LdapNativeException.ErrorCode
+- uid: SharpHoundCommonLib.Ntlm.LdapNativeException.ErrorCode*
+  name: ErrorCode
+  href: api/SharpHoundCommonLib.Ntlm.LdapNativeException.html#SharpHoundCommonLib_Ntlm_LdapNativeException_ErrorCode_
+  commentId: Overload:SharpHoundCommonLib.Ntlm.LdapNativeException.ErrorCode
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Ntlm.LdapNativeException.ErrorCode
+  nameWithType: LdapNativeException.ErrorCode
+- uid: SharpHoundCommonLib.Ntlm.LdapNativeException.ServerErrorMessage
+  name: ServerErrorMessage
+  href: api/SharpHoundCommonLib.Ntlm.LdapNativeException.html#SharpHoundCommonLib_Ntlm_LdapNativeException_ServerErrorMessage
+  commentId: P:SharpHoundCommonLib.Ntlm.LdapNativeException.ServerErrorMessage
+  fullName: SharpHoundCommonLib.Ntlm.LdapNativeException.ServerErrorMessage
+  nameWithType: LdapNativeException.ServerErrorMessage
+- uid: SharpHoundCommonLib.Ntlm.LdapNativeException.ServerErrorMessage*
+  name: ServerErrorMessage
+  href: api/SharpHoundCommonLib.Ntlm.LdapNativeException.html#SharpHoundCommonLib_Ntlm_LdapNativeException_ServerErrorMessage_
+  commentId: Overload:SharpHoundCommonLib.Ntlm.LdapNativeException.ServerErrorMessage
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Ntlm.LdapNativeException.ServerErrorMessage
+  nameWithType: LdapNativeException.ServerErrorMessage
+- uid: SharpHoundCommonLib.Ntlm.LdapTransport
+  name: LdapTransport
+  href: api/SharpHoundCommonLib.Ntlm.LdapTransport.html
+  commentId: T:SharpHoundCommonLib.Ntlm.LdapTransport
+  fullName: SharpHoundCommonLib.Ntlm.LdapTransport
+  nameWithType: LdapTransport
+- uid: SharpHoundCommonLib.Ntlm.MissingChallengeException
+  name: MissingChallengeException
+  href: api/SharpHoundCommonLib.Ntlm.MissingChallengeException.html
+  commentId: T:SharpHoundCommonLib.Ntlm.MissingChallengeException
+  fullName: SharpHoundCommonLib.Ntlm.MissingChallengeException
+  nameWithType: MissingChallengeException
+- uid: SharpHoundCommonLib.Ntlm.MissingChallengeException.#ctor(System.String)
+  name: MissingChallengeException(String)
+  href: api/SharpHoundCommonLib.Ntlm.MissingChallengeException.html#SharpHoundCommonLib_Ntlm_MissingChallengeException__ctor_System_String_
+  commentId: M:SharpHoundCommonLib.Ntlm.MissingChallengeException.#ctor(System.String)
+  fullName: SharpHoundCommonLib.Ntlm.MissingChallengeException.MissingChallengeException(System.String)
+  nameWithType: MissingChallengeException.MissingChallengeException(String)
+- uid: SharpHoundCommonLib.Ntlm.MissingChallengeException.#ctor*
+  name: MissingChallengeException
+  href: api/SharpHoundCommonLib.Ntlm.MissingChallengeException.html#SharpHoundCommonLib_Ntlm_MissingChallengeException__ctor_
+  commentId: Overload:SharpHoundCommonLib.Ntlm.MissingChallengeException.#ctor
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Ntlm.MissingChallengeException.MissingChallengeException
+  nameWithType: MissingChallengeException.MissingChallengeException
+- uid: SharpHoundCommonLib.Ntlm.NativeMethods
+  name: NativeMethods
+  href: api/SharpHoundCommonLib.Ntlm.NativeMethods.html
+  commentId: T:SharpHoundCommonLib.Ntlm.NativeMethods
+  fullName: SharpHoundCommonLib.Ntlm.NativeMethods
+  nameWithType: NativeMethods
+- uid: SharpHoundCommonLib.Ntlm.NativeMethods.ldap_connect(SharpHoundCommonLib.Ntlm.SafeLdapHandle,System.IntPtr)
+  name: ldap_connect(SafeLdapHandle, IntPtr)
+  href: api/SharpHoundCommonLib.Ntlm.NativeMethods.html#SharpHoundCommonLib_Ntlm_NativeMethods_ldap_connect_SharpHoundCommonLib_Ntlm_SafeLdapHandle_System_IntPtr_
+  commentId: M:SharpHoundCommonLib.Ntlm.NativeMethods.ldap_connect(SharpHoundCommonLib.Ntlm.SafeLdapHandle,System.IntPtr)
+  fullName: SharpHoundCommonLib.Ntlm.NativeMethods.ldap_connect(SharpHoundCommonLib.Ntlm.SafeLdapHandle, System.IntPtr)
+  nameWithType: NativeMethods.ldap_connect(SafeLdapHandle, IntPtr)
+- uid: SharpHoundCommonLib.Ntlm.NativeMethods.ldap_connect*
+  name: ldap_connect
+  href: api/SharpHoundCommonLib.Ntlm.NativeMethods.html#SharpHoundCommonLib_Ntlm_NativeMethods_ldap_connect_
+  commentId: Overload:SharpHoundCommonLib.Ntlm.NativeMethods.ldap_connect
+  fullName: SharpHoundCommonLib.Ntlm.NativeMethods.ldap_connect
+  nameWithType: NativeMethods.ldap_connect
+- uid: SharpHoundCommonLib.Ntlm.NativeMethods.ldap_get_option(SharpHoundCommonLib.Ntlm.SafeLdapHandle,SharpHoundCommonLib.Enums.LdapOption,System.Int32@)
+  name: ldap_get_option(SafeLdapHandle, LdapOption, out Int32)
+  href: api/SharpHoundCommonLib.Ntlm.NativeMethods.html#SharpHoundCommonLib_Ntlm_NativeMethods_ldap_get_option_SharpHoundCommonLib_Ntlm_SafeLdapHandle_SharpHoundCommonLib_Enums_LdapOption_System_Int32__
+  commentId: M:SharpHoundCommonLib.Ntlm.NativeMethods.ldap_get_option(SharpHoundCommonLib.Ntlm.SafeLdapHandle,SharpHoundCommonLib.Enums.LdapOption,System.Int32@)
+  name.vb: ldap_get_option(SafeLdapHandle, LdapOption, ByRef Int32)
+  fullName: SharpHoundCommonLib.Ntlm.NativeMethods.ldap_get_option(SharpHoundCommonLib.Ntlm.SafeLdapHandle, SharpHoundCommonLib.Enums.LdapOption, out System.Int32)
+  fullName.vb: SharpHoundCommonLib.Ntlm.NativeMethods.ldap_get_option(SharpHoundCommonLib.Ntlm.SafeLdapHandle, SharpHoundCommonLib.Enums.LdapOption, ByRef System.Int32)
+  nameWithType: NativeMethods.ldap_get_option(SafeLdapHandle, LdapOption, out Int32)
+  nameWithType.vb: NativeMethods.ldap_get_option(SafeLdapHandle, LdapOption, ByRef Int32)
+- uid: SharpHoundCommonLib.Ntlm.NativeMethods.ldap_get_option(SharpHoundCommonLib.Ntlm.SafeLdapHandle,SharpHoundCommonLib.Enums.LdapOption,System.IntPtr@)
+  name: ldap_get_option(SafeLdapHandle, LdapOption, out IntPtr)
+  href: api/SharpHoundCommonLib.Ntlm.NativeMethods.html#SharpHoundCommonLib_Ntlm_NativeMethods_ldap_get_option_SharpHoundCommonLib_Ntlm_SafeLdapHandle_SharpHoundCommonLib_Enums_LdapOption_System_IntPtr__
+  commentId: M:SharpHoundCommonLib.Ntlm.NativeMethods.ldap_get_option(SharpHoundCommonLib.Ntlm.SafeLdapHandle,SharpHoundCommonLib.Enums.LdapOption,System.IntPtr@)
+  name.vb: ldap_get_option(SafeLdapHandle, LdapOption, ByRef IntPtr)
+  fullName: SharpHoundCommonLib.Ntlm.NativeMethods.ldap_get_option(SharpHoundCommonLib.Ntlm.SafeLdapHandle, SharpHoundCommonLib.Enums.LdapOption, out System.IntPtr)
+  fullName.vb: SharpHoundCommonLib.Ntlm.NativeMethods.ldap_get_option(SharpHoundCommonLib.Ntlm.SafeLdapHandle, SharpHoundCommonLib.Enums.LdapOption, ByRef System.IntPtr)
+  nameWithType: NativeMethods.ldap_get_option(SafeLdapHandle, LdapOption, out IntPtr)
+  nameWithType.vb: NativeMethods.ldap_get_option(SafeLdapHandle, LdapOption, ByRef IntPtr)
+- uid: SharpHoundCommonLib.Ntlm.NativeMethods.ldap_get_option*
+  name: ldap_get_option
+  href: api/SharpHoundCommonLib.Ntlm.NativeMethods.html#SharpHoundCommonLib_Ntlm_NativeMethods_ldap_get_option_
+  commentId: Overload:SharpHoundCommonLib.Ntlm.NativeMethods.ldap_get_option
+  fullName: SharpHoundCommonLib.Ntlm.NativeMethods.ldap_get_option
+  nameWithType: NativeMethods.ldap_get_option
+- uid: SharpHoundCommonLib.Ntlm.NativeMethods.ldap_init(System.String,System.Int32)
+  name: ldap_init(String, Int32)
+  href: api/SharpHoundCommonLib.Ntlm.NativeMethods.html#SharpHoundCommonLib_Ntlm_NativeMethods_ldap_init_System_String_System_Int32_
+  commentId: M:SharpHoundCommonLib.Ntlm.NativeMethods.ldap_init(System.String,System.Int32)
+  fullName: SharpHoundCommonLib.Ntlm.NativeMethods.ldap_init(System.String, System.Int32)
+  nameWithType: NativeMethods.ldap_init(String, Int32)
+- uid: SharpHoundCommonLib.Ntlm.NativeMethods.ldap_init*
+  name: ldap_init
+  href: api/SharpHoundCommonLib.Ntlm.NativeMethods.html#SharpHoundCommonLib_Ntlm_NativeMethods_ldap_init_
+  commentId: Overload:SharpHoundCommonLib.Ntlm.NativeMethods.ldap_init
+  fullName: SharpHoundCommonLib.Ntlm.NativeMethods.ldap_init
+  nameWithType: NativeMethods.ldap_init
+- uid: SharpHoundCommonLib.Ntlm.NativeMethods.ldap_memfree(System.IntPtr)
+  name: ldap_memfree(IntPtr)
+  href: api/SharpHoundCommonLib.Ntlm.NativeMethods.html#SharpHoundCommonLib_Ntlm_NativeMethods_ldap_memfree_System_IntPtr_
+  commentId: M:SharpHoundCommonLib.Ntlm.NativeMethods.ldap_memfree(System.IntPtr)
+  fullName: SharpHoundCommonLib.Ntlm.NativeMethods.ldap_memfree(System.IntPtr)
+  nameWithType: NativeMethods.ldap_memfree(IntPtr)
+- uid: SharpHoundCommonLib.Ntlm.NativeMethods.ldap_memfree*
+  name: ldap_memfree
+  href: api/SharpHoundCommonLib.Ntlm.NativeMethods.html#SharpHoundCommonLib_Ntlm_NativeMethods_ldap_memfree_
+  commentId: Overload:SharpHoundCommonLib.Ntlm.NativeMethods.ldap_memfree
+  fullName: SharpHoundCommonLib.Ntlm.NativeMethods.ldap_memfree
+  nameWithType: NativeMethods.ldap_memfree
+- uid: SharpHoundCommonLib.Ntlm.NativeMethods.ldap_sasl_bind_s(SharpHoundCommonLib.Ntlm.SafeLdapHandle,System.String,System.String,System.IntPtr,System.IntPtr,System.IntPtr,System.IntPtr@)
+  name: ldap_sasl_bind_s(SafeLdapHandle, String, String, IntPtr, IntPtr, IntPtr, out IntPtr)
+  href: api/SharpHoundCommonLib.Ntlm.NativeMethods.html#SharpHoundCommonLib_Ntlm_NativeMethods_ldap_sasl_bind_s_SharpHoundCommonLib_Ntlm_SafeLdapHandle_System_String_System_String_System_IntPtr_System_IntPtr_System_IntPtr_System_IntPtr__
+  commentId: M:SharpHoundCommonLib.Ntlm.NativeMethods.ldap_sasl_bind_s(SharpHoundCommonLib.Ntlm.SafeLdapHandle,System.String,System.String,System.IntPtr,System.IntPtr,System.IntPtr,System.IntPtr@)
+  name.vb: ldap_sasl_bind_s(SafeLdapHandle, String, String, IntPtr, IntPtr, IntPtr, ByRef IntPtr)
+  fullName: SharpHoundCommonLib.Ntlm.NativeMethods.ldap_sasl_bind_s(SharpHoundCommonLib.Ntlm.SafeLdapHandle, System.String, System.String, System.IntPtr, System.IntPtr, System.IntPtr, out System.IntPtr)
+  fullName.vb: SharpHoundCommonLib.Ntlm.NativeMethods.ldap_sasl_bind_s(SharpHoundCommonLib.Ntlm.SafeLdapHandle, System.String, System.String, System.IntPtr, System.IntPtr, System.IntPtr, ByRef System.IntPtr)
+  nameWithType: NativeMethods.ldap_sasl_bind_s(SafeLdapHandle, String, String, IntPtr, IntPtr, IntPtr, out IntPtr)
+  nameWithType.vb: NativeMethods.ldap_sasl_bind_s(SafeLdapHandle, String, String, IntPtr, IntPtr, IntPtr, ByRef IntPtr)
+- uid: SharpHoundCommonLib.Ntlm.NativeMethods.ldap_sasl_bind_s*
+  name: ldap_sasl_bind_s
+  href: api/SharpHoundCommonLib.Ntlm.NativeMethods.html#SharpHoundCommonLib_Ntlm_NativeMethods_ldap_sasl_bind_s_
+  commentId: Overload:SharpHoundCommonLib.Ntlm.NativeMethods.ldap_sasl_bind_s
+  fullName: SharpHoundCommonLib.Ntlm.NativeMethods.ldap_sasl_bind_s
+  nameWithType: NativeMethods.ldap_sasl_bind_s
+- uid: SharpHoundCommonLib.Ntlm.NativeMethods.ldap_set_option(SharpHoundCommonLib.Ntlm.SafeLdapHandle,SharpHoundCommonLib.Enums.LdapOption,System.Int32@)
+  name: ldap_set_option(SafeLdapHandle, LdapOption, ref Int32)
+  href: api/SharpHoundCommonLib.Ntlm.NativeMethods.html#SharpHoundCommonLib_Ntlm_NativeMethods_ldap_set_option_SharpHoundCommonLib_Ntlm_SafeLdapHandle_SharpHoundCommonLib_Enums_LdapOption_System_Int32__
+  commentId: M:SharpHoundCommonLib.Ntlm.NativeMethods.ldap_set_option(SharpHoundCommonLib.Ntlm.SafeLdapHandle,SharpHoundCommonLib.Enums.LdapOption,System.Int32@)
+  name.vb: ldap_set_option(SafeLdapHandle, LdapOption, ByRef Int32)
+  fullName: SharpHoundCommonLib.Ntlm.NativeMethods.ldap_set_option(SharpHoundCommonLib.Ntlm.SafeLdapHandle, SharpHoundCommonLib.Enums.LdapOption, ref System.Int32)
+  fullName.vb: SharpHoundCommonLib.Ntlm.NativeMethods.ldap_set_option(SharpHoundCommonLib.Ntlm.SafeLdapHandle, SharpHoundCommonLib.Enums.LdapOption, ByRef System.Int32)
+  nameWithType: NativeMethods.ldap_set_option(SafeLdapHandle, LdapOption, ref Int32)
+  nameWithType.vb: NativeMethods.ldap_set_option(SafeLdapHandle, LdapOption, ByRef Int32)
+- uid: SharpHoundCommonLib.Ntlm.NativeMethods.ldap_set_option(SharpHoundCommonLib.Ntlm.SafeLdapHandle,SharpHoundCommonLib.Enums.LdapOption,System.IntPtr)
+  name: ldap_set_option(SafeLdapHandle, LdapOption, IntPtr)
+  href: api/SharpHoundCommonLib.Ntlm.NativeMethods.html#SharpHoundCommonLib_Ntlm_NativeMethods_ldap_set_option_SharpHoundCommonLib_Ntlm_SafeLdapHandle_SharpHoundCommonLib_Enums_LdapOption_System_IntPtr_
+  commentId: M:SharpHoundCommonLib.Ntlm.NativeMethods.ldap_set_option(SharpHoundCommonLib.Ntlm.SafeLdapHandle,SharpHoundCommonLib.Enums.LdapOption,System.IntPtr)
+  fullName: SharpHoundCommonLib.Ntlm.NativeMethods.ldap_set_option(SharpHoundCommonLib.Ntlm.SafeLdapHandle, SharpHoundCommonLib.Enums.LdapOption, System.IntPtr)
+  nameWithType: NativeMethods.ldap_set_option(SafeLdapHandle, LdapOption, IntPtr)
+- uid: SharpHoundCommonLib.Ntlm.NativeMethods.ldap_set_option*
+  name: ldap_set_option
+  href: api/SharpHoundCommonLib.Ntlm.NativeMethods.html#SharpHoundCommonLib_Ntlm_NativeMethods_ldap_set_option_
+  commentId: Overload:SharpHoundCommonLib.Ntlm.NativeMethods.ldap_set_option
+  fullName: SharpHoundCommonLib.Ntlm.NativeMethods.ldap_set_option
+  nameWithType: NativeMethods.ldap_set_option
+- uid: SharpHoundCommonLib.Ntlm.NativeMethods.ldap_unbind_s(System.IntPtr)
+  name: ldap_unbind_s(IntPtr)
+  href: api/SharpHoundCommonLib.Ntlm.NativeMethods.html#SharpHoundCommonLib_Ntlm_NativeMethods_ldap_unbind_s_System_IntPtr_
+  commentId: M:SharpHoundCommonLib.Ntlm.NativeMethods.ldap_unbind_s(System.IntPtr)
+  fullName: SharpHoundCommonLib.Ntlm.NativeMethods.ldap_unbind_s(System.IntPtr)
+  nameWithType: NativeMethods.ldap_unbind_s(IntPtr)
+- uid: SharpHoundCommonLib.Ntlm.NativeMethods.ldap_unbind_s*
+  name: ldap_unbind_s
+  href: api/SharpHoundCommonLib.Ntlm.NativeMethods.html#SharpHoundCommonLib_Ntlm_NativeMethods_ldap_unbind_s_
+  commentId: Overload:SharpHoundCommonLib.Ntlm.NativeMethods.ldap_unbind_s
+  fullName: SharpHoundCommonLib.Ntlm.NativeMethods.ldap_unbind_s
+  nameWithType: NativeMethods.ldap_unbind_s
+- uid: SharpHoundCommonLib.Ntlm.NativeMethods.LdapGetLastError
+  name: LdapGetLastError()
+  href: api/SharpHoundCommonLib.Ntlm.NativeMethods.html#SharpHoundCommonLib_Ntlm_NativeMethods_LdapGetLastError
+  commentId: M:SharpHoundCommonLib.Ntlm.NativeMethods.LdapGetLastError
+  fullName: SharpHoundCommonLib.Ntlm.NativeMethods.LdapGetLastError()
+  nameWithType: NativeMethods.LdapGetLastError()
+- uid: SharpHoundCommonLib.Ntlm.NativeMethods.LdapGetLastError*
+  name: LdapGetLastError
+  href: api/SharpHoundCommonLib.Ntlm.NativeMethods.html#SharpHoundCommonLib_Ntlm_NativeMethods_LdapGetLastError_
+  commentId: Overload:SharpHoundCommonLib.Ntlm.NativeMethods.LdapGetLastError
+  fullName: SharpHoundCommonLib.Ntlm.NativeMethods.LdapGetLastError
+  nameWithType: NativeMethods.LdapGetLastError
+- uid: SharpHoundCommonLib.Ntlm.NtlmAuthenticationHandler
+  name: NtlmAuthenticationHandler
+  href: api/SharpHoundCommonLib.Ntlm.NtlmAuthenticationHandler.html
+  commentId: T:SharpHoundCommonLib.Ntlm.NtlmAuthenticationHandler
+  fullName: SharpHoundCommonLib.Ntlm.NtlmAuthenticationHandler
+  nameWithType: NtlmAuthenticationHandler
+- uid: SharpHoundCommonLib.Ntlm.NtlmAuthenticationHandler.#ctor(System.String,ILogger)
+  name: NtlmAuthenticationHandler(String, ILogger)
+  href: api/SharpHoundCommonLib.Ntlm.NtlmAuthenticationHandler.html#SharpHoundCommonLib_Ntlm_NtlmAuthenticationHandler__ctor_System_String_ILogger_
+  commentId: M:SharpHoundCommonLib.Ntlm.NtlmAuthenticationHandler.#ctor(System.String,ILogger)
+  fullName: SharpHoundCommonLib.Ntlm.NtlmAuthenticationHandler.NtlmAuthenticationHandler(System.String, ILogger)
+  nameWithType: NtlmAuthenticationHandler.NtlmAuthenticationHandler(String, ILogger)
+- uid: SharpHoundCommonLib.Ntlm.NtlmAuthenticationHandler.#ctor*
+  name: NtlmAuthenticationHandler
+  href: api/SharpHoundCommonLib.Ntlm.NtlmAuthenticationHandler.html#SharpHoundCommonLib_Ntlm_NtlmAuthenticationHandler__ctor_
+  commentId: Overload:SharpHoundCommonLib.Ntlm.NtlmAuthenticationHandler.#ctor
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Ntlm.NtlmAuthenticationHandler.NtlmAuthenticationHandler
+  nameWithType: NtlmAuthenticationHandler.NtlmAuthenticationHandler
+- uid: SharpHoundCommonLib.Ntlm.NtlmAuthenticationHandler.Options
+  name: Options
+  href: api/SharpHoundCommonLib.Ntlm.NtlmAuthenticationHandler.html#SharpHoundCommonLib_Ntlm_NtlmAuthenticationHandler_Options
+  commentId: P:SharpHoundCommonLib.Ntlm.NtlmAuthenticationHandler.Options
+  fullName: SharpHoundCommonLib.Ntlm.NtlmAuthenticationHandler.Options
+  nameWithType: NtlmAuthenticationHandler.Options
+- uid: SharpHoundCommonLib.Ntlm.NtlmAuthenticationHandler.Options*
+  name: Options
+  href: api/SharpHoundCommonLib.Ntlm.NtlmAuthenticationHandler.html#SharpHoundCommonLib_Ntlm_NtlmAuthenticationHandler_Options_
+  commentId: Overload:SharpHoundCommonLib.Ntlm.NtlmAuthenticationHandler.Options
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Ntlm.NtlmAuthenticationHandler.Options
+  nameWithType: NtlmAuthenticationHandler.Options
+- uid: SharpHoundCommonLib.Ntlm.NtlmAuthenticationHandler.PerformNtlmAuthenticationAsync(SharpHoundCommonLib.Ntlm.INtlmTransport)
+  name: PerformNtlmAuthenticationAsync(INtlmTransport)
+  href: api/SharpHoundCommonLib.Ntlm.NtlmAuthenticationHandler.html#SharpHoundCommonLib_Ntlm_NtlmAuthenticationHandler_PerformNtlmAuthenticationAsync_SharpHoundCommonLib_Ntlm_INtlmTransport_
+  commentId: M:SharpHoundCommonLib.Ntlm.NtlmAuthenticationHandler.PerformNtlmAuthenticationAsync(SharpHoundCommonLib.Ntlm.INtlmTransport)
+  fullName: SharpHoundCommonLib.Ntlm.NtlmAuthenticationHandler.PerformNtlmAuthenticationAsync(SharpHoundCommonLib.Ntlm.INtlmTransport)
+  nameWithType: NtlmAuthenticationHandler.PerformNtlmAuthenticationAsync(INtlmTransport)
+- uid: SharpHoundCommonLib.Ntlm.NtlmAuthenticationHandler.PerformNtlmAuthenticationAsync*
+  name: PerformNtlmAuthenticationAsync
+  href: api/SharpHoundCommonLib.Ntlm.NtlmAuthenticationHandler.html#SharpHoundCommonLib_Ntlm_NtlmAuthenticationHandler_PerformNtlmAuthenticationAsync_
+  commentId: Overload:SharpHoundCommonLib.Ntlm.NtlmAuthenticationHandler.PerformNtlmAuthenticationAsync
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Ntlm.NtlmAuthenticationHandler.PerformNtlmAuthenticationAsync
+  nameWithType: NtlmAuthenticationHandler.PerformNtlmAuthenticationAsync
+- uid: SharpHoundCommonLib.Ntlm.SafeLdapHandle
+  name: SafeLdapHandle
+  href: api/SharpHoundCommonLib.Ntlm.SafeLdapHandle.html
+  commentId: T:SharpHoundCommonLib.Ntlm.SafeLdapHandle
+  fullName: SharpHoundCommonLib.Ntlm.SafeLdapHandle
+  nameWithType: SafeLdapHandle
+- uid: SharpHoundCommonLib.Ntlm.SafeLdapHandle.ReleaseHandle
+  name: ReleaseHandle()
+  href: api/SharpHoundCommonLib.Ntlm.SafeLdapHandle.html#SharpHoundCommonLib_Ntlm_SafeLdapHandle_ReleaseHandle
+  commentId: M:SharpHoundCommonLib.Ntlm.SafeLdapHandle.ReleaseHandle
+  fullName: SharpHoundCommonLib.Ntlm.SafeLdapHandle.ReleaseHandle()
+  nameWithType: SafeLdapHandle.ReleaseHandle()
+- uid: SharpHoundCommonLib.Ntlm.SafeLdapHandle.ReleaseHandle*
+  name: ReleaseHandle
+  href: api/SharpHoundCommonLib.Ntlm.SafeLdapHandle.html#SharpHoundCommonLib_Ntlm_SafeLdapHandle_ReleaseHandle_
+  commentId: Overload:SharpHoundCommonLib.Ntlm.SafeLdapHandle.ReleaseHandle
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Ntlm.SafeLdapHandle.ReleaseHandle
+  nameWithType: SafeLdapHandle.ReleaseHandle
+- uid: SharpHoundCommonLib.Ntlm.VerifyServerCert
+  name: VerifyServerCert
+  href: api/SharpHoundCommonLib.Ntlm.VerifyServerCert.html
+  commentId: T:SharpHoundCommonLib.Ntlm.VerifyServerCert
+  fullName: SharpHoundCommonLib.Ntlm.VerifyServerCert
+  nameWithType: VerifyServerCert
 - uid: SharpHoundCommonLib.OutputTypes
   name: SharpHoundCommonLib.OutputTypes
   href: api/SharpHoundCommonLib.OutputTypes.html
@@ -6344,6 +7115,85 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.OutputTypes.APIResult.FailureReason
   nameWithType: APIResult.FailureReason
+- uid: SharpHoundCommonLib.OutputTypes.APIResult`1
+  name: APIResult<T>
+  href: api/SharpHoundCommonLib.OutputTypes.APIResult-1.html
+  commentId: T:SharpHoundCommonLib.OutputTypes.APIResult`1
+  name.vb: APIResult(Of T)
+  fullName: SharpHoundCommonLib.OutputTypes.APIResult<T>
+  fullName.vb: SharpHoundCommonLib.OutputTypes.APIResult(Of T)
+  nameWithType: APIResult<T>
+  nameWithType.vb: APIResult(Of T)
+- uid: SharpHoundCommonLib.OutputTypes.APIResult`1.Failure(System.String)
+  name: Failure(String)
+  href: api/SharpHoundCommonLib.OutputTypes.APIResult-1.html#SharpHoundCommonLib_OutputTypes_APIResult_1_Failure_System_String_
+  commentId: M:SharpHoundCommonLib.OutputTypes.APIResult`1.Failure(System.String)
+  fullName: SharpHoundCommonLib.OutputTypes.APIResult<T>.Failure(System.String)
+  fullName.vb: SharpHoundCommonLib.OutputTypes.APIResult(Of T).Failure(System.String)
+  nameWithType: APIResult<T>.Failure(String)
+  nameWithType.vb: APIResult(Of T).Failure(String)
+- uid: SharpHoundCommonLib.OutputTypes.APIResult`1.Failure*
+  name: Failure
+  href: api/SharpHoundCommonLib.OutputTypes.APIResult-1.html#SharpHoundCommonLib_OutputTypes_APIResult_1_Failure_
+  commentId: Overload:SharpHoundCommonLib.OutputTypes.APIResult`1.Failure
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.OutputTypes.APIResult<T>.Failure
+  fullName.vb: SharpHoundCommonLib.OutputTypes.APIResult(Of T).Failure
+  nameWithType: APIResult<T>.Failure
+  nameWithType.vb: APIResult(Of T).Failure
+- uid: SharpHoundCommonLib.OutputTypes.APIResult`1.op_Implicit(`0)~SharpHoundCommonLib.OutputTypes.APIResult{`0}
+  name: Implicit(T to APIResult<T>)
+  href: api/SharpHoundCommonLib.OutputTypes.APIResult-1.html#SharpHoundCommonLib_OutputTypes_APIResult_1_op_Implicit__0__SharpHoundCommonLib_OutputTypes_APIResult__0_
+  commentId: M:SharpHoundCommonLib.OutputTypes.APIResult`1.op_Implicit(`0)~SharpHoundCommonLib.OutputTypes.APIResult{`0}
+  name.vb: Widening(T to APIResult(Of T))
+  fullName: SharpHoundCommonLib.OutputTypes.APIResult<T>.Implicit(T to SharpHoundCommonLib.OutputTypes.APIResult<T>)
+  fullName.vb: SharpHoundCommonLib.OutputTypes.APIResult(Of T).Widening(T to SharpHoundCommonLib.OutputTypes.APIResult(Of T))
+  nameWithType: APIResult<T>.Implicit(T to APIResult<T>)
+  nameWithType.vb: APIResult(Of T).Widening(T to APIResult(Of T))
+- uid: SharpHoundCommonLib.OutputTypes.APIResult`1.op_Implicit*
+  name: Implicit
+  href: api/SharpHoundCommonLib.OutputTypes.APIResult-1.html#SharpHoundCommonLib_OutputTypes_APIResult_1_op_Implicit_
+  commentId: Overload:SharpHoundCommonLib.OutputTypes.APIResult`1.op_Implicit
+  isSpec: "True"
+  name.vb: Widening
+  fullName: SharpHoundCommonLib.OutputTypes.APIResult<T>.Implicit
+  fullName.vb: SharpHoundCommonLib.OutputTypes.APIResult(Of T).Widening
+  nameWithType: APIResult<T>.Implicit
+  nameWithType.vb: APIResult(Of T).Widening
+- uid: SharpHoundCommonLib.OutputTypes.APIResult`1.Result
+  name: Result
+  href: api/SharpHoundCommonLib.OutputTypes.APIResult-1.html#SharpHoundCommonLib_OutputTypes_APIResult_1_Result
+  commentId: P:SharpHoundCommonLib.OutputTypes.APIResult`1.Result
+  fullName: SharpHoundCommonLib.OutputTypes.APIResult<T>.Result
+  fullName.vb: SharpHoundCommonLib.OutputTypes.APIResult(Of T).Result
+  nameWithType: APIResult<T>.Result
+  nameWithType.vb: APIResult(Of T).Result
+- uid: SharpHoundCommonLib.OutputTypes.APIResult`1.Result*
+  name: Result
+  href: api/SharpHoundCommonLib.OutputTypes.APIResult-1.html#SharpHoundCommonLib_OutputTypes_APIResult_1_Result_
+  commentId: Overload:SharpHoundCommonLib.OutputTypes.APIResult`1.Result
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.OutputTypes.APIResult<T>.Result
+  fullName.vb: SharpHoundCommonLib.OutputTypes.APIResult(Of T).Result
+  nameWithType: APIResult<T>.Result
+  nameWithType.vb: APIResult(Of T).Result
+- uid: SharpHoundCommonLib.OutputTypes.APIResult`1.Success(`0)
+  name: Success(T)
+  href: api/SharpHoundCommonLib.OutputTypes.APIResult-1.html#SharpHoundCommonLib_OutputTypes_APIResult_1_Success__0_
+  commentId: M:SharpHoundCommonLib.OutputTypes.APIResult`1.Success(`0)
+  fullName: SharpHoundCommonLib.OutputTypes.APIResult<T>.Success(T)
+  fullName.vb: SharpHoundCommonLib.OutputTypes.APIResult(Of T).Success(T)
+  nameWithType: APIResult<T>.Success(T)
+  nameWithType.vb: APIResult(Of T).Success(T)
+- uid: SharpHoundCommonLib.OutputTypes.APIResult`1.Success*
+  name: Success
+  href: api/SharpHoundCommonLib.OutputTypes.APIResult-1.html#SharpHoundCommonLib_OutputTypes_APIResult_1_Success_
+  commentId: Overload:SharpHoundCommonLib.OutputTypes.APIResult`1.Success
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.OutputTypes.APIResult<T>.Success
+  fullName.vb: SharpHoundCommonLib.OutputTypes.APIResult(Of T).Success
+  nameWithType: APIResult<T>.Success
+  nameWithType.vb: APIResult(Of T).Success
 - uid: SharpHoundCommonLib.OutputTypes.BoolRegistryAPIResult
   name: BoolRegistryAPIResult
   href: api/SharpHoundCommonLib.OutputTypes.BoolRegistryAPIResult.html
@@ -6363,6 +7213,114 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.OutputTypes.BoolRegistryAPIResult.Value
   nameWithType: BoolRegistryAPIResult.Value
+- uid: SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpoint
+  name: CAEnrollmentEndpoint
+  href: api/SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpoint.html
+  commentId: T:SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpoint
+  fullName: SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpoint
+  nameWithType: CAEnrollmentEndpoint
+- uid: SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult
+  name: CAEnrollmentEndpointScanResult
+  href: api/SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult.html
+  commentId: T:SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult
+  fullName: SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult
+  nameWithType: CAEnrollmentEndpointScanResult
+- uid: SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult.Error
+  name: Error
+  href: api/SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult.html#SharpHoundCommonLib_OutputTypes_CAEnrollmentEndpointScanResult_Error
+  commentId: F:SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult.Error
+  fullName: SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult.Error
+  nameWithType: CAEnrollmentEndpointScanResult.Error
+- uid: SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult.NotVulnerable_NoNtlmChallenge
+  name: NotVulnerable_NoNtlmChallenge
+  href: api/SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult.html#SharpHoundCommonLib_OutputTypes_CAEnrollmentEndpointScanResult_NotVulnerable_NoNtlmChallenge
+  commentId: F:SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult.NotVulnerable_NoNtlmChallenge
+  fullName: SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult.NotVulnerable_NoNtlmChallenge
+  nameWithType: CAEnrollmentEndpointScanResult.NotVulnerable_NoNtlmChallenge
+- uid: SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult.NotVulnerable_NtlmChannelBindingRequired
+  name: NotVulnerable_NtlmChannelBindingRequired
+  href: api/SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult.html#SharpHoundCommonLib_OutputTypes_CAEnrollmentEndpointScanResult_NotVulnerable_NtlmChannelBindingRequired
+  commentId: F:SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult.NotVulnerable_NtlmChannelBindingRequired
+  fullName: SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult.NotVulnerable_NtlmChannelBindingRequired
+  nameWithType: CAEnrollmentEndpointScanResult.NotVulnerable_NtlmChannelBindingRequired
+- uid: SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult.NotVulnerable_PathForbidden
+  name: NotVulnerable_PathForbidden
+  href: api/SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult.html#SharpHoundCommonLib_OutputTypes_CAEnrollmentEndpointScanResult_NotVulnerable_PathForbidden
+  commentId: F:SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult.NotVulnerable_PathForbidden
+  fullName: SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult.NotVulnerable_PathForbidden
+  nameWithType: CAEnrollmentEndpointScanResult.NotVulnerable_PathForbidden
+- uid: SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult.NotVulnerable_PathNotFound
+  name: NotVulnerable_PathNotFound
+  href: api/SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult.html#SharpHoundCommonLib_OutputTypes_CAEnrollmentEndpointScanResult_NotVulnerable_PathNotFound
+  commentId: F:SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult.NotVulnerable_PathNotFound
+  fullName: SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult.NotVulnerable_PathNotFound
+  nameWithType: CAEnrollmentEndpointScanResult.NotVulnerable_PathNotFound
+- uid: SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult.NotVulnerable_PortInaccessible
+  name: NotVulnerable_PortInaccessible
+  href: api/SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult.html#SharpHoundCommonLib_OutputTypes_CAEnrollmentEndpointScanResult_NotVulnerable_PortInaccessible
+  commentId: F:SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult.NotVulnerable_PortInaccessible
+  fullName: SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult.NotVulnerable_PortInaccessible
+  nameWithType: CAEnrollmentEndpointScanResult.NotVulnerable_PortInaccessible
+- uid: SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult.NotVulnerable_ServerError
+  name: NotVulnerable_ServerError
+  href: api/SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult.html#SharpHoundCommonLib_OutputTypes_CAEnrollmentEndpointScanResult_NotVulnerable_ServerError
+  commentId: F:SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult.NotVulnerable_ServerError
+  fullName: SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult.NotVulnerable_ServerError
+  nameWithType: CAEnrollmentEndpointScanResult.NotVulnerable_ServerError
+- uid: SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult.Vulnerable_KerberosHttpEndpoint
+  name: Vulnerable_KerberosHttpEndpoint
+  href: api/SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult.html#SharpHoundCommonLib_OutputTypes_CAEnrollmentEndpointScanResult_Vulnerable_KerberosHttpEndpoint
+  commentId: F:SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult.Vulnerable_KerberosHttpEndpoint
+  fullName: SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult.Vulnerable_KerberosHttpEndpoint
+  nameWithType: CAEnrollmentEndpointScanResult.Vulnerable_KerberosHttpEndpoint
+- uid: SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult.Vulnerable_NtlmHttpEndpoint
+  name: Vulnerable_NtlmHttpEndpoint
+  href: api/SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult.html#SharpHoundCommonLib_OutputTypes_CAEnrollmentEndpointScanResult_Vulnerable_NtlmHttpEndpoint
+  commentId: F:SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult.Vulnerable_NtlmHttpEndpoint
+  fullName: SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult.Vulnerable_NtlmHttpEndpoint
+  nameWithType: CAEnrollmentEndpointScanResult.Vulnerable_NtlmHttpEndpoint
+- uid: SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult.Vulnerable_NtlmHttpsNoChannelBinding
+  name: Vulnerable_NtlmHttpsNoChannelBinding
+  href: api/SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult.html#SharpHoundCommonLib_OutputTypes_CAEnrollmentEndpointScanResult_Vulnerable_NtlmHttpsNoChannelBinding
+  commentId: F:SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult.Vulnerable_NtlmHttpsNoChannelBinding
+  fullName: SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult.Vulnerable_NtlmHttpsNoChannelBinding
+  nameWithType: CAEnrollmentEndpointScanResult.Vulnerable_NtlmHttpsNoChannelBinding
+- uid: SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointType
+  name: CAEnrollmentEndpointType
+  href: api/SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointType.html
+  commentId: T:SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointType
+  fullName: SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointType
+  nameWithType: CAEnrollmentEndpointType
+- uid: SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointType.DCOM
+  name: DCOM
+  href: api/SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointType.html#SharpHoundCommonLib_OutputTypes_CAEnrollmentEndpointType_DCOM
+  commentId: F:SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointType.DCOM
+  fullName: SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointType.DCOM
+  nameWithType: CAEnrollmentEndpointType.DCOM
+- uid: SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointType.EnrollmentWebService
+  name: EnrollmentWebService
+  href: api/SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointType.html#SharpHoundCommonLib_OutputTypes_CAEnrollmentEndpointType_EnrollmentWebService
+  commentId: F:SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointType.EnrollmentWebService
+  fullName: SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointType.EnrollmentWebService
+  nameWithType: CAEnrollmentEndpointType.EnrollmentWebService
+- uid: SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointType.NDES
+  name: NDES
+  href: api/SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointType.html#SharpHoundCommonLib_OutputTypes_CAEnrollmentEndpointType_NDES
+  commentId: F:SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointType.NDES
+  fullName: SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointType.NDES
+  nameWithType: CAEnrollmentEndpointType.NDES
+- uid: SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointType.RPC
+  name: RPC
+  href: api/SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointType.html#SharpHoundCommonLib_OutputTypes_CAEnrollmentEndpointType_RPC
+  commentId: F:SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointType.RPC
+  fullName: SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointType.RPC
+  nameWithType: CAEnrollmentEndpointType.RPC
+- uid: SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointType.WebEnrollmentApplication
+  name: WebEnrollmentApplication
+  href: api/SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointType.html#SharpHoundCommonLib_OutputTypes_CAEnrollmentEndpointType_WebEnrollmentApplication
+  commentId: F:SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointType.WebEnrollmentApplication
+  fullName: SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointType.WebEnrollmentApplication
+  nameWithType: CAEnrollmentEndpointType.WebEnrollmentApplication
 - uid: SharpHoundCommonLib.OutputTypes.CARegistryData
   name: CARegistryData
   href: api/SharpHoundCommonLib.OutputTypes.CARegistryData.html
@@ -6569,6 +7527,32 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.OutputTypes.Computer.IsDC
   nameWithType: Computer.IsDC
+- uid: SharpHoundCommonLib.OutputTypes.Computer.IsWebClientRunning
+  name: IsWebClientRunning
+  href: api/SharpHoundCommonLib.OutputTypes.Computer.html#SharpHoundCommonLib_OutputTypes_Computer_IsWebClientRunning
+  commentId: P:SharpHoundCommonLib.OutputTypes.Computer.IsWebClientRunning
+  fullName: SharpHoundCommonLib.OutputTypes.Computer.IsWebClientRunning
+  nameWithType: Computer.IsWebClientRunning
+- uid: SharpHoundCommonLib.OutputTypes.Computer.IsWebClientRunning*
+  name: IsWebClientRunning
+  href: api/SharpHoundCommonLib.OutputTypes.Computer.html#SharpHoundCommonLib_OutputTypes_Computer_IsWebClientRunning_
+  commentId: Overload:SharpHoundCommonLib.OutputTypes.Computer.IsWebClientRunning
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.OutputTypes.Computer.IsWebClientRunning
+  nameWithType: Computer.IsWebClientRunning
+- uid: SharpHoundCommonLib.OutputTypes.Computer.LdapServices
+  name: LdapServices
+  href: api/SharpHoundCommonLib.OutputTypes.Computer.html#SharpHoundCommonLib_OutputTypes_Computer_LdapServices
+  commentId: P:SharpHoundCommonLib.OutputTypes.Computer.LdapServices
+  fullName: SharpHoundCommonLib.OutputTypes.Computer.LdapServices
+  nameWithType: Computer.LdapServices
+- uid: SharpHoundCommonLib.OutputTypes.Computer.LdapServices*
+  name: LdapServices
+  href: api/SharpHoundCommonLib.OutputTypes.Computer.html#SharpHoundCommonLib_OutputTypes_Computer_LdapServices_
+  commentId: Overload:SharpHoundCommonLib.OutputTypes.Computer.LdapServices
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.OutputTypes.Computer.LdapServices
+  nameWithType: Computer.LdapServices
 - uid: SharpHoundCommonLib.OutputTypes.Computer.LocalGroups
   name: LocalGroups
   href: api/SharpHoundCommonLib.OutputTypes.Computer.html#SharpHoundCommonLib_OutputTypes_Computer_LocalGroups
@@ -6582,6 +7566,19 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.OutputTypes.Computer.LocalGroups
   nameWithType: Computer.LocalGroups
+- uid: SharpHoundCommonLib.OutputTypes.Computer.NtlmSessions
+  name: NtlmSessions
+  href: api/SharpHoundCommonLib.OutputTypes.Computer.html#SharpHoundCommonLib_OutputTypes_Computer_NtlmSessions
+  commentId: P:SharpHoundCommonLib.OutputTypes.Computer.NtlmSessions
+  fullName: SharpHoundCommonLib.OutputTypes.Computer.NtlmSessions
+  nameWithType: Computer.NtlmSessions
+- uid: SharpHoundCommonLib.OutputTypes.Computer.NtlmSessions*
+  name: NtlmSessions
+  href: api/SharpHoundCommonLib.OutputTypes.Computer.html#SharpHoundCommonLib_OutputTypes_Computer_NtlmSessions_
+  commentId: Overload:SharpHoundCommonLib.OutputTypes.Computer.NtlmSessions
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.OutputTypes.Computer.NtlmSessions
+  nameWithType: Computer.NtlmSessions
 - uid: SharpHoundCommonLib.OutputTypes.Computer.PrimaryGroupSID
   name: PrimaryGroupSID
   href: api/SharpHoundCommonLib.OutputTypes.Computer.html#SharpHoundCommonLib_OutputTypes_Computer_PrimaryGroupSID
@@ -6634,6 +7631,19 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.OutputTypes.Computer.Sessions
   nameWithType: Computer.Sessions
+- uid: SharpHoundCommonLib.OutputTypes.Computer.SmbInfo
+  name: SmbInfo
+  href: api/SharpHoundCommonLib.OutputTypes.Computer.html#SharpHoundCommonLib_OutputTypes_Computer_SmbInfo
+  commentId: P:SharpHoundCommonLib.OutputTypes.Computer.SmbInfo
+  fullName: SharpHoundCommonLib.OutputTypes.Computer.SmbInfo
+  nameWithType: Computer.SmbInfo
+- uid: SharpHoundCommonLib.OutputTypes.Computer.SmbInfo*
+  name: SmbInfo
+  href: api/SharpHoundCommonLib.OutputTypes.Computer.html#SharpHoundCommonLib_OutputTypes_Computer_SmbInfo_
+  commentId: Overload:SharpHoundCommonLib.OutputTypes.Computer.SmbInfo
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.OutputTypes.Computer.SmbInfo
+  nameWithType: Computer.SmbInfo
 - uid: SharpHoundCommonLib.OutputTypes.Computer.Status
   name: Status
   href: api/SharpHoundCommonLib.OutputTypes.Computer.html#SharpHoundCommonLib_OutputTypes_Computer_Status
@@ -6673,103 +7683,6 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.OutputTypes.Computer.UserRights
   nameWithType: Computer.UserRights
-- uid: SharpHoundCommonLib.OutputTypes.ComputerStatus
-  name: ComputerStatus
-  href: api/SharpHoundCommonLib.OutputTypes.ComputerStatus.html
-  commentId: T:SharpHoundCommonLib.OutputTypes.ComputerStatus
-  fullName: SharpHoundCommonLib.OutputTypes.ComputerStatus
-  nameWithType: ComputerStatus
-- uid: SharpHoundCommonLib.OutputTypes.ComputerStatus.Connectable
-  name: Connectable
-  href: api/SharpHoundCommonLib.OutputTypes.ComputerStatus.html#SharpHoundCommonLib_OutputTypes_ComputerStatus_Connectable
-  commentId: P:SharpHoundCommonLib.OutputTypes.ComputerStatus.Connectable
-  fullName: SharpHoundCommonLib.OutputTypes.ComputerStatus.Connectable
-  nameWithType: ComputerStatus.Connectable
-- uid: SharpHoundCommonLib.OutputTypes.ComputerStatus.Connectable*
-  name: Connectable
-  href: api/SharpHoundCommonLib.OutputTypes.ComputerStatus.html#SharpHoundCommonLib_OutputTypes_ComputerStatus_Connectable_
-  commentId: Overload:SharpHoundCommonLib.OutputTypes.ComputerStatus.Connectable
-  isSpec: "True"
-  fullName: SharpHoundCommonLib.OutputTypes.ComputerStatus.Connectable
-  nameWithType: ComputerStatus.Connectable
-- uid: SharpHoundCommonLib.OutputTypes.ComputerStatus.Error
-  name: Error
-  href: api/SharpHoundCommonLib.OutputTypes.ComputerStatus.html#SharpHoundCommonLib_OutputTypes_ComputerStatus_Error
-  commentId: P:SharpHoundCommonLib.OutputTypes.ComputerStatus.Error
-  fullName: SharpHoundCommonLib.OutputTypes.ComputerStatus.Error
-  nameWithType: ComputerStatus.Error
-- uid: SharpHoundCommonLib.OutputTypes.ComputerStatus.Error*
-  name: Error
-  href: api/SharpHoundCommonLib.OutputTypes.ComputerStatus.html#SharpHoundCommonLib_OutputTypes_ComputerStatus_Error_
-  commentId: Overload:SharpHoundCommonLib.OutputTypes.ComputerStatus.Error
-  isSpec: "True"
-  fullName: SharpHoundCommonLib.OutputTypes.ComputerStatus.Error
-  nameWithType: ComputerStatus.Error
-- uid: SharpHoundCommonLib.OutputTypes.ComputerStatus.GetCSVStatus(System.String)
-  name: GetCSVStatus(String)
-  href: api/SharpHoundCommonLib.OutputTypes.ComputerStatus.html#SharpHoundCommonLib_OutputTypes_ComputerStatus_GetCSVStatus_System_String_
-  commentId: M:SharpHoundCommonLib.OutputTypes.ComputerStatus.GetCSVStatus(System.String)
-  fullName: SharpHoundCommonLib.OutputTypes.ComputerStatus.GetCSVStatus(System.String)
-  nameWithType: ComputerStatus.GetCSVStatus(String)
-- uid: SharpHoundCommonLib.OutputTypes.ComputerStatus.GetCSVStatus*
-  name: GetCSVStatus
-  href: api/SharpHoundCommonLib.OutputTypes.ComputerStatus.html#SharpHoundCommonLib_OutputTypes_ComputerStatus_GetCSVStatus_
-  commentId: Overload:SharpHoundCommonLib.OutputTypes.ComputerStatus.GetCSVStatus
-  isSpec: "True"
-  fullName: SharpHoundCommonLib.OutputTypes.ComputerStatus.GetCSVStatus
-  nameWithType: ComputerStatus.GetCSVStatus
-- uid: SharpHoundCommonLib.OutputTypes.ComputerStatus.NonWindowsOS
-  name: NonWindowsOS
-  href: api/SharpHoundCommonLib.OutputTypes.ComputerStatus.html#SharpHoundCommonLib_OutputTypes_ComputerStatus_NonWindowsOS
-  commentId: P:SharpHoundCommonLib.OutputTypes.ComputerStatus.NonWindowsOS
-  fullName: SharpHoundCommonLib.OutputTypes.ComputerStatus.NonWindowsOS
-  nameWithType: ComputerStatus.NonWindowsOS
-- uid: SharpHoundCommonLib.OutputTypes.ComputerStatus.NonWindowsOS*
-  name: NonWindowsOS
-  href: api/SharpHoundCommonLib.OutputTypes.ComputerStatus.html#SharpHoundCommonLib_OutputTypes_ComputerStatus_NonWindowsOS_
-  commentId: Overload:SharpHoundCommonLib.OutputTypes.ComputerStatus.NonWindowsOS
-  isSpec: "True"
-  fullName: SharpHoundCommonLib.OutputTypes.ComputerStatus.NonWindowsOS
-  nameWithType: ComputerStatus.NonWindowsOS
-- uid: SharpHoundCommonLib.OutputTypes.ComputerStatus.NotActive
-  name: NotActive
-  href: api/SharpHoundCommonLib.OutputTypes.ComputerStatus.html#SharpHoundCommonLib_OutputTypes_ComputerStatus_NotActive
-  commentId: P:SharpHoundCommonLib.OutputTypes.ComputerStatus.NotActive
-  fullName: SharpHoundCommonLib.OutputTypes.ComputerStatus.NotActive
-  nameWithType: ComputerStatus.NotActive
-- uid: SharpHoundCommonLib.OutputTypes.ComputerStatus.NotActive*
-  name: NotActive
-  href: api/SharpHoundCommonLib.OutputTypes.ComputerStatus.html#SharpHoundCommonLib_OutputTypes_ComputerStatus_NotActive_
-  commentId: Overload:SharpHoundCommonLib.OutputTypes.ComputerStatus.NotActive
-  isSpec: "True"
-  fullName: SharpHoundCommonLib.OutputTypes.ComputerStatus.NotActive
-  nameWithType: ComputerStatus.NotActive
-- uid: SharpHoundCommonLib.OutputTypes.ComputerStatus.PortNotOpen
-  name: PortNotOpen
-  href: api/SharpHoundCommonLib.OutputTypes.ComputerStatus.html#SharpHoundCommonLib_OutputTypes_ComputerStatus_PortNotOpen
-  commentId: P:SharpHoundCommonLib.OutputTypes.ComputerStatus.PortNotOpen
-  fullName: SharpHoundCommonLib.OutputTypes.ComputerStatus.PortNotOpen
-  nameWithType: ComputerStatus.PortNotOpen
-- uid: SharpHoundCommonLib.OutputTypes.ComputerStatus.PortNotOpen*
-  name: PortNotOpen
-  href: api/SharpHoundCommonLib.OutputTypes.ComputerStatus.html#SharpHoundCommonLib_OutputTypes_ComputerStatus_PortNotOpen_
-  commentId: Overload:SharpHoundCommonLib.OutputTypes.ComputerStatus.PortNotOpen
-  isSpec: "True"
-  fullName: SharpHoundCommonLib.OutputTypes.ComputerStatus.PortNotOpen
-  nameWithType: ComputerStatus.PortNotOpen
-- uid: SharpHoundCommonLib.OutputTypes.ComputerStatus.Success
-  name: Success
-  href: api/SharpHoundCommonLib.OutputTypes.ComputerStatus.html#SharpHoundCommonLib_OutputTypes_ComputerStatus_Success
-  commentId: P:SharpHoundCommonLib.OutputTypes.ComputerStatus.Success
-  fullName: SharpHoundCommonLib.OutputTypes.ComputerStatus.Success
-  nameWithType: ComputerStatus.Success
-- uid: SharpHoundCommonLib.OutputTypes.ComputerStatus.Success*
-  name: Success
-  href: api/SharpHoundCommonLib.OutputTypes.ComputerStatus.html#SharpHoundCommonLib_OutputTypes_ComputerStatus_Success_
-  commentId: Overload:SharpHoundCommonLib.OutputTypes.ComputerStatus.Success
-  isSpec: "True"
-  fullName: SharpHoundCommonLib.OutputTypes.ComputerStatus.Success
-  nameWithType: ComputerStatus.Success
 - uid: SharpHoundCommonLib.OutputTypes.Container
   name: Container
   href: api/SharpHoundCommonLib.OutputTypes.Container.html
@@ -6802,38 +7715,6 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.OutputTypes.Container.InheritanceHashes
   nameWithType: Container.InheritanceHashes
-- uid: SharpHoundCommonLib.OutputTypes.DCRegistryData
-  name: DCRegistryData
-  href: api/SharpHoundCommonLib.OutputTypes.DCRegistryData.html
-  commentId: T:SharpHoundCommonLib.OutputTypes.DCRegistryData
-  fullName: SharpHoundCommonLib.OutputTypes.DCRegistryData
-  nameWithType: DCRegistryData
-- uid: SharpHoundCommonLib.OutputTypes.DCRegistryData.CertificateMappingMethods
-  name: CertificateMappingMethods
-  href: api/SharpHoundCommonLib.OutputTypes.DCRegistryData.html#SharpHoundCommonLib_OutputTypes_DCRegistryData_CertificateMappingMethods
-  commentId: P:SharpHoundCommonLib.OutputTypes.DCRegistryData.CertificateMappingMethods
-  fullName: SharpHoundCommonLib.OutputTypes.DCRegistryData.CertificateMappingMethods
-  nameWithType: DCRegistryData.CertificateMappingMethods
-- uid: SharpHoundCommonLib.OutputTypes.DCRegistryData.CertificateMappingMethods*
-  name: CertificateMappingMethods
-  href: api/SharpHoundCommonLib.OutputTypes.DCRegistryData.html#SharpHoundCommonLib_OutputTypes_DCRegistryData_CertificateMappingMethods_
-  commentId: Overload:SharpHoundCommonLib.OutputTypes.DCRegistryData.CertificateMappingMethods
-  isSpec: "True"
-  fullName: SharpHoundCommonLib.OutputTypes.DCRegistryData.CertificateMappingMethods
-  nameWithType: DCRegistryData.CertificateMappingMethods
-- uid: SharpHoundCommonLib.OutputTypes.DCRegistryData.StrongCertificateBindingEnforcement
-  name: StrongCertificateBindingEnforcement
-  href: api/SharpHoundCommonLib.OutputTypes.DCRegistryData.html#SharpHoundCommonLib_OutputTypes_DCRegistryData_StrongCertificateBindingEnforcement
-  commentId: P:SharpHoundCommonLib.OutputTypes.DCRegistryData.StrongCertificateBindingEnforcement
-  fullName: SharpHoundCommonLib.OutputTypes.DCRegistryData.StrongCertificateBindingEnforcement
-  nameWithType: DCRegistryData.StrongCertificateBindingEnforcement
-- uid: SharpHoundCommonLib.OutputTypes.DCRegistryData.StrongCertificateBindingEnforcement*
-  name: StrongCertificateBindingEnforcement
-  href: api/SharpHoundCommonLib.OutputTypes.DCRegistryData.html#SharpHoundCommonLib_OutputTypes_DCRegistryData_StrongCertificateBindingEnforcement_
-  commentId: Overload:SharpHoundCommonLib.OutputTypes.DCRegistryData.StrongCertificateBindingEnforcement
-  isSpec: "True"
-  fullName: SharpHoundCommonLib.OutputTypes.DCRegistryData.StrongCertificateBindingEnforcement
-  nameWithType: DCRegistryData.StrongCertificateBindingEnforcement
 - uid: SharpHoundCommonLib.OutputTypes.Domain
   name: Domain
   href: api/SharpHoundCommonLib.OutputTypes.Domain.html
@@ -7085,6 +7966,19 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.OutputTypes.EnterpriseCA.HostingComputer
   nameWithType: EnterpriseCA.HostingComputer
+- uid: SharpHoundCommonLib.OutputTypes.EnterpriseCA.HttpEnrollmentEndpoints
+  name: HttpEnrollmentEndpoints
+  href: api/SharpHoundCommonLib.OutputTypes.EnterpriseCA.html#SharpHoundCommonLib_OutputTypes_EnterpriseCA_HttpEnrollmentEndpoints
+  commentId: P:SharpHoundCommonLib.OutputTypes.EnterpriseCA.HttpEnrollmentEndpoints
+  fullName: SharpHoundCommonLib.OutputTypes.EnterpriseCA.HttpEnrollmentEndpoints
+  nameWithType: EnterpriseCA.HttpEnrollmentEndpoints
+- uid: SharpHoundCommonLib.OutputTypes.EnterpriseCA.HttpEnrollmentEndpoints*
+  name: HttpEnrollmentEndpoints
+  href: api/SharpHoundCommonLib.OutputTypes.EnterpriseCA.html#SharpHoundCommonLib_OutputTypes_EnterpriseCA_HttpEnrollmentEndpoints_
+  commentId: Overload:SharpHoundCommonLib.OutputTypes.EnterpriseCA.HttpEnrollmentEndpoints
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.OutputTypes.EnterpriseCA.HttpEnrollmentEndpoints
+  nameWithType: EnterpriseCA.HttpEnrollmentEndpoints
 - uid: SharpHoundCommonLib.OutputTypes.GPLink
   name: GPLink
   href: api/SharpHoundCommonLib.OutputTypes.GPLink.html
@@ -7212,6 +8106,12 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.OutputTypes.IssuancePolicy.GroupLink
   nameWithType: IssuancePolicy.GroupLink
+- uid: SharpHoundCommonLib.OutputTypes.LdapService
+  name: LdapService
+  href: api/SharpHoundCommonLib.OutputTypes.LdapService.html
+  commentId: T:SharpHoundCommonLib.OutputTypes.LdapService
+  fullName: SharpHoundCommonLib.OutputTypes.LdapService
+  nameWithType: LdapService
 - uid: SharpHoundCommonLib.OutputTypes.LocalGroup
   name: LocalGroup
   href: api/SharpHoundCommonLib.OutputTypes.LocalGroup.html
@@ -7501,6 +8401,44 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.OutputTypes.NTAuthStore.DomainSID
   nameWithType: NTAuthStore.DomainSID
+- uid: SharpHoundCommonLib.OutputTypes.NtlmSession
+  name: NtlmSession
+  href: api/SharpHoundCommonLib.OutputTypes.NtlmSession.html
+  commentId: T:SharpHoundCommonLib.OutputTypes.NtlmSession
+  fullName: SharpHoundCommonLib.OutputTypes.NtlmSession
+  nameWithType: NtlmSession
+- uid: SharpHoundCommonLib.OutputTypes.NtlmSessionResult
+  name: NtlmSessionResult
+  href: api/SharpHoundCommonLib.OutputTypes.NtlmSessionResult.html
+  commentId: T:SharpHoundCommonLib.OutputTypes.NtlmSessionResult
+  fullName: SharpHoundCommonLib.OutputTypes.NtlmSessionResult
+  nameWithType: NtlmSessionResult
+- uid: SharpHoundCommonLib.OutputTypes.NtlmSessionResult.CollectionDurationMs
+  name: CollectionDurationMs
+  href: api/SharpHoundCommonLib.OutputTypes.NtlmSessionResult.html#SharpHoundCommonLib_OutputTypes_NtlmSessionResult_CollectionDurationMs
+  commentId: P:SharpHoundCommonLib.OutputTypes.NtlmSessionResult.CollectionDurationMs
+  fullName: SharpHoundCommonLib.OutputTypes.NtlmSessionResult.CollectionDurationMs
+  nameWithType: NtlmSessionResult.CollectionDurationMs
+- uid: SharpHoundCommonLib.OutputTypes.NtlmSessionResult.CollectionDurationMs*
+  name: CollectionDurationMs
+  href: api/SharpHoundCommonLib.OutputTypes.NtlmSessionResult.html#SharpHoundCommonLib_OutputTypes_NtlmSessionResult_CollectionDurationMs_
+  commentId: Overload:SharpHoundCommonLib.OutputTypes.NtlmSessionResult.CollectionDurationMs
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.OutputTypes.NtlmSessionResult.CollectionDurationMs
+  nameWithType: NtlmSessionResult.CollectionDurationMs
+- uid: SharpHoundCommonLib.OutputTypes.NtlmSessionResult.Sessions
+  name: Sessions
+  href: api/SharpHoundCommonLib.OutputTypes.NtlmSessionResult.html#SharpHoundCommonLib_OutputTypes_NtlmSessionResult_Sessions
+  commentId: P:SharpHoundCommonLib.OutputTypes.NtlmSessionResult.Sessions
+  fullName: SharpHoundCommonLib.OutputTypes.NtlmSessionResult.Sessions
+  nameWithType: NtlmSessionResult.Sessions
+- uid: SharpHoundCommonLib.OutputTypes.NtlmSessionResult.Sessions*
+  name: Sessions
+  href: api/SharpHoundCommonLib.OutputTypes.NtlmSessionResult.html#SharpHoundCommonLib_OutputTypes_NtlmSessionResult_Sessions_
+  commentId: Overload:SharpHoundCommonLib.OutputTypes.NtlmSessionResult.Sessions
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.OutputTypes.NtlmSessionResult.Sessions
+  nameWithType: NtlmSessionResult.Sessions
 - uid: SharpHoundCommonLib.OutputTypes.OU
   name: OU
   href: api/SharpHoundCommonLib.OutputTypes.OU.html
@@ -8331,6 +9269,21 @@ references:
   commentId: M:SharpHoundCommonLib.Processors.ACLProcessor.ProcessACL(SharpHoundCommonLib.ResolvedSearchResult,SharpHoundCommonLib.IDirectoryObject)
   fullName: SharpHoundCommonLib.Processors.ACLProcessor.ProcessACL(SharpHoundCommonLib.ResolvedSearchResult, SharpHoundCommonLib.IDirectoryObject)
   nameWithType: ACLProcessor.ProcessACL(ResolvedSearchResult, IDirectoryObject)
+- uid: SharpHoundCommonLib.Processors.ACLProcessor.ProcessACL(SharpHoundCommonLib.ResolvedSearchResult,SharpHoundCommonLib.IDirectoryObject,System.Boolean)
+  name: ProcessACL(ResolvedSearchResult, IDirectoryObject, Boolean)
+  href: api/SharpHoundCommonLib.Processors.ACLProcessor.html#SharpHoundCommonLib_Processors_ACLProcessor_ProcessACL_SharpHoundCommonLib_ResolvedSearchResult_SharpHoundCommonLib_IDirectoryObject_System_Boolean_
+  commentId: M:SharpHoundCommonLib.Processors.ACLProcessor.ProcessACL(SharpHoundCommonLib.ResolvedSearchResult,SharpHoundCommonLib.IDirectoryObject,System.Boolean)
+  fullName: SharpHoundCommonLib.Processors.ACLProcessor.ProcessACL(SharpHoundCommonLib.ResolvedSearchResult, SharpHoundCommonLib.IDirectoryObject, System.Boolean)
+  nameWithType: ACLProcessor.ProcessACL(ResolvedSearchResult, IDirectoryObject, Boolean)
+- uid: SharpHoundCommonLib.Processors.ACLProcessor.ProcessACL(System.Byte[],System.String,SharpHoundCommonLib.Enums.Label,System.Boolean,System.Boolean,System.String)
+  name: ProcessACL(Byte[], String, Label, Boolean, Boolean, String)
+  href: api/SharpHoundCommonLib.Processors.ACLProcessor.html#SharpHoundCommonLib_Processors_ACLProcessor_ProcessACL_System_Byte___System_String_SharpHoundCommonLib_Enums_Label_System_Boolean_System_Boolean_System_String_
+  commentId: M:SharpHoundCommonLib.Processors.ACLProcessor.ProcessACL(System.Byte[],System.String,SharpHoundCommonLib.Enums.Label,System.Boolean,System.Boolean,System.String)
+  name.vb: ProcessACL(Byte(), String, Label, Boolean, Boolean, String)
+  fullName: SharpHoundCommonLib.Processors.ACLProcessor.ProcessACL(System.Byte[], System.String, SharpHoundCommonLib.Enums.Label, System.Boolean, System.Boolean, System.String)
+  fullName.vb: SharpHoundCommonLib.Processors.ACLProcessor.ProcessACL(System.Byte(), System.String, SharpHoundCommonLib.Enums.Label, System.Boolean, System.Boolean, System.String)
+  nameWithType: ACLProcessor.ProcessACL(Byte[], String, Label, Boolean, Boolean, String)
+  nameWithType.vb: ACLProcessor.ProcessACL(Byte(), String, Label, Boolean, Boolean, String)
 - uid: SharpHoundCommonLib.Processors.ACLProcessor.ProcessACL(System.Byte[],System.String,SharpHoundCommonLib.Enums.Label,System.Boolean,System.String)
   name: ProcessACL(Byte[], String, Label, Boolean, String)
   href: api/SharpHoundCommonLib.Processors.ACLProcessor.html#SharpHoundCommonLib_Processors_ACLProcessor_ProcessACL_System_Byte___System_String_SharpHoundCommonLib_Enums_Label_System_Boolean_System_String_
@@ -8378,6 +9331,38 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.Processors.ACLProcessor.ProcessGMSAReaders
   nameWithType: ACLProcessor.ProcessGMSAReaders
+- uid: SharpHoundCommonLib.Processors.CAEnrollmentProcessor
+  name: CAEnrollmentProcessor
+  href: api/SharpHoundCommonLib.Processors.CAEnrollmentProcessor.html
+  commentId: T:SharpHoundCommonLib.Processors.CAEnrollmentProcessor
+  fullName: SharpHoundCommonLib.Processors.CAEnrollmentProcessor
+  nameWithType: CAEnrollmentProcessor
+- uid: SharpHoundCommonLib.Processors.CAEnrollmentProcessor.#ctor(System.String,System.String,ILogger)
+  name: CAEnrollmentProcessor(String, String, ILogger)
+  href: api/SharpHoundCommonLib.Processors.CAEnrollmentProcessor.html#SharpHoundCommonLib_Processors_CAEnrollmentProcessor__ctor_System_String_System_String_ILogger_
+  commentId: M:SharpHoundCommonLib.Processors.CAEnrollmentProcessor.#ctor(System.String,System.String,ILogger)
+  fullName: SharpHoundCommonLib.Processors.CAEnrollmentProcessor.CAEnrollmentProcessor(System.String, System.String, ILogger)
+  nameWithType: CAEnrollmentProcessor.CAEnrollmentProcessor(String, String, ILogger)
+- uid: SharpHoundCommonLib.Processors.CAEnrollmentProcessor.#ctor*
+  name: CAEnrollmentProcessor
+  href: api/SharpHoundCommonLib.Processors.CAEnrollmentProcessor.html#SharpHoundCommonLib_Processors_CAEnrollmentProcessor__ctor_
+  commentId: Overload:SharpHoundCommonLib.Processors.CAEnrollmentProcessor.#ctor
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Processors.CAEnrollmentProcessor.CAEnrollmentProcessor
+  nameWithType: CAEnrollmentProcessor.CAEnrollmentProcessor
+- uid: SharpHoundCommonLib.Processors.CAEnrollmentProcessor.ScanAsync
+  name: ScanAsync()
+  href: api/SharpHoundCommonLib.Processors.CAEnrollmentProcessor.html#SharpHoundCommonLib_Processors_CAEnrollmentProcessor_ScanAsync
+  commentId: M:SharpHoundCommonLib.Processors.CAEnrollmentProcessor.ScanAsync
+  fullName: SharpHoundCommonLib.Processors.CAEnrollmentProcessor.ScanAsync()
+  nameWithType: CAEnrollmentProcessor.ScanAsync()
+- uid: SharpHoundCommonLib.Processors.CAEnrollmentProcessor.ScanAsync*
+  name: ScanAsync
+  href: api/SharpHoundCommonLib.Processors.CAEnrollmentProcessor.html#SharpHoundCommonLib_Processors_CAEnrollmentProcessor_ScanAsync_
+  commentId: Overload:SharpHoundCommonLib.Processors.CAEnrollmentProcessor.ScanAsync
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Processors.CAEnrollmentProcessor.ScanAsync
+  nameWithType: CAEnrollmentProcessor.ScanAsync
 - uid: SharpHoundCommonLib.Processors.CertAbuseProcessor
   name: CertAbuseProcessor
   href: api/SharpHoundCommonLib.Processors.CertAbuseProcessor.html
@@ -8847,6 +9832,90 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.Processors.ContainerProcessor.ReadContainerGPLinks
   nameWithType: ContainerProcessor.ReadContainerGPLinks
+- uid: SharpHoundCommonLib.Processors.DCLdapProcessor
+  name: DCLdapProcessor
+  href: api/SharpHoundCommonLib.Processors.DCLdapProcessor.html
+  commentId: T:SharpHoundCommonLib.Processors.DCLdapProcessor
+  fullName: SharpHoundCommonLib.Processors.DCLdapProcessor
+  nameWithType: DCLdapProcessor
+- uid: SharpHoundCommonLib.Processors.DCLdapProcessor.#ctor(System.Int32,System.String,ILogger)
+  name: DCLdapProcessor(Int32, String, ILogger)
+  href: api/SharpHoundCommonLib.Processors.DCLdapProcessor.html#SharpHoundCommonLib_Processors_DCLdapProcessor__ctor_System_Int32_System_String_ILogger_
+  commentId: M:SharpHoundCommonLib.Processors.DCLdapProcessor.#ctor(System.Int32,System.String,ILogger)
+  fullName: SharpHoundCommonLib.Processors.DCLdapProcessor.DCLdapProcessor(System.Int32, System.String, ILogger)
+  nameWithType: DCLdapProcessor.DCLdapProcessor(Int32, String, ILogger)
+- uid: SharpHoundCommonLib.Processors.DCLdapProcessor.#ctor*
+  name: DCLdapProcessor
+  href: api/SharpHoundCommonLib.Processors.DCLdapProcessor.html#SharpHoundCommonLib_Processors_DCLdapProcessor__ctor_
+  commentId: Overload:SharpHoundCommonLib.Processors.DCLdapProcessor.#ctor
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Processors.DCLdapProcessor.DCLdapProcessor
+  nameWithType: DCLdapProcessor.DCLdapProcessor
+- uid: SharpHoundCommonLib.Processors.DCLdapProcessor.CheckIsChannelBindingDisabled
+  name: CheckIsChannelBindingDisabled()
+  href: api/SharpHoundCommonLib.Processors.DCLdapProcessor.html#SharpHoundCommonLib_Processors_DCLdapProcessor_CheckIsChannelBindingDisabled
+  commentId: M:SharpHoundCommonLib.Processors.DCLdapProcessor.CheckIsChannelBindingDisabled
+  fullName: SharpHoundCommonLib.Processors.DCLdapProcessor.CheckIsChannelBindingDisabled()
+  nameWithType: DCLdapProcessor.CheckIsChannelBindingDisabled()
+- uid: SharpHoundCommonLib.Processors.DCLdapProcessor.CheckIsChannelBindingDisabled*
+  name: CheckIsChannelBindingDisabled
+  href: api/SharpHoundCommonLib.Processors.DCLdapProcessor.html#SharpHoundCommonLib_Processors_DCLdapProcessor_CheckIsChannelBindingDisabled_
+  commentId: Overload:SharpHoundCommonLib.Processors.DCLdapProcessor.CheckIsChannelBindingDisabled
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Processors.DCLdapProcessor.CheckIsChannelBindingDisabled
+  nameWithType: DCLdapProcessor.CheckIsChannelBindingDisabled
+- uid: SharpHoundCommonLib.Processors.DCLdapProcessor.CheckIsNtlmSigningRequired
+  name: CheckIsNtlmSigningRequired()
+  href: api/SharpHoundCommonLib.Processors.DCLdapProcessor.html#SharpHoundCommonLib_Processors_DCLdapProcessor_CheckIsNtlmSigningRequired
+  commentId: M:SharpHoundCommonLib.Processors.DCLdapProcessor.CheckIsNtlmSigningRequired
+  fullName: SharpHoundCommonLib.Processors.DCLdapProcessor.CheckIsNtlmSigningRequired()
+  nameWithType: DCLdapProcessor.CheckIsNtlmSigningRequired()
+- uid: SharpHoundCommonLib.Processors.DCLdapProcessor.CheckIsNtlmSigningRequired*
+  name: CheckIsNtlmSigningRequired
+  href: api/SharpHoundCommonLib.Processors.DCLdapProcessor.html#SharpHoundCommonLib_Processors_DCLdapProcessor_CheckIsNtlmSigningRequired_
+  commentId: Overload:SharpHoundCommonLib.Processors.DCLdapProcessor.CheckIsNtlmSigningRequired
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Processors.DCLdapProcessor.CheckIsNtlmSigningRequired
+  nameWithType: DCLdapProcessor.CheckIsNtlmSigningRequired
+- uid: SharpHoundCommonLib.Processors.DCLdapProcessor.Scan
+  name: Scan()
+  href: api/SharpHoundCommonLib.Processors.DCLdapProcessor.html#SharpHoundCommonLib_Processors_DCLdapProcessor_Scan
+  commentId: M:SharpHoundCommonLib.Processors.DCLdapProcessor.Scan
+  fullName: SharpHoundCommonLib.Processors.DCLdapProcessor.Scan()
+  nameWithType: DCLdapProcessor.Scan()
+- uid: SharpHoundCommonLib.Processors.DCLdapProcessor.Scan*
+  name: Scan
+  href: api/SharpHoundCommonLib.Processors.DCLdapProcessor.html#SharpHoundCommonLib_Processors_DCLdapProcessor_Scan_
+  commentId: Overload:SharpHoundCommonLib.Processors.DCLdapProcessor.Scan
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Processors.DCLdapProcessor.Scan
+  nameWithType: DCLdapProcessor.Scan
+- uid: SharpHoundCommonLib.Processors.DCLdapProcessor.TestLdapPort
+  name: TestLdapPort()
+  href: api/SharpHoundCommonLib.Processors.DCLdapProcessor.html#SharpHoundCommonLib_Processors_DCLdapProcessor_TestLdapPort
+  commentId: M:SharpHoundCommonLib.Processors.DCLdapProcessor.TestLdapPort
+  fullName: SharpHoundCommonLib.Processors.DCLdapProcessor.TestLdapPort()
+  nameWithType: DCLdapProcessor.TestLdapPort()
+- uid: SharpHoundCommonLib.Processors.DCLdapProcessor.TestLdapPort*
+  name: TestLdapPort
+  href: api/SharpHoundCommonLib.Processors.DCLdapProcessor.html#SharpHoundCommonLib_Processors_DCLdapProcessor_TestLdapPort_
+  commentId: Overload:SharpHoundCommonLib.Processors.DCLdapProcessor.TestLdapPort
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Processors.DCLdapProcessor.TestLdapPort
+  nameWithType: DCLdapProcessor.TestLdapPort
+- uid: SharpHoundCommonLib.Processors.DCLdapProcessor.TestLdapsPort
+  name: TestLdapsPort()
+  href: api/SharpHoundCommonLib.Processors.DCLdapProcessor.html#SharpHoundCommonLib_Processors_DCLdapProcessor_TestLdapsPort
+  commentId: M:SharpHoundCommonLib.Processors.DCLdapProcessor.TestLdapsPort
+  fullName: SharpHoundCommonLib.Processors.DCLdapProcessor.TestLdapsPort()
+  nameWithType: DCLdapProcessor.TestLdapsPort()
+- uid: SharpHoundCommonLib.Processors.DCLdapProcessor.TestLdapsPort*
+  name: TestLdapsPort
+  href: api/SharpHoundCommonLib.Processors.DCLdapProcessor.html#SharpHoundCommonLib_Processors_DCLdapProcessor_TestLdapsPort_
+  commentId: Overload:SharpHoundCommonLib.Processors.DCLdapProcessor.TestLdapsPort
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Processors.DCLdapProcessor.TestLdapsPort
+  nameWithType: DCLdapProcessor.TestLdapsPort
 - uid: SharpHoundCommonLib.Processors.DCRegistryProcessor
   name: DCRegistryProcessor
   href: api/SharpHoundCommonLib.Processors.DCRegistryProcessor.html
@@ -9020,6 +10089,30 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.Processors.EnrollmentAgentRestriction.Template
   nameWithType: EnrollmentAgentRestriction.Template
+- uid: SharpHoundCommonLib.Processors.EventLogCollection
+  name: EventLogCollection
+  href: api/SharpHoundCommonLib.Processors.EventLogCollection.html
+  commentId: T:SharpHoundCommonLib.Processors.EventLogCollection
+  fullName: SharpHoundCommonLib.Processors.EventLogCollection
+  nameWithType: EventLogCollection
+- uid: SharpHoundCommonLib.Processors.EventLogCollection.DomainControllerNtlmAuth
+  name: DomainControllerNtlmAuth
+  href: api/SharpHoundCommonLib.Processors.EventLogCollection.html#SharpHoundCommonLib_Processors_EventLogCollection_DomainControllerNtlmAuth
+  commentId: F:SharpHoundCommonLib.Processors.EventLogCollection.DomainControllerNtlmAuth
+  fullName: SharpHoundCommonLib.Processors.EventLogCollection.DomainControllerNtlmAuth
+  nameWithType: EventLogCollection.DomainControllerNtlmAuth
+- uid: SharpHoundCommonLib.Processors.EventLogCollection.InboundNtlmSessions
+  name: InboundNtlmSessions
+  href: api/SharpHoundCommonLib.Processors.EventLogCollection.html#SharpHoundCommonLib_Processors_EventLogCollection_InboundNtlmSessions
+  commentId: F:SharpHoundCommonLib.Processors.EventLogCollection.InboundNtlmSessions
+  fullName: SharpHoundCommonLib.Processors.EventLogCollection.InboundNtlmSessions
+  nameWithType: EventLogCollection.InboundNtlmSessions
+- uid: SharpHoundCommonLib.Processors.EventLogProcessor
+  name: EventLogProcessor
+  href: api/SharpHoundCommonLib.Processors.EventLogProcessor.html
+  commentId: T:SharpHoundCommonLib.Processors.EventLogProcessor
+  fullName: SharpHoundCommonLib.Processors.EventLogProcessor
+  nameWithType: EventLogProcessor
 - uid: SharpHoundCommonLib.Processors.GPOLocalGroupProcessor
   name: GPOLocalGroupProcessor
   href: api/SharpHoundCommonLib.Processors.GPOLocalGroupProcessor.html
@@ -9168,6 +10261,38 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.Processors.IssuancePolicyProperties.Props
   nameWithType: IssuancePolicyProperties.Props
+- uid: SharpHoundCommonLib.Processors.LdapAuthOptions
+  name: LdapAuthOptions
+  href: api/SharpHoundCommonLib.Processors.LdapAuthOptions.html
+  commentId: T:SharpHoundCommonLib.Processors.LdapAuthOptions
+  fullName: SharpHoundCommonLib.Processors.LdapAuthOptions
+  nameWithType: LdapAuthOptions
+- uid: SharpHoundCommonLib.Processors.LdapAuthOptions.Bindings
+  name: Bindings
+  href: api/SharpHoundCommonLib.Processors.LdapAuthOptions.html#SharpHoundCommonLib_Processors_LdapAuthOptions_Bindings
+  commentId: P:SharpHoundCommonLib.Processors.LdapAuthOptions.Bindings
+  fullName: SharpHoundCommonLib.Processors.LdapAuthOptions.Bindings
+  nameWithType: LdapAuthOptions.Bindings
+- uid: SharpHoundCommonLib.Processors.LdapAuthOptions.Bindings*
+  name: Bindings
+  href: api/SharpHoundCommonLib.Processors.LdapAuthOptions.html#SharpHoundCommonLib_Processors_LdapAuthOptions_Bindings_
+  commentId: Overload:SharpHoundCommonLib.Processors.LdapAuthOptions.Bindings
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Processors.LdapAuthOptions.Bindings
+  nameWithType: LdapAuthOptions.Bindings
+- uid: SharpHoundCommonLib.Processors.LdapAuthOptions.Signing
+  name: Signing
+  href: api/SharpHoundCommonLib.Processors.LdapAuthOptions.html#SharpHoundCommonLib_Processors_LdapAuthOptions_Signing
+  commentId: P:SharpHoundCommonLib.Processors.LdapAuthOptions.Signing
+  fullName: SharpHoundCommonLib.Processors.LdapAuthOptions.Signing
+  nameWithType: LdapAuthOptions.Signing
+- uid: SharpHoundCommonLib.Processors.LdapAuthOptions.Signing*
+  name: Signing
+  href: api/SharpHoundCommonLib.Processors.LdapAuthOptions.html#SharpHoundCommonLib_Processors_LdapAuthOptions_Signing_
+  commentId: Overload:SharpHoundCommonLib.Processors.LdapAuthOptions.Signing
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Processors.LdapAuthOptions.Signing
+  nameWithType: LdapAuthOptions.Signing
 - uid: SharpHoundCommonLib.Processors.LdapPropertyProcessor
   name: LdapPropertyProcessor
   href: api/SharpHoundCommonLib.Processors.LdapPropertyProcessor.html
@@ -9614,6 +10739,12 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.Processors.RegistryResult.Value
   nameWithType: RegistryResult.Value
+- uid: SharpHoundCommonLib.Processors.SmbProcessor
+  name: SmbProcessor
+  href: api/SharpHoundCommonLib.Processors.SmbProcessor.html
+  commentId: T:SharpHoundCommonLib.Processors.SmbProcessor
+  fullName: SharpHoundCommonLib.Processors.SmbProcessor
+  nameWithType: SmbProcessor
 - uid: SharpHoundCommonLib.Processors.SPNProcessors
   name: SPNProcessors
   href: api/SharpHoundCommonLib.Processors.SPNProcessors.html
@@ -9782,6 +10913,12 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.Processors.UserRightsAssignmentProcessor.OpenLSAPolicy
   nameWithType: UserRightsAssignmentProcessor.OpenLSAPolicy
+- uid: SharpHoundCommonLib.Processors.WebClientServiceProcessor
+  name: WebClientServiceProcessor
+  href: api/SharpHoundCommonLib.Processors.WebClientServiceProcessor.html
+  commentId: T:SharpHoundCommonLib.Processors.WebClientServiceProcessor
+  fullName: SharpHoundCommonLib.Processors.WebClientServiceProcessor
+  nameWithType: WebClientServiceProcessor
 - uid: SharpHoundCommonLib.ResolvedSearchResult
   name: ResolvedSearchResult
   href: api/SharpHoundCommonLib.ResolvedSearchResult.html
@@ -10295,6 +11432,265 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.SHRegistryKey.GetValue
   nameWithType: SHRegistryKey.GetValue
+- uid: SharpHoundCommonLib.ThirdParty.PSOpenAD
+  name: SharpHoundCommonLib.ThirdParty.PSOpenAD
+  href: api/SharpHoundCommonLib.ThirdParty.PSOpenAD.html
+  commentId: N:SharpHoundCommonLib.ThirdParty.PSOpenAD
+  fullName: SharpHoundCommonLib.ThirdParty.PSOpenAD
+  nameWithType: SharpHoundCommonLib.ThirdParty.PSOpenAD
+- uid: SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationMethod
+  name: AuthenticationMethod
+  href: api/SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationMethod.html
+  commentId: T:SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationMethod
+  fullName: SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationMethod
+  nameWithType: AuthenticationMethod
+- uid: SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationMethod.Anonymous
+  name: Anonymous
+  href: api/SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationMethod.html#SharpHoundCommonLib_ThirdParty_PSOpenAD_AuthenticationMethod_Anonymous
+  commentId: F:SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationMethod.Anonymous
+  fullName: SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationMethod.Anonymous
+  nameWithType: AuthenticationMethod.Anonymous
+- uid: SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationMethod.Certificate
+  name: Certificate
+  href: api/SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationMethod.html#SharpHoundCommonLib_ThirdParty_PSOpenAD_AuthenticationMethod_Certificate
+  commentId: F:SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationMethod.Certificate
+  fullName: SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationMethod.Certificate
+  nameWithType: AuthenticationMethod.Certificate
+- uid: SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationMethod.Default
+  name: Default
+  href: api/SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationMethod.html#SharpHoundCommonLib_ThirdParty_PSOpenAD_AuthenticationMethod_Default
+  commentId: F:SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationMethod.Default
+  fullName: SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationMethod.Default
+  nameWithType: AuthenticationMethod.Default
+- uid: SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationMethod.Kerberos
+  name: Kerberos
+  href: api/SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationMethod.html#SharpHoundCommonLib_ThirdParty_PSOpenAD_AuthenticationMethod_Kerberos
+  commentId: F:SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationMethod.Kerberos
+  fullName: SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationMethod.Kerberos
+  nameWithType: AuthenticationMethod.Kerberos
+- uid: SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationMethod.Negotiate
+  name: Negotiate
+  href: api/SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationMethod.html#SharpHoundCommonLib_ThirdParty_PSOpenAD_AuthenticationMethod_Negotiate
+  commentId: F:SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationMethod.Negotiate
+  fullName: SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationMethod.Negotiate
+  nameWithType: AuthenticationMethod.Negotiate
+- uid: SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationMethod.NTLM
+  name: NTLM
+  href: api/SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationMethod.html#SharpHoundCommonLib_ThirdParty_PSOpenAD_AuthenticationMethod_NTLM
+  commentId: F:SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationMethod.NTLM
+  fullName: SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationMethod.NTLM
+  nameWithType: AuthenticationMethod.NTLM
+- uid: SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationMethod.Simple
+  name: Simple
+  href: api/SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationMethod.html#SharpHoundCommonLib_ThirdParty_PSOpenAD_AuthenticationMethod_Simple
+  commentId: F:SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationMethod.Simple
+  fullName: SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationMethod.Simple
+  nameWithType: AuthenticationMethod.Simple
+- uid: SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider
+  name: AuthenticationProvider
+  href: api/SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider.html
+  commentId: T:SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider
+  fullName: SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider
+  nameWithType: AuthenticationProvider
+- uid: SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider.#ctor(SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationMethod,System.String,System.Boolean,System.Boolean,System.String)
+  name: AuthenticationProvider(AuthenticationMethod, String, Boolean, Boolean, String)
+  href: api/SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider.html#SharpHoundCommonLib_ThirdParty_PSOpenAD_AuthenticationProvider__ctor_SharpHoundCommonLib_ThirdParty_PSOpenAD_AuthenticationMethod_System_String_System_Boolean_System_Boolean_System_String_
+  commentId: M:SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider.#ctor(SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationMethod,System.String,System.Boolean,System.Boolean,System.String)
+  fullName: SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider.AuthenticationProvider(SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationMethod, System.String, System.Boolean, System.Boolean, System.String)
+  nameWithType: AuthenticationProvider.AuthenticationProvider(AuthenticationMethod, String, Boolean, Boolean, String)
+- uid: SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider.#ctor*
+  name: AuthenticationProvider
+  href: api/SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider.html#SharpHoundCommonLib_ThirdParty_PSOpenAD_AuthenticationProvider__ctor_
+  commentId: Overload:SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider.#ctor
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider.AuthenticationProvider
+  nameWithType: AuthenticationProvider.AuthenticationProvider
+- uid: SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider.Available
+  name: Available
+  href: api/SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider.html#SharpHoundCommonLib_ThirdParty_PSOpenAD_AuthenticationProvider_Available
+  commentId: P:SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider.Available
+  fullName: SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider.Available
+  nameWithType: AuthenticationProvider.Available
+- uid: SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider.Available*
+  name: Available
+  href: api/SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider.html#SharpHoundCommonLib_ThirdParty_PSOpenAD_AuthenticationProvider_Available_
+  commentId: Overload:SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider.Available
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider.Available
+  nameWithType: AuthenticationProvider.Available
+- uid: SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider.CanSign
+  name: CanSign
+  href: api/SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider.html#SharpHoundCommonLib_ThirdParty_PSOpenAD_AuthenticationProvider_CanSign
+  commentId: P:SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider.CanSign
+  fullName: SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider.CanSign
+  nameWithType: AuthenticationProvider.CanSign
+- uid: SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider.CanSign*
+  name: CanSign
+  href: api/SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider.html#SharpHoundCommonLib_ThirdParty_PSOpenAD_AuthenticationProvider_CanSign_
+  commentId: Overload:SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider.CanSign
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider.CanSign
+  nameWithType: AuthenticationProvider.CanSign
+- uid: SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider.Details
+  name: Details
+  href: api/SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider.html#SharpHoundCommonLib_ThirdParty_PSOpenAD_AuthenticationProvider_Details
+  commentId: P:SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider.Details
+  fullName: SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider.Details
+  nameWithType: AuthenticationProvider.Details
+- uid: SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider.Details*
+  name: Details
+  href: api/SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider.html#SharpHoundCommonLib_ThirdParty_PSOpenAD_AuthenticationProvider_Details_
+  commentId: Overload:SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider.Details
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider.Details
+  nameWithType: AuthenticationProvider.Details
+- uid: SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider.Method
+  name: Method
+  href: api/SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider.html#SharpHoundCommonLib_ThirdParty_PSOpenAD_AuthenticationProvider_Method
+  commentId: P:SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider.Method
+  fullName: SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider.Method
+  nameWithType: AuthenticationProvider.Method
+- uid: SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider.Method*
+  name: Method
+  href: api/SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider.html#SharpHoundCommonLib_ThirdParty_PSOpenAD_AuthenticationProvider_Method_
+  commentId: Overload:SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider.Method
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider.Method
+  nameWithType: AuthenticationProvider.Method
+- uid: SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider.SaslId
+  name: SaslId
+  href: api/SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider.html#SharpHoundCommonLib_ThirdParty_PSOpenAD_AuthenticationProvider_SaslId
+  commentId: P:SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider.SaslId
+  fullName: SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider.SaslId
+  nameWithType: AuthenticationProvider.SaslId
+- uid: SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider.SaslId*
+  name: SaslId
+  href: api/SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider.html#SharpHoundCommonLib_ThirdParty_PSOpenAD_AuthenticationProvider_SaslId_
+  commentId: Overload:SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider.SaslId
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider.SaslId
+  nameWithType: AuthenticationProvider.SaslId
+- uid: SharpHoundCommonLib.ThirdParty.PSOpenAD.ChannelBindings
+  name: ChannelBindings
+  href: api/SharpHoundCommonLib.ThirdParty.PSOpenAD.ChannelBindings.html
+  commentId: T:SharpHoundCommonLib.ThirdParty.PSOpenAD.ChannelBindings
+  fullName: SharpHoundCommonLib.ThirdParty.PSOpenAD.ChannelBindings
+  nameWithType: ChannelBindings
+- uid: SharpHoundCommonLib.ThirdParty.PSOpenAD.ChannelBindings.AcceptorAddr
+  name: AcceptorAddr
+  href: api/SharpHoundCommonLib.ThirdParty.PSOpenAD.ChannelBindings.html#SharpHoundCommonLib_ThirdParty_PSOpenAD_ChannelBindings_AcceptorAddr
+  commentId: P:SharpHoundCommonLib.ThirdParty.PSOpenAD.ChannelBindings.AcceptorAddr
+  fullName: SharpHoundCommonLib.ThirdParty.PSOpenAD.ChannelBindings.AcceptorAddr
+  nameWithType: ChannelBindings.AcceptorAddr
+- uid: SharpHoundCommonLib.ThirdParty.PSOpenAD.ChannelBindings.AcceptorAddr*
+  name: AcceptorAddr
+  href: api/SharpHoundCommonLib.ThirdParty.PSOpenAD.ChannelBindings.html#SharpHoundCommonLib_ThirdParty_PSOpenAD_ChannelBindings_AcceptorAddr_
+  commentId: Overload:SharpHoundCommonLib.ThirdParty.PSOpenAD.ChannelBindings.AcceptorAddr
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.ThirdParty.PSOpenAD.ChannelBindings.AcceptorAddr
+  nameWithType: ChannelBindings.AcceptorAddr
+- uid: SharpHoundCommonLib.ThirdParty.PSOpenAD.ChannelBindings.AcceptorAddrType
+  name: AcceptorAddrType
+  href: api/SharpHoundCommonLib.ThirdParty.PSOpenAD.ChannelBindings.html#SharpHoundCommonLib_ThirdParty_PSOpenAD_ChannelBindings_AcceptorAddrType
+  commentId: P:SharpHoundCommonLib.ThirdParty.PSOpenAD.ChannelBindings.AcceptorAddrType
+  fullName: SharpHoundCommonLib.ThirdParty.PSOpenAD.ChannelBindings.AcceptorAddrType
+  nameWithType: ChannelBindings.AcceptorAddrType
+- uid: SharpHoundCommonLib.ThirdParty.PSOpenAD.ChannelBindings.AcceptorAddrType*
+  name: AcceptorAddrType
+  href: api/SharpHoundCommonLib.ThirdParty.PSOpenAD.ChannelBindings.html#SharpHoundCommonLib_ThirdParty_PSOpenAD_ChannelBindings_AcceptorAddrType_
+  commentId: Overload:SharpHoundCommonLib.ThirdParty.PSOpenAD.ChannelBindings.AcceptorAddrType
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.ThirdParty.PSOpenAD.ChannelBindings.AcceptorAddrType
+  nameWithType: ChannelBindings.AcceptorAddrType
+- uid: SharpHoundCommonLib.ThirdParty.PSOpenAD.ChannelBindings.ApplicationData
+  name: ApplicationData
+  href: api/SharpHoundCommonLib.ThirdParty.PSOpenAD.ChannelBindings.html#SharpHoundCommonLib_ThirdParty_PSOpenAD_ChannelBindings_ApplicationData
+  commentId: P:SharpHoundCommonLib.ThirdParty.PSOpenAD.ChannelBindings.ApplicationData
+  fullName: SharpHoundCommonLib.ThirdParty.PSOpenAD.ChannelBindings.ApplicationData
+  nameWithType: ChannelBindings.ApplicationData
+- uid: SharpHoundCommonLib.ThirdParty.PSOpenAD.ChannelBindings.ApplicationData*
+  name: ApplicationData
+  href: api/SharpHoundCommonLib.ThirdParty.PSOpenAD.ChannelBindings.html#SharpHoundCommonLib_ThirdParty_PSOpenAD_ChannelBindings_ApplicationData_
+  commentId: Overload:SharpHoundCommonLib.ThirdParty.PSOpenAD.ChannelBindings.ApplicationData
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.ThirdParty.PSOpenAD.ChannelBindings.ApplicationData
+  nameWithType: ChannelBindings.ApplicationData
+- uid: SharpHoundCommonLib.ThirdParty.PSOpenAD.ChannelBindings.InitiatorAddr
+  name: InitiatorAddr
+  href: api/SharpHoundCommonLib.ThirdParty.PSOpenAD.ChannelBindings.html#SharpHoundCommonLib_ThirdParty_PSOpenAD_ChannelBindings_InitiatorAddr
+  commentId: P:SharpHoundCommonLib.ThirdParty.PSOpenAD.ChannelBindings.InitiatorAddr
+  fullName: SharpHoundCommonLib.ThirdParty.PSOpenAD.ChannelBindings.InitiatorAddr
+  nameWithType: ChannelBindings.InitiatorAddr
+- uid: SharpHoundCommonLib.ThirdParty.PSOpenAD.ChannelBindings.InitiatorAddr*
+  name: InitiatorAddr
+  href: api/SharpHoundCommonLib.ThirdParty.PSOpenAD.ChannelBindings.html#SharpHoundCommonLib_ThirdParty_PSOpenAD_ChannelBindings_InitiatorAddr_
+  commentId: Overload:SharpHoundCommonLib.ThirdParty.PSOpenAD.ChannelBindings.InitiatorAddr
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.ThirdParty.PSOpenAD.ChannelBindings.InitiatorAddr
+  nameWithType: ChannelBindings.InitiatorAddr
+- uid: SharpHoundCommonLib.ThirdParty.PSOpenAD.ChannelBindings.InitiatorAddrType
+  name: InitiatorAddrType
+  href: api/SharpHoundCommonLib.ThirdParty.PSOpenAD.ChannelBindings.html#SharpHoundCommonLib_ThirdParty_PSOpenAD_ChannelBindings_InitiatorAddrType
+  commentId: P:SharpHoundCommonLib.ThirdParty.PSOpenAD.ChannelBindings.InitiatorAddrType
+  fullName: SharpHoundCommonLib.ThirdParty.PSOpenAD.ChannelBindings.InitiatorAddrType
+  nameWithType: ChannelBindings.InitiatorAddrType
+- uid: SharpHoundCommonLib.ThirdParty.PSOpenAD.ChannelBindings.InitiatorAddrType*
+  name: InitiatorAddrType
+  href: api/SharpHoundCommonLib.ThirdParty.PSOpenAD.ChannelBindings.html#SharpHoundCommonLib_ThirdParty_PSOpenAD_ChannelBindings_InitiatorAddrType_
+  commentId: Overload:SharpHoundCommonLib.ThirdParty.PSOpenAD.ChannelBindings.InitiatorAddrType
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.ThirdParty.PSOpenAD.ChannelBindings.InitiatorAddrType
+  nameWithType: ChannelBindings.InitiatorAddrType
+- uid: SharpHoundCommonLib.ThirdParty.PSOpenAD.SspiException
+  name: SspiException
+  href: api/SharpHoundCommonLib.ThirdParty.PSOpenAD.SspiException.html
+  commentId: T:SharpHoundCommonLib.ThirdParty.PSOpenAD.SspiException
+  fullName: SharpHoundCommonLib.ThirdParty.PSOpenAD.SspiException
+  nameWithType: SspiException
+- uid: SharpHoundCommonLib.ThirdParty.PSOpenAD.SspiException.#ctor
+  name: SspiException()
+  href: api/SharpHoundCommonLib.ThirdParty.PSOpenAD.SspiException.html#SharpHoundCommonLib_ThirdParty_PSOpenAD_SspiException__ctor
+  commentId: M:SharpHoundCommonLib.ThirdParty.PSOpenAD.SspiException.#ctor
+  fullName: SharpHoundCommonLib.ThirdParty.PSOpenAD.SspiException.SspiException()
+  nameWithType: SspiException.SspiException()
+- uid: SharpHoundCommonLib.ThirdParty.PSOpenAD.SspiException.#ctor(System.Int32,System.String)
+  name: SspiException(Int32, String)
+  href: api/SharpHoundCommonLib.ThirdParty.PSOpenAD.SspiException.html#SharpHoundCommonLib_ThirdParty_PSOpenAD_SspiException__ctor_System_Int32_System_String_
+  commentId: M:SharpHoundCommonLib.ThirdParty.PSOpenAD.SspiException.#ctor(System.Int32,System.String)
+  fullName: SharpHoundCommonLib.ThirdParty.PSOpenAD.SspiException.SspiException(System.Int32, System.String)
+  nameWithType: SspiException.SspiException(Int32, String)
+- uid: SharpHoundCommonLib.ThirdParty.PSOpenAD.SspiException.#ctor(System.String)
+  name: SspiException(String)
+  href: api/SharpHoundCommonLib.ThirdParty.PSOpenAD.SspiException.html#SharpHoundCommonLib_ThirdParty_PSOpenAD_SspiException__ctor_System_String_
+  commentId: M:SharpHoundCommonLib.ThirdParty.PSOpenAD.SspiException.#ctor(System.String)
+  fullName: SharpHoundCommonLib.ThirdParty.PSOpenAD.SspiException.SspiException(System.String)
+  nameWithType: SspiException.SspiException(String)
+- uid: SharpHoundCommonLib.ThirdParty.PSOpenAD.SspiException.#ctor(System.String,System.Exception)
+  name: SspiException(String, Exception)
+  href: api/SharpHoundCommonLib.ThirdParty.PSOpenAD.SspiException.html#SharpHoundCommonLib_ThirdParty_PSOpenAD_SspiException__ctor_System_String_System_Exception_
+  commentId: M:SharpHoundCommonLib.ThirdParty.PSOpenAD.SspiException.#ctor(System.String,System.Exception)
+  fullName: SharpHoundCommonLib.ThirdParty.PSOpenAD.SspiException.SspiException(System.String, System.Exception)
+  nameWithType: SspiException.SspiException(String, Exception)
+- uid: SharpHoundCommonLib.ThirdParty.PSOpenAD.SspiException.#ctor*
+  name: SspiException
+  href: api/SharpHoundCommonLib.ThirdParty.PSOpenAD.SspiException.html#SharpHoundCommonLib_ThirdParty_PSOpenAD_SspiException__ctor_
+  commentId: Overload:SharpHoundCommonLib.ThirdParty.PSOpenAD.SspiException.#ctor
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.ThirdParty.PSOpenAD.SspiException.SspiException
+  nameWithType: SspiException.SspiException
+- uid: SharpHoundCommonLib.ThirdParty.PSOpenAD.SspiException.ErrorCode
+  name: ErrorCode
+  href: api/SharpHoundCommonLib.ThirdParty.PSOpenAD.SspiException.html#SharpHoundCommonLib_ThirdParty_PSOpenAD_SspiException_ErrorCode
+  commentId: P:SharpHoundCommonLib.ThirdParty.PSOpenAD.SspiException.ErrorCode
+  fullName: SharpHoundCommonLib.ThirdParty.PSOpenAD.SspiException.ErrorCode
+  nameWithType: SspiException.ErrorCode
+- uid: SharpHoundCommonLib.ThirdParty.PSOpenAD.SspiException.ErrorCode*
+  name: ErrorCode
+  href: api/SharpHoundCommonLib.ThirdParty.PSOpenAD.SspiException.html#SharpHoundCommonLib_ThirdParty_PSOpenAD_SspiException_ErrorCode_
+  commentId: Overload:SharpHoundCommonLib.ThirdParty.PSOpenAD.SspiException.ErrorCode
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.ThirdParty.PSOpenAD.SspiException.ErrorCode
+  nameWithType: SspiException.ErrorCode
 - uid: SharpHoundCommonLib.WellKnownPrincipal
   name: WellKnownPrincipal
   href: api/SharpHoundCommonLib.WellKnownPrincipal.html

@@ -105,6 +105,9 @@
       <section></section>
       <h4><a class="xref" href="SharpHoundCommonLib.Processors.ACLProcessor.html">ACLProcessor</a></h4>
       <section></section>
+      <h4><a class="xref" href="SharpHoundCommonLib.Processors.CAEnrollmentProcessor.html">CAEnrollmentProcessor</a></h4>
+      <section><p>This processor, given an Enrollment Certificate Authority, checks the HTTP endpoints for specific NTLM settings (http enablement, channel bindings)</p>
+</section>
       <h4><a class="xref" href="SharpHoundCommonLib.Processors.CertAbuseProcessor.html">CertAbuseProcessor</a></h4>
       <section></section>
       <h4><a class="xref" href="SharpHoundCommonLib.Processors.CertRegistryResult.html">CertRegistryResult</a></h4>
@@ -117,11 +120,16 @@
       <section></section>
       <h4><a class="xref" href="SharpHoundCommonLib.Processors.ContainerProcessor.html">ContainerProcessor</a></h4>
       <section></section>
+      <h4><a class="xref" href="SharpHoundCommonLib.Processors.DCLdapProcessor.html">DCLdapProcessor</a></h4>
+      <section><p>This processor checks if LDAP is requiring signing, as well as if channel binding is disabled. This is only used for domain controllers</p>
+</section>
       <h4><a class="xref" href="SharpHoundCommonLib.Processors.DCRegistryProcessor.html">DCRegistryProcessor</a></h4>
       <section></section>
       <h4><a class="xref" href="SharpHoundCommonLib.Processors.DomainTrustProcessor.html">DomainTrustProcessor</a></h4>
       <section></section>
       <h4><a class="xref" href="SharpHoundCommonLib.Processors.EnrollmentAgentRestriction.html">EnrollmentAgentRestriction</a></h4>
+      <section></section>
+      <h4><a class="xref" href="SharpHoundCommonLib.Processors.EventLogProcessor.html">EventLogProcessor</a></h4>
       <section></section>
       <h4><a class="xref" href="SharpHoundCommonLib.Processors.GPOLocalGroupProcessor.html">GPOLocalGroupProcessor</a></h4>
       <section></section>
@@ -131,6 +139,8 @@
       <h4><a class="xref" href="SharpHoundCommonLib.Processors.GroupProcessor.html">GroupProcessor</a></h4>
       <section></section>
       <h4><a class="xref" href="SharpHoundCommonLib.Processors.IssuancePolicyProperties.html">IssuancePolicyProperties</a></h4>
+      <section></section>
+      <h4><a class="xref" href="SharpHoundCommonLib.Processors.LdapAuthOptions.html">LdapAuthOptions</a></h4>
       <section></section>
       <h4><a class="xref" href="SharpHoundCommonLib.Processors.LdapPropertyProcessor.html">LdapPropertyProcessor</a></h4>
       <section></section>
@@ -142,11 +152,24 @@
       <section></section>
       <h4><a class="xref" href="SharpHoundCommonLib.Processors.RegistryResult.html">RegistryResult</a></h4>
       <section></section>
+      <h4><a class="xref" href="SharpHoundCommonLib.Processors.SmbProcessor.html">SmbProcessor</a></h4>
+      <section><p>This processor implements the SMB negotation process in order to retrieve several pieces of information from a host, notable whether NTLM signing is enabled
+This processor will also provide some extra data  from the computer which we might be able to use elsewhere. There are a lot of byte streams in this class which
+are well defined and should not be altered, as they are part of the SMB spec</p>
+<p>A significant portion of the SMB packet documentation was retrieved from <a href="https://github.com/FeigongSec/NTLMINFO/blob/main/SmbInfo/SmbInfo/Program.cs">https://github.com/FeigongSec/NTLMINFO/blob/main/SmbInfo/SmbInfo/Program.cs</a></p>
+</section>
       <h4><a class="xref" href="SharpHoundCommonLib.Processors.SPNProcessors.html">SPNProcessors</a></h4>
       <section></section>
       <h4><a class="xref" href="SharpHoundCommonLib.Processors.UserProperties.html">UserProperties</a></h4>
       <section></section>
       <h4><a class="xref" href="SharpHoundCommonLib.Processors.UserRightsAssignmentProcessor.html">UserRightsAssignmentProcessor</a></h4>
+      <section></section>
+      <h4><a class="xref" href="SharpHoundCommonLib.Processors.WebClientServiceProcessor.html">WebClientServiceProcessor</a></h4>
+      <section><p>This processor checks for the presence of web clients on computers by checking for the existence of a particular named pipe.</p>
+</section>
+    <h3 id="enums">Enums
+  </h3>
+      <h4><a class="xref" href="SharpHoundCommonLib.Processors.EventLogCollection.html">EventLogCollection</a></h4>
       <section></section>
     <h3 id="delegates">Delegates
   </h3>
