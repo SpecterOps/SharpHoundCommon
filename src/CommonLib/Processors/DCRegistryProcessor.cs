@@ -24,31 +24,24 @@ namespace SharpHoundCommonLib.Processors
         /// <remarks>https://support.microsoft.com/en-us/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16</remarks>
         /// <param name="target"></param>
         /// <returns>IntRegistryAPIResult</returns>
-        /// <exception cref="Exception"></exception>
         [ExcludeFromCodeCoverage]
-        public IntRegistryAPIResult GetCertificateMappingMethods(string target)
+        public APIResult<int> GetCertificateMappingMethods(string target)
         {
-            var ret = new IntRegistryAPIResult();
             const string subKey = @"SYSTEM\CurrentControlSet\Control\SecurityProviders\Schannel";
             const string subValue = "CertificateMappingMethods";
             var data = Helpers.GetRegistryKeyData(target, subKey, subValue, _log);
-
-            ret.Collected = data.Collected;
+            
             if (!data.Collected)
             {
-                ret.FailureReason = data.FailureReason;
-                return ret;
+                return APIResult<int>.Failure(data.FailureReason);
             }
 
             if (data.Value == null)
             {
-                ret.Value = -1;    
-                return ret;
+                return APIResult<int>.Success(-1);
             }
 
-            ret.Value = (int)data.Value;
-
-            return ret;
+            return APIResult<int>.Success((int)data.Value);
         }
 
         /// <summary>
@@ -57,31 +50,24 @@ namespace SharpHoundCommonLib.Processors
         /// <remarks>https://support.microsoft.com/en-us/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16</remarks>
         /// <param name="target"></param>
         /// <returns>IntRegistryAPIResult</returns>
-        /// <exception cref="Exception"></exception>
         [ExcludeFromCodeCoverage]
-        public IntRegistryAPIResult GetStrongCertificateBindingEnforcement(string target)
+        public APIResult<int> GetStrongCertificateBindingEnforcement(string target)
         {
-            var ret = new IntRegistryAPIResult();
             const string subKey = @"SYSTEM\CurrentControlSet\Services\Kdc";
             const string subValue = "StrongCertificateBindingEnforcement";
             var data = Helpers.GetRegistryKeyData(target, subKey, subValue, _log);
 
-            ret.Collected = data.Collected;
             if (!data.Collected)
             {
-                ret.FailureReason = data.FailureReason;
-                return ret;
+                return APIResult<int>.Failure(data.FailureReason);
             }
 
             if (data.Value == null)
             {
-                ret.Value = -1;    
-                return ret;
+                return APIResult<int>.Success(-1);
             }
 
-            ret.Value = (int)data.Value;
-
-            return ret;
+            return APIResult<int>.Success((int)data.Value);
         }
     }
 }

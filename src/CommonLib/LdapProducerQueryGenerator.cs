@@ -9,11 +9,12 @@ public class LdapProducerQueryGenerator {
     public static GeneratedLdapParameters GenerateDefaultPartitionParameters(CollectionMethod methods) {
         var filter = new LdapFilter();
         var properties = new List<string>();
-        
+
         properties.AddRange(CommonProperties.BaseQueryProps);
         properties.AddRange(CommonProperties.TypeResolutionProps);
 
-        if (methods.HasFlag(CollectionMethod.ObjectProps) || methods.HasFlag(CollectionMethod.ACL) || methods.HasFlag(CollectionMethod.Container)) {
+        if (methods.HasFlag(CollectionMethod.ObjectProps) || methods.HasFlag(CollectionMethod.ACL) ||
+            methods.HasFlag(CollectionMethod.Container)) {
             filter = filter.AddComputers().AddDomains().AddUsers().AddContainers().AddGPOs().AddOUs().AddGroups();
 
             if (methods.HasFlag(CollectionMethod.Container)) {
@@ -39,14 +40,14 @@ public class LdapProducerQueryGenerator {
             if (methods.HasFlag(CollectionMethod.Trusts)) {
                 properties.AddRange(CommonProperties.DomainTrustProps);
             }
-            
+
             if (methods.HasFlag(CollectionMethod.GPOLocalGroup))
                 properties.AddRange(CommonProperties.GPOLocalGroupProps);
 
             if (methods.HasFlag(CollectionMethod.SPNTargets))
                 properties.AddRange(CommonProperties.SPNTargetProps);
 
-            if (methods.HasFlag(CollectionMethod.DCRegistry))
+            if (methods.IsComputerCollectionSet())
                 properties.AddRange(CommonProperties.ComputerMethodProps);
 
             if (methods.HasFlag(CollectionMethod.SPNTargets)) {
@@ -79,16 +80,16 @@ public class LdapProducerQueryGenerator {
             properties.AddRange(CommonProperties.GPOLocalGroupProps);
         }
 
-        if (methods.HasFlag(CollectionMethod.DCRegistry)) {
+        if (methods.HasFlag(CollectionMethod.DCRegistry) || methods.HasFlag(CollectionMethod.LdapServices)) {
             filter = filter.AddComputers(CommonFilters.DomainControllers);
             properties.AddRange(CommonProperties.ComputerMethodProps);
         }
-        
+
         if (methods.HasFlag(CollectionMethod.Group)) {
             filter = filter.AddGroups();
             properties.AddRange(CommonProperties.GroupResolutionProps);
         }
-        
+
         return new GeneratedLdapParameters {
             Filter = filter,
             Attributes = properties.Distinct().ToArray()
@@ -98,7 +99,7 @@ public class LdapProducerQueryGenerator {
     public static GeneratedLdapParameters GenerateConfigurationPartitionParameters(CollectionMethod methods) {
         var filter = new LdapFilter();
         var properties = new List<string>();
-        
+
         properties.AddRange(CommonProperties.BaseQueryProps);
         properties.AddRange(CommonProperties.TypeResolutionProps);
 
@@ -106,9 +107,8 @@ public class LdapProducerQueryGenerator {
             methods.HasFlag(CollectionMethod.Container) || methods.HasFlag(CollectionMethod.CertServices)) {
             filter = filter.AddContainers().AddConfiguration().AddCertificateTemplates().AddCertificateAuthorities()
                 .AddEnterpriseCertificationAuthorities().AddIssuancePolicies();
-            
-            if (methods.HasFlag(CollectionMethod.ObjectProps))
-            {
+
+            if (methods.HasFlag(CollectionMethod.ObjectProps)) {
                 properties.AddRange(CommonProperties.ObjectPropsProps);
             }
 
