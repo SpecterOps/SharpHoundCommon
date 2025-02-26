@@ -25,7 +25,7 @@ namespace SharpHoundCommonLib.Processors {
             _skipPasswordCheck = skipPasswordCheck;
         }
 
-        public ComputerAvailability(PortScanner scanner, int timeout = 500, int computerExpiryDays = 60,
+        public ComputerAvailability(IPortScanner scanner, int timeout = 500, int computerExpiryDays = 60,
             bool skipPortScan = false, bool skipPasswordCheck = false,
             ILogger log = null) {
             _scanner = scanner ?? new PortScanner();
