@@ -56,23 +56,26 @@ public class RegistryProcessor {
                     continue;
 
                 var name = key.ValueName;
-                if (name == "NtlmMinClientSec")
-                    output.NtlmMinClientSec = Convert.ToUInt32(key.Value);
-
-                if (name == "NtlmMinServerSec")
-                    output.NtlmMinServerSec = Convert.ToUInt32(key.Value);
-
-                if (name == "RestrictSendingNTLMTraffic")
-                    output.RestrictSendingNtlmTraffic = Convert.ToUInt32(key.Value);
-
-                if (name == "RestrictReceivingNTLMTraffic")
-                    output.RestrictReceivingNtlmTraffic = Convert.ToUInt32(key.Value);
-
-                if (name == "LMCompatibilityLevel")
-                    output.LmCompatibilityLevel = Convert.ToUInt32(key.Value);
-
-                if (name == "UseMachineId")
-                    output.UseMachine = Convert.ToUInt32(key.Value);
+                switch (name) {
+                    case "NtlmMinClientSec":
+                        output.NtlmMinClientSec = Convert.ToUInt32(key.Value);
+                        break;
+                    case "NtlmMinServerSec":
+                        output.NtlmMinServerSec = Convert.ToUInt32(key.Value);
+                        break;
+                    case "RestrictSendingNTLMTraffic":
+                        output.RestrictSendingNtlmTraffic = Convert.ToUInt32(key.Value);
+                        break;
+                    case "RestrictReceivingNTLMTraffic":
+                        output.RestrictReceivingNtlmTraffic = Convert.ToUInt32(key.Value);
+                        break;
+                    case "LMCompatibilityLevel":
+                        output.LmCompatibilityLevel = Convert.ToUInt32(key.Value);
+                        break;
+                    case "UseMachineId":
+                        output.UseMachine = Convert.ToUInt32(key.Value);
+                        break;
+                }
             }
 
             // If all strategies failed, need to report errors.

@@ -51,7 +51,7 @@ namespace SharpHoundRPC.Registry {
             IEnumerable<RegistryQuery> queries) {
             return await Task.Run(() => {
                 var results = new List<RegistryQueryResult>();
-                bool isLocalMachine = NativeUtils.IsCurrentMachineFqdn(targetMachine);
+                var isLocalMachine = NativeUtils.IsCurrentMachineFqdn(targetMachine);
                 ManagementScope scope;
 
                 if (isLocalMachine) {
@@ -60,11 +60,11 @@ namespace SharpHoundRPC.Registry {
                     var connectionOptions = new ConnectionOptions {
                         Authority = UseKerberos
                             ? @$"kerberos:{Domain}\{targetMachine}"
-                            : @$"ntlmdomain:{Domain}"
+                            : $"ntlmdomain:{Domain}"
                     };
 
                     scope = new ManagementScope(
-                        $"\\\\{targetMachine}\\root\\cimv2",
+                        $@"\\{targetMachine}\root\cimv2",
                         connectionOptions);
                 }
 
@@ -76,9 +76,10 @@ namespace SharpHoundRPC.Registry {
                     if (query.ValueNames == null) continue;
 
                     var methodParams = reg.GetMethodParameters("EnumValues");
-                    methodParams["hDefKey"] = (UInt32)query.Hive;
+                    methodParams["hDefKey"] = (uint)query.Hive;
                     methodParams["sSubKeyName"] = query.KeyPath;
 
+                    //Exceptions here bubble up to the strategy executor and are handled there
                     using var outParams = reg.InvokeMethod("EnumValues", methodParams, null);
 
                     var valueNames = (string[])outParams["sNames"];
@@ -133,7 +134,7 @@ namespace SharpHoundRPC.Registry {
             methodParams["sSubKeyName"] = keyPath;
             methodParams["sValueName"] = valueName;
 
-            (string methodName, string propertyName) = (RegistryValueKind)valueType switch {
+            (var methodName, var propertyName) = (RegistryValueKind)valueType switch {
                 RegistryValueKind.String => ("GetStringValue", "sValue"),
                 RegistryValueKind.ExpandString => ("GetExpandedStringValue", "sValue"),
                 RegistryValueKind.Binary => ("GetBinaryValue", "uValue"),
