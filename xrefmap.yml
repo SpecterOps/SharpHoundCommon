@@ -1268,6 +1268,12 @@ references:
   commentId: F:SharpHoundCommonLib.Enums.CollectionMethod.None
   fullName: SharpHoundCommonLib.Enums.CollectionMethod.None
   nameWithType: CollectionMethod.None
+- uid: SharpHoundCommonLib.Enums.CollectionMethod.NTLMRegistry
+  name: NTLMRegistry
+  href: api/SharpHoundCommonLib.Enums.CollectionMethod.html#SharpHoundCommonLib_Enums_CollectionMethod_NTLMRegistry
+  commentId: F:SharpHoundCommonLib.Enums.CollectionMethod.NTLMRegistry
+  fullName: SharpHoundCommonLib.Enums.CollectionMethod.NTLMRegistry
+  nameWithType: CollectionMethod.NTLMRegistry
 - uid: SharpHoundCommonLib.Enums.CollectionMethod.ObjectProps
   name: ObjectProps
   href: api/SharpHoundCommonLib.Enums.CollectionMethod.html#SharpHoundCommonLib_Enums_CollectionMethod_ObjectProps
@@ -7540,19 +7546,6 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.OutputTypes.Computer.IsWebClientRunning
   nameWithType: Computer.IsWebClientRunning
-- uid: SharpHoundCommonLib.OutputTypes.Computer.LdapServices
-  name: LdapServices
-  href: api/SharpHoundCommonLib.OutputTypes.Computer.html#SharpHoundCommonLib_OutputTypes_Computer_LdapServices
-  commentId: P:SharpHoundCommonLib.OutputTypes.Computer.LdapServices
-  fullName: SharpHoundCommonLib.OutputTypes.Computer.LdapServices
-  nameWithType: Computer.LdapServices
-- uid: SharpHoundCommonLib.OutputTypes.Computer.LdapServices*
-  name: LdapServices
-  href: api/SharpHoundCommonLib.OutputTypes.Computer.html#SharpHoundCommonLib_OutputTypes_Computer_LdapServices_
-  commentId: Overload:SharpHoundCommonLib.OutputTypes.Computer.LdapServices
-  isSpec: "True"
-  fullName: SharpHoundCommonLib.OutputTypes.Computer.LdapServices
-  nameWithType: Computer.LdapServices
 - uid: SharpHoundCommonLib.OutputTypes.Computer.LocalGroups
   name: LocalGroups
   href: api/SharpHoundCommonLib.OutputTypes.Computer.html#SharpHoundCommonLib_OutputTypes_Computer_LocalGroups
@@ -7605,6 +7598,19 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.OutputTypes.Computer.PrivilegedSessions
   nameWithType: Computer.PrivilegedSessions
+- uid: SharpHoundCommonLib.OutputTypes.Computer.RegistryData
+  name: RegistryData
+  href: api/SharpHoundCommonLib.OutputTypes.Computer.html#SharpHoundCommonLib_OutputTypes_Computer_RegistryData
+  commentId: P:SharpHoundCommonLib.OutputTypes.Computer.RegistryData
+  fullName: SharpHoundCommonLib.OutputTypes.Computer.RegistryData
+  nameWithType: Computer.RegistryData
+- uid: SharpHoundCommonLib.OutputTypes.Computer.RegistryData*
+  name: RegistryData
+  href: api/SharpHoundCommonLib.OutputTypes.Computer.html#SharpHoundCommonLib_OutputTypes_Computer_RegistryData_
+  commentId: Overload:SharpHoundCommonLib.OutputTypes.Computer.RegistryData
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.OutputTypes.Computer.RegistryData
+  nameWithType: Computer.RegistryData
 - uid: SharpHoundCommonLib.OutputTypes.Computer.RegistrySessions
   name: RegistrySessions
   href: api/SharpHoundCommonLib.OutputTypes.Computer.html#SharpHoundCommonLib_OutputTypes_Computer_RegistrySessions
@@ -8610,6 +8616,90 @@ references:
   fullName.vb: SharpHoundCommonLib.OutputTypes.OutputWrapper(Of T).Meta
   nameWithType: OutputWrapper<T>.Meta
   nameWithType.vb: OutputWrapper(Of T).Meta
+- uid: SharpHoundCommonLib.OutputTypes.RegistryData
+  name: RegistryData
+  href: api/SharpHoundCommonLib.OutputTypes.RegistryData.html
+  commentId: T:SharpHoundCommonLib.OutputTypes.RegistryData
+  fullName: SharpHoundCommonLib.OutputTypes.RegistryData
+  nameWithType: RegistryData
+- uid: SharpHoundCommonLib.OutputTypes.RegistryData.LmCompatibilityLevel
+  name: LmCompatibilityLevel
+  href: api/SharpHoundCommonLib.OutputTypes.RegistryData.html#SharpHoundCommonLib_OutputTypes_RegistryData_LmCompatibilityLevel
+  commentId: P:SharpHoundCommonLib.OutputTypes.RegistryData.LmCompatibilityLevel
+  fullName: SharpHoundCommonLib.OutputTypes.RegistryData.LmCompatibilityLevel
+  nameWithType: RegistryData.LmCompatibilityLevel
+- uid: SharpHoundCommonLib.OutputTypes.RegistryData.LmCompatibilityLevel*
+  name: LmCompatibilityLevel
+  href: api/SharpHoundCommonLib.OutputTypes.RegistryData.html#SharpHoundCommonLib_OutputTypes_RegistryData_LmCompatibilityLevel_
+  commentId: Overload:SharpHoundCommonLib.OutputTypes.RegistryData.LmCompatibilityLevel
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.OutputTypes.RegistryData.LmCompatibilityLevel
+  nameWithType: RegistryData.LmCompatibilityLevel
+- uid: SharpHoundCommonLib.OutputTypes.RegistryData.NtlmMinClientSec
+  name: NtlmMinClientSec
+  href: api/SharpHoundCommonLib.OutputTypes.RegistryData.html#SharpHoundCommonLib_OutputTypes_RegistryData_NtlmMinClientSec
+  commentId: P:SharpHoundCommonLib.OutputTypes.RegistryData.NtlmMinClientSec
+  fullName: SharpHoundCommonLib.OutputTypes.RegistryData.NtlmMinClientSec
+  nameWithType: RegistryData.NtlmMinClientSec
+- uid: SharpHoundCommonLib.OutputTypes.RegistryData.NtlmMinClientSec*
+  name: NtlmMinClientSec
+  href: api/SharpHoundCommonLib.OutputTypes.RegistryData.html#SharpHoundCommonLib_OutputTypes_RegistryData_NtlmMinClientSec_
+  commentId: Overload:SharpHoundCommonLib.OutputTypes.RegistryData.NtlmMinClientSec
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.OutputTypes.RegistryData.NtlmMinClientSec
+  nameWithType: RegistryData.NtlmMinClientSec
+- uid: SharpHoundCommonLib.OutputTypes.RegistryData.NtlmMinServerSec
+  name: NtlmMinServerSec
+  href: api/SharpHoundCommonLib.OutputTypes.RegistryData.html#SharpHoundCommonLib_OutputTypes_RegistryData_NtlmMinServerSec
+  commentId: P:SharpHoundCommonLib.OutputTypes.RegistryData.NtlmMinServerSec
+  fullName: SharpHoundCommonLib.OutputTypes.RegistryData.NtlmMinServerSec
+  nameWithType: RegistryData.NtlmMinServerSec
+- uid: SharpHoundCommonLib.OutputTypes.RegistryData.NtlmMinServerSec*
+  name: NtlmMinServerSec
+  href: api/SharpHoundCommonLib.OutputTypes.RegistryData.html#SharpHoundCommonLib_OutputTypes_RegistryData_NtlmMinServerSec_
+  commentId: Overload:SharpHoundCommonLib.OutputTypes.RegistryData.NtlmMinServerSec
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.OutputTypes.RegistryData.NtlmMinServerSec
+  nameWithType: RegistryData.NtlmMinServerSec
+- uid: SharpHoundCommonLib.OutputTypes.RegistryData.RestrictReceivingNtlmTraffic
+  name: RestrictReceivingNtlmTraffic
+  href: api/SharpHoundCommonLib.OutputTypes.RegistryData.html#SharpHoundCommonLib_OutputTypes_RegistryData_RestrictReceivingNtlmTraffic
+  commentId: P:SharpHoundCommonLib.OutputTypes.RegistryData.RestrictReceivingNtlmTraffic
+  fullName: SharpHoundCommonLib.OutputTypes.RegistryData.RestrictReceivingNtlmTraffic
+  nameWithType: RegistryData.RestrictReceivingNtlmTraffic
+- uid: SharpHoundCommonLib.OutputTypes.RegistryData.RestrictReceivingNtlmTraffic*
+  name: RestrictReceivingNtlmTraffic
+  href: api/SharpHoundCommonLib.OutputTypes.RegistryData.html#SharpHoundCommonLib_OutputTypes_RegistryData_RestrictReceivingNtlmTraffic_
+  commentId: Overload:SharpHoundCommonLib.OutputTypes.RegistryData.RestrictReceivingNtlmTraffic
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.OutputTypes.RegistryData.RestrictReceivingNtlmTraffic
+  nameWithType: RegistryData.RestrictReceivingNtlmTraffic
+- uid: SharpHoundCommonLib.OutputTypes.RegistryData.RestrictSendingNtlmTraffic
+  name: RestrictSendingNtlmTraffic
+  href: api/SharpHoundCommonLib.OutputTypes.RegistryData.html#SharpHoundCommonLib_OutputTypes_RegistryData_RestrictSendingNtlmTraffic
+  commentId: P:SharpHoundCommonLib.OutputTypes.RegistryData.RestrictSendingNtlmTraffic
+  fullName: SharpHoundCommonLib.OutputTypes.RegistryData.RestrictSendingNtlmTraffic
+  nameWithType: RegistryData.RestrictSendingNtlmTraffic
+- uid: SharpHoundCommonLib.OutputTypes.RegistryData.RestrictSendingNtlmTraffic*
+  name: RestrictSendingNtlmTraffic
+  href: api/SharpHoundCommonLib.OutputTypes.RegistryData.html#SharpHoundCommonLib_OutputTypes_RegistryData_RestrictSendingNtlmTraffic_
+  commentId: Overload:SharpHoundCommonLib.OutputTypes.RegistryData.RestrictSendingNtlmTraffic
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.OutputTypes.RegistryData.RestrictSendingNtlmTraffic
+  nameWithType: RegistryData.RestrictSendingNtlmTraffic
+- uid: SharpHoundCommonLib.OutputTypes.RegistryData.UseMachine
+  name: UseMachine
+  href: api/SharpHoundCommonLib.OutputTypes.RegistryData.html#SharpHoundCommonLib_OutputTypes_RegistryData_UseMachine
+  commentId: P:SharpHoundCommonLib.OutputTypes.RegistryData.UseMachine
+  fullName: SharpHoundCommonLib.OutputTypes.RegistryData.UseMachine
+  nameWithType: RegistryData.UseMachine
+- uid: SharpHoundCommonLib.OutputTypes.RegistryData.UseMachine*
+  name: UseMachine
+  href: api/SharpHoundCommonLib.OutputTypes.RegistryData.html#SharpHoundCommonLib_OutputTypes_RegistryData_UseMachine_
+  commentId: Overload:SharpHoundCommonLib.OutputTypes.RegistryData.UseMachine
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.OutputTypes.RegistryData.UseMachine
+  nameWithType: RegistryData.UseMachine
 - uid: SharpHoundCommonLib.OutputTypes.ResultingGPOChanges
   name: ResultingGPOChanges
   href: api/SharpHoundCommonLib.OutputTypes.ResultingGPOChanges.html
@@ -9539,12 +9629,12 @@ references:
   commentId: T:SharpHoundCommonLib.Processors.ComputerAvailability
   fullName: SharpHoundCommonLib.Processors.ComputerAvailability
   nameWithType: ComputerAvailability
-- uid: SharpHoundCommonLib.Processors.ComputerAvailability.#ctor(SharpHoundCommonLib.Processors.PortScanner,System.Int32,System.Int32,System.Boolean,System.Boolean,ILogger)
-  name: ComputerAvailability(PortScanner, Int32, Int32, Boolean, Boolean, ILogger)
-  href: api/SharpHoundCommonLib.Processors.ComputerAvailability.html#SharpHoundCommonLib_Processors_ComputerAvailability__ctor_SharpHoundCommonLib_Processors_PortScanner_System_Int32_System_Int32_System_Boolean_System_Boolean_ILogger_
-  commentId: M:SharpHoundCommonLib.Processors.ComputerAvailability.#ctor(SharpHoundCommonLib.Processors.PortScanner,System.Int32,System.Int32,System.Boolean,System.Boolean,ILogger)
-  fullName: SharpHoundCommonLib.Processors.ComputerAvailability.ComputerAvailability(SharpHoundCommonLib.Processors.PortScanner, System.Int32, System.Int32, System.Boolean, System.Boolean, ILogger)
-  nameWithType: ComputerAvailability.ComputerAvailability(PortScanner, Int32, Int32, Boolean, Boolean, ILogger)
+- uid: SharpHoundCommonLib.Processors.ComputerAvailability.#ctor(SharpHoundRPC.PortScanner.IPortScanner,System.Int32,System.Int32,System.Boolean,System.Boolean,ILogger)
+  name: ComputerAvailability(IPortScanner, Int32, Int32, Boolean, Boolean, ILogger)
+  href: api/SharpHoundCommonLib.Processors.ComputerAvailability.html#SharpHoundCommonLib_Processors_ComputerAvailability__ctor_SharpHoundRPC_PortScanner_IPortScanner_System_Int32_System_Int32_System_Boolean_System_Boolean_ILogger_
+  commentId: M:SharpHoundCommonLib.Processors.ComputerAvailability.#ctor(SharpHoundRPC.PortScanner.IPortScanner,System.Int32,System.Int32,System.Boolean,System.Boolean,ILogger)
+  fullName: SharpHoundCommonLib.Processors.ComputerAvailability.ComputerAvailability(SharpHoundRPC.PortScanner.IPortScanner, System.Int32, System.Int32, System.Boolean, System.Boolean, ILogger)
+  nameWithType: ComputerAvailability.ComputerAvailability(IPortScanner, Int32, Int32, Boolean, Boolean, ILogger)
 - uid: SharpHoundCommonLib.Processors.ComputerAvailability.#ctor(System.Int32,System.Int32,System.Boolean,System.Boolean,ILogger)
   name: ComputerAvailability(Int32, Int32, Boolean, Boolean, ILogger)
   href: api/SharpHoundCommonLib.Processors.ComputerAvailability.html#SharpHoundCommonLib_Processors_ComputerAvailability__ctor_System_Int32_System_Int32_System_Boolean_System_Boolean_ILogger_
@@ -10694,12 +10784,12 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.Processors.PortScanner.PortScanner
   nameWithType: PortScanner.PortScanner
-- uid: SharpHoundCommonLib.Processors.PortScanner.CheckPort(System.String,System.Int32,System.Int32)
-  name: CheckPort(String, Int32, Int32)
-  href: api/SharpHoundCommonLib.Processors.PortScanner.html#SharpHoundCommonLib_Processors_PortScanner_CheckPort_System_String_System_Int32_System_Int32_
-  commentId: M:SharpHoundCommonLib.Processors.PortScanner.CheckPort(System.String,System.Int32,System.Int32)
-  fullName: SharpHoundCommonLib.Processors.PortScanner.CheckPort(System.String, System.Int32, System.Int32)
-  nameWithType: PortScanner.CheckPort(String, Int32, Int32)
+- uid: SharpHoundCommonLib.Processors.PortScanner.CheckPort(System.String,System.Int32,System.Int32,System.Boolean)
+  name: CheckPort(String, Int32, Int32, Boolean)
+  href: api/SharpHoundCommonLib.Processors.PortScanner.html#SharpHoundCommonLib_Processors_PortScanner_CheckPort_System_String_System_Int32_System_Int32_System_Boolean_
+  commentId: M:SharpHoundCommonLib.Processors.PortScanner.CheckPort(System.String,System.Int32,System.Int32,System.Boolean)
+  fullName: SharpHoundCommonLib.Processors.PortScanner.CheckPort(System.String, System.Int32, System.Int32, System.Boolean)
+  nameWithType: PortScanner.CheckPort(String, Int32, Int32, Boolean)
 - uid: SharpHoundCommonLib.Processors.PortScanner.CheckPort*
   name: CheckPort
   href: api/SharpHoundCommonLib.Processors.PortScanner.html#SharpHoundCommonLib_Processors_PortScanner_CheckPort_
@@ -10720,6 +10810,38 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.Processors.PortScanner.ClearCache
   nameWithType: PortScanner.ClearCache
+- uid: SharpHoundCommonLib.Processors.RegistryProcessor
+  name: RegistryProcessor
+  href: api/SharpHoundCommonLib.Processors.RegistryProcessor.html
+  commentId: T:SharpHoundCommonLib.Processors.RegistryProcessor
+  fullName: SharpHoundCommonLib.Processors.RegistryProcessor
+  nameWithType: RegistryProcessor
+- uid: SharpHoundCommonLib.Processors.RegistryProcessor.#ctor(ILogger,System.String)
+  name: RegistryProcessor(ILogger, String)
+  href: api/SharpHoundCommonLib.Processors.RegistryProcessor.html#SharpHoundCommonLib_Processors_RegistryProcessor__ctor_ILogger_System_String_
+  commentId: M:SharpHoundCommonLib.Processors.RegistryProcessor.#ctor(ILogger,System.String)
+  fullName: SharpHoundCommonLib.Processors.RegistryProcessor.RegistryProcessor(ILogger, System.String)
+  nameWithType: RegistryProcessor.RegistryProcessor(ILogger, String)
+- uid: SharpHoundCommonLib.Processors.RegistryProcessor.#ctor*
+  name: RegistryProcessor
+  href: api/SharpHoundCommonLib.Processors.RegistryProcessor.html#SharpHoundCommonLib_Processors_RegistryProcessor__ctor_
+  commentId: Overload:SharpHoundCommonLib.Processors.RegistryProcessor.#ctor
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Processors.RegistryProcessor.RegistryProcessor
+  nameWithType: RegistryProcessor.RegistryProcessor
+- uid: SharpHoundCommonLib.Processors.RegistryProcessor.ReadRegistrySettings(System.String)
+  name: ReadRegistrySettings(String)
+  href: api/SharpHoundCommonLib.Processors.RegistryProcessor.html#SharpHoundCommonLib_Processors_RegistryProcessor_ReadRegistrySettings_System_String_
+  commentId: M:SharpHoundCommonLib.Processors.RegistryProcessor.ReadRegistrySettings(System.String)
+  fullName: SharpHoundCommonLib.Processors.RegistryProcessor.ReadRegistrySettings(System.String)
+  nameWithType: RegistryProcessor.ReadRegistrySettings(String)
+- uid: SharpHoundCommonLib.Processors.RegistryProcessor.ReadRegistrySettings*
+  name: ReadRegistrySettings
+  href: api/SharpHoundCommonLib.Processors.RegistryProcessor.html#SharpHoundCommonLib_Processors_RegistryProcessor_ReadRegistrySettings_
+  commentId: Overload:SharpHoundCommonLib.Processors.RegistryProcessor.ReadRegistrySettings
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Processors.RegistryProcessor.ReadRegistrySettings
+  nameWithType: RegistryProcessor.ReadRegistrySettings
 - uid: SharpHoundCommonLib.Processors.RegistryResult
   name: RegistryResult
   href: api/SharpHoundCommonLib.Processors.RegistryResult.html
@@ -13585,6 +13707,672 @@ references:
   commentId: F:SharpHoundRPC.NtStatus.StatusSuccess
   fullName: SharpHoundRPC.NtStatus.StatusSuccess
   nameWithType: NtStatus.StatusSuccess
+- uid: SharpHoundRPC.PortScanner
+  name: SharpHoundRPC.PortScanner
+  href: api/SharpHoundRPC.PortScanner.html
+  commentId: N:SharpHoundRPC.PortScanner
+  fullName: SharpHoundRPC.PortScanner
+  nameWithType: SharpHoundRPC.PortScanner
+- uid: SharpHoundRPC.PortScanner.IPortScanner
+  name: IPortScanner
+  href: api/SharpHoundRPC.PortScanner.IPortScanner.html
+  commentId: T:SharpHoundRPC.PortScanner.IPortScanner
+  fullName: SharpHoundRPC.PortScanner.IPortScanner
+  nameWithType: IPortScanner
+- uid: SharpHoundRPC.PortScanner.IPortScanner.CheckPort(System.String,System.Int32,System.Int32,System.Boolean)
+  name: CheckPort(String, Int32, Int32, Boolean)
+  href: api/SharpHoundRPC.PortScanner.IPortScanner.html#SharpHoundRPC_PortScanner_IPortScanner_CheckPort_System_String_System_Int32_System_Int32_System_Boolean_
+  commentId: M:SharpHoundRPC.PortScanner.IPortScanner.CheckPort(System.String,System.Int32,System.Int32,System.Boolean)
+  fullName: SharpHoundRPC.PortScanner.IPortScanner.CheckPort(System.String, System.Int32, System.Int32, System.Boolean)
+  nameWithType: IPortScanner.CheckPort(String, Int32, Int32, Boolean)
+- uid: SharpHoundRPC.PortScanner.IPortScanner.CheckPort*
+  name: CheckPort
+  href: api/SharpHoundRPC.PortScanner.IPortScanner.html#SharpHoundRPC_PortScanner_IPortScanner_CheckPort_
+  commentId: Overload:SharpHoundRPC.PortScanner.IPortScanner.CheckPort
+  isSpec: "True"
+  fullName: SharpHoundRPC.PortScanner.IPortScanner.CheckPort
+  nameWithType: IPortScanner.CheckPort
+- uid: SharpHoundRPC.Registry
+  name: SharpHoundRPC.Registry
+  href: api/SharpHoundRPC.Registry.html
+  commentId: N:SharpHoundRPC.Registry
+  fullName: SharpHoundRPC.Registry
+  nameWithType: SharpHoundRPC.Registry
+- uid: SharpHoundRPC.Registry.DotNetWmiRegistryStrategy
+  name: DotNetWmiRegistryStrategy
+  href: api/SharpHoundRPC.Registry.DotNetWmiRegistryStrategy.html
+  commentId: T:SharpHoundRPC.Registry.DotNetWmiRegistryStrategy
+  fullName: SharpHoundRPC.Registry.DotNetWmiRegistryStrategy
+  nameWithType: DotNetWmiRegistryStrategy
+- uid: SharpHoundRPC.Registry.DotNetWmiRegistryStrategy.#ctor(SharpHoundRPC.PortScanner.IPortScanner,System.String)
+  name: DotNetWmiRegistryStrategy(IPortScanner, String)
+  href: api/SharpHoundRPC.Registry.DotNetWmiRegistryStrategy.html#SharpHoundRPC_Registry_DotNetWmiRegistryStrategy__ctor_SharpHoundRPC_PortScanner_IPortScanner_System_String_
+  commentId: M:SharpHoundRPC.Registry.DotNetWmiRegistryStrategy.#ctor(SharpHoundRPC.PortScanner.IPortScanner,System.String)
+  fullName: SharpHoundRPC.Registry.DotNetWmiRegistryStrategy.DotNetWmiRegistryStrategy(SharpHoundRPC.PortScanner.IPortScanner, System.String)
+  nameWithType: DotNetWmiRegistryStrategy.DotNetWmiRegistryStrategy(IPortScanner, String)
+- uid: SharpHoundRPC.Registry.DotNetWmiRegistryStrategy.#ctor*
+  name: DotNetWmiRegistryStrategy
+  href: api/SharpHoundRPC.Registry.DotNetWmiRegistryStrategy.html#SharpHoundRPC_Registry_DotNetWmiRegistryStrategy__ctor_
+  commentId: Overload:SharpHoundRPC.Registry.DotNetWmiRegistryStrategy.#ctor
+  isSpec: "True"
+  fullName: SharpHoundRPC.Registry.DotNetWmiRegistryStrategy.DotNetWmiRegistryStrategy
+  nameWithType: DotNetWmiRegistryStrategy.DotNetWmiRegistryStrategy
+- uid: SharpHoundRPC.Registry.DotNetWmiRegistryStrategy.CanExecute(System.String)
+  name: CanExecute(String)
+  href: api/SharpHoundRPC.Registry.DotNetWmiRegistryStrategy.html#SharpHoundRPC_Registry_DotNetWmiRegistryStrategy_CanExecute_System_String_
+  commentId: M:SharpHoundRPC.Registry.DotNetWmiRegistryStrategy.CanExecute(System.String)
+  fullName: SharpHoundRPC.Registry.DotNetWmiRegistryStrategy.CanExecute(System.String)
+  nameWithType: DotNetWmiRegistryStrategy.CanExecute(String)
+- uid: SharpHoundRPC.Registry.DotNetWmiRegistryStrategy.CanExecute*
+  name: CanExecute
+  href: api/SharpHoundRPC.Registry.DotNetWmiRegistryStrategy.html#SharpHoundRPC_Registry_DotNetWmiRegistryStrategy_CanExecute_
+  commentId: Overload:SharpHoundRPC.Registry.DotNetWmiRegistryStrategy.CanExecute
+  isSpec: "True"
+  fullName: SharpHoundRPC.Registry.DotNetWmiRegistryStrategy.CanExecute
+  nameWithType: DotNetWmiRegistryStrategy.CanExecute
+- uid: SharpHoundRPC.Registry.DotNetWmiRegistryStrategy.Domain
+  name: Domain
+  href: api/SharpHoundRPC.Registry.DotNetWmiRegistryStrategy.html#SharpHoundRPC_Registry_DotNetWmiRegistryStrategy_Domain
+  commentId: P:SharpHoundRPC.Registry.DotNetWmiRegistryStrategy.Domain
+  fullName: SharpHoundRPC.Registry.DotNetWmiRegistryStrategy.Domain
+  nameWithType: DotNetWmiRegistryStrategy.Domain
+- uid: SharpHoundRPC.Registry.DotNetWmiRegistryStrategy.Domain*
+  name: Domain
+  href: api/SharpHoundRPC.Registry.DotNetWmiRegistryStrategy.html#SharpHoundRPC_Registry_DotNetWmiRegistryStrategy_Domain_
+  commentId: Overload:SharpHoundRPC.Registry.DotNetWmiRegistryStrategy.Domain
+  isSpec: "True"
+  fullName: SharpHoundRPC.Registry.DotNetWmiRegistryStrategy.Domain
+  nameWithType: DotNetWmiRegistryStrategy.Domain
+- uid: SharpHoundRPC.Registry.DotNetWmiRegistryStrategy.ExecuteAsync(System.String,System.Collections.Generic.IEnumerable{SharpHoundRPC.Registry.RegistryQuery})
+  name: ExecuteAsync(String, IEnumerable<RegistryQuery>)
+  href: api/SharpHoundRPC.Registry.DotNetWmiRegistryStrategy.html#SharpHoundRPC_Registry_DotNetWmiRegistryStrategy_ExecuteAsync_System_String_System_Collections_Generic_IEnumerable_SharpHoundRPC_Registry_RegistryQuery__
+  commentId: M:SharpHoundRPC.Registry.DotNetWmiRegistryStrategy.ExecuteAsync(System.String,System.Collections.Generic.IEnumerable{SharpHoundRPC.Registry.RegistryQuery})
+  name.vb: ExecuteAsync(String, IEnumerable(Of RegistryQuery))
+  fullName: SharpHoundRPC.Registry.DotNetWmiRegistryStrategy.ExecuteAsync(System.String, System.Collections.Generic.IEnumerable<SharpHoundRPC.Registry.RegistryQuery>)
+  fullName.vb: SharpHoundRPC.Registry.DotNetWmiRegistryStrategy.ExecuteAsync(System.String, System.Collections.Generic.IEnumerable(Of SharpHoundRPC.Registry.RegistryQuery))
+  nameWithType: DotNetWmiRegistryStrategy.ExecuteAsync(String, IEnumerable<RegistryQuery>)
+  nameWithType.vb: DotNetWmiRegistryStrategy.ExecuteAsync(String, IEnumerable(Of RegistryQuery))
+- uid: SharpHoundRPC.Registry.DotNetWmiRegistryStrategy.ExecuteAsync*
+  name: ExecuteAsync
+  href: api/SharpHoundRPC.Registry.DotNetWmiRegistryStrategy.html#SharpHoundRPC_Registry_DotNetWmiRegistryStrategy_ExecuteAsync_
+  commentId: Overload:SharpHoundRPC.Registry.DotNetWmiRegistryStrategy.ExecuteAsync
+  isSpec: "True"
+  fullName: SharpHoundRPC.Registry.DotNetWmiRegistryStrategy.ExecuteAsync
+  nameWithType: DotNetWmiRegistryStrategy.ExecuteAsync
+- uid: SharpHoundRPC.Registry.DotNetWmiRegistryStrategy.UseKerberos
+  name: UseKerberos
+  href: api/SharpHoundRPC.Registry.DotNetWmiRegistryStrategy.html#SharpHoundRPC_Registry_DotNetWmiRegistryStrategy_UseKerberos
+  commentId: P:SharpHoundRPC.Registry.DotNetWmiRegistryStrategy.UseKerberos
+  fullName: SharpHoundRPC.Registry.DotNetWmiRegistryStrategy.UseKerberos
+  nameWithType: DotNetWmiRegistryStrategy.UseKerberos
+- uid: SharpHoundRPC.Registry.DotNetWmiRegistryStrategy.UseKerberos*
+  name: UseKerberos
+  href: api/SharpHoundRPC.Registry.DotNetWmiRegistryStrategy.html#SharpHoundRPC_Registry_DotNetWmiRegistryStrategy_UseKerberos_
+  commentId: Overload:SharpHoundRPC.Registry.DotNetWmiRegistryStrategy.UseKerberos
+  isSpec: "True"
+  fullName: SharpHoundRPC.Registry.DotNetWmiRegistryStrategy.UseKerberos
+  nameWithType: DotNetWmiRegistryStrategy.UseKerberos
+- uid: SharpHoundRPC.Registry.ICollectionStrategy`2
+  name: ICollectionStrategy<T, TQuery>
+  href: api/SharpHoundRPC.Registry.ICollectionStrategy-2.html
+  commentId: T:SharpHoundRPC.Registry.ICollectionStrategy`2
+  name.vb: ICollectionStrategy(Of T, TQuery)
+  fullName: SharpHoundRPC.Registry.ICollectionStrategy<T, TQuery>
+  fullName.vb: SharpHoundRPC.Registry.ICollectionStrategy(Of T, TQuery)
+  nameWithType: ICollectionStrategy<T, TQuery>
+  nameWithType.vb: ICollectionStrategy(Of T, TQuery)
+- uid: SharpHoundRPC.Registry.ICollectionStrategy`2.CanExecute(System.String)
+  name: CanExecute(String)
+  href: api/SharpHoundRPC.Registry.ICollectionStrategy-2.html#SharpHoundRPC_Registry_ICollectionStrategy_2_CanExecute_System_String_
+  commentId: M:SharpHoundRPC.Registry.ICollectionStrategy`2.CanExecute(System.String)
+  fullName: SharpHoundRPC.Registry.ICollectionStrategy<T, TQuery>.CanExecute(System.String)
+  fullName.vb: SharpHoundRPC.Registry.ICollectionStrategy(Of T, TQuery).CanExecute(System.String)
+  nameWithType: ICollectionStrategy<T, TQuery>.CanExecute(String)
+  nameWithType.vb: ICollectionStrategy(Of T, TQuery).CanExecute(String)
+- uid: SharpHoundRPC.Registry.ICollectionStrategy`2.CanExecute*
+  name: CanExecute
+  href: api/SharpHoundRPC.Registry.ICollectionStrategy-2.html#SharpHoundRPC_Registry_ICollectionStrategy_2_CanExecute_
+  commentId: Overload:SharpHoundRPC.Registry.ICollectionStrategy`2.CanExecute
+  isSpec: "True"
+  fullName: SharpHoundRPC.Registry.ICollectionStrategy<T, TQuery>.CanExecute
+  fullName.vb: SharpHoundRPC.Registry.ICollectionStrategy(Of T, TQuery).CanExecute
+  nameWithType: ICollectionStrategy<T, TQuery>.CanExecute
+  nameWithType.vb: ICollectionStrategy(Of T, TQuery).CanExecute
+- uid: SharpHoundRPC.Registry.ICollectionStrategy`2.ExecuteAsync(System.String,System.Collections.Generic.IEnumerable{`1})
+  name: ExecuteAsync(String, IEnumerable<TQuery>)
+  href: api/SharpHoundRPC.Registry.ICollectionStrategy-2.html#SharpHoundRPC_Registry_ICollectionStrategy_2_ExecuteAsync_System_String_System_Collections_Generic_IEnumerable__1__
+  commentId: M:SharpHoundRPC.Registry.ICollectionStrategy`2.ExecuteAsync(System.String,System.Collections.Generic.IEnumerable{`1})
+  name.vb: ExecuteAsync(String, IEnumerable(Of TQuery))
+  fullName: SharpHoundRPC.Registry.ICollectionStrategy<T, TQuery>.ExecuteAsync(System.String, System.Collections.Generic.IEnumerable<TQuery>)
+  fullName.vb: SharpHoundRPC.Registry.ICollectionStrategy(Of T, TQuery).ExecuteAsync(System.String, System.Collections.Generic.IEnumerable(Of TQuery))
+  nameWithType: ICollectionStrategy<T, TQuery>.ExecuteAsync(String, IEnumerable<TQuery>)
+  nameWithType.vb: ICollectionStrategy(Of T, TQuery).ExecuteAsync(String, IEnumerable(Of TQuery))
+- uid: SharpHoundRPC.Registry.ICollectionStrategy`2.ExecuteAsync*
+  name: ExecuteAsync
+  href: api/SharpHoundRPC.Registry.ICollectionStrategy-2.html#SharpHoundRPC_Registry_ICollectionStrategy_2_ExecuteAsync_
+  commentId: Overload:SharpHoundRPC.Registry.ICollectionStrategy`2.ExecuteAsync
+  isSpec: "True"
+  fullName: SharpHoundRPC.Registry.ICollectionStrategy<T, TQuery>.ExecuteAsync
+  fullName.vb: SharpHoundRPC.Registry.ICollectionStrategy(Of T, TQuery).ExecuteAsync
+  nameWithType: ICollectionStrategy<T, TQuery>.ExecuteAsync
+  nameWithType.vb: ICollectionStrategy(Of T, TQuery).ExecuteAsync
+- uid: SharpHoundRPC.Registry.NativeUtils
+  name: NativeUtils
+  href: api/SharpHoundRPC.Registry.NativeUtils.html
+  commentId: T:SharpHoundRPC.Registry.NativeUtils
+  fullName: SharpHoundRPC.Registry.NativeUtils
+  nameWithType: NativeUtils
+- uid: SharpHoundRPC.Registry.NativeUtils.ComputerNameFormat
+  name: NativeUtils.ComputerNameFormat
+  href: api/SharpHoundRPC.Registry.NativeUtils.ComputerNameFormat.html
+  commentId: T:SharpHoundRPC.Registry.NativeUtils.ComputerNameFormat
+  fullName: SharpHoundRPC.Registry.NativeUtils.ComputerNameFormat
+  nameWithType: NativeUtils.ComputerNameFormat
+- uid: SharpHoundRPC.Registry.NativeUtils.ComputerNameFormat.DnsDomain
+  name: DnsDomain
+  href: api/SharpHoundRPC.Registry.NativeUtils.ComputerNameFormat.html#SharpHoundRPC_Registry_NativeUtils_ComputerNameFormat_DnsDomain
+  commentId: F:SharpHoundRPC.Registry.NativeUtils.ComputerNameFormat.DnsDomain
+  fullName: SharpHoundRPC.Registry.NativeUtils.ComputerNameFormat.DnsDomain
+  nameWithType: NativeUtils.ComputerNameFormat.DnsDomain
+- uid: SharpHoundRPC.Registry.NativeUtils.ComputerNameFormat.DnsFullyQualified
+  name: DnsFullyQualified
+  href: api/SharpHoundRPC.Registry.NativeUtils.ComputerNameFormat.html#SharpHoundRPC_Registry_NativeUtils_ComputerNameFormat_DnsFullyQualified
+  commentId: F:SharpHoundRPC.Registry.NativeUtils.ComputerNameFormat.DnsFullyQualified
+  fullName: SharpHoundRPC.Registry.NativeUtils.ComputerNameFormat.DnsFullyQualified
+  nameWithType: NativeUtils.ComputerNameFormat.DnsFullyQualified
+- uid: SharpHoundRPC.Registry.NativeUtils.ComputerNameFormat.DnsHostname
+  name: DnsHostname
+  href: api/SharpHoundRPC.Registry.NativeUtils.ComputerNameFormat.html#SharpHoundRPC_Registry_NativeUtils_ComputerNameFormat_DnsHostname
+  commentId: F:SharpHoundRPC.Registry.NativeUtils.ComputerNameFormat.DnsHostname
+  fullName: SharpHoundRPC.Registry.NativeUtils.ComputerNameFormat.DnsHostname
+  nameWithType: NativeUtils.ComputerNameFormat.DnsHostname
+- uid: SharpHoundRPC.Registry.NativeUtils.ComputerNameFormat.NetBIOS
+  name: NetBIOS
+  href: api/SharpHoundRPC.Registry.NativeUtils.ComputerNameFormat.html#SharpHoundRPC_Registry_NativeUtils_ComputerNameFormat_NetBIOS
+  commentId: F:SharpHoundRPC.Registry.NativeUtils.ComputerNameFormat.NetBIOS
+  fullName: SharpHoundRPC.Registry.NativeUtils.ComputerNameFormat.NetBIOS
+  nameWithType: NativeUtils.ComputerNameFormat.NetBIOS
+- uid: SharpHoundRPC.Registry.NativeUtils.ComputerNameFormat.PhysicalDnsDomain
+  name: PhysicalDnsDomain
+  href: api/SharpHoundRPC.Registry.NativeUtils.ComputerNameFormat.html#SharpHoundRPC_Registry_NativeUtils_ComputerNameFormat_PhysicalDnsDomain
+  commentId: F:SharpHoundRPC.Registry.NativeUtils.ComputerNameFormat.PhysicalDnsDomain
+  fullName: SharpHoundRPC.Registry.NativeUtils.ComputerNameFormat.PhysicalDnsDomain
+  nameWithType: NativeUtils.ComputerNameFormat.PhysicalDnsDomain
+- uid: SharpHoundRPC.Registry.NativeUtils.ComputerNameFormat.PhysicalDnsFullyQualified
+  name: PhysicalDnsFullyQualified
+  href: api/SharpHoundRPC.Registry.NativeUtils.ComputerNameFormat.html#SharpHoundRPC_Registry_NativeUtils_ComputerNameFormat_PhysicalDnsFullyQualified
+  commentId: F:SharpHoundRPC.Registry.NativeUtils.ComputerNameFormat.PhysicalDnsFullyQualified
+  fullName: SharpHoundRPC.Registry.NativeUtils.ComputerNameFormat.PhysicalDnsFullyQualified
+  nameWithType: NativeUtils.ComputerNameFormat.PhysicalDnsFullyQualified
+- uid: SharpHoundRPC.Registry.NativeUtils.ComputerNameFormat.PhysicalDnsHostname
+  name: PhysicalDnsHostname
+  href: api/SharpHoundRPC.Registry.NativeUtils.ComputerNameFormat.html#SharpHoundRPC_Registry_NativeUtils_ComputerNameFormat_PhysicalDnsHostname
+  commentId: F:SharpHoundRPC.Registry.NativeUtils.ComputerNameFormat.PhysicalDnsHostname
+  fullName: SharpHoundRPC.Registry.NativeUtils.ComputerNameFormat.PhysicalDnsHostname
+  nameWithType: NativeUtils.ComputerNameFormat.PhysicalDnsHostname
+- uid: SharpHoundRPC.Registry.NativeUtils.ComputerNameFormat.PhysicalNetBIOS
+  name: PhysicalNetBIOS
+  href: api/SharpHoundRPC.Registry.NativeUtils.ComputerNameFormat.html#SharpHoundRPC_Registry_NativeUtils_ComputerNameFormat_PhysicalNetBIOS
+  commentId: F:SharpHoundRPC.Registry.NativeUtils.ComputerNameFormat.PhysicalNetBIOS
+  fullName: SharpHoundRPC.Registry.NativeUtils.ComputerNameFormat.PhysicalNetBIOS
+  nameWithType: NativeUtils.ComputerNameFormat.PhysicalNetBIOS
+- uid: SharpHoundRPC.Registry.NativeUtils.GetComputerName(SharpHoundRPC.Registry.NativeUtils.ComputerNameFormat)
+  name: GetComputerName(NativeUtils.ComputerNameFormat)
+  href: api/SharpHoundRPC.Registry.NativeUtils.html#SharpHoundRPC_Registry_NativeUtils_GetComputerName_SharpHoundRPC_Registry_NativeUtils_ComputerNameFormat_
+  commentId: M:SharpHoundRPC.Registry.NativeUtils.GetComputerName(SharpHoundRPC.Registry.NativeUtils.ComputerNameFormat)
+  fullName: SharpHoundRPC.Registry.NativeUtils.GetComputerName(SharpHoundRPC.Registry.NativeUtils.ComputerNameFormat)
+  nameWithType: NativeUtils.GetComputerName(NativeUtils.ComputerNameFormat)
+- uid: SharpHoundRPC.Registry.NativeUtils.GetComputerName*
+  name: GetComputerName
+  href: api/SharpHoundRPC.Registry.NativeUtils.html#SharpHoundRPC_Registry_NativeUtils_GetComputerName_
+  commentId: Overload:SharpHoundRPC.Registry.NativeUtils.GetComputerName
+  isSpec: "True"
+  fullName: SharpHoundRPC.Registry.NativeUtils.GetComputerName
+  nameWithType: NativeUtils.GetComputerName
+- uid: SharpHoundRPC.Registry.NativeUtils.IsCurrentMachineFqdn(System.String)
+  name: IsCurrentMachineFqdn(String)
+  href: api/SharpHoundRPC.Registry.NativeUtils.html#SharpHoundRPC_Registry_NativeUtils_IsCurrentMachineFqdn_System_String_
+  commentId: M:SharpHoundRPC.Registry.NativeUtils.IsCurrentMachineFqdn(System.String)
+  fullName: SharpHoundRPC.Registry.NativeUtils.IsCurrentMachineFqdn(System.String)
+  nameWithType: NativeUtils.IsCurrentMachineFqdn(String)
+- uid: SharpHoundRPC.Registry.NativeUtils.IsCurrentMachineFqdn*
+  name: IsCurrentMachineFqdn
+  href: api/SharpHoundRPC.Registry.NativeUtils.html#SharpHoundRPC_Registry_NativeUtils_IsCurrentMachineFqdn_
+  commentId: Overload:SharpHoundRPC.Registry.NativeUtils.IsCurrentMachineFqdn
+  isSpec: "True"
+  fullName: SharpHoundRPC.Registry.NativeUtils.IsCurrentMachineFqdn
+  nameWithType: NativeUtils.IsCurrentMachineFqdn
+- uid: SharpHoundRPC.Registry.RegistryQuery
+  name: RegistryQuery
+  href: api/SharpHoundRPC.Registry.RegistryQuery.html
+  commentId: T:SharpHoundRPC.Registry.RegistryQuery
+  fullName: SharpHoundRPC.Registry.RegistryQuery
+  nameWithType: RegistryQuery
+- uid: SharpHoundRPC.Registry.RegistryQuery.#ctor(Microsoft.Win32.RegistryHive,System.String)
+  name: RegistryQuery(RegistryHive, String)
+  href: api/SharpHoundRPC.Registry.RegistryQuery.html#SharpHoundRPC_Registry_RegistryQuery__ctor_Microsoft_Win32_RegistryHive_System_String_
+  commentId: M:SharpHoundRPC.Registry.RegistryQuery.#ctor(Microsoft.Win32.RegistryHive,System.String)
+  fullName: SharpHoundRPC.Registry.RegistryQuery.RegistryQuery(Microsoft.Win32.RegistryHive, System.String)
+  nameWithType: RegistryQuery.RegistryQuery(RegistryHive, String)
+- uid: SharpHoundRPC.Registry.RegistryQuery.#ctor*
+  name: RegistryQuery
+  href: api/SharpHoundRPC.Registry.RegistryQuery.html#SharpHoundRPC_Registry_RegistryQuery__ctor_
+  commentId: Overload:SharpHoundRPC.Registry.RegistryQuery.#ctor
+  isSpec: "True"
+  fullName: SharpHoundRPC.Registry.RegistryQuery.RegistryQuery
+  nameWithType: RegistryQuery.RegistryQuery
+- uid: SharpHoundRPC.Registry.RegistryQuery.ForKey(Microsoft.Win32.RegistryHive,System.String)
+  name: ForKey(RegistryHive, String)
+  href: api/SharpHoundRPC.Registry.RegistryQuery.html#SharpHoundRPC_Registry_RegistryQuery_ForKey_Microsoft_Win32_RegistryHive_System_String_
+  commentId: M:SharpHoundRPC.Registry.RegistryQuery.ForKey(Microsoft.Win32.RegistryHive,System.String)
+  fullName: SharpHoundRPC.Registry.RegistryQuery.ForKey(Microsoft.Win32.RegistryHive, System.String)
+  nameWithType: RegistryQuery.ForKey(RegistryHive, String)
+- uid: SharpHoundRPC.Registry.RegistryQuery.ForKey*
+  name: ForKey
+  href: api/SharpHoundRPC.Registry.RegistryQuery.html#SharpHoundRPC_Registry_RegistryQuery_ForKey_
+  commentId: Overload:SharpHoundRPC.Registry.RegistryQuery.ForKey
+  isSpec: "True"
+  fullName: SharpHoundRPC.Registry.RegistryQuery.ForKey
+  nameWithType: RegistryQuery.ForKey
+- uid: SharpHoundRPC.Registry.RegistryQuery.Hive
+  name: Hive
+  href: api/SharpHoundRPC.Registry.RegistryQuery.html#SharpHoundRPC_Registry_RegistryQuery_Hive
+  commentId: P:SharpHoundRPC.Registry.RegistryQuery.Hive
+  fullName: SharpHoundRPC.Registry.RegistryQuery.Hive
+  nameWithType: RegistryQuery.Hive
+- uid: SharpHoundRPC.Registry.RegistryQuery.Hive*
+  name: Hive
+  href: api/SharpHoundRPC.Registry.RegistryQuery.html#SharpHoundRPC_Registry_RegistryQuery_Hive_
+  commentId: Overload:SharpHoundRPC.Registry.RegistryQuery.Hive
+  isSpec: "True"
+  fullName: SharpHoundRPC.Registry.RegistryQuery.Hive
+  nameWithType: RegistryQuery.Hive
+- uid: SharpHoundRPC.Registry.RegistryQuery.KeyPath
+  name: KeyPath
+  href: api/SharpHoundRPC.Registry.RegistryQuery.html#SharpHoundRPC_Registry_RegistryQuery_KeyPath
+  commentId: P:SharpHoundRPC.Registry.RegistryQuery.KeyPath
+  fullName: SharpHoundRPC.Registry.RegistryQuery.KeyPath
+  nameWithType: RegistryQuery.KeyPath
+- uid: SharpHoundRPC.Registry.RegistryQuery.KeyPath*
+  name: KeyPath
+  href: api/SharpHoundRPC.Registry.RegistryQuery.html#SharpHoundRPC_Registry_RegistryQuery_KeyPath_
+  commentId: Overload:SharpHoundRPC.Registry.RegistryQuery.KeyPath
+  isSpec: "True"
+  fullName: SharpHoundRPC.Registry.RegistryQuery.KeyPath
+  nameWithType: RegistryQuery.KeyPath
+- uid: SharpHoundRPC.Registry.RegistryQuery.ValueNames
+  name: ValueNames
+  href: api/SharpHoundRPC.Registry.RegistryQuery.html#SharpHoundRPC_Registry_RegistryQuery_ValueNames
+  commentId: P:SharpHoundRPC.Registry.RegistryQuery.ValueNames
+  fullName: SharpHoundRPC.Registry.RegistryQuery.ValueNames
+  nameWithType: RegistryQuery.ValueNames
+- uid: SharpHoundRPC.Registry.RegistryQuery.ValueNames*
+  name: ValueNames
+  href: api/SharpHoundRPC.Registry.RegistryQuery.html#SharpHoundRPC_Registry_RegistryQuery_ValueNames_
+  commentId: Overload:SharpHoundRPC.Registry.RegistryQuery.ValueNames
+  isSpec: "True"
+  fullName: SharpHoundRPC.Registry.RegistryQuery.ValueNames
+  nameWithType: RegistryQuery.ValueNames
+- uid: SharpHoundRPC.Registry.RegistryQuery.WithValues(System.String[])
+  name: WithValues(String[])
+  href: api/SharpHoundRPC.Registry.RegistryQuery.html#SharpHoundRPC_Registry_RegistryQuery_WithValues_System_String___
+  commentId: M:SharpHoundRPC.Registry.RegistryQuery.WithValues(System.String[])
+  name.vb: WithValues(String())
+  fullName: SharpHoundRPC.Registry.RegistryQuery.WithValues(System.String[])
+  fullName.vb: SharpHoundRPC.Registry.RegistryQuery.WithValues(System.String())
+  nameWithType: RegistryQuery.WithValues(String[])
+  nameWithType.vb: RegistryQuery.WithValues(String())
+- uid: SharpHoundRPC.Registry.RegistryQuery.WithValues*
+  name: WithValues
+  href: api/SharpHoundRPC.Registry.RegistryQuery.html#SharpHoundRPC_Registry_RegistryQuery_WithValues_
+  commentId: Overload:SharpHoundRPC.Registry.RegistryQuery.WithValues
+  isSpec: "True"
+  fullName: SharpHoundRPC.Registry.RegistryQuery.WithValues
+  nameWithType: RegistryQuery.WithValues
+- uid: SharpHoundRPC.Registry.RegistryQueryResult
+  name: RegistryQueryResult
+  href: api/SharpHoundRPC.Registry.RegistryQueryResult.html
+  commentId: T:SharpHoundRPC.Registry.RegistryQueryResult
+  fullName: SharpHoundRPC.Registry.RegistryQueryResult
+  nameWithType: RegistryQueryResult
+- uid: SharpHoundRPC.Registry.RegistryQueryResult.#ctor(System.String,System.String,System.Object,System.Nullable{Microsoft.Win32.RegistryValueKind},System.Boolean)
+  name: RegistryQueryResult(String, String, Object, Nullable<RegistryValueKind>, Boolean)
+  href: api/SharpHoundRPC.Registry.RegistryQueryResult.html#SharpHoundRPC_Registry_RegistryQueryResult__ctor_System_String_System_String_System_Object_System_Nullable_Microsoft_Win32_RegistryValueKind__System_Boolean_
+  commentId: M:SharpHoundRPC.Registry.RegistryQueryResult.#ctor(System.String,System.String,System.Object,System.Nullable{Microsoft.Win32.RegistryValueKind},System.Boolean)
+  name.vb: RegistryQueryResult(String, String, Object, Nullable(Of RegistryValueKind), Boolean)
+  fullName: SharpHoundRPC.Registry.RegistryQueryResult.RegistryQueryResult(System.String, System.String, System.Object, System.Nullable<Microsoft.Win32.RegistryValueKind>, System.Boolean)
+  fullName.vb: SharpHoundRPC.Registry.RegistryQueryResult.RegistryQueryResult(System.String, System.String, System.Object, System.Nullable(Of Microsoft.Win32.RegistryValueKind), System.Boolean)
+  nameWithType: RegistryQueryResult.RegistryQueryResult(String, String, Object, Nullable<RegistryValueKind>, Boolean)
+  nameWithType.vb: RegistryQueryResult.RegistryQueryResult(String, String, Object, Nullable(Of RegistryValueKind), Boolean)
+- uid: SharpHoundRPC.Registry.RegistryQueryResult.#ctor*
+  name: RegistryQueryResult
+  href: api/SharpHoundRPC.Registry.RegistryQueryResult.html#SharpHoundRPC_Registry_RegistryQueryResult__ctor_
+  commentId: Overload:SharpHoundRPC.Registry.RegistryQueryResult.#ctor
+  isSpec: "True"
+  fullName: SharpHoundRPC.Registry.RegistryQueryResult.RegistryQueryResult
+  nameWithType: RegistryQueryResult.RegistryQueryResult
+- uid: SharpHoundRPC.Registry.RegistryQueryResult.KeyPath
+  name: KeyPath
+  href: api/SharpHoundRPC.Registry.RegistryQueryResult.html#SharpHoundRPC_Registry_RegistryQueryResult_KeyPath
+  commentId: P:SharpHoundRPC.Registry.RegistryQueryResult.KeyPath
+  fullName: SharpHoundRPC.Registry.RegistryQueryResult.KeyPath
+  nameWithType: RegistryQueryResult.KeyPath
+- uid: SharpHoundRPC.Registry.RegistryQueryResult.KeyPath*
+  name: KeyPath
+  href: api/SharpHoundRPC.Registry.RegistryQueryResult.html#SharpHoundRPC_Registry_RegistryQueryResult_KeyPath_
+  commentId: Overload:SharpHoundRPC.Registry.RegistryQueryResult.KeyPath
+  isSpec: "True"
+  fullName: SharpHoundRPC.Registry.RegistryQueryResult.KeyPath
+  nameWithType: RegistryQueryResult.KeyPath
+- uid: SharpHoundRPC.Registry.RegistryQueryResult.Value
+  name: Value
+  href: api/SharpHoundRPC.Registry.RegistryQueryResult.html#SharpHoundRPC_Registry_RegistryQueryResult_Value
+  commentId: P:SharpHoundRPC.Registry.RegistryQueryResult.Value
+  fullName: SharpHoundRPC.Registry.RegistryQueryResult.Value
+  nameWithType: RegistryQueryResult.Value
+- uid: SharpHoundRPC.Registry.RegistryQueryResult.Value*
+  name: Value
+  href: api/SharpHoundRPC.Registry.RegistryQueryResult.html#SharpHoundRPC_Registry_RegistryQueryResult_Value_
+  commentId: Overload:SharpHoundRPC.Registry.RegistryQueryResult.Value
+  isSpec: "True"
+  fullName: SharpHoundRPC.Registry.RegistryQueryResult.Value
+  nameWithType: RegistryQueryResult.Value
+- uid: SharpHoundRPC.Registry.RegistryQueryResult.ValueExists
+  name: ValueExists
+  href: api/SharpHoundRPC.Registry.RegistryQueryResult.html#SharpHoundRPC_Registry_RegistryQueryResult_ValueExists
+  commentId: P:SharpHoundRPC.Registry.RegistryQueryResult.ValueExists
+  fullName: SharpHoundRPC.Registry.RegistryQueryResult.ValueExists
+  nameWithType: RegistryQueryResult.ValueExists
+- uid: SharpHoundRPC.Registry.RegistryQueryResult.ValueExists*
+  name: ValueExists
+  href: api/SharpHoundRPC.Registry.RegistryQueryResult.html#SharpHoundRPC_Registry_RegistryQueryResult_ValueExists_
+  commentId: Overload:SharpHoundRPC.Registry.RegistryQueryResult.ValueExists
+  isSpec: "True"
+  fullName: SharpHoundRPC.Registry.RegistryQueryResult.ValueExists
+  nameWithType: RegistryQueryResult.ValueExists
+- uid: SharpHoundRPC.Registry.RegistryQueryResult.ValueKind
+  name: ValueKind
+  href: api/SharpHoundRPC.Registry.RegistryQueryResult.html#SharpHoundRPC_Registry_RegistryQueryResult_ValueKind
+  commentId: P:SharpHoundRPC.Registry.RegistryQueryResult.ValueKind
+  fullName: SharpHoundRPC.Registry.RegistryQueryResult.ValueKind
+  nameWithType: RegistryQueryResult.ValueKind
+- uid: SharpHoundRPC.Registry.RegistryQueryResult.ValueKind*
+  name: ValueKind
+  href: api/SharpHoundRPC.Registry.RegistryQueryResult.html#SharpHoundRPC_Registry_RegistryQueryResult_ValueKind_
+  commentId: Overload:SharpHoundRPC.Registry.RegistryQueryResult.ValueKind
+  isSpec: "True"
+  fullName: SharpHoundRPC.Registry.RegistryQueryResult.ValueKind
+  nameWithType: RegistryQueryResult.ValueKind
+- uid: SharpHoundRPC.Registry.RegistryQueryResult.ValueName
+  name: ValueName
+  href: api/SharpHoundRPC.Registry.RegistryQueryResult.html#SharpHoundRPC_Registry_RegistryQueryResult_ValueName
+  commentId: P:SharpHoundRPC.Registry.RegistryQueryResult.ValueName
+  fullName: SharpHoundRPC.Registry.RegistryQueryResult.ValueName
+  nameWithType: RegistryQueryResult.ValueName
+- uid: SharpHoundRPC.Registry.RegistryQueryResult.ValueName*
+  name: ValueName
+  href: api/SharpHoundRPC.Registry.RegistryQueryResult.html#SharpHoundRPC_Registry_RegistryQueryResult_ValueName_
+  commentId: Overload:SharpHoundRPC.Registry.RegistryQueryResult.ValueName
+  isSpec: "True"
+  fullName: SharpHoundRPC.Registry.RegistryQueryResult.ValueName
+  nameWithType: RegistryQueryResult.ValueName
+- uid: SharpHoundRPC.Registry.RemoteRegistryException
+  name: RemoteRegistryException
+  href: api/SharpHoundRPC.Registry.RemoteRegistryException.html
+  commentId: T:SharpHoundRPC.Registry.RemoteRegistryException
+  fullName: SharpHoundRPC.Registry.RemoteRegistryException
+  nameWithType: RemoteRegistryException
+- uid: SharpHoundRPC.Registry.RemoteRegistryException.#ctor(System.String)
+  name: RemoteRegistryException(String)
+  href: api/SharpHoundRPC.Registry.RemoteRegistryException.html#SharpHoundRPC_Registry_RemoteRegistryException__ctor_System_String_
+  commentId: M:SharpHoundRPC.Registry.RemoteRegistryException.#ctor(System.String)
+  fullName: SharpHoundRPC.Registry.RemoteRegistryException.RemoteRegistryException(System.String)
+  nameWithType: RemoteRegistryException.RemoteRegistryException(String)
+- uid: SharpHoundRPC.Registry.RemoteRegistryException.#ctor(System.String,System.Exception)
+  name: RemoteRegistryException(String, Exception)
+  href: api/SharpHoundRPC.Registry.RemoteRegistryException.html#SharpHoundRPC_Registry_RemoteRegistryException__ctor_System_String_System_Exception_
+  commentId: M:SharpHoundRPC.Registry.RemoteRegistryException.#ctor(System.String,System.Exception)
+  fullName: SharpHoundRPC.Registry.RemoteRegistryException.RemoteRegistryException(System.String, System.Exception)
+  nameWithType: RemoteRegistryException.RemoteRegistryException(String, Exception)
+- uid: SharpHoundRPC.Registry.RemoteRegistryException.#ctor*
+  name: RemoteRegistryException
+  href: api/SharpHoundRPC.Registry.RemoteRegistryException.html#SharpHoundRPC_Registry_RemoteRegistryException__ctor_
+  commentId: Overload:SharpHoundRPC.Registry.RemoteRegistryException.#ctor
+  isSpec: "True"
+  fullName: SharpHoundRPC.Registry.RemoteRegistryException.RemoteRegistryException
+  nameWithType: RemoteRegistryException.RemoteRegistryException
+- uid: SharpHoundRPC.Registry.RemoteRegistryStrategy
+  name: RemoteRegistryStrategy
+  href: api/SharpHoundRPC.Registry.RemoteRegistryStrategy.html
+  commentId: T:SharpHoundRPC.Registry.RemoteRegistryStrategy
+  fullName: SharpHoundRPC.Registry.RemoteRegistryStrategy
+  nameWithType: RemoteRegistryStrategy
+- uid: SharpHoundRPC.Registry.RemoteRegistryStrategy.#ctor(SharpHoundRPC.PortScanner.IPortScanner)
+  name: RemoteRegistryStrategy(IPortScanner)
+  href: api/SharpHoundRPC.Registry.RemoteRegistryStrategy.html#SharpHoundRPC_Registry_RemoteRegistryStrategy__ctor_SharpHoundRPC_PortScanner_IPortScanner_
+  commentId: M:SharpHoundRPC.Registry.RemoteRegistryStrategy.#ctor(SharpHoundRPC.PortScanner.IPortScanner)
+  fullName: SharpHoundRPC.Registry.RemoteRegistryStrategy.RemoteRegistryStrategy(SharpHoundRPC.PortScanner.IPortScanner)
+  nameWithType: RemoteRegistryStrategy.RemoteRegistryStrategy(IPortScanner)
+- uid: SharpHoundRPC.Registry.RemoteRegistryStrategy.#ctor*
+  name: RemoteRegistryStrategy
+  href: api/SharpHoundRPC.Registry.RemoteRegistryStrategy.html#SharpHoundRPC_Registry_RemoteRegistryStrategy__ctor_
+  commentId: Overload:SharpHoundRPC.Registry.RemoteRegistryStrategy.#ctor
+  isSpec: "True"
+  fullName: SharpHoundRPC.Registry.RemoteRegistryStrategy.RemoteRegistryStrategy
+  nameWithType: RemoteRegistryStrategy.RemoteRegistryStrategy
+- uid: SharpHoundRPC.Registry.RemoteRegistryStrategy.CanExecute(System.String)
+  name: CanExecute(String)
+  href: api/SharpHoundRPC.Registry.RemoteRegistryStrategy.html#SharpHoundRPC_Registry_RemoteRegistryStrategy_CanExecute_System_String_
+  commentId: M:SharpHoundRPC.Registry.RemoteRegistryStrategy.CanExecute(System.String)
+  fullName: SharpHoundRPC.Registry.RemoteRegistryStrategy.CanExecute(System.String)
+  nameWithType: RemoteRegistryStrategy.CanExecute(String)
+- uid: SharpHoundRPC.Registry.RemoteRegistryStrategy.CanExecute*
+  name: CanExecute
+  href: api/SharpHoundRPC.Registry.RemoteRegistryStrategy.html#SharpHoundRPC_Registry_RemoteRegistryStrategy_CanExecute_
+  commentId: Overload:SharpHoundRPC.Registry.RemoteRegistryStrategy.CanExecute
+  isSpec: "True"
+  fullName: SharpHoundRPC.Registry.RemoteRegistryStrategy.CanExecute
+  nameWithType: RemoteRegistryStrategy.CanExecute
+- uid: SharpHoundRPC.Registry.RemoteRegistryStrategy.ExecuteAsync(System.String,System.Collections.Generic.IEnumerable{SharpHoundRPC.Registry.RegistryQuery})
+  name: ExecuteAsync(String, IEnumerable<RegistryQuery>)
+  href: api/SharpHoundRPC.Registry.RemoteRegistryStrategy.html#SharpHoundRPC_Registry_RemoteRegistryStrategy_ExecuteAsync_System_String_System_Collections_Generic_IEnumerable_SharpHoundRPC_Registry_RegistryQuery__
+  commentId: M:SharpHoundRPC.Registry.RemoteRegistryStrategy.ExecuteAsync(System.String,System.Collections.Generic.IEnumerable{SharpHoundRPC.Registry.RegistryQuery})
+  name.vb: ExecuteAsync(String, IEnumerable(Of RegistryQuery))
+  fullName: SharpHoundRPC.Registry.RemoteRegistryStrategy.ExecuteAsync(System.String, System.Collections.Generic.IEnumerable<SharpHoundRPC.Registry.RegistryQuery>)
+  fullName.vb: SharpHoundRPC.Registry.RemoteRegistryStrategy.ExecuteAsync(System.String, System.Collections.Generic.IEnumerable(Of SharpHoundRPC.Registry.RegistryQuery))
+  nameWithType: RemoteRegistryStrategy.ExecuteAsync(String, IEnumerable<RegistryQuery>)
+  nameWithType.vb: RemoteRegistryStrategy.ExecuteAsync(String, IEnumerable(Of RegistryQuery))
+- uid: SharpHoundRPC.Registry.RemoteRegistryStrategy.ExecuteAsync*
+  name: ExecuteAsync
+  href: api/SharpHoundRPC.Registry.RemoteRegistryStrategy.html#SharpHoundRPC_Registry_RemoteRegistryStrategy_ExecuteAsync_
+  commentId: Overload:SharpHoundRPC.Registry.RemoteRegistryStrategy.ExecuteAsync
+  isSpec: "True"
+  fullName: SharpHoundRPC.Registry.RemoteRegistryStrategy.ExecuteAsync
+  nameWithType: RemoteRegistryStrategy.ExecuteAsync
+- uid: SharpHoundRPC.Registry.StrategyExecutor
+  name: StrategyExecutor
+  href: api/SharpHoundRPC.Registry.StrategyExecutor.html
+  commentId: T:SharpHoundRPC.Registry.StrategyExecutor
+  fullName: SharpHoundRPC.Registry.StrategyExecutor
+  nameWithType: StrategyExecutor
+- uid: SharpHoundRPC.Registry.StrategyExecutor.CollectAsync*
+  name: CollectAsync
+  href: api/SharpHoundRPC.Registry.StrategyExecutor.html#SharpHoundRPC_Registry_StrategyExecutor_CollectAsync_
+  commentId: Overload:SharpHoundRPC.Registry.StrategyExecutor.CollectAsync
+  isSpec: "True"
+  fullName: SharpHoundRPC.Registry.StrategyExecutor.CollectAsync
+  nameWithType: StrategyExecutor.CollectAsync
+- uid: SharpHoundRPC.Registry.StrategyExecutor.CollectAsync``2(System.String,System.Collections.Generic.IEnumerable{``1},System.Collections.Generic.IEnumerable{SharpHoundRPC.Registry.ICollectionStrategy{``0,``1}})
+  name: CollectAsync<T, TQuery>(String, IEnumerable<TQuery>, IEnumerable<ICollectionStrategy<T, TQuery>>)
+  href: api/SharpHoundRPC.Registry.StrategyExecutor.html#SharpHoundRPC_Registry_StrategyExecutor_CollectAsync__2_System_String_System_Collections_Generic_IEnumerable___1__System_Collections_Generic_IEnumerable_SharpHoundRPC_Registry_ICollectionStrategy___0___1___
+  commentId: M:SharpHoundRPC.Registry.StrategyExecutor.CollectAsync``2(System.String,System.Collections.Generic.IEnumerable{``1},System.Collections.Generic.IEnumerable{SharpHoundRPC.Registry.ICollectionStrategy{``0,``1}})
+  name.vb: CollectAsync(Of T, TQuery)(String, IEnumerable(Of TQuery), IEnumerable(Of ICollectionStrategy(Of T, TQuery)))
+  fullName: SharpHoundRPC.Registry.StrategyExecutor.CollectAsync<T, TQuery>(System.String, System.Collections.Generic.IEnumerable<TQuery>, System.Collections.Generic.IEnumerable<SharpHoundRPC.Registry.ICollectionStrategy<T, TQuery>>)
+  fullName.vb: SharpHoundRPC.Registry.StrategyExecutor.CollectAsync(Of T, TQuery)(System.String, System.Collections.Generic.IEnumerable(Of TQuery), System.Collections.Generic.IEnumerable(Of SharpHoundRPC.Registry.ICollectionStrategy(Of T, TQuery)))
+  nameWithType: StrategyExecutor.CollectAsync<T, TQuery>(String, IEnumerable<TQuery>, IEnumerable<ICollectionStrategy<T, TQuery>>)
+  nameWithType.vb: StrategyExecutor.CollectAsync(Of T, TQuery)(String, IEnumerable(Of TQuery), IEnumerable(Of ICollectionStrategy(Of T, TQuery)))
+- uid: SharpHoundRPC.Registry.StrategyExecutorResult`1
+  name: StrategyExecutorResult<T>
+  href: api/SharpHoundRPC.Registry.StrategyExecutorResult-1.html
+  commentId: T:SharpHoundRPC.Registry.StrategyExecutorResult`1
+  name.vb: StrategyExecutorResult(Of T)
+  fullName: SharpHoundRPC.Registry.StrategyExecutorResult<T>
+  fullName.vb: SharpHoundRPC.Registry.StrategyExecutorResult(Of T)
+  nameWithType: StrategyExecutorResult<T>
+  nameWithType.vb: StrategyExecutorResult(Of T)
+- uid: SharpHoundRPC.Registry.StrategyExecutorResult`1.FailureAttempts
+  name: FailureAttempts
+  href: api/SharpHoundRPC.Registry.StrategyExecutorResult-1.html#SharpHoundRPC_Registry_StrategyExecutorResult_1_FailureAttempts
+  commentId: P:SharpHoundRPC.Registry.StrategyExecutorResult`1.FailureAttempts
+  fullName: SharpHoundRPC.Registry.StrategyExecutorResult<T>.FailureAttempts
+  fullName.vb: SharpHoundRPC.Registry.StrategyExecutorResult(Of T).FailureAttempts
+  nameWithType: StrategyExecutorResult<T>.FailureAttempts
+  nameWithType.vb: StrategyExecutorResult(Of T).FailureAttempts
+- uid: SharpHoundRPC.Registry.StrategyExecutorResult`1.FailureAttempts*
+  name: FailureAttempts
+  href: api/SharpHoundRPC.Registry.StrategyExecutorResult-1.html#SharpHoundRPC_Registry_StrategyExecutorResult_1_FailureAttempts_
+  commentId: Overload:SharpHoundRPC.Registry.StrategyExecutorResult`1.FailureAttempts
+  isSpec: "True"
+  fullName: SharpHoundRPC.Registry.StrategyExecutorResult<T>.FailureAttempts
+  fullName.vb: SharpHoundRPC.Registry.StrategyExecutorResult(Of T).FailureAttempts
+  nameWithType: StrategyExecutorResult<T>.FailureAttempts
+  nameWithType.vb: StrategyExecutorResult(Of T).FailureAttempts
+- uid: SharpHoundRPC.Registry.StrategyExecutorResult`1.Results
+  name: Results
+  href: api/SharpHoundRPC.Registry.StrategyExecutorResult-1.html#SharpHoundRPC_Registry_StrategyExecutorResult_1_Results
+  commentId: P:SharpHoundRPC.Registry.StrategyExecutorResult`1.Results
+  fullName: SharpHoundRPC.Registry.StrategyExecutorResult<T>.Results
+  fullName.vb: SharpHoundRPC.Registry.StrategyExecutorResult(Of T).Results
+  nameWithType: StrategyExecutorResult<T>.Results
+  nameWithType.vb: StrategyExecutorResult(Of T).Results
+- uid: SharpHoundRPC.Registry.StrategyExecutorResult`1.Results*
+  name: Results
+  href: api/SharpHoundRPC.Registry.StrategyExecutorResult-1.html#SharpHoundRPC_Registry_StrategyExecutorResult_1_Results_
+  commentId: Overload:SharpHoundRPC.Registry.StrategyExecutorResult`1.Results
+  isSpec: "True"
+  fullName: SharpHoundRPC.Registry.StrategyExecutorResult<T>.Results
+  fullName.vb: SharpHoundRPC.Registry.StrategyExecutorResult(Of T).Results
+  nameWithType: StrategyExecutorResult<T>.Results
+  nameWithType.vb: StrategyExecutorResult(Of T).Results
+- uid: SharpHoundRPC.Registry.StrategyExecutorResult`1.WasSuccessful
+  name: WasSuccessful
+  href: api/SharpHoundRPC.Registry.StrategyExecutorResult-1.html#SharpHoundRPC_Registry_StrategyExecutorResult_1_WasSuccessful
+  commentId: F:SharpHoundRPC.Registry.StrategyExecutorResult`1.WasSuccessful
+  fullName: SharpHoundRPC.Registry.StrategyExecutorResult<T>.WasSuccessful
+  fullName.vb: SharpHoundRPC.Registry.StrategyExecutorResult(Of T).WasSuccessful
+  nameWithType: StrategyExecutorResult<T>.WasSuccessful
+  nameWithType.vb: StrategyExecutorResult(Of T).WasSuccessful
+- uid: SharpHoundRPC.Registry.StrategyResult`1
+  name: StrategyResult<T>
+  href: api/SharpHoundRPC.Registry.StrategyResult-1.html
+  commentId: T:SharpHoundRPC.Registry.StrategyResult`1
+  name.vb: StrategyResult(Of T)
+  fullName: SharpHoundRPC.Registry.StrategyResult<T>
+  fullName.vb: SharpHoundRPC.Registry.StrategyResult(Of T)
+  nameWithType: StrategyResult<T>
+  nameWithType.vb: StrategyResult(Of T)
+- uid: SharpHoundRPC.Registry.StrategyResult`1.#ctor(System.Type)
+  name: StrategyResult(Type)
+  href: api/SharpHoundRPC.Registry.StrategyResult-1.html#SharpHoundRPC_Registry_StrategyResult_1__ctor_System_Type_
+  commentId: M:SharpHoundRPC.Registry.StrategyResult`1.#ctor(System.Type)
+  fullName: SharpHoundRPC.Registry.StrategyResult<T>.StrategyResult(System.Type)
+  fullName.vb: SharpHoundRPC.Registry.StrategyResult(Of T).StrategyResult(System.Type)
+  nameWithType: StrategyResult<T>.StrategyResult(Type)
+  nameWithType.vb: StrategyResult(Of T).StrategyResult(Type)
+- uid: SharpHoundRPC.Registry.StrategyResult`1.#ctor*
+  name: StrategyResult
+  href: api/SharpHoundRPC.Registry.StrategyResult-1.html#SharpHoundRPC_Registry_StrategyResult_1__ctor_
+  commentId: Overload:SharpHoundRPC.Registry.StrategyResult`1.#ctor
+  isSpec: "True"
+  fullName: SharpHoundRPC.Registry.StrategyResult<T>.StrategyResult
+  fullName.vb: SharpHoundRPC.Registry.StrategyResult(Of T).StrategyResult
+  nameWithType: StrategyResult<T>.StrategyResult
+  nameWithType.vb: StrategyResult(Of T).StrategyResult
+- uid: SharpHoundRPC.Registry.StrategyResult`1.FailureReason
+  name: FailureReason
+  href: api/SharpHoundRPC.Registry.StrategyResult-1.html#SharpHoundRPC_Registry_StrategyResult_1_FailureReason
+  commentId: P:SharpHoundRPC.Registry.StrategyResult`1.FailureReason
+  fullName: SharpHoundRPC.Registry.StrategyResult<T>.FailureReason
+  fullName.vb: SharpHoundRPC.Registry.StrategyResult(Of T).FailureReason
+  nameWithType: StrategyResult<T>.FailureReason
+  nameWithType.vb: StrategyResult(Of T).FailureReason
+- uid: SharpHoundRPC.Registry.StrategyResult`1.FailureReason*
+  name: FailureReason
+  href: api/SharpHoundRPC.Registry.StrategyResult-1.html#SharpHoundRPC_Registry_StrategyResult_1_FailureReason_
+  commentId: Overload:SharpHoundRPC.Registry.StrategyResult`1.FailureReason
+  isSpec: "True"
+  fullName: SharpHoundRPC.Registry.StrategyResult<T>.FailureReason
+  fullName.vb: SharpHoundRPC.Registry.StrategyResult(Of T).FailureReason
+  nameWithType: StrategyResult<T>.FailureReason
+  nameWithType.vb: StrategyResult(Of T).FailureReason
+- uid: SharpHoundRPC.Registry.StrategyResult`1.Results
+  name: Results
+  href: api/SharpHoundRPC.Registry.StrategyResult-1.html#SharpHoundRPC_Registry_StrategyResult_1_Results
+  commentId: P:SharpHoundRPC.Registry.StrategyResult`1.Results
+  fullName: SharpHoundRPC.Registry.StrategyResult<T>.Results
+  fullName.vb: SharpHoundRPC.Registry.StrategyResult(Of T).Results
+  nameWithType: StrategyResult<T>.Results
+  nameWithType.vb: StrategyResult(Of T).Results
+- uid: SharpHoundRPC.Registry.StrategyResult`1.Results*
+  name: Results
+  href: api/SharpHoundRPC.Registry.StrategyResult-1.html#SharpHoundRPC_Registry_StrategyResult_1_Results_
+  commentId: Overload:SharpHoundRPC.Registry.StrategyResult`1.Results
+  isSpec: "True"
+  fullName: SharpHoundRPC.Registry.StrategyResult<T>.Results
+  fullName.vb: SharpHoundRPC.Registry.StrategyResult(Of T).Results
+  nameWithType: StrategyResult<T>.Results
+  nameWithType.vb: StrategyResult(Of T).Results
+- uid: SharpHoundRPC.Registry.StrategyResult`1.StrategyType
+  name: StrategyType
+  href: api/SharpHoundRPC.Registry.StrategyResult-1.html#SharpHoundRPC_Registry_StrategyResult_1_StrategyType
+  commentId: P:SharpHoundRPC.Registry.StrategyResult`1.StrategyType
+  fullName: SharpHoundRPC.Registry.StrategyResult<T>.StrategyType
+  fullName.vb: SharpHoundRPC.Registry.StrategyResult(Of T).StrategyType
+  nameWithType: StrategyResult<T>.StrategyType
+  nameWithType.vb: StrategyResult(Of T).StrategyType
+- uid: SharpHoundRPC.Registry.StrategyResult`1.StrategyType*
+  name: StrategyType
+  href: api/SharpHoundRPC.Registry.StrategyResult-1.html#SharpHoundRPC_Registry_StrategyResult_1_StrategyType_
+  commentId: Overload:SharpHoundRPC.Registry.StrategyResult`1.StrategyType
+  isSpec: "True"
+  fullName: SharpHoundRPC.Registry.StrategyResult<T>.StrategyType
+  fullName.vb: SharpHoundRPC.Registry.StrategyResult(Of T).StrategyType
+  nameWithType: StrategyResult<T>.StrategyType
+  nameWithType.vb: StrategyResult(Of T).StrategyType
+- uid: SharpHoundRPC.Registry.StrategyResult`1.ToString
+  name: ToString()
+  href: api/SharpHoundRPC.Registry.StrategyResult-1.html#SharpHoundRPC_Registry_StrategyResult_1_ToString
+  commentId: M:SharpHoundRPC.Registry.StrategyResult`1.ToString
+  fullName: SharpHoundRPC.Registry.StrategyResult<T>.ToString()
+  fullName.vb: SharpHoundRPC.Registry.StrategyResult(Of T).ToString()
+  nameWithType: StrategyResult<T>.ToString()
+  nameWithType.vb: StrategyResult(Of T).ToString()
+- uid: SharpHoundRPC.Registry.StrategyResult`1.ToString*
+  name: ToString
+  href: api/SharpHoundRPC.Registry.StrategyResult-1.html#SharpHoundRPC_Registry_StrategyResult_1_ToString_
+  commentId: Overload:SharpHoundRPC.Registry.StrategyResult`1.ToString
+  isSpec: "True"
+  fullName: SharpHoundRPC.Registry.StrategyResult<T>.ToString
+  fullName.vb: SharpHoundRPC.Registry.StrategyResult(Of T).ToString
+  nameWithType: StrategyResult<T>.ToString
+  nameWithType.vb: StrategyResult(Of T).ToString
+- uid: SharpHoundRPC.Registry.StrategyResult`1.WasSuccessful
+  name: WasSuccessful
+  href: api/SharpHoundRPC.Registry.StrategyResult-1.html#SharpHoundRPC_Registry_StrategyResult_1_WasSuccessful
+  commentId: P:SharpHoundRPC.Registry.StrategyResult`1.WasSuccessful
+  fullName: SharpHoundRPC.Registry.StrategyResult<T>.WasSuccessful
+  fullName.vb: SharpHoundRPC.Registry.StrategyResult(Of T).WasSuccessful
+  nameWithType: StrategyResult<T>.WasSuccessful
+  nameWithType.vb: StrategyResult(Of T).WasSuccessful
+- uid: SharpHoundRPC.Registry.StrategyResult`1.WasSuccessful*
+  name: WasSuccessful
+  href: api/SharpHoundRPC.Registry.StrategyResult-1.html#SharpHoundRPC_Registry_StrategyResult_1_WasSuccessful_
+  commentId: Overload:SharpHoundRPC.Registry.StrategyResult`1.WasSuccessful
+  isSpec: "True"
+  fullName: SharpHoundRPC.Registry.StrategyResult<T>.WasSuccessful
+  fullName.vb: SharpHoundRPC.Registry.StrategyResult(Of T).WasSuccessful
+  nameWithType: StrategyResult<T>.WasSuccessful
+  nameWithType.vb: StrategyResult(Of T).WasSuccessful
 - uid: SharpHoundRPC.Result`1
   name: Result<T>
   href: api/SharpHoundRPC.Result-1.html
