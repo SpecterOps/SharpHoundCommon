@@ -34,7 +34,7 @@ namespace SharpHoundCommonLib.Enums {
         DCOnly = ACL | Container | Group | ObjectProps | Trusts | GPOLocalGroup | CertServices | LdapServices | SmbInfo,
 
         Default = Group | Session | Trusts | ACL | ObjectProps | LocalGroups | SPNTargets | Container | CertServices |
-                  LdapServices | SmbInfo,
+                  LdapServices | SmbInfo | WebClientService,
 
         All = Default | LoggedOn | GPOLocalGroup | UserRights | CARegistry | DCRegistry | WebClientService |
               LdapServices | NTLMRegistry
