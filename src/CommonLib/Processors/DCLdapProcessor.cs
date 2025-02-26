@@ -6,6 +6,7 @@ using SharpHoundCommonLib.ThirdParty.PSOpenAD;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
+using SharpHoundRPC.PortScanner;
 
 namespace SharpHoundCommonLib.Processors;
 
@@ -19,7 +20,7 @@ public class LdapAuthOptions {
 /// </summary>
 public class DCLdapProcessor {
     private readonly ILogger _log;
-    private readonly PortScanner _scanner;
+    private readonly IPortScanner _scanner;
     private readonly int _portScanTimeout;
     private readonly int _ldapTimeout;
     private readonly Uri _ldapEndpoint;

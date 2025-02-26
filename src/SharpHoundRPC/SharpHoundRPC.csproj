@@ -22,4 +22,7 @@
     <ItemGroup>
         <Folder Include="Properties"/>
     </ItemGroup>
+    <ItemGroup>
+      <Reference Include="System.Management" />
+    </ItemGroup>
 </Project>

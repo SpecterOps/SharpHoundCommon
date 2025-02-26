@@ -19,6 +19,7 @@ using SharpHoundCommonLib.LDAPQueries;
 using SharpHoundCommonLib.OutputTypes;
 using SharpHoundCommonLib.Processors;
 using SharpHoundRPC.NetAPINative;
+using SharpHoundRPC.PortScanner;
 using Domain = System.DirectoryServices.ActiveDirectory.Domain;
 using Group = SharpHoundCommonLib.OutputTypes.Group;
 using SearchScope = System.DirectoryServices.Protocols.SearchScope;
@@ -43,7 +44,7 @@ namespace SharpHoundCommonLib {
             new(StringComparer.OrdinalIgnoreCase);
 
         private readonly ILogger _log;
-        private readonly PortScanner _portScanner;
+        private readonly IPortScanner _portScanner;
         private readonly NativeMethods _nativeMethods;
         private readonly string _nullCacheKey = Guid.NewGuid().ToString();
         private static readonly Regex SIDRegex = new(@"^(S-\d+-\d+-\d+-\d+-\d+-\d+)(-\d+)?$");

@@ -14,6 +14,7 @@ using SharpHoundCommonLib.Exceptions;
 using SharpHoundCommonLib.LDAPQueries;
 using SharpHoundCommonLib.Processors;
 using SharpHoundRPC.NetAPINative;
+using SharpHoundRPC.PortScanner;
 
 namespace SharpHoundCommonLib {
     internal class LdapConnectionPool : IDisposable {
@@ -24,7 +25,7 @@ namespace SharpHoundCommonLib {
         private readonly string _poolIdentifier;
         private readonly LdapConfig _ldapConfig;
         private readonly ILogger _log;
-        private readonly PortScanner _portScanner;
+        private readonly IPortScanner _portScanner;
         private readonly NativeMethods _nativeMethods;
         private static readonly TimeSpan MinBackoffDelay = TimeSpan.FromSeconds(2);
         private static readonly TimeSpan MaxBackoffDelay = TimeSpan.FromSeconds(20);
@@ -35,7 +36,8 @@ namespace SharpHoundCommonLib {
         // Tracks domains we know we've determined we shouldn't try to connect to
         private static readonly ConcurrentHashSet _excludedDomains = new();
 
-        public LdapConnectionPool(string identifier, string poolIdentifier, LdapConfig config, PortScanner scanner = null, NativeMethods nativeMethods = null, ILogger log = null) {
+        public LdapConnectionPool(string identifier, string poolIdentifier, LdapConfig config,
+            IPortScanner scanner = null, NativeMethods nativeMethods = null, ILogger log = null) {
             _connections = new ConcurrentBag<LdapConnectionWrapper>();
             _globalCatalogConnection = new ConcurrentBag<LdapConnectionWrapper>();
             //TODO: Re-enable this once we track down the semaphore deadlock
@@ -623,7 +625,8 @@ namespace SharpHoundCommonLib {
             return true;
         }
 
-        public async Task<(bool Success, LdapConnectionWrapper ConnectionWrapper, string Message)> GetConnectionAsync() {
+        public async Task<(bool Success, LdapConnectionWrapper ConnectionWrapper, string Message)>
+            GetConnectionAsync() {
             if (_excludedDomains.Contains(_identifier)) {
                 return (false, null, $"Identifier {_identifier} excluded for connection attempt");
             }
@@ -645,7 +648,8 @@ namespace SharpHoundCommonLib {
             return CreateNewConnectionForServer(server, globalCatalog);
         }
 
-        public async Task<(bool Success, LdapConnectionWrapper ConnectionWrapper, string Message)> GetGlobalCatalogConnectionAsync() {
+        public async Task<(bool Success, LdapConnectionWrapper ConnectionWrapper, string Message)>
+            GetGlobalCatalogConnectionAsync() {
             if (_excludedDomains.Contains(_identifier)) {
                 return (false, null, $"Identifier {_identifier} excluded for connection attempt");
             }
@@ -764,7 +768,8 @@ namespace SharpHoundCommonLib {
                     }
                 }
             } catch (Exception e) {
-                _log.LogInformation(e, "We will not be able to connect to domain {Domain} by any strategy, leaving it.", _identifier);
+                _log.LogInformation(e, "We will not be able to connect to domain {Domain} by any strategy, leaving it.",
+                    _identifier);
                 _excludedDomains.Add(_identifier);
             }
 
