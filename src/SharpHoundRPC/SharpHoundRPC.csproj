@@ -3,12 +3,12 @@
         <TargetFramework>net472</TargetFramework>
         <OutputType>library</OutputType>
         <PackageId>SharpHoundRPC</PackageId>
-        <LangVersion>9</LangVersion>
+        <LangVersion>default</LangVersion>
         <Authors>Rohan Vazarkar</Authors>
         <Company>SpecterOps</Company>
         <PackageDescription>SAM/LSA Wrapper for C# BloodHound tasks</PackageDescription>
         <PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
-        <Version>3.0.8</Version>
+        <Version>4.2.1</Version>
         <AssemblyName>SharpHoundRPC</AssemblyName>
         <RootNamespace>SharpHoundRPC</RootNamespace>
     </PropertyGroup>
