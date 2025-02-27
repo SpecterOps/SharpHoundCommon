@@ -38,6 +38,7 @@ namespace SharpHoundCommonLib.Processors
                 }
 
                 var entry = result.Value;
+                _log.LogDebug("Got Trust: {Trust}", entry.DumpDirectoryObject());
                 var trust = new DomainTrust();
                 if (!entry.TryGetByteProperty(LDAPProperties.SecurityIdentifier, out var targetSidBytes) || targetSidBytes.Length == 0) {
                     _log.LogDebug("Trust sid is null or empty for target: {Domain}", domain);

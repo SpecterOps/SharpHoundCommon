@@ -19,6 +19,7 @@ using SharpHoundCommonLib.LDAPQueries;
 using SharpHoundCommonLib.OutputTypes;
 using SharpHoundCommonLib.Processors;
 using SharpHoundRPC.NetAPINative;
+using SharpHoundRPC.PortScanner;
 using Domain = System.DirectoryServices.ActiveDirectory.Domain;
 using Group = SharpHoundCommonLib.OutputTypes.Group;
 using SearchScope = System.DirectoryServices.Protocols.SearchScope;
@@ -43,7 +44,7 @@ namespace SharpHoundCommonLib {
             new(StringComparer.OrdinalIgnoreCase);
 
         private readonly ILogger _log;
-        private readonly PortScanner _portScanner;
+        private readonly IPortScanner _portScanner;
         private readonly NativeMethods _nativeMethods;
         private readonly string _nullCacheKey = Guid.NewGuid().ToString();
         private static readonly Regex SIDRegex = new(@"^(S-\d+-\d+-\d+-\d+-\d+-\d+)(-\d+)?$");
@@ -182,7 +183,7 @@ namespace SharpHoundCommonLib {
             } catch {
                 //pass
             }
-           
+
 
             return (false, Label.Base);
         }
@@ -227,7 +228,7 @@ namespace SharpHoundCommonLib {
             } catch {
                 //pass
             }
-            
+
 
             return (false, Label.Base);
         }
@@ -361,7 +362,7 @@ namespace SharpHoundCommonLib {
             } catch {
                 //pass
             }
-            
+
 
             return (false, string.Empty);
         }
@@ -904,7 +905,6 @@ namespace SharpHoundCommonLib {
                 _unresolvablePrincipals.Add(distinguishedName);
                 return (false, default);
             }
-            
         }
 
         public async Task<(bool Success, string DSHeuristics)> GetDSHueristics(string domain, string dn) {
@@ -961,7 +961,7 @@ namespace SharpHoundCommonLib {
                 yield return entdc;
             }
         }
-        
+
         private async IAsyncEnumerable<Group> GetEnterpriseDCGroups() {
             var grouped = new ConcurrentDictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
             var forestSidToName = new ConcurrentDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -972,7 +972,7 @@ namespace SharpHoundCommonLib {
                     await GetDomainSidFromDomainName(forestName) is (true, var forestDomainSid)) {
                     forestSidToName.TryAdd(forestDomainSid, forestName);
                     if (!grouped.ContainsKey(forestDomainSid)) {
-                        grouped[forestDomainSid] = [];
+                        grouped[forestDomainSid] = new();
                     }
 
                     foreach (var k in domainSid) {
@@ -983,8 +983,10 @@ namespace SharpHoundCommonLib {
 
             foreach (var f in grouped) {
                 if (!forestSidToName.TryGetValue(f.Key, out var forestName)) {
+                    _log.LogWarning("Could not get a mapped value for well known principal {Key}", f.Key);
                     continue;
                 }
+
                 var group = new Group { ObjectIdentifier = $"{forestName}-S-1-5-9" };
                 group.Properties.Add("name", $"ENTERPRISE DOMAIN CONTROLLERS@{forestName}".ToUpper());
                 group.Properties.Add("domainsid", f.Key);
@@ -1203,6 +1205,15 @@ namespace SharpHoundCommonLib {
                 return (true, res);
             }
 
+            res.ObjectType = await ComputeLabel(directoryObject, objectIdentifier, domain, utils);
+
+            directoryObject.TryGetProperty(LDAPProperties.SAMAccountName, out var samAccountName);
+            res.DisplayName = ComputeDisplayName(directoryObject, domain, res.ObjectType, samAccountName);
+            return (true, res);
+        }
+
+        private static async Task<Label> ComputeLabel(IDirectoryObject directoryObject, string objectIdentifier,
+            string domain, ILdapUtils utils) {
             if (!directoryObject.GetLabel(out var label)) {
                 if (await utils.ResolveIDAndType(objectIdentifier, domain) is (true, var typedPrincipal)) {
                     label = typedPrincipal.ObjectType;
@@ -1213,68 +1224,78 @@ namespace SharpHoundCommonLib {
                 label = Label.User;
             }
 
-            res.ObjectType = label;
+            return label;
+        }
 
-            directoryObject.TryGetProperty(LDAPProperties.SAMAccountName, out var samAccountName);
-
+        private static string ComputeDisplayName(IDirectoryObject directoryObject, string domain, Label label,
+            string samAccountName) {
+            string displayName;
             switch (label) {
                 case Label.User:
                 case Label.Group:
                 case Label.Base:
-                    res.DisplayName = $"{samAccountName}@{domain}";
+                    if (!string.IsNullOrWhiteSpace(samAccountName)) {
+                        displayName = $"{samAccountName}@{domain}";    
+                    }else if (directoryObject.TryGetProperty(LDAPProperties.CanonicalName, out var canonicalName)) {
+                        displayName = $"{canonicalName}@{domain}";
+                    }else if (directoryObject.TryGetProperty(LDAPProperties.Name, out var name)) {
+                        displayName = $"{name}@{domain}";
+                    } else {
+                        displayName = $"UNKNOWN@{domain}";
+                    }
                     break;
                 case Label.Computer: {
                     var shortName = samAccountName?.TrimEnd('$');
                     if (directoryObject.TryGetProperty(LDAPProperties.DNSHostName, out var dns)) {
-                        res.DisplayName = dns;
+                        displayName = dns;
                     } else if (!string.IsNullOrWhiteSpace(shortName)) {
-                        res.DisplayName = $"{shortName}.{domain}";
+                        displayName = $"{shortName}.{domain}";
                     } else if (directoryObject.TryGetProperty(LDAPProperties.CanonicalName,
                                    out var canonicalName)) {
-                        res.DisplayName = $"{canonicalName}.{domain}";
+                        displayName = $"{canonicalName}.{domain}";
                     } else if (directoryObject.TryGetProperty(LDAPProperties.Name, out var name)) {
-                        res.DisplayName = $"{name}.{domain}";
+                        displayName = $"{name}.{domain}";
                     } else {
-                        res.DisplayName = $"UNKNOWN.{domain}";
+                        displayName = $"UNKNOWN.{domain}";
                     }
 
                     break;
                 }
                 case Label.GPO:
                 case Label.IssuancePolicy: {
-                    if (directoryObject.TryGetProperty(LDAPProperties.DisplayName, out var displayName)) {
-                        res.DisplayName = $"{displayName}@{domain}";
+                    if (directoryObject.TryGetProperty(LDAPProperties.DisplayName, out var ldapDisplayName)) {
+                        displayName = $"{ldapDisplayName}@{domain}";
                     } else if (directoryObject.TryGetProperty(LDAPProperties.CanonicalName,
                                    out var canonicalName)) {
-                        res.DisplayName = $"{canonicalName}@{domain}";
+                        displayName = $"{canonicalName}@{domain}";
                     } else {
-                        res.DisplayName = $"UNKNOWN@{domain}";
+                        displayName = $"UNKNOWN@{domain}";
                     }
 
                     break;
                 }
                 case Label.Domain:
-                    res.DisplayName = domain;
+                    displayName = domain;
                     break;
                 case Label.OU: {
                     if (directoryObject.TryGetProperty(LDAPProperties.Name, out var name)) {
-                        res.DisplayName = $"{name}@{domain}";
+                        displayName = $"{name}@{domain}";
                     } else if (directoryObject.TryGetProperty(LDAPProperties.OU, out var ou)) {
-                        res.DisplayName = $"{ou}@{domain}";
+                        displayName = $"{ou}@{domain}";
                     } else {
-                        res.DisplayName = $"UNKNOWN@{domain}";
+                        displayName = $"UNKNOWN@{domain}";
                     }
 
                     break;
                 }
                 case Label.Container: {
                     if (directoryObject.TryGetProperty(LDAPProperties.Name, out var name)) {
-                        res.DisplayName = $"{name}@{domain}";
+                        displayName = $"{name}@{domain}";
                     } else if (directoryObject.TryGetProperty(LDAPProperties.CanonicalName,
                                    out var canonicalName)) {
-                        res.DisplayName = $"{canonicalName}@{domain}";
+                        displayName = $"{canonicalName}@{domain}";
                     } else {
-                        res.DisplayName = $"UNKNOWN@{domain}";
+                        displayName = $"UNKNOWN@{domain}";
                     }
 
                     break;
@@ -1286,9 +1307,9 @@ namespace SharpHoundCommonLib {
                 case Label.EnterpriseCA:
                 case Label.CertTemplate: {
                     if (directoryObject.TryGetProperty(LDAPProperties.Name, out var name)) {
-                        res.DisplayName = $"{name}@{domain}";
+                        displayName = $"{name}@{domain}";
                     } else {
-                        res.DisplayName = $"UNKNOWN@{domain}";
+                        displayName = $"UNKNOWN@{domain}";
                     }
 
                     break;
@@ -1297,8 +1318,7 @@ namespace SharpHoundCommonLib {
                     throw new ArgumentOutOfRangeException();
             }
 
-            res.DisplayName = res.DisplayName.ToUpper();
-            return (true, res);
+            return displayName.ToUpper();
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net462</TargetFramework>
+        <TargetFramework>net472</TargetFramework>
         <OutputType>library</OutputType>
         <PackageId>SharpHoundCommon</PackageId>
         <LangVersion>default</LangVersion>
@@ -9,7 +9,7 @@
         <PackageDescription>Common library for C# BloodHound enumeration tasks</PackageDescription>
         <PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
         <RepositoryUrl>https://github.com/BloodHoundAD/SharpHoundCommon</RepositoryUrl>
-        <Version>4.0.9</Version>
+        <Version>4.2.1</Version>
         <AssemblyName>SharpHoundCommonLib</AssemblyName>
         <RootNamespace>SharpHoundCommonLib</RootNamespace>
     </PropertyGroup>
@@ -26,6 +26,7 @@
         <Reference Include="System.DirectoryServices" />
         <Reference Include="System.DirectoryServices.AccountManagement" />
         <Reference Include="System.DirectoryServices.Protocols" />
+        <Reference Include="System.Net.Http" />
     </ItemGroup>
     <ItemGroup>
         <Folder Include="Properties" />
@@ -35,6 +36,7 @@
     </ItemGroup>
     <PropertyGroup>
         <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
+        <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     </PropertyGroup>
     <Target Name="CopyProjectReferencesToPackage" DependsOnTargets="BuildOnlySettings;ResolveReferences">
         <ItemGroup>

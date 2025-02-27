@@ -39,7 +39,7 @@ namespace SharpHoundCommonLib {
             //Start at the first instance of a comma, and continue to loop while we still have commas. If we get -1, it means we ran out of commas.
             //This allows us to cleanly iterate over all indexes of commas in our DNs and find the first non-escaped one
             for (var i = distinguishedName.IndexOf(','); i > -1; i = distinguishedName.IndexOf(',', i + 1)) {
-                //If theres a comma at the beginning of the DN, something screwy is going on. Just ignore it
+                //If there's a comma at the beginning of the DN, something screwy is going on. Just ignore it
                 if (i == 0) {
                     continue;
                 }
@@ -300,6 +300,16 @@ namespace SharpHoundCommonLib {
             CommonOids.ClientAuthentication,
             CommonOids.AnyPurpose
         };
+        
+        public static string DumpDirectoryObject(this IDirectoryObject directoryObject) {
+            var builder = new StringBuilder();
+            builder.AppendLine("PropertyName : PropertyValue");
+            foreach (var prop in directoryObject.PropertyNames()) {
+                builder.AppendLine($"{prop} : {directoryObject.GetProperty(prop)}");
+            }
+
+            return builder.ToString();
+        }
     }
 
     public class ParsedGPLink {
