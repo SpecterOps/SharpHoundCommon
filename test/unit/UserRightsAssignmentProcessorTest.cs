@@ -88,5 +88,57 @@ namespace CommonLibTest
             var status = receivedStatus[0];
             Assert.Equal("Timeout", status.Status);
         }
+        
+        [WindowsOnlyFact]
+        public async Task UserRightsAssignmentProcessor_TestGetLocalDomainInformationFail()
+        {
+            var mockProcessor = new Mock<UserRightsAssignmentProcessor>(new MockLdapUtils(), null);
+            var mockLSAPolicy = new MockFailLSAPolicy_GetLocalDomainInformation();
+            mockProcessor.Setup(x => x.OpenLSAPolicy(It.IsAny<string>())).Returns(()=> {
+                Task.Delay(100).Wait();
+                return NtStatus.StatusAccessDenied;
+            });
+            mockProcessor.Setup(x => x.OpenLSAPolicy(It.IsAny<string>())).Returns(mockLSAPolicy);
+            var processor = mockProcessor.Object;
+            var machineDomainSid = $"{Consts.MockDomainSid}-1001";
+            var receivedStatus = new List<CSVComputerStatus>();
+            processor.ComputerStatusEvent += async status =>  {
+                receivedStatus.Add(status);
+            };
+            var results = await processor.GetUserRightsAssignments("win10.testlab.local", machineDomainSid, "testlab.local", false)
+                .ToArrayAsync();
+
+            Assert.Empty(results);
+            Assert.Single(receivedStatus);
+            var status = receivedStatus[0];
+            Assert.Equal("StatusAccessDenied", status.Status);
+            Assert.Equal("LSAGetMachineSID", status.Task);
+        }
+        
+        [WindowsOnlyFact]
+        public async Task UserRightsAssignmentProcessor_TestGetResolvedPrincipalsWithPrivilegeFail()
+        {
+            var mockProcessor = new Mock<UserRightsAssignmentProcessor>(new MockLdapUtils(), null);
+            var mockLSAPolicy = new MockFailLSAPolicy_GetResolvedPrincipalsWithPrivilege();
+            mockProcessor.Setup(x => x.OpenLSAPolicy(It.IsAny<string>())).Returns(mockLSAPolicy);
+            var processor = mockProcessor.Object;
+            var machineDomainSid = $"{Consts.MockDomainSid}-1001";
+            var receivedStatus = new List<CSVComputerStatus>();
+            processor.ComputerStatusEvent += async status =>  {
+                receivedStatus.Add(status);
+            };
+            var results = await processor.GetUserRightsAssignments("win10.testlab.local", machineDomainSid, "testlab.local", false)
+                .ToArrayAsync();
+
+            Assert.Single(results);
+            
+            var result = results[0];
+            Assert.False(result.Collected);
+            Assert.Equal("LSAEnumerateAccountsWithUserRights returned StatusAccessDenied", result.FailureReason);
+            Assert.Single(receivedStatus);
+            var status = receivedStatus[0];
+            Assert.Equal("StatusAccessDenied", status.Status);
+            Assert.Equal("LSAEnumerateAccountsWithUserRight", status.Task);
+        }
     }
 }

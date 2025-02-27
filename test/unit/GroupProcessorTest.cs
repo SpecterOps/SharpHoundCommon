@@ -31,6 +31,11 @@ namespace CommonLibTest
             "CN=NonExistent,CN=Users,DC=testlab,DC=local"
         };
         
+        private readonly Result<string>[] _testMembershipReturnFail =
+        {
+            Result<string>.Fail()
+        };
+        
 
         private readonly ITestOutputHelper _testOutputHelper;
         private GroupProcessor _baseProcessor;
@@ -133,6 +138,26 @@ namespace CommonLibTest
             foreach (var t in results) _testOutputHelper.WriteLine(t.ToString());
             Assert.Equal(4, results.Length);
             Assert.Equal(expected, results);
+        }
+        
+        [Fact]
+        public async Task GroupProcessor_ReadGroupMembers_EmptyMembers_FailRangedRetrieval()
+        {
+            var mockUtils = new Mock<MockLdapUtils>();
+            mockUtils.Setup(x => x.RangedRetrieval(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>())).Returns(_testMembershipReturnFail.ToAsyncEnumerable());
+            var processor = new GroupProcessor(mockUtils.Object);
+
+            var results = await processor
+                .ReadGroupMembers("CN=Administrators,CN=Builtin,DC=testlab,DC=local", Array.Empty<string>()).ToArrayAsync();
+            foreach (var t in results) _testOutputHelper.WriteLine(t.ToString());
+            Assert.Empty(results);
+        }
+        
+        [Fact]
+        public void GroupProcessor_GetPrimaryGroupInfo_NullObjectID_ReturnsNull()
+        {
+            var result = GroupProcessor.GetPrimaryGroupInfo("513", null);
+            Assert.Null(result);
         }
     }
 }

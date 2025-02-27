@@ -1,10 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.DirectoryServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
 using System.Threading.Tasks;
 using CommonLibTest.Facades;
+using Moq;
 using SharpHoundCommonLib;
 using SharpHoundCommonLib.Enums;
 using SharpHoundCommonLib.OutputTypes;
@@ -989,5 +992,582 @@ namespace CommonLibTest
             Assert.True(hasGuid);
             Assert.Equal(guidExpected.ToString(), guidActual);
         }
+        
+        [Fact]
+        public void LDAPPropertyProcessor_ReadACAProperties() {
+            var ecdsa = ECDsa.Create();
+            var req = new CertificateRequest("cn=foobar", ecdsa, HashAlgorithmName.SHA256);
+            var cert = req.CreateSelfSigned(DateTimeOffset.Now, DateTimeOffset.Now.AddYears(5));
+
+            var bytes = cert.Export(X509ContentType.Cert, "abc");
+            var mock = new MockDirectoryObject(
+                "CN\u003dDUMPSTER-DC01-CA,CN\u003dAIA,CN\u003dPUBLIC KEY SERVICES,CN\u003dSERVICES,CN\u003dCONFIGURATION,DC\u003dDUMPSTER,DC\u003dFIRE",
+                new Dictionary<string, object>
+                {
+                    {"description", null},
+                    {"domain", "DUMPSTER.FIRE"},
+                    {"name", "DUMPSTER-DC01-CA@DUMPSTER.FIRE"},
+                    {"domainsid", "S-1-5-21-2697957641-2271029196-387917394"},
+                    {"whencreated", 1683986131},
+                    {LDAPProperties.CACertificate, bytes}
+                }, "","2F9F3630-F46A-49BF-B186-6629994EBCF9");
+
+            var test = LdapPropertyProcessor.ReadRootCAProperties(mock);
+            var keys = test.Keys;
+
+            //These are not common properties
+            Assert.DoesNotContain("domain", keys);
+            Assert.DoesNotContain("name", keys);
+            Assert.DoesNotContain("domainsid", keys);
+
+            Assert.Contains("whencreated", keys);
+            Assert.Contains("certthumbprint", keys);
+            Assert.Contains("certname", keys);
+            Assert.Contains("certchain", keys);
+            Assert.Contains("hasbasicconstraints", keys);
+            Assert.Contains("basicconstraintpathlength", keys);
+        }
+
+        [Theory]
+        [MemberData(nameof(ReadDomainPropertiesData))]
+        public async void LDAPPropertyProcessor_ReadDomainProperties<T>(MockDirectoryObject mock,
+            string expectedProp, T expectedValue)
+        {
+            var processor = new LdapPropertyProcessor(new MockLdapUtils());
+            var test = await processor.ReadDomainProperties(mock,"testlab.local");
+            Assert.Contains(expectedProp, test.Keys);
+            Assert.Equal(expectedValue, test[expectedProp] );
+        }
+        public static IEnumerable<object[]> ReadDomainPropertiesData =>
+            new List<object[]>
+            {
+                new object[] 
+                { 
+                    new MockDirectoryObject("DC\u003dtestlab,DC\u003dlocal", new Dictionary<string, object>
+                        {
+                            {LDAPProperties.ExpirePasswordsOnSmartCardOnlyAccounts, "True"}
+                        }, "S-1-5-21-3130019616-2776909439-2417379446",""), 
+                    "expirepasswordsonsmartcardonlyaccounts", 
+                    true 
+                },
+                new object[] 
+                { 
+                    new MockDirectoryObject("DC\u003dtestlab,DC\u003dlocal", new Dictionary<string, object>
+                        {
+                            {LDAPProperties.MachineAccountQuota, 4}
+                        }, "S-1-5-21-3130019616-2776909439-2417379446",""), 
+                    "machineaccountquota", 
+                    (long)4 
+                },
+                new object[] 
+                { 
+                    new MockDirectoryObject("DC\u003dtestlab,DC\u003dlocal", new Dictionary<string, object>
+                        {
+                            {LDAPProperties.MinPwdLength, 4}
+                        }, "S-1-5-21-3130019616-2776909439-2417379446",""), 
+                    "minpwdlength", 
+                    (long)4 
+                },
+                new object[] 
+                { 
+                    new MockDirectoryObject("DC\u003dtestlab,DC\u003dlocal", new Dictionary<string, object>
+                        {
+                            {LDAPProperties.PwdProperties, 4}
+                        }, "S-1-5-21-3130019616-2776909439-2417379446",""), 
+                    "pwdproperties", 
+                    (long)4 
+                },
+                new object[] 
+                { 
+                    new MockDirectoryObject("DC\u003dtestlab,DC\u003dlocal", new Dictionary<string, object>
+                        {
+                            {LDAPProperties.PwdHistoryLength, 4}
+                        }, "S-1-5-21-3130019616-2776909439-2417379446",""), 
+                    "pwdhistorylength", 
+                    (long)4 
+                },
+                new object[] 
+                { 
+                    new MockDirectoryObject("DC\u003dtestlab,DC\u003dlocal", new Dictionary<string, object>
+                        {
+                            {LDAPProperties.LockoutThreshold, 4}
+                        }, "S-1-5-21-3130019616-2776909439-2417379446",""), 
+                    "lockoutthreshold", 
+                    (long)4 
+                },
+                new object[] 
+                { 
+                    new MockDirectoryObject("DC\u003dtestlab,DC\u003dlocal", new Dictionary<string, object>
+                        {
+                            {LDAPProperties.LockOutObservationWindow, long.MinValue}
+                        }, "S-1-5-21-3130019616-2776909439-2417379446",""), 
+                    "lockoutobservationwindow", 
+                    long.MinValue 
+                },
+                new object[] 
+                { 
+                    new MockDirectoryObject("DC\u003dtestlab,DC\u003dlocal", new Dictionary<string, object>
+                        {
+                            {LDAPProperties.MinPwdAge, long.MinValue}
+                        }, "S-1-5-21-3130019616-2776909439-2417379446",""), 
+                    "minpwdage", 
+                    "Forever" 
+                },
+                new object[] 
+                { 
+                    new MockDirectoryObject("DC\u003dtestlab,DC\u003dlocal", new Dictionary<string, object>
+                        {
+                            {LDAPProperties.MaxPwdAge, long.MinValue}
+                        }, "S-1-5-21-3130019616-2776909439-2417379446",""), 
+                    "maxpwdage", 
+                    "Forever" 
+                },
+                new object[] 
+                { 
+                    new MockDirectoryObject("DC\u003dtestlab,DC\u003dlocal", new Dictionary<string, object>
+                        {
+                            {LDAPProperties.LockoutDuration, long.MinValue}
+                        }, "S-1-5-21-3130019616-2776909439-2417379446",""), 
+                    "lockoutduration", 
+                    "Forever" 
+                },
+                new object[] 
+                { 
+                    new MockDirectoryObject("DC\u003dtestlab,DC\u003dlocal", new Dictionary<string, object>
+                    {
+                        {LDAPProperties.MaxPwdAge, -11211100000000}
+                    }, "S-1-5-21-3130019616-2776909439-2417379446",""), 
+                    "maxpwdage", 
+                    "12 days, 23 hours, 25 minutes, 10 seconds" 
+                }
+            };
+        
+        [Fact]
+        public async void LDAPPropertyProcessor_ReadDomainProperties_ConvertNanoDuration_TestNull()
+        {
+            var mock = new MockDirectoryObject("DC\u003dtestlab,DC\u003dlocal", new Dictionary<string, object>
+            {
+                {LDAPProperties.MaxPwdAge, 100}
+            }, "S-1-5-21-3130019616-2776909439-2417379446","");
+
+            var processor = new LdapPropertyProcessor(new MockLdapUtils());
+            var test = await processor.ReadDomainProperties(mock,"testlab.local");
+            Assert.DoesNotContain("maxpwdage", test.Keys);
+        }
+        
+        [Theory]
+        [MemberData(nameof(ReadUserPropertiesData))]
+        public async void LDAPPropertyProcessor_ReadUserProperties<T>(MockDirectoryObject mock,
+            string expectedProp, T expectedValue)
+        {
+            var processor = new LdapPropertyProcessor(new MockLdapUtils());
+            var test = await processor.ReadUserProperties(mock, "testlab.local");
+            var props = test.Props;
+            var keys = props.Keys;
+
+            Assert.Contains(expectedProp, keys);
+            Assert.Equal(expectedValue, props[expectedProp]);
+        }
+
+        public static IEnumerable<object[]> ReadUserPropertiesData =>
+            new List<object[]>
+            {
+                new object[]
+                {
+                    new MockDirectoryObject("CN\u003ddfm,CN\u003dUsers,DC\u003dtestlab,DC\u003dlocal",
+                        new Dictionary<string, object>
+                        {
+                            {"description", "Test"},
+                            {"useraccountcontrol", "66048"},
+                            {"lastlogontimestamp", "132670318095676525"},
+                            {"homedirectory", @"\\win10\testdir"},
+                            {"mail", "test@testdomain.com"},
+                            {
+                                "serviceprincipalname", new[]
+                                {
+                                    "MSSQLSVC/win10"
+                                }
+                            },
+                            {"admincount", "1"},
+                            {
+                                "sidhistory", new[]
+                                {
+                                    Utils.B64ToBytes("AQUAAAAAAAUVAAAAIE+Qun9GhKV2SBaQUQQAAA==")
+                                }
+                            },
+                            {"pwdlastset", "132131667346106691"}
+                        }, "S-1-5-21-3130019616-2776909439-2417379446-1101",""),
+                    "lastlogon",
+                    (long)-1
+                },
+                new object[]
+                {
+                    new MockDirectoryObject("CN\u003ddfm,CN\u003dUsers,DC\u003dtestlab,DC\u003dlocal",
+                        new Dictionary<string, object>
+                        {
+                            {"description", "Test"},
+                            {"useraccountcontrol", "66048"},
+                            {"homedirectory", @"\\win10\testdir"},
+                            {"mail", "test@testdomain.com"},
+                            {
+                                "serviceprincipalname", new[]
+                                {
+                                    "MSSQLSVC/win10"
+                                }
+                            },
+                            {"admincount", "1"},
+                            {
+                                "sidhistory", new[]
+                                {
+                                    Utils.B64ToBytes("AQUAAAAAAAUVAAAAIE+Qun9GhKV2SBaQUQQAAA==")
+                                }
+                            },
+                            {"pwdlastset", "132131667346106691"}
+                        }, "S-1-5-21-3130019616-2776909439-2417379446-1101",""),
+                    "lastlogontimestamp",
+                    (long)-1
+                },
+                // Test Password Last Set Null
+                new object[] 
+                {
+                    new MockDirectoryObject("CN\u003ddfm,CN\u003dUsers,DC\u003dtestlab,DC\u003dlocal",
+                        new Dictionary<string, object>
+                        {
+                            {"description", "Test"},
+                            {"useraccountcontrol", "66048"},
+                            {"homedirectory", @"\\win10\testdir"},
+                            {"mail", "test@testdomain.com"},
+                            {
+                                "serviceprincipalname", new[]
+                                {
+                                    "MSSQLSVC/win10"
+                                }
+                            },
+                            {"admincount", "1"},
+                            {
+                                "sidhistory", new[]
+                                {
+                                    Utils.B64ToBytes("AQUAAAAAAAUVAAAAIE+Qun9GhKV2SBaQUQQAAA==")
+                                }
+                            }
+                        }, "S-1-5-21-3130019616-2776909439-2417379446-1101",""),
+                    "lastlogontimestamp",
+                    (long)-1
+                },
+            };
+        
+        [Fact]
+        public async Task LDAPPropertyProcessor_ReadUserProperties_TestDelegatesNull()
+        {
+            var mock = new MockDirectoryObject("CN\u003ddfm,CN\u003dUsers,DC\u003dtestlab,DC\u003dlocal",
+                new Dictionary<string, object>
+                {
+                    {"description", "Test"},
+                    {"useraccountcontrol", 0x1000000.ToString()},
+                    {LDAPProperties.LastLogon, "132673011142753043"},
+                    {LDAPProperties.LastLogonTimestamp, "132670318095676525"},
+                    {"homedirectory", @"\\win10\testdir"},
+                    {
+                        "serviceprincipalname", new[]
+                        {
+                            "MSSQLSVC\\win10"
+                        }
+                    },
+                    {"admincount", "1"},
+                    {
+                        "sidhistory", new[]
+                        {
+                            Utils.B64ToBytes("AQUAAAAAAAUVAAAAIE+Qun9GhKV2SBaQUQQAAA==")
+                        }
+                    },
+                    {"pwdlastset", "132131667346106691"},
+                    {
+                        "msds-allowedtodelegateto", new[]
+                        {
+                            null,
+                            "rdpman/win10"
+                        }
+                    }
+                }, "S-1-5-21-3130019616-2776909439-2417379446-1101", "");
+
+            var processor = new LdapPropertyProcessor(new MockLdapUtils());
+            var test = await processor.ReadUserProperties(mock, "testlab.local");
+            var props = test.Props;
+            var keys = props.Keys;
+
+            Assert.Contains("allowedtodelegate", keys);
+            var atd = props["allowedtodelegate"] as string[];
+            Assert.Equal(2, atd.Length);
+            //Assert.Contains("host/primary", atd);
+            Assert.Contains("rdpman/win10", atd);
+
+            var atdr = test.AllowedToDelegate;
+            Assert.Equal(1, atdr.Length);
+            var expected = new TypedPrincipal[]
+            {
+                new()
+                {
+                    ObjectIdentifier = "S-1-5-21-3130019616-2776909439-2417379446-1104",
+                    ObjectType = Label.Computer
+                }
+            };
+            Assert.Equal(expected, atdr);
+        }
+        [WindowsOnlyFact]
+        public async Task LDAPPropertyProcessor_ReadComputerProperties_TestDelegatesNull()
+        {
+            var mock = new MockDirectoryObject("CN\u003dWIN10,OU\u003dTestOU,DC\u003dtestlab,DC\u003dlocal",
+                new Dictionary<string, object>
+                {
+                    {"description", "Test"},
+                    {"useraccountcontrol", 0x1001000.ToString()},
+                    {"lastlogon", "132673011142753043"},
+                    {"lastlogontimestamp", "132670318095676525"},
+                    {"operatingsystem", "Windows 10 Enterprise"},
+                    {"operatingsystemservicepack", "1607"},
+                    {"mail", "test@testdomain.com"},
+                    {"admincount", "c"},
+                    {
+                        "sidhistory", new[]
+                        {
+                            Utils.B64ToBytes("AQUAAAAAAAUVAAAAIE+Qun9GhKV2SBaQUQQAAA==")
+                        }
+                    },
+                    {
+                        "msds-allowedtodelegateto", new[]
+                        {
+                            null,
+                            "ldap/PRIMARY.testlab.local",
+                            "ldap/PRIMARY"
+                        }
+                    },
+                    {"pwdlastset", "132131667346106691"},
+                    {
+                        "serviceprincipalname", new[]
+                        {
+                            "WSMAN/WIN10",
+                            "WSMAN/WIN10.testlab.local",
+                            "RestrictedKrbHost/WIN10",
+                            "HOST/WIN10",
+                            "RestrictedKrbHost/WIN10.testlab.local",
+                            "HOST/WIN10.testlab.local"
+                        }
+                    }
+                }, "S-1-5-21-3130019616-2776909439-2417379446-1101","");
+
+            var processor = new LdapPropertyProcessor(new MockLdapUtils());
+            var test = await processor.ReadComputerProperties(mock, "testlab.local");
+            var props = test.Props;
+            var keys = props.Keys;
+
+            Assert.Contains("allowedtodelegate", keys);
+            var atd = props["allowedtodelegate"] as string[];
+            Assert.Equal(3, atd.Length);
+
+            //AllowedToDelegate
+            Assert.Single(test.AllowedToDelegate);
+            Assert.Contains(new TypedPrincipal
+            {
+                ObjectIdentifier = "S-1-5-21-3130019616-2776909439-2417379446-1001",
+                ObjectType = Label.Computer
+            }, test.AllowedToDelegate);
+        }
+        
+        [WindowsOnlyFact]
+        public async Task LDAPPropertyProcessor_ReadComputerProperties_AllowedToActOnBehalfOfOtherIdentity()
+        {
+            var mockUtils = new Mock<ILdapUtils>();
+            var mockSecurityDescriptor = new Mock<ActiveDirectorySecurityDescriptor>(MockBehavior.Loose, null);
+            var mockRule = new Mock<ActiveDirectoryRuleDescriptor>(MockBehavior.Loose, null);
+            var collection = new List<ActiveDirectoryRuleDescriptor>();
+            var expectedPrincipalSID = "S-1-5-21-3130019616-2776909439-2417379446-512";
+            var expectedPrincipalType = Label.CertTemplate;
+            var mock = new MockDirectoryObject("CN\u003dWIN10,OU\u003dTestOU,DC\u003dtestlab,DC\u003dlocal",
+                new Dictionary<string, object>
+                {
+                    {"description", "Test"},
+                    {"useraccountcontrol", 0x1001000.ToString()},
+                    {"lastlogon", "132673011142753043"},
+                    {"lastlogontimestamp", "132670318095676525"},
+                    {"operatingsystem", "Windows 10 Enterprise"},
+                    {"operatingsystemservicepack", "1607"},
+                    {"mail", "test@testdomain.com"},
+                    {"admincount", "c"},
+                    {
+                        "msds-allowedtoactonbehalfofotheridentity", 
+                        
+                            Utils.B64ToBytes("AQUAAAAAAAUVAAAAIE+Qun9GhKV2SBaQUQQAAA==")
+                        
+                    }
+                }, "S-1-5-21-3130019616-2776909439-2417379446-1101","");
+            
+            var sd = new ActiveDirectorySecurityDescriptor(new ActiveDirectorySecurity());
+            mockUtils.Setup(x => x.MakeSecurityDescriptor()).Returns(sd);
+            mockSecurityDescriptor.Setup(m => m.SetSecurityDescriptorBinaryForm(It.IsAny<byte[]>())).Throws(new OverflowException());
+            mockUtils.Setup(x => x.MakeSecurityDescriptor()).Returns(mockSecurityDescriptor.Object);
+            collection.Add(mockRule.Object);
+            mockSecurityDescriptor.Setup(m => m.GetAccessRules(It.IsAny<bool>(), It.IsAny<bool>(), It.IsAny<Type>()))
+                .Returns(collection);
+            mockUtils.Setup(x => x.ResolveIDAndType(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync((true, new TypedPrincipal(expectedPrincipalSID, expectedPrincipalType)));
+            
+
+            var processor = new LdapPropertyProcessor(mockUtils.Object);
+            var test = await processor.ReadComputerProperties(mock, "testlab.local");
+
+            //AllowedToAct
+            Assert.Single(test.AllowedToAct);
+            Assert.Contains(new TypedPrincipal
+            {
+                ObjectIdentifier = expectedPrincipalSID,
+                ObjectType = expectedPrincipalType
+            }, test.AllowedToAct);
+        }
+        
+        [Theory]
+        [MemberData(nameof(ConvertEncryptionTypesData))]
+        public async void LDAPPropertyProcessor_ConvertEncryptionTypes(MockDirectoryObject mock,
+            string expectedProp, List<String> expectedValue)
+        {
+            var processor = new LdapPropertyProcessor(new MockLdapUtils());
+            var test = await processor.ReadComputerProperties(mock, "testlab.local");
+            var props = test.Props;
+            var keys = props.Keys;
+
+            Assert.Contains(expectedProp, keys);
+
+            Assert.Equal(expectedValue, (List<String>)props[expectedProp]);
+        }
+
+        public static IEnumerable<object[]> ConvertEncryptionTypesData =>
+            new List<object[]>
+            {
+                // SupportedEncrypTionTypes: 0
+                new object[]
+                {
+                    new MockDirectoryObject("CN\u003dWIN10,OU\u003dTestOU,DC\u003dtestlab,DC\u003dlocal",
+                        new Dictionary<string, object>
+                        {
+                            { "description", "Test" },
+                            { "useraccountcontrol", 0x1001000.ToString() },
+                            { "lastlogon", "132673011142753043" },
+                            { "lastlogontimestamp", "132670318095676525" },
+                            { "operatingsystem", "Windows 10 Enterprise" },
+                            { "operatingsystemservicepack", "1607" },
+                            { "mail", "test@testdomain.com" },
+                            { "admincount", "c" },
+                            {
+                                "msds-supportedencryptiontypes", "0"
+                            }
+                        }, "S-1-5-21-3130019616-2776909439-2417379446-1101", ""),
+                    "supportedencryptiontypes",
+                    new List<String>(["Not defined"])
+                },
+                // SupportedEncrypTionTypes: DES_CBC_CRC
+                new object[]
+                {
+                    new MockDirectoryObject("CN\u003dWIN10,OU\u003dTestOU,DC\u003dtestlab,DC\u003dlocal",
+                        new Dictionary<string, object>
+                        {
+                            { "description", "Test" },
+                            { "useraccountcontrol", 0x1001000.ToString() },
+                            { "lastlogon", "132673011142753043" },
+                            { "lastlogontimestamp", "132670318095676525" },
+                            { "operatingsystem", "Windows 10 Enterprise" },
+                            { "operatingsystemservicepack", "1607" },
+                            { "mail", "test@testdomain.com" },
+                            { "admincount", "c" },
+                            {
+                                "msds-supportedencryptiontypes", "1"
+                            }
+                        }, "S-1-5-21-3130019616-2776909439-2417379446-1101", ""),
+                    "supportedencryptiontypes",
+                    new List<String>(["DES-CBC-CRC"])
+                },
+                // SupportedEncrypTionTypes: DES-CBC-MD5
+                new object[]
+                {
+                    new MockDirectoryObject("CN\u003dWIN10,OU\u003dTestOU,DC\u003dtestlab,DC\u003dlocal",
+                        new Dictionary<string, object>
+                        {
+                            { "description", "Test" },
+                            { "useraccountcontrol", 0x1001000.ToString() },
+                            { "lastlogon", "132673011142753043" },
+                            { "lastlogontimestamp", "132670318095676525" },
+                            { "operatingsystem", "Windows 10 Enterprise" },
+                            { "operatingsystemservicepack", "1607" },
+                            { "mail", "test@testdomain.com" },
+                            { "admincount", "c" },
+                            {
+                                "msds-supportedencryptiontypes", "2"
+                            }
+                        }, "S-1-5-21-3130019616-2776909439-2417379446-1101", ""),
+                    "supportedencryptiontypes",
+                    new List<String>(["DES-CBC-MD5"])
+                },
+                // SupportedEncrypTionTypes: RC4-HMAC-MD5
+                new object[]
+                {
+                    new MockDirectoryObject("CN\u003dWIN10,OU\u003dTestOU,DC\u003dtestlab,DC\u003dlocal",
+                        new Dictionary<string, object>
+                        {
+                            { "description", "Test" },
+                            { "useraccountcontrol", 0x1001000.ToString() },
+                            { "lastlogon", "132673011142753043" },
+                            { "lastlogontimestamp", "132670318095676525" },
+                            { "operatingsystem", "Windows 10 Enterprise" },
+                            { "operatingsystemservicepack", "1607" },
+                            { "mail", "test@testdomain.com" },
+                            { "admincount", "c" },
+                            {
+                                "msds-supportedencryptiontypes", "4"
+                            }
+                        }, "S-1-5-21-3130019616-2776909439-2417379446-1101", ""),
+                    "supportedencryptiontypes",
+                    new List<String>(["RC4-HMAC-MD5"])
+                },
+                // SupportedEncrypTionTypes: AES128-CTS-HMAC-SHA1-96
+                new object[]
+                {
+                    new MockDirectoryObject("CN\u003dWIN10,OU\u003dTestOU,DC\u003dtestlab,DC\u003dlocal",
+                        new Dictionary<string, object>
+                        {
+                            { "description", "Test" },
+                            { "useraccountcontrol", 0x1001000.ToString() },
+                            { "lastlogon", "132673011142753043" },
+                            { "lastlogontimestamp", "132670318095676525" },
+                            { "operatingsystem", "Windows 10 Enterprise" },
+                            { "operatingsystemservicepack", "1607" },
+                            { "mail", "test@testdomain.com" },
+                            { "admincount", "c" },
+                            {
+                                "msds-supportedencryptiontypes", "8"
+                            }
+                        }, "S-1-5-21-3130019616-2776909439-2417379446-1101", ""),
+                    "supportedencryptiontypes",
+                    new List<String>(["AES128-CTS-HMAC-SHA1-96"])
+                },
+                // SupportedEncrypTionTypes: AES256-CTS-HMAC-SHA1-96
+                new object[]
+                {
+                    new MockDirectoryObject("CN\u003dWIN10,OU\u003dTestOU,DC\u003dtestlab,DC\u003dlocal",
+                        new Dictionary<string, object>
+                        {
+                            { "description", "Test" },
+                            { "useraccountcontrol", 0x1001000.ToString() },
+                            { "lastlogon", "132673011142753043" },
+                            { "lastlogontimestamp", "132670318095676525" },
+                            { "operatingsystem", "Windows 10 Enterprise" },
+                            { "operatingsystemservicepack", "1607" },
+                            { "mail", "test@testdomain.com" },
+                            { "admincount", "c" },
+                            {
+                                "msds-supportedencryptiontypes", "16"
+                            }
+                        }, "S-1-5-21-3130019616-2776909439-2417379446-1101", ""),
+                    "supportedencryptiontypes",
+                    new List<String>(["AES256-CTS-HMAC-SHA1-96"])
+                },
+            };
     }
 }
