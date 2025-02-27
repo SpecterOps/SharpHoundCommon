@@ -94,7 +94,7 @@ namespace CommonLibTest {
 
             Assert.Equal("Value cannot be null. (Parameter 'machineName')", results.FailureReason);
             Assert.False(results.Collected);
-            Assert.Empty(results.Data);
+            Assert.Null(results.Result);
         }
 
         // [WindowsOnlyFact]
