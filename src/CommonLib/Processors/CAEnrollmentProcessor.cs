@@ -16,7 +16,6 @@ namespace SharpHoundCommonLib.Processors {
         private readonly string _caDnsHostname;
         private readonly string _caName;
         private readonly ILogger _logger;
-        private readonly IHttpClientFactory _httpClientFactory;
 
         public CAEnrollmentProcessor(string caDnsHostname, string caName, ILogger log = null) {
             ServicePointManager.SecurityProtocol |=
@@ -28,8 +27,6 @@ namespace SharpHoundCommonLib.Processors {
             _caDnsHostname = caDnsHostname;
             _caName = caName;
             _logger = log ?? Logging.LogProvider.CreateLogger("CAEnrollmentProcessor");
-
-            _httpClientFactory = new HttpClientFactory();
         }
 
 
@@ -120,7 +117,7 @@ namespace SharpHoundCommonLib.Processors {
                     }
 
                     if (webEx.Response is HttpWebResponse httpResponse) {
-                        HttpStatusCode statusCode = httpResponse.StatusCode;
+                        var statusCode = httpResponse.StatusCode;
 
                         switch (statusCode) {
                             case HttpStatusCode.NotFound:
@@ -138,16 +135,17 @@ namespace SharpHoundCommonLib.Processors {
 
                         return APIResult<CAEnrollmentEndpoint>.Success(output);
                     }
+
                     Console.WriteLine($"WebException occurred: {ex}");
 
                     return APIResult<CAEnrollmentEndpoint>
                         .Failure(
-                            $"Unhandled WebException. Url: {url}. Exception: {webEx}. Inner: {webEx.InnerException}  Data: {webEx.Data}");
+                            $"Unhandled WebException. Url: {url}. Exception: {webEx.Message}. Inner: {webEx.InnerException.Message}  Data: {webEx.Data}");
                 }
 
                 return APIResult<CAEnrollmentEndpoint>
                     .Failure(
-                        $"HttpRequestException occured checking NTLM accessibility for URL: {url}. Exception: {ex}");
+                        $"HttpRequestException occured checking NTLM accessibility for URL: {url}. Exception: {ex.Message}");
             } catch (HttpUnauthorizedException ex) {
                 if (useBadChannelBinding == true) {
                     output.Status = CAEnrollmentEndpointScanResult.NotVulnerable_NtlmChannelBindingRequired;
@@ -156,7 +154,7 @@ namespace SharpHoundCommonLib.Processors {
 
                 return APIResult<CAEnrollmentEndpoint>
                     .Failure(
-                        $"401 Unauthorized exception checking NTLM accessibility for URL: {url}. Exception: {ex}");
+                        $"401 Unauthorized exception checking NTLM accessibility for URL: {url}. Exception: {ex.Message}");
             } catch (HttpForbiddenException) {
                 output.Status = CAEnrollmentEndpointScanResult.NotVulnerable_PathForbidden;
                 return APIResult<CAEnrollmentEndpoint>
@@ -169,10 +167,14 @@ namespace SharpHoundCommonLib.Processors {
                 output.Status = CAEnrollmentEndpointScanResult.NotVulnerable_NoNtlmChallenge;
                 return APIResult<CAEnrollmentEndpoint>
                     .Success(output);
+            } catch (ExtendedProtectionMisconfiguredException) {
+                output.Status = CAEnrollmentEndpointScanResult.NotVulnerable_EpaMisconfigured;
+                return APIResult<CAEnrollmentEndpoint>
+                    .Success(output);
             } catch (Exception ex) {
                 return APIResult<CAEnrollmentEndpoint>
                     .Failure(
-                        $"Unhandled exception checking NTLM accessibility for URL: {url}. BadChannelBindings: {useBadChannelBinding}.  Exception: {ex}");
+                        $"Unhandled exception checking NTLM accessibility for URL: {url}. BadChannelBindings: {useBadChannelBinding}.  Exception: {ex.Message}");
             }
         }
     }

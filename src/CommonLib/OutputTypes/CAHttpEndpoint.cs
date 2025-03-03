@@ -47,6 +47,10 @@ namespace SharpHoundCommonLib.OutputTypes {
         // Returned if the IIS is configured to require SSL (so no HTTP possible)
         NotVulnerable_PathForbidden,
 
+        // 500 Server Error when visiting URL and error reveals ExtendedProtectionPolicy is misconfigured.
+        // Occurs when IIS's EPA settings differ from site's web.config's ExtendedProtectionPolicy setting.
+        NotVulnerable_EpaMisconfigured,
+
         // 500 Server Error when visiting a Url
         NotVulnerable_ServerError,
 

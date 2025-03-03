@@ -97,11 +97,24 @@ public class HttpNtlmAuthenticationService {
 
         if (response.StatusCode == HttpStatusCode.OK) {
             return;
-        } else if (response.StatusCode == HttpStatusCode.Unauthorized) {
+        }
+
+        if (response.StatusCode == HttpStatusCode.Unauthorized) {
             throw new HttpUnauthorizedException(
                 $"401 Unauthorized when accessing {url} with {authScheme} and no signing");
-        } else if (response.StatusCode == HttpStatusCode.Forbidden) {
+        }
+
+        if (response.StatusCode == HttpStatusCode.Forbidden) {
+            // Indicates the path exists but is inaccessible. 
+            // Common cause: trying to access CES (which requires HTTPS by default) over HTTP
             throw new HttpForbiddenException($"403 Forbidden when accessing {url} with {authScheme} and no signing");
+        }
+
+        if (response.StatusCode == HttpStatusCode.InternalServerError) {
+            var body = await response.Content.ReadAsStringAsync();
+            if (body.Contains("ExtendedProtectionPolicy.PolicyEnforcement"))
+                throw new ExtendedProtectionMisconfiguredException(
+                    $"EPA misconfigured at {url} with {authScheme} and no signing");
         }
 
         response.EnsureSuccessStatusCode();
@@ -136,6 +149,15 @@ internal class HttpUnauthorizedException : Exception {
     }
 
     public HttpUnauthorizedException(string message) : base(message) {
+    }
+}
+
+[Serializable]
+internal class ExtendedProtectionMisconfiguredException : Exception {
+    public ExtendedProtectionMisconfiguredException() {
+    }
+
+    public ExtendedProtectionMisconfiguredException(string message) : base(message) {
     }
 }
 

@@ -1,6 +1,8 @@
 ﻿/*
  * Taken from https://github.com/jborean93/PSOpenAD/blob/90f92c2c4905acc61c67a85021ab7b6d09045eee/src/PSOpenAD/Native/SSPI.cs
+ * Modifications done to allow for correct auth types
  */
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -9,7 +11,7 @@ using System.Security.Authentication;
 
 namespace SharpHoundCommonLib.ThirdParty.PSOpenAD;
 
-internal static class Helpers
+internal static partial class Helpers
 {
     [StructLayout(LayoutKind.Sequential)]
     public struct SEC_CHANNEL_BINDINGS
@@ -633,7 +635,7 @@ internal class SafeSspiCredentialHandle : SafeHandle
 
     internal SafeSspiCredentialHandle()
         : base(Marshal.AllocHGlobal(Marshal.SizeOf<Helpers.SecHandle>()), true)
-    {}
+    { }
 
     public override bool IsInvalid => handle == IntPtr.Zero;
 
@@ -655,11 +657,11 @@ internal class SafeSspiContextHandle : SafeHandle
 
     internal SafeSspiContextHandle()
         : base(Marshal.AllocHGlobal(Marshal.SizeOf<Helpers.SecHandle>()), true)
-    {}
+    { }
 
     internal SafeSspiContextHandle(IntPtr handle, bool ownsHandle)
         : base(handle, ownsHandle)
-    {}
+    { }
 
     public override bool IsInvalid => handle == IntPtr.Zero;
 
@@ -675,3 +677,4 @@ internal class SafeSspiContextHandle : SafeHandle
         return true;
     }
 }
+#nullable disable

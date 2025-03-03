@@ -9,51 +9,45 @@ namespace SharpHoundCommonLib.Ntlm;
 /// <summary>
 /// This class handles the Authenticate and Negotiate parts of an NTLM challenge/response flow specifically for HTTP transport
 /// </summary>
-public class HttpTransport : INtlmTransport
-{
+public class HttpTransport : INtlmTransport {
     private readonly ILogger _logger;
     private readonly HttpClient _httpClient;
     private readonly Uri _url;
     private readonly string _authScheme;
 
-    public HttpTransport(HttpClient httpClient, Uri url, string authScheme, ILogger logger = null)
-    {
+    public HttpTransport(HttpClient httpClient, Uri url, string authScheme, ILogger logger = null) {
         _logger = logger ?? Logging.LogProvider.CreateLogger(nameof(HttpTransport));
         _httpClient = httpClient;
         _url = url;
         _authScheme = authScheme;
     }
 
-    public async Task<byte[]> NegotiateAsync(byte[] negotiateMessage)
-    {
+    public async Task<byte[]> NegotiateAsync(byte[] negotiateMessage) {
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, _url);
         var messageBase64 = Convert.ToBase64String(negotiateMessage);
         requestMessage.Headers.Add("Authorization", $"{_authScheme} {messageBase64}");
 
         var response = await _httpClient.SendAsync(requestMessage);
 
-        if (!response.Headers.Contains("WWW-Authenticate"))
-        {
+        if (!response.Headers.Contains("WWW-Authenticate")) {
             throw new InvalidOperationException("No WWW-Authenticate header found in response");
         }
 
         var authHeaders = response.Headers.WwwAuthenticate.Where(a => a.Scheme == _authScheme).ToArray();
-        if (!authHeaders.Any())
-        {
-            throw new InvalidOperationException($"No WWW-Authenticate header found in response. Auth Scheme: {_authScheme}");
+        if (!authHeaders.Any()) {
+            throw new InvalidOperationException(
+                $"No WWW-Authenticate header found in response. Auth Scheme: {_authScheme}");
         }
 
         var challengeMessageB64 = authHeaders.First().Parameter;
-        if (challengeMessageB64 == null)
-        {
+        if (challengeMessageB64 == null) {
             throw new MissingChallengeException($"No challenge received from the server. Auth Scheme: {_authScheme}");
         }
 
         return Convert.FromBase64String(challengeMessageB64);
     }
 
-    public async Task<object> AuthenticateAsync(byte[] authenticateMessage)
-    {
+    public async Task<object> AuthenticateAsync(byte[] authenticateMessage) {
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, _url);
         var messageBase64 = Convert.ToBase64String(authenticateMessage);
         requestMessage.Headers.Add("Authorization", $"{_authScheme} {messageBase64}");
@@ -63,10 +57,7 @@ public class HttpTransport : INtlmTransport
     }
 }
 
-public class MissingChallengeException : Exception
-{
-    public MissingChallengeException(string message): base(message)
-    {
+public class MissingChallengeException : Exception {
+    public MissingChallengeException(string message) : base(message) {
     }
 }
-
