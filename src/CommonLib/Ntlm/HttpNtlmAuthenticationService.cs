@@ -67,12 +67,14 @@ public class HttpNtlmAuthenticationService {
         if (response.StatusCode != HttpStatusCode.Unauthorized) {
             if (response.StatusCode == HttpStatusCode.Forbidden) {
                 throw new HttpForbiddenException("Forbidden when enumerating Auth schemes");
-            } else if (response.StatusCode == HttpStatusCode.InternalServerError) {
-                throw new HttpServerErrorException("Server Error when enumerating Auth schemes");
-            } else {
-                // Use .NET's exceptions to make things easy
-                response.EnsureSuccessStatusCode();
             }
+
+            if (response.StatusCode == HttpStatusCode.InternalServerError) {
+                throw new HttpServerErrorException("Server Error when enumerating Auth schemes");
+            }
+
+            // Use .NET's exceptions to make things easy
+            response.EnsureSuccessStatusCode();
         }
 
         if (response.Headers.WwwAuthenticate == null) {

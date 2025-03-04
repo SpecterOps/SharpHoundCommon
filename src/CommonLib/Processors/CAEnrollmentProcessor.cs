@@ -3,6 +3,7 @@ using SharpHoundCommonLib.Ntlm;
 using SharpHoundCommonLib.OutputTypes;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
@@ -47,8 +48,39 @@ namespace SharpHoundCommonLib.Processors {
             } catch (Exception ex) {
                 _logger.LogError(ex, "An error occurred while scanning enrollment endpoints");
             }
+            
+            endpoints = TagEndpoints(endpoints).ToList();
 
             return endpoints;
+        }
+
+        private IEnumerable<APIResult<CAEnrollmentEndpoint>> TagEndpoints(IEnumerable<APIResult<CAEnrollmentEndpoint>> endpoints) {
+            var tagEndpoints = endpoints as APIResult<CAEnrollmentEndpoint>[] ?? endpoints.ToArray();
+            foreach (var endpoint in tagEndpoints) {
+                if (!endpoint.Collected)
+                    continue;
+                
+                var enrollmentEndpoint = endpoint.Result;
+                if (enrollmentEndpoint.Url.Scheme != Uri.UriSchemeHttps) {
+                    switch (enrollmentEndpoint.Status) {
+                        case CAEnrollmentEndpointScanResult.Vulnerable_NtlmHttpEndpoint:
+                            endpoint.Result.ADCSWebEnrollmentHTTP = true;
+                            break;
+                    }
+                } else {
+                    switch (enrollmentEndpoint.Status) {
+                        case CAEnrollmentEndpointScanResult.Vulnerable_NtlmHttpsNoChannelBinding:
+                            endpoint.Result.ADCSWebEnrollmentHTTPS = true;
+                            break;
+                        case CAEnrollmentEndpointScanResult.NotVulnerable_NtlmChannelBindingRequired:
+                            endpoint.Result.ADCSWebEnrollmentHTTPS = true;
+                            endpoint.Result.ADCSWebEnrollmentEPA = true;
+                            break;
+                    }
+                }
+            }
+
+            return tagEndpoints;
         }
 
         private async Task<IEnumerable<APIResult<CAEnrollmentEndpoint>>>
@@ -103,10 +135,7 @@ namespace SharpHoundCommonLib.Processors {
                 await authService.EnsureRequiresAuth(url, useBadChannelBinding);
                 return APIResult<CAEnrollmentEndpoint>.Success(output);
             } catch (HttpRequestException ex) {
-                if (ex.InnerException is WebException) {
-                    var webEx = (WebException)ex.InnerException;
-
-
+                if (ex.InnerException is WebException webEx) {
                     if (webEx.InnerException is SocketException) {
                         output.Status = CAEnrollmentEndpointScanResult.NotVulnerable_PortInaccessible;
                         return APIResult<CAEnrollmentEndpoint>.Success(output);
@@ -140,7 +169,7 @@ namespace SharpHoundCommonLib.Processors {
 
                     return APIResult<CAEnrollmentEndpoint>
                         .Failure(
-                            $"Unhandled WebException. Url: {url}. Exception: {webEx.Message}. Inner: {webEx.InnerException.Message}  Data: {webEx.Data}");
+                            $"Unhandled WebException. Url: {url}. Exception: {webEx.Message}. Inner: {webEx.InnerException?.Message}  Data: {webEx.Data}");
                 }
 
                 return APIResult<CAEnrollmentEndpoint>

@@ -64,5 +64,8 @@ namespace SharpHoundCommonLib.OutputTypes {
         public Uri Url { get; set; } = url;
         public CAEnrollmentEndpointType Type { get; set; } = type;
         public CAEnrollmentEndpointScanResult Status { get; set; } = status;
+        public bool ADCSWebEnrollmentHTTP { get; set; }
+        public bool ADCSWebEnrollmentHTTPS { get; set; }
+        public bool ADCSWebEnrollmentEPA { get; set; }
     }
 }
