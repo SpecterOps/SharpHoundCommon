@@ -7237,6 +7237,12 @@ references:
   commentId: F:SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult.Error
   fullName: SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult.Error
   nameWithType: CAEnrollmentEndpointScanResult.Error
+- uid: SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult.NotVulnerable_EpaMisconfigured
+  name: NotVulnerable_EpaMisconfigured
+  href: api/SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult.html#SharpHoundCommonLib_OutputTypes_CAEnrollmentEndpointScanResult_NotVulnerable_EpaMisconfigured
+  commentId: F:SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult.NotVulnerable_EpaMisconfigured
+  fullName: SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult.NotVulnerable_EpaMisconfigured
+  nameWithType: CAEnrollmentEndpointScanResult.NotVulnerable_EpaMisconfigured
 - uid: SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult.NotVulnerable_NoNtlmChallenge
   name: NotVulnerable_NoNtlmChallenge
   href: api/SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpointScanResult.html#SharpHoundCommonLib_OutputTypes_CAEnrollmentEndpointScanResult_NotVulnerable_NoNtlmChallenge
@@ -7559,6 +7565,19 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.OutputTypes.Computer.LocalGroups
   nameWithType: Computer.LocalGroups
+- uid: SharpHoundCommonLib.OutputTypes.Computer.NTLMRegistryData
+  name: NTLMRegistryData
+  href: api/SharpHoundCommonLib.OutputTypes.Computer.html#SharpHoundCommonLib_OutputTypes_Computer_NTLMRegistryData
+  commentId: P:SharpHoundCommonLib.OutputTypes.Computer.NTLMRegistryData
+  fullName: SharpHoundCommonLib.OutputTypes.Computer.NTLMRegistryData
+  nameWithType: Computer.NTLMRegistryData
+- uid: SharpHoundCommonLib.OutputTypes.Computer.NTLMRegistryData*
+  name: NTLMRegistryData
+  href: api/SharpHoundCommonLib.OutputTypes.Computer.html#SharpHoundCommonLib_OutputTypes_Computer_NTLMRegistryData_
+  commentId: Overload:SharpHoundCommonLib.OutputTypes.Computer.NTLMRegistryData
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.OutputTypes.Computer.NTLMRegistryData
+  nameWithType: Computer.NTLMRegistryData
 - uid: SharpHoundCommonLib.OutputTypes.Computer.NtlmSessions
   name: NtlmSessions
   href: api/SharpHoundCommonLib.OutputTypes.Computer.html#SharpHoundCommonLib_OutputTypes_Computer_NtlmSessions
@@ -7598,19 +7617,6 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.OutputTypes.Computer.PrivilegedSessions
   nameWithType: Computer.PrivilegedSessions
-- uid: SharpHoundCommonLib.OutputTypes.Computer.RegistryData
-  name: RegistryData
-  href: api/SharpHoundCommonLib.OutputTypes.Computer.html#SharpHoundCommonLib_OutputTypes_Computer_RegistryData
-  commentId: P:SharpHoundCommonLib.OutputTypes.Computer.RegistryData
-  fullName: SharpHoundCommonLib.OutputTypes.Computer.RegistryData
-  nameWithType: Computer.RegistryData
-- uid: SharpHoundCommonLib.OutputTypes.Computer.RegistryData*
-  name: RegistryData
-  href: api/SharpHoundCommonLib.OutputTypes.Computer.html#SharpHoundCommonLib_OutputTypes_Computer_RegistryData_
-  commentId: Overload:SharpHoundCommonLib.OutputTypes.Computer.RegistryData
-  isSpec: "True"
-  fullName: SharpHoundCommonLib.OutputTypes.Computer.RegistryData
-  nameWithType: Computer.RegistryData
 - uid: SharpHoundCommonLib.OutputTypes.Computer.RegistrySessions
   name: RegistrySessions
   href: api/SharpHoundCommonLib.OutputTypes.Computer.html#SharpHoundCommonLib_OutputTypes_Computer_RegistrySessions
