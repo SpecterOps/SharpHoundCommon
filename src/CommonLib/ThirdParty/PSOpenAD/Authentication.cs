@@ -3,9 +3,9 @@
  * GSSAPI code removed as it is unused
  * Small modifications done to fix PS -> c# translation errors
  */
+#nullable enable
 using System;
 using System.Buffers;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 namespace SharpHoundCommonLib.ThirdParty.PSOpenAD;
@@ -31,7 +31,7 @@ public enum AuthenticationMethod
 
     /// <summary>Authentication using a client provided X.509 Certificate for LDAP or StartTLS.</summary>
     Certificate,
-    
+
     // <summary>Authentication using NTLM</summary>
     NTLM
 }
@@ -145,8 +145,9 @@ internal class SspiContext : SecurityContext
     {
         _bindingData = CreateChannelBindings(channelBindings);
         _targetSpn = target;
-
-        string package = method == AuthenticationMethod.Kerberos ? "Kerberos" : "Negotiate";
+        
+        //This has been modified to properly support NTLM authentication
+        string package = Enum.GetName(typeof(AuthenticationMethod), method);
         WinNTAuthIdentity? identity = null;
         if (!string.IsNullOrEmpty(username) || !string.IsNullOrEmpty(password))
         {
@@ -331,8 +332,9 @@ internal class SspiContext : SecurityContext
         }
     }
 
-    public override UInt32 MaxWrapSize(UInt32 outputSize, bool confReq) {
-        return default; // Not used in SSPI. Unimplemented
+    public override UInt32 MaxWrapSize(UInt32 outputSize, bool confReq)
+    {
+        throw new NotImplementedException(); // Not used in SSPI.
     }
 
     private byte[]? CreateChannelBindings(ChannelBindings? bindings)
@@ -399,3 +401,4 @@ internal class SspiContext : SecurityContext
         _context?.Dispose();
     }
 }
+#nullable disable
