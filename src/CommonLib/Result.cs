@@ -24,6 +24,7 @@ namespace SharpHoundCommonLib {
         public string Error { get; set; }
         public bool IsSuccess => string.IsNullOrWhiteSpace(Error) && Success;
         private bool Success { get; set; }
+        public bool IsTimeout { get; set; }
 
         protected Result(bool success, string error) {
             Success = success;

@@ -19,21 +19,26 @@ namespace SharpHoundCommonLib.Processors {
     public class SmbProcessor(int timeoutMs, ILogger log = null) {
         private readonly ILogger _log = log ?? Logging.LogProvider.CreateLogger("SmbProcessor");
 
-        public async Task<APIResult<SmbInfo>> Scan(string host) {
+        public async Task<APIResult<SmbInfo>> Scan(string host, TimeSpan timeout = default) {
+            if (timeout == default) {
+                timeout = TimeSpan.FromMinutes(2);
+            }
+            
             var scanner = new SmbScanner();
-            var result = await scanner.Scan(host, 445, timeoutMs);
 
-            if (result.Success && result.Info != null) {
+            var result = await Task.Run(() => scanner.Scan(host, 445, timeoutMs)).TimeoutAfter(timeout);
+
+            if (result.IsSuccess && result.Value.Info != null) {
                 var info = new SmbInfo() {
-                    SigningEnabled = result.Info.SmbSigning,
-                    OsVersion = result.Info.OsVersion,
-                    OsBuild = result.Info.OsBuildNumber.ToString(),
-                    DnsComputerName = result.Info.DnsComputerName,
+                    SigningEnabled = result.Value.Info.SmbSigning,
+                    OsVersion = result.Value.Info.OsVersion,
+                    OsBuild = result.Value.Info.OsBuildNumber.ToString(),
+                    DnsComputerName = result.Value.Info.DnsComputerName,
                 };
 
                 return APIResult<SmbInfo>.Success(info);
             } else {
-                return APIResult<SmbInfo>.Failure(result.ErrorMessage ?? "Unknown error");
+                return APIResult<SmbInfo>.Failure(result.Error ?? "Unknown error");
             }
         }
     }
@@ -45,14 +50,12 @@ namespace SharpHoundCommonLib.Processors {
         SMBv2
     }
 
-    public class SmbScanResult {
-        public SmbScanResult(string host) {
+    public class SmbScanInfo {
+        public SmbScanInfo(string host) {
             Host = host;
         }
 
         public string Host { get; set; }
-        public bool Success { get; set; }
-        public string ErrorMessage { get; set; }
         public NTLMInfo Info { get; set; }
         public SmbVersion SmbVersion { get; set; }
     }
@@ -150,9 +153,8 @@ namespace SharpHoundCommonLib.Processors {
     }
 
     public class SmbScanner {
-        public async Task<SmbScanResult> Scan(string host, int port, int timeoutMs = 10000) {
-            var result = new SmbScanResult(host) {
-                Success = false,
+        public async Task<Result<SmbScanInfo>> Scan(string host, int port, int timeoutMs = 10000) {
+            var scanInfo = new SmbScanInfo(host) {
                 SmbVersion = SmbVersion.Unknown
             };
 
@@ -162,8 +164,7 @@ namespace SharpHoundCommonLib.Processors {
                 smbClient = await ConnectAsync(host, port, timeoutMs);
 
                 if (!smbClient.Connected) {
-                    result.ErrorMessage = "SMBInfo can't connect!";
-                    return result;
+                    return Result<SmbScanInfo>.Fail("SMBInfo can't connect!");
                 }
 
                 var smbClientStream = smbClient.GetStream();
@@ -199,14 +200,13 @@ namespace SharpHoundCommonLib.Processors {
                     }
 
                     if (ss.Length >= 2) {
-                        result.Info = NTLMInfo.FromBytes(smbClientReceive);
-                        result.Info.NativeOs = ss[0];
-                        result.Info.NativeLanManager = ss[1];
-                        result.Info.SmbSigning = signingEnabled;
+                        scanInfo.Info = NTLMInfo.FromBytes(smbClientReceive);
+                        scanInfo.Info.NativeOs = ss[0];
+                        scanInfo.Info.NativeLanManager = ss[1];
+                        scanInfo.Info.SmbSigning = signingEnabled;
                     }
 
-                    result.SmbVersion = SmbVersion.SMBv1;
-                    result.Success = true;
+                    scanInfo.SmbVersion = SmbVersion.SMBv1;
                 } catch {
                     // If SMBv1 fails, try SMBv2 with a new connection
                     if (smbClient != null) {
@@ -221,8 +221,8 @@ namespace SharpHoundCommonLib.Processors {
                     if (BitConverter.ToString([
                             smbClientReceive[4], smbClientReceive[5], smbClientReceive[6], smbClientReceive[7]
                         ]).ToLower() == "ff-53-4d-42") {
-                        result.ErrorMessage = "Could not connect with SMBv2";
-                        return result;
+                        // result.ErrorMessage = "Could not connect with SMBv2";
+                        return Result<SmbScanInfo>.Fail("Could not connect with SMBv2");
                     }
 
                     var signingEnabled = BitConverter.ToString([smbClientReceive[70]]) == "03";
@@ -233,19 +233,18 @@ namespace SharpHoundCommonLib.Processors {
                     smbClientReceive = await SendStreamAsync(smbClientStream, GetNTLMSSPNegotiatev2Data(smbPackets),
                         operationCts.Token);
 
-                    result.Info = NTLMInfo.FromBytes(smbClientReceive);
-                    result.Info.SmbSigning = smbPackets.SMB_Signing;
+                    scanInfo.Info = NTLMInfo.FromBytes(smbClientReceive);
+                    scanInfo.Info.SmbSigning = smbPackets.SMB_Signing;
 
-                    result.SmbVersion = SmbVersion.SMBv2;
-                    result.Success = true;
+                    scanInfo.SmbVersion = SmbVersion.SMBv2;
                 }
             } catch (Exception ex) {
-                result.ErrorMessage = ex.Message;
+                return Result<SmbScanInfo>.Fail(ex.Message);
             } finally {
                 smbClient?.Close();
             }
 
-            return result;
+            return Result<SmbScanInfo>.Ok(scanInfo);
         }
 
         private static async Task<TcpClient> ConnectAsync(string host, int port, int timeoutMs) {

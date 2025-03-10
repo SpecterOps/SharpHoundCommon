@@ -215,5 +215,21 @@ namespace SharpHoundCommonLib
         public static IDirectoryObject ToDirectoryObject(this DirectoryEntry entry) {
             return new DirectoryEntryWrapper(entry);
         }
+        
+        public static async Task<Result<T>> TimeoutAfter<T>(this Task<Result<T>> task, TimeSpan timeout) {
+
+            using (var timeoutCancellationTokenSource = new CancellationTokenSource()) {
+
+                var completedTask = await Task.WhenAny(task, Task.Delay(timeout, timeoutCancellationTokenSource.Token));
+                if (completedTask == task) {
+                    timeoutCancellationTokenSource.Cancel();
+                    return await task; // Very important in order to propagate exceptions
+                }
+
+                var result = Result<T>.Fail("Timeout");
+                result.IsTimeout = true;
+                return result;
+            }
+        }
     }
 }
