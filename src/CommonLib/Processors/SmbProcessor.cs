@@ -19,7 +19,9 @@ namespace SharpHoundCommonLib.Processors {
     /// <param name="log"></param>
     public class SmbProcessor(int timeoutMs, ILogger log = null) {
         private readonly ILogger _log = log ?? Logging.LogProvider.CreateLogger("SmbProcessor");
+        public delegate Task ComputerStatusDelegate(CSVComputerStatus status);
 
+        public event ComputerStatusDelegate ComputerStatusEvent;
         public async Task<APIResult<SmbInfo>> Scan(string host, TimeSpan timeout = default) {
             if (timeout == default) {
                 timeout = TimeSpan.FromMinutes(2);
@@ -29,21 +31,49 @@ namespace SharpHoundCommonLib.Processors {
 
             var result = await Task.Run(() => scanner.Scan(host, 445, timeoutMs)).TimeoutAfter(timeout);
 
-            if (result.IsSuccess && result.Value.Info != null) {
-                var info = new SmbInfo() {
-                    SigningEnabled = result.Value.Info.SmbSigning,
-                    OsVersion = result.Value.Info.OsVersion,
-                    OsBuild = result.Value.Info.OsBuildNumber.ToString(),
-                    DnsComputerName = result.Value.Info.DnsComputerName,
-                };
+            if (result.IsFailed) {
+                await SendComputerStatus(new CSVComputerStatus {
+                    Status = result.Status.ToString(),
+                    Task = "SmbScan",
+                    ComputerName = host
+                });
+                _log.LogTrace("SmbScan failed on {ComputerName}: {Status}", host, result.Status);
+                return APIResult<SmbInfo>.Failure(result.Status.ToString());
+            }
 
-                return APIResult<SmbInfo>.Success(info);
-            } else {
+            if (result.Value.Info == null)
+            {
+                await SendComputerStatus(new CSVComputerStatus {
+                    Status = result.Error ?? "Unknown error",
+                    Task = "SmbScan",
+                    ComputerName = host
+                });
+                _log.LogTrace("SmbScan failed on {ComputerName}: {Status}", host, result.Status);
                 return APIResult<SmbInfo>.Failure(result.Error ?? "Unknown error");
             }
+            
+            _log.LogDebug("SmbScan succeeded on {ComputerName}", host);
+            await SendComputerStatus(new CSVComputerStatus {
+                Status = CSVComputerStatus.StatusSuccess,
+                Task = "SmbScan",
+                ComputerName = host
+            });
+            
+            var info = new SmbInfo() {
+                SigningEnabled = result.Value.Info.SmbSigning,
+                OsVersion = result.Value.Info.OsVersion,
+                OsBuild = result.Value.Info.OsBuildNumber.ToString(),
+                DnsComputerName = result.Value.Info.DnsComputerName,
+            };
+
+            return APIResult<SmbInfo>.Success(info);
+
+        }
+        
+        private async Task SendComputerStatus(CSVComputerStatus status) {
+            if (ComputerStatusEvent is not null) await ComputerStatusEvent.Invoke(status);
         }
     }
-
 
     public enum SmbVersion {
         Unknown,

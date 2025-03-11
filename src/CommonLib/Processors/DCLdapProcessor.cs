@@ -26,6 +26,7 @@ public class DCLdapProcessor {
     private readonly int _ldapTimeout;
     private readonly Uri _ldapEndpoint;
     private readonly Uri _ldapSslEndpoint;
+    public delegate Task ComputerStatusDelegate(CSVComputerStatus status);
 
     private readonly string SEC_E_UNSUPPORTED_FUNCTION = "80090302";
     private readonly string SEC_E_BAD_BINDINGS = "80090346";
@@ -39,19 +40,21 @@ public class DCLdapProcessor {
         _ldapEndpoint = new Uri($"ldap://{dcHostname}:389");
         _ldapSslEndpoint = new Uri($"ldaps://{dcHostname}:636");
     }
+    
+    public event ComputerStatusDelegate ComputerStatusEvent;
 
-    public async Task<LdapService> Scan() {
+    public async Task<LdapService> Scan(string computerName) {
         var hasLdap = await TestLdapPort();
         var hasLdaps = await TestLdapsPort();
         APIResult<bool> isSigningRequired = new(),
             isChannelBindingDisabled = new();
 
         if (hasLdap) {
-            isSigningRequired = await CheckIsNtlmSigningRequired();
+            isSigningRequired = await CheckIsNtlmSigningRequired(computerName);
         }
 
         if (hasLdaps) {
-            isChannelBindingDisabled = await CheckIsChannelBindingDisabled();
+            isChannelBindingDisabled = await CheckIsChannelBindingDisabled(computerName);
         }
 
         return new LdapService(
@@ -76,7 +79,7 @@ public class DCLdapProcessor {
         return await _scanner.CheckPort(_ldapSslEndpoint.Host, _ldapSslEndpoint.Port, _portScanTimeout);
     }
 
-    public async Task<APIResult<bool>> CheckIsNtlmSigningRequired(TimeSpan timeout = default) {
+    public async Task<APIResult<bool>> CheckIsNtlmSigningRequired(string computerName, TimeSpan timeout = default) {
         if (timeout == default) {
             timeout = TimeSpan.FromMinutes(2);
         }
@@ -86,8 +89,32 @@ public class DCLdapProcessor {
             };
             var accessibleWithoutSigning = await Task.Run(() => Authenticate(_ldapEndpoint, options)).TimeoutAfter(timeout);
 
-            return APIResult<bool>.Success(accessibleWithoutSigning.Value == false);
+            if (accessibleWithoutSigning.IsSuccess)
+            {
+                _log.LogDebug("NTLMAuthenticate succeeded on {ComputerName}", computerName);
+                await SendComputerStatus(new CSVComputerStatus {
+                    Status = CSVComputerStatus.StatusSuccess,
+                    Task = "NTLMAuthenticate",
+                    ComputerName = computerName
+                });
+                return APIResult<bool>.Success(accessibleWithoutSigning.Value == false);
+            }
+            
+            await SendComputerStatus(new CSVComputerStatus {
+                Status = accessibleWithoutSigning.Status.ToString(),
+                Task = "NTLMAuthenticate",
+                ComputerName = computerName
+            });
+            _log.LogTrace("NTLMAuthenticate failed on {ComputerName}: {Status}", computerName, accessibleWithoutSigning.Status);
+            return APIResult<bool>.Failure(accessibleWithoutSigning.Status.ToString());
+
         } catch (Exception ex) {
+            await SendComputerStatus(new CSVComputerStatus {
+                Status = ex.Message,
+                Task = "NTLMAuthenticate",
+                ComputerName = computerName
+            });
+            _log.LogTrace("NTLMAuthenticate failed on {ComputerName}: {Status}", computerName, ex.Message);
             return APIResult<bool>.Failure($"CheckIsNtlmSigningRequired failed: {ex}");
         }
     }
@@ -100,7 +127,7 @@ public class DCLdapProcessor {
     // 3) Correct bindings to ensure NTLM auth is enabled
     // However, as of right now we only do #2. We can't do #1 right now since the
     // Window's SSPI APIs (InitSecurityContext) always add channel bindings.
-    public async Task<APIResult<bool>> CheckIsChannelBindingDisabled(TimeSpan timeout = default) {
+    public async Task<APIResult<bool>> CheckIsChannelBindingDisabled(string computerName, TimeSpan timeout = default) {
         if (timeout == default) {
             timeout = TimeSpan.FromMinutes(2);
         }
@@ -115,8 +142,32 @@ public class DCLdapProcessor {
                 Bindings = bindings
             }).TimeoutAfter(timeout);
 
-            return APIResult<bool>.Success(accessibleWithNoBindings.Value);
+            if (accessibleWithNoBindings.IsSuccess)
+            {
+                _log.LogDebug("NTLMAuthenticate succeeded on {ComputerName}", computerName);
+                await SendComputerStatus(new CSVComputerStatus {
+                    Status = CSVComputerStatus.StatusSuccess,
+                    Task = "NTLMAuthenticate",
+                    ComputerName = computerName
+                });
+                return APIResult<bool>.Success(accessibleWithNoBindings.Value == false);
+            }
+            
+            await SendComputerStatus(new CSVComputerStatus {
+                Status = accessibleWithNoBindings.Status.ToString(),
+                Task = "NTLMAuthenticate",
+                ComputerName = computerName
+            });
+            _log.LogTrace("NTLMAuthenticate failed on {ComputerName}: {Status}", computerName, accessibleWithNoBindings.Status);
+            return APIResult<bool>.Failure(accessibleWithNoBindings.Status.ToString());
+
         } catch (Exception ex) {
+            await SendComputerStatus(new CSVComputerStatus {
+                Status = ex.Message,
+                Task = "NTLMAuthenticate",
+                ComputerName = computerName
+            });
+            _log.LogTrace("NTLMAuthenticate failed on {ComputerName}: {Status}", computerName, ex.Message);
             return APIResult<bool>.Failure($"CheckIsNtlmSigningRequired failed: {ex}");
         }
     }
@@ -175,5 +226,9 @@ public class DCLdapProcessor {
         }
 
         return SharpHoundRPC.Result<bool>.Ok(false);
+    }
+    
+    private async Task SendComputerStatus(CSVComputerStatus status) {
+        if (ComputerStatusEvent is not null) await ComputerStatusEvent.Invoke(status);
     }
 }
