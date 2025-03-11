@@ -5,6 +5,7 @@ using System.Collections.Specialized;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using SharpHoundRPC;
 
 namespace SharpHoundCommonLib.Processors {
     /// <summary>
@@ -153,7 +154,7 @@ namespace SharpHoundCommonLib.Processors {
     }
 
     public class SmbScanner {
-        public async Task<Result<SmbScanInfo>> Scan(string host, int port, int timeoutMs = 10000) {
+        public async Task<SharpHoundRPC.Result<SmbScanInfo>> Scan(string host, int port, int timeoutMs = 10000) {
             var scanInfo = new SmbScanInfo(host) {
                 SmbVersion = SmbVersion.Unknown
             };
@@ -164,7 +165,7 @@ namespace SharpHoundCommonLib.Processors {
                 smbClient = await ConnectAsync(host, port, timeoutMs);
 
                 if (!smbClient.Connected) {
-                    return Result<SmbScanInfo>.Fail("SMBInfo can't connect!");
+                    return SharpHoundRPC.Result<SmbScanInfo>.Fail("SMBInfo can't connect!");
                 }
 
                 var smbClientStream = smbClient.GetStream();
@@ -221,8 +222,7 @@ namespace SharpHoundCommonLib.Processors {
                     if (BitConverter.ToString([
                             smbClientReceive[4], smbClientReceive[5], smbClientReceive[6], smbClientReceive[7]
                         ]).ToLower() == "ff-53-4d-42") {
-                        // result.ErrorMessage = "Could not connect with SMBv2";
-                        return Result<SmbScanInfo>.Fail("Could not connect with SMBv2");
+                        return SharpHoundRPC.Result<SmbScanInfo>.Fail("Could not connect with SMBv2");
                     }
 
                     var signingEnabled = BitConverter.ToString([smbClientReceive[70]]) == "03";
@@ -239,12 +239,12 @@ namespace SharpHoundCommonLib.Processors {
                     scanInfo.SmbVersion = SmbVersion.SMBv2;
                 }
             } catch (Exception ex) {
-                return Result<SmbScanInfo>.Fail(ex.Message);
+                return SharpHoundRPC.Result<SmbScanInfo>.Fail(ex.Message);
             } finally {
                 smbClient?.Close();
             }
 
-            return Result<SmbScanInfo>.Ok(scanInfo);
+            return SharpHoundRPC.Result<SmbScanInfo>.Ok(scanInfo);
         }
 
         private static async Task<TcpClient> ConnectAsync(string host, int port, int timeoutMs) {

@@ -6,6 +6,7 @@ using SharpHoundCommonLib.ThirdParty.PSOpenAD;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
+using SharpHoundRPC;
 using SharpHoundRPC.PortScanner;
 
 namespace SharpHoundCommonLib.Processors;
@@ -75,14 +76,17 @@ public class DCLdapProcessor {
         return await _scanner.CheckPort(_ldapSslEndpoint.Host, _ldapSslEndpoint.Port, _portScanTimeout);
     }
 
-    public async Task<APIResult<bool>> CheckIsNtlmSigningRequired() {
+    public async Task<APIResult<bool>> CheckIsNtlmSigningRequired(TimeSpan timeout = default) {
+        if (timeout == default) {
+            timeout = TimeSpan.FromMinutes(2);
+        }
         try {
             var options = new LdapAuthOptions() {
                 Signing = false
             };
-            var accessibleWithoutSigning = await Authenticate(_ldapEndpoint, options);
+            var accessibleWithoutSigning = await Task.Run(() => Authenticate(_ldapEndpoint, options)).TimeoutAfter(timeout);
 
-            return APIResult<bool>.Success(accessibleWithoutSigning == false);
+            return APIResult<bool>.Success(accessibleWithoutSigning.Value == false);
         } catch (Exception ex) {
             return APIResult<bool>.Failure($"CheckIsNtlmSigningRequired failed: {ex}");
         }
@@ -96,7 +100,10 @@ public class DCLdapProcessor {
     // 3) Correct bindings to ensure NTLM auth is enabled
     // However, as of right now we only do #2. We can't do #1 right now since the
     // Window's SSPI APIs (InitSecurityContext) always add channel bindings.
-    public async Task<APIResult<bool>> CheckIsChannelBindingDisabled() {
+    public async Task<APIResult<bool>> CheckIsChannelBindingDisabled(TimeSpan timeout = default) {
+        if (timeout == default) {
+            timeout = TimeSpan.FromMinutes(2);
+        }
         try {
             // 1) Can we connect with *invalid* bindings
 
@@ -106,9 +113,9 @@ public class DCLdapProcessor {
             var accessibleWithNoBindings = await Authenticate(_ldapSslEndpoint, new LdapAuthOptions() {
                 Signing = false,
                 Bindings = bindings
-            });
+            }).TimeoutAfter(timeout);
 
-            return APIResult<bool>.Success(accessibleWithNoBindings);
+            return APIResult<bool>.Success(accessibleWithNoBindings.Value);
         } catch (Exception ex) {
             return APIResult<bool>.Failure($"CheckIsNtlmSigningRequired failed: {ex}");
         }
@@ -120,7 +127,7 @@ public class DCLdapProcessor {
     /// <param name="endpoint"></param>
     /// <param name="options"></param>
     /// <returns></returns>
-    private async Task<bool> Authenticate(Uri endpoint, LdapAuthOptions options) {
+    private async Task<SharpHoundRPC.Result<bool>> Authenticate(Uri endpoint, LdapAuthOptions options) {
         var host = endpoint.Host;
         var auth = new NtlmAuthenticationHandler($"LDAP/{host.ToUpper()}") {
             Options = options
@@ -130,7 +137,7 @@ public class DCLdapProcessor {
         try {
             transport.InitializeConnectionAsync(_ldapTimeout);
             await auth.PerformNtlmAuthenticationAsync(transport);
-            return true;
+            return SharpHoundRPC.Result<bool>.Ok(true);
         } catch (LdapNativeException ex) {
             switch (ex.ErrorCode) {
                 case (int)LdapErrorCodes.InvalidCredentials:
@@ -139,13 +146,13 @@ public class DCLdapProcessor {
                     //   0x80090302 == SEC_E_UNSUPPORTED_FUNCTION
                     if (ex.ServerErrorMessage.StartsWith(SEC_E_UNSUPPORTED_FUNCTION)) {
                         _log.LogDebug("LDAP endpoint '{endpoint}' does not support NTLM", endpoint);
-                        return false;
+                        return SharpHoundRPC.Result<bool>.Ok(false);
                     }
 
                     if (ex.ServerErrorMessage.StartsWith(SEC_E_BAD_BINDINGS)) {
                         _log.LogDebug("Bad bindings with the LDAPS endpoint '{endpoint}'. Server error: {serverError}",
                             endpoint, ex.ServerErrorMessage);
-                        return false;
+                        return SharpHoundRPC.Result<bool>.Ok(false);
                     } else {
                         _log.LogError(
                             "Unhandled LDAP InvalidCred error code during LDAP test: {ex}, Server error: {err}", ex,
@@ -154,10 +161,10 @@ public class DCLdapProcessor {
                     }
                 case (int)LdapErrorCodes.StrongAuthRequired:
                     _log.LogDebug("LDAP requires signing. Endpoint: {endpoint}", endpoint);
-                    return false;
+                    return SharpHoundRPC.Result<bool>.Ok(false);
                 case (int)LdapErrorCodes.ServerDown:
                     _log.LogDebug("LDAP endpoint '{endpoint}' not accessible", endpoint);
-                    return false;
+                    return SharpHoundRPC.Result<bool>.Ok(false);
                 default:
                     _log.LogError("Unhandled LdapException error code during LDAP test: {ex}, Server error: {err}", ex,
                         ex.ServerErrorMessage);
@@ -167,6 +174,6 @@ public class DCLdapProcessor {
             _log.LogError("An unhandled error occurred during the LDAP test: {ex}", ex);
         }
 
-        return false;
+        return SharpHoundRPC.Result<bool>.Ok(false);
     }
 }
