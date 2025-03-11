@@ -215,6 +215,5 @@ namespace SharpHoundCommonLib
         public static IDirectoryObject ToDirectoryObject(this DirectoryEntry entry) {
             return new DirectoryEntryWrapper(entry);
         }
-        
     }
 }
