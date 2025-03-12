@@ -26,7 +26,7 @@ namespace CommonLibTest {
         public async Task DCLdapProcessor_CheckIsNtlmSigningRequired_TestTimeout() {
             var mockProcessor = new Mock<DCLdapProcessor>(2, "primary.testlab.local", null);
             
-            mockProcessor.Setup(x => x.CheckIsNtlmSigningRequired("primary.testlab.local")).ReturnsAsync(() => {
+            mockProcessor.Setup(x => x.CheckIsNtlmSigningRequired()).ReturnsAsync(() => {
                 Task.Delay(100).Wait();
                 return NtStatus.StatusAccessDenied;
             });
@@ -50,7 +50,7 @@ namespace CommonLibTest {
             var mockProcessor = new Mock<DCLdapProcessor>(2, "primary.testlab.local", null);
             mockProcessor.CallBase = true;
             
-            mockProcessor.Setup(x => x.CheckIsChannelBindingDisabled("primary.testlab.local")).ReturnsAsync(() => {
+            mockProcessor.Setup(x => x.CheckIsChannelBindingDisabled()).ReturnsAsync(() => {
                 Task.Delay(1000).Wait();
                 return NtStatus.StatusAccessDenied;
             });
