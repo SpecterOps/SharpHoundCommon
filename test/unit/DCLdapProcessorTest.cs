@@ -1,17 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.DirectoryServices;
-using System.Linq;
-using System.Security.AccessControl;
-using System.Threading;
 using System.Threading.Tasks;
-using CommonLibTest.Facades;
 using Moq;
-using Newtonsoft.Json;
 using SharpHoundCommonLib;
-using SharpHoundCommonLib.Enums;
-using SharpHoundCommonLib.OutputTypes;
 using SharpHoundCommonLib.Processors;
 using SharpHoundRPC;
 using Xunit;
@@ -32,19 +24,21 @@ namespace CommonLibTest {
     
         [Fact]
         public async Task DCLdapProcessor_CheckIsNtlmSigningRequired_TestTimeout() {
-            var mockProcessor = new Mock<DCLdapProcessor>(2, "primary.testlab.local");
+            var mockProcessor = new Mock<DCLdapProcessor>(2, "primary.testlab.local", null);
             
-            mockProcessor.Setup(x => x.Authenticate(new Uri($"ldap://testlab.local:389"),new LdapAuthOptions())).ReturnsAsync(() => {
+            mockProcessor.Setup(x => x.CheckIsNtlmSigningRequired("primary.testlab.local")).ReturnsAsync(() => {
                 Task.Delay(100).Wait();
                 return NtStatus.StatusAccessDenied;
             });
+
+            mockProcessor.Setup(x => x.TestLdapPort()).ReturnsAsync(true);
             
             var processor = mockProcessor.Object;
             var receivedStatus = new List<CSVComputerStatus>();
             processor.ComputerStatusEvent += async status =>  {
                 receivedStatus.Add(status);
             };
-            var results = await processor.CheckIsNtlmSigningRequired("primary.testlab.local", TimeSpan.FromMinutes(2));
+            var results = await processor.Scan("primary.testlab.local", TimeSpan.FromMilliseconds(1));
 
             Assert.Single(receivedStatus);
             var status = receivedStatus[0];
@@ -56,10 +50,12 @@ namespace CommonLibTest {
             var mockProcessor = new Mock<DCLdapProcessor>(2, "primary.testlab.local", null);
             mockProcessor.CallBase = true;
             
-            mockProcessor.Setup(x => x.Authenticate(It.IsAny<Uri>(), It.IsAny<LdapAuthOptions>())).ReturnsAsync(() => {
+            mockProcessor.Setup(x => x.CheckIsChannelBindingDisabled("primary.testlab.local")).ReturnsAsync(() => {
                 Task.Delay(1000).Wait();
                 return NtStatus.StatusAccessDenied;
             });
+            
+            mockProcessor.Setup(x => x.TestLdapsPort()).ReturnsAsync(true);
 
             mockProcessor.Setup(x => x.TestLdapPort()).ReturnsAsync(true);
             mockProcessor.Setup(x => x.TestLdapsPort()).ReturnsAsync(true);
@@ -69,7 +65,7 @@ namespace CommonLibTest {
             processor.ComputerStatusEvent += async status =>  {
                 receivedStatus.Add(status);
             };
-            var results = await processor.CheckIsChannelBindingDisabled("primary.testlab.local", TimeSpan.FromMilliseconds(1));
+            var results = await processor.Scan("primary.testlab.local", TimeSpan.FromMilliseconds(1));
 
             Assert.Single(receivedStatus);
             var status = receivedStatus[0];

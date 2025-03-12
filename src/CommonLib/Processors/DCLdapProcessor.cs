@@ -50,22 +50,69 @@ public class DCLdapProcessor {
         
         var hasLdap = await TestLdapPort();
         var hasLdaps = await TestLdapsPort();
-        APIResult<bool> isSigningRequired = new(),
+        SharpHoundRPC.Result<bool> isSigningRequired = new(),
             isChannelBindingDisabled = new();
 
         if (hasLdap) {
-            isSigningRequired = await CheckIsNtlmSigningRequired(computerName, timeout);
+            isSigningRequired = await Task.Run(() => CheckIsNtlmSigningRequired(computerName)).TimeoutAfter(timeout);
         }
 
         if (hasLdaps) {
-            isChannelBindingDisabled = await CheckIsChannelBindingDisabled(computerName, timeout);
+            isChannelBindingDisabled = await Task.Run(() => CheckIsChannelBindingDisabled(computerName)).TimeoutAfter(timeout);
         }
+        
+        if (isSigningRequired.IsFailed || isChannelBindingDisabled.IsFailed) {
+            await SendComputerStatus(new CSVComputerStatus {
+                Status = isSigningRequired.Error,
+                Task = "DCLdapScan",
+                ComputerName = computerName
+            });
+            _log.LogTrace("DCLdapScan failed on {ComputerName}: {Status}", computerName, isSigningRequired.Status);
+            _log.LogTrace("DCLdapScan failed on {ComputerName}: {Status}", computerName, isChannelBindingDisabled.Status);
+            return new LdapService(
+                hasLdap,
+                hasLdaps,
+                new APIResult<bool>
+                {
+                    Collected = isSigningRequired.IsSuccess,
+                    FailureReason = isSigningRequired.Error,
+                    Result = isSigningRequired.Value,
+
+                },
+                new APIResult<bool>
+                {
+                    Collected = isChannelBindingDisabled.IsSuccess,
+                    FailureReason = isChannelBindingDisabled.Error,
+                    Result = isChannelBindingDisabled.Value,
+
+                }
+            );
+        }
+        
+        await SendComputerStatus(new CSVComputerStatus {
+            Status = CSVComputerStatus.StatusSuccess,
+            Task = "DCLdapScan",
+            ComputerName = computerName
+        });
+        _log.LogTrace("DCLdapScan succeeded on ComputerName}", computerName);
 
         return new LdapService(
             hasLdap,
             hasLdaps,
-            isSigningRequired,
-            isChannelBindingDisabled
+            new APIResult<bool>
+            {
+                Collected = isSigningRequired.IsSuccess,
+                FailureReason = isSigningRequired.Error,
+                Result = isSigningRequired.Value,
+
+            },
+            new APIResult<bool>
+            {
+                Collected = isChannelBindingDisabled.IsSuccess,
+                FailureReason = isChannelBindingDisabled.Error,
+                Result = isChannelBindingDisabled.Value,
+
+            }
         );
     }
 
@@ -83,43 +130,17 @@ public class DCLdapProcessor {
         return await _scanner.CheckPort(_ldapSslEndpoint.Host, _ldapSslEndpoint.Port, _portScanTimeout);
     }
 
-    public virtual async Task<APIResult<bool>> CheckIsNtlmSigningRequired(string computerName, TimeSpan timeout = default) {
-        if (timeout == default) {
-            timeout = TimeSpan.FromMinutes(2);
-        }
+    public virtual async Task<SharpHoundRPC.Result<bool>> CheckIsNtlmSigningRequired(string computerName) {
         try {
             var options = new LdapAuthOptions() {
                 Signing = false
             };
-            var accessibleWithoutSigning = await Task.Run(() => Authenticate(_ldapEndpoint, options)).TimeoutAfter(timeout);
+            var accessibleWithoutSigning = await Task.Run(() => Authenticate(_ldapEndpoint, options));
 
-            if (accessibleWithoutSigning.IsSuccess)
-            {
-                _log.LogDebug("NTLMAuthenticate succeeded on {ComputerName}", computerName);
-                await SendComputerStatus(new CSVComputerStatus {
-                    Status = CSVComputerStatus.StatusSuccess,
-                    Task = "NTLMAuthenticate",
-                    ComputerName = computerName
-                });
-                return APIResult<bool>.Success(accessibleWithoutSigning.Value == false);
-            }
-            
-            await SendComputerStatus(new CSVComputerStatus {
-                Status = accessibleWithoutSigning.Error,
-                Task = "NTLMAuthenticate",
-                ComputerName = computerName
-            });
-            _log.LogTrace("NTLMAuthenticate failed on {ComputerName}: {Status}", computerName, accessibleWithoutSigning.Status);
-            return APIResult<bool>.Failure(accessibleWithoutSigning.Error);
+            return SharpHoundRPC.Result<bool>.Ok(accessibleWithoutSigning == false);
 
         } catch (Exception ex) {
-            await SendComputerStatus(new CSVComputerStatus {
-                Status = ex.Message,
-                Task = "NTLMAuthenticate",
-                ComputerName = computerName
-            });
-            _log.LogTrace("NTLMAuthenticate failed on {ComputerName}: {Status}", computerName, ex.Message);
-            return APIResult<bool>.Failure($"CheckIsNtlmSigningRequired failed: {ex}");
+            return SharpHoundRPC.Result<bool>.Fail($"CheckIsNtlmSigningRequired failed: {ex}");
         }
     }
 
@@ -131,10 +152,7 @@ public class DCLdapProcessor {
     // 3) Correct bindings to ensure NTLM auth is enabled
     // However, as of right now we only do #2. We can't do #1 right now since the
     // Window's SSPI APIs (InitSecurityContext) always add channel bindings.
-    public virtual async Task<APIResult<bool>> CheckIsChannelBindingDisabled(string computerName, TimeSpan timeout = default) {
-        if (timeout == default) {
-            timeout = TimeSpan.FromMinutes(2);
-        }
+    public virtual async Task<SharpHoundRPC.Result<bool>> CheckIsChannelBindingDisabled(string computerName) {
         try {
             // 1) Can we connect with *invalid* bindings
 
@@ -144,35 +162,11 @@ public class DCLdapProcessor {
             var accessibleWithNoBindings = await Authenticate(_ldapSslEndpoint, new LdapAuthOptions() {
                 Signing = false,
                 Bindings = bindings
-            }).TimeoutAfter(timeout);
-
-            if (accessibleWithNoBindings.IsSuccess)
-            {
-                _log.LogDebug("NTLMAuthenticate succeeded on {ComputerName}", computerName);
-                await SendComputerStatus(new CSVComputerStatus {
-                    Status = CSVComputerStatus.StatusSuccess,
-                    Task = "NTLMAuthenticate",
-                    ComputerName = computerName
-                });
-                return APIResult<bool>.Success(accessibleWithNoBindings.Value == false);
-            }
-            
-            await SendComputerStatus(new CSVComputerStatus {
-                Status = accessibleWithNoBindings.Error,
-                Task = "NTLMAuthenticate",
-                ComputerName = computerName
             });
-            _log.LogTrace("NTLMAuthenticate failed on {ComputerName}: {Status}", computerName, accessibleWithNoBindings.Status);
-            return APIResult<bool>.Failure(accessibleWithNoBindings.Error);
+            return SharpHoundRPC.Result<bool>.Ok(accessibleWithNoBindings == false);
 
         } catch (Exception ex) {
-            await SendComputerStatus(new CSVComputerStatus {
-                Status = ex.Message,
-                Task = "NTLMAuthenticate",
-                ComputerName = computerName
-            });
-            _log.LogTrace("NTLMAuthenticate failed on {ComputerName}: {Status}", computerName, ex.Message);
-            return APIResult<bool>.Failure($"CheckIsNtlmSigningRequired failed: {ex}");
+            return SharpHoundRPC.Result<bool>.Fail($"CheckIsNtlmSigningRequired failed: {ex}");
         }
     }
 
@@ -182,7 +176,7 @@ public class DCLdapProcessor {
     /// <param name="endpoint"></param>
     /// <param name="options"></param>
     /// <returns></returns>
-    public virtual async Task<SharpHoundRPC.Result<bool>> Authenticate(Uri endpoint, LdapAuthOptions options) {
+    public async Task<bool> Authenticate(Uri endpoint, LdapAuthOptions options) {
         var host = endpoint.Host;
         var auth = new NtlmAuthenticationHandler($"LDAP/{host.ToUpper()}") {
             Options = options
@@ -192,7 +186,7 @@ public class DCLdapProcessor {
         try {
             transport.InitializeConnectionAsync(_ldapTimeout);
             await auth.PerformNtlmAuthenticationAsync(transport);
-            return SharpHoundRPC.Result<bool>.Ok(true);
+            return true;
         } catch (LdapNativeException ex) {
             switch (ex.ErrorCode) {
                 case (int)LdapErrorCodes.InvalidCredentials:
@@ -201,13 +195,13 @@ public class DCLdapProcessor {
                     //   0x80090302 == SEC_E_UNSUPPORTED_FUNCTION
                     if (ex.ServerErrorMessage.StartsWith(SEC_E_UNSUPPORTED_FUNCTION)) {
                         _log.LogDebug("LDAP endpoint '{endpoint}' does not support NTLM", endpoint);
-                        return SharpHoundRPC.Result<bool>.Ok(false);
+                        return false;
                     }
 
                     if (ex.ServerErrorMessage.StartsWith(SEC_E_BAD_BINDINGS)) {
                         _log.LogDebug("Bad bindings with the LDAPS endpoint '{endpoint}'. Server error: {serverError}",
                             endpoint, ex.ServerErrorMessage);
-                        return SharpHoundRPC.Result<bool>.Ok(false);
+                        return false;
                     } else {
                         _log.LogError(
                             "Unhandled LDAP InvalidCred error code during LDAP test: {ex}, Server error: {err}", ex,
@@ -216,10 +210,10 @@ public class DCLdapProcessor {
                     }
                 case (int)LdapErrorCodes.StrongAuthRequired:
                     _log.LogDebug("LDAP requires signing. Endpoint: {endpoint}", endpoint);
-                    return SharpHoundRPC.Result<bool>.Ok(false);
+                    return false;
                 case (int)LdapErrorCodes.ServerDown:
                     _log.LogDebug("LDAP endpoint '{endpoint}' not accessible", endpoint);
-                    return SharpHoundRPC.Result<bool>.Ok(false);
+                    return false;
                 default:
                     _log.LogError("Unhandled LdapException error code during LDAP test: {ex}, Server error: {err}", ex,
                         ex.ServerErrorMessage);
@@ -229,7 +223,7 @@ public class DCLdapProcessor {
             _log.LogError("An unhandled error occurred during the LDAP test: {ex}", ex);
         }
 
-        return SharpHoundRPC.Result<bool>.Ok(false);
+        return false;
     }
     
     private async Task SendComputerStatus(CSVComputerStatus status) {
