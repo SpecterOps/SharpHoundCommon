@@ -45,7 +45,7 @@ namespace CommonLibTest {
                 receivedStatus.Add(status);
             };
             var results = await mockProcessor.Scan("primary.testlab.local",TimeSpan.FromMilliseconds(1));
-            // Assert.Empty(results.Result);
+
             Assert.Single(receivedStatus);
             var status = receivedStatus[0];
             Assert.Equal("Timeout", status.Status);
