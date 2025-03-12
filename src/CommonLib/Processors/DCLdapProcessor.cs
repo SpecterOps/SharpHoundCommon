@@ -32,8 +32,8 @@ public class DCLdapProcessor {
     private readonly string SEC_E_BAD_BINDINGS = "80090346";
 
 
-    public DCLdapProcessor(int portScanTimeout, string dcHostname, ILogger log) {
-        _log = log;
+    public DCLdapProcessor(int portScanTimeout, string dcHostname, ILogger log = null) {
+        _log = log ?? Logging.LogProvider.CreateLogger("DCLdapProcessor");
         _scanner = new PortScanner();
         _portScanTimeout = portScanTimeout;
         _ldapTimeout = portScanTimeout / 1000;
@@ -43,18 +43,22 @@ public class DCLdapProcessor {
     
     public event ComputerStatusDelegate ComputerStatusEvent;
 
-    public async Task<LdapService> Scan(string computerName) {
+    public async Task<LdapService> Scan(string computerName, TimeSpan timeout = default) {
+        if (timeout == default) {
+            timeout = TimeSpan.FromMinutes(2);
+        }
+        
         var hasLdap = await TestLdapPort();
         var hasLdaps = await TestLdapsPort();
         APIResult<bool> isSigningRequired = new(),
             isChannelBindingDisabled = new();
 
         if (hasLdap) {
-            isSigningRequired = await CheckIsNtlmSigningRequired(computerName);
+            isSigningRequired = await CheckIsNtlmSigningRequired(computerName, timeout);
         }
 
         if (hasLdaps) {
-            isChannelBindingDisabled = await CheckIsChannelBindingDisabled(computerName);
+            isChannelBindingDisabled = await CheckIsChannelBindingDisabled(computerName, timeout);
         }
 
         return new LdapService(
@@ -70,12 +74,12 @@ public class DCLdapProcessor {
     /// </summary>
     /// <returns>bool</returns>
     [ExcludeFromCodeCoverage]
-    public async Task<bool> TestLdapPort() {
+    public virtual async Task<bool> TestLdapPort() {
         return await _scanner.CheckPort(_ldapEndpoint.Host, _ldapEndpoint.Port, _portScanTimeout);
     }
 
     [ExcludeFromCodeCoverage]
-    public async Task<bool> TestLdapsPort() {
+    public virtual async Task<bool> TestLdapsPort() {
         return await _scanner.CheckPort(_ldapSslEndpoint.Host, _ldapSslEndpoint.Port, _portScanTimeout);
     }
 

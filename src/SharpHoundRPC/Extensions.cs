@@ -45,6 +45,8 @@ namespace SharpHoundRPC
                     timeoutCancellationTokenSource.Cancel();
                     return await task; // Very important in order to propagate exceptions
                 }
+                
+                Console.WriteLine("TimeoutLogic Triggered");
 
                 var result = Result<T>.Fail("Timeout");
                 result.IsTimeout = true;

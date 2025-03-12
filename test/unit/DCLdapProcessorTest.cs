@@ -53,19 +53,23 @@ namespace CommonLibTest {
         
         [Fact]
         public async Task DCLdapProcessor_CheckIsChannelBindingDisabled_TestTimeout() {
-            var mockProcessor = new Mock<DCLdapProcessor>(2, "primary.testlab.local");
+            var mockProcessor = new Mock<DCLdapProcessor>(2, "primary.testlab.local", null);
+            mockProcessor.CallBase = true;
             
-            mockProcessor.Setup(x => x.Authenticate(new Uri($"ldap://testlab.local:389"),new LdapAuthOptions())).ReturnsAsync(() => {
-                Task.Delay(100).Wait();
+            mockProcessor.Setup(x => x.Authenticate(It.IsAny<Uri>(), It.IsAny<LdapAuthOptions>())).ReturnsAsync(() => {
+                Task.Delay(1000).Wait();
                 return NtStatus.StatusAccessDenied;
             });
+
+            mockProcessor.Setup(x => x.TestLdapPort()).ReturnsAsync(true);
+            mockProcessor.Setup(x => x.TestLdapsPort()).ReturnsAsync(true);
             
             var processor = mockProcessor.Object;
             var receivedStatus = new List<CSVComputerStatus>();
             processor.ComputerStatusEvent += async status =>  {
                 receivedStatus.Add(status);
             };
-            var results = await processor.CheckIsChannelBindingDisabled("primary.testlab.local", TimeSpan.FromMinutes(2));
+            var results = await processor.CheckIsChannelBindingDisabled("primary.testlab.local", TimeSpan.FromMilliseconds(1));
 
             Assert.Single(receivedStatus);
             var status = receivedStatus[0];
