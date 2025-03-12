@@ -17,19 +17,29 @@ namespace SharpHoundCommonLib.Processors {
     /// </summary>
     /// <param name="timeoutMs"></param>
     /// <param name="log"></param>
-    public class SmbProcessor(int timeoutMs, ILogger log = null) {
-        private readonly ILogger _log = log ?? Logging.LogProvider.CreateLogger("SmbProcessor");
+    public class SmbProcessor
+    {
         public delegate Task ComputerStatusDelegate(CSVComputerStatus status);
+        private readonly ILogger _log;
+        private readonly SmbScanner _smbScanner;
+        private readonly int _timeoutMs;
+        
+        public SmbProcessor(int timeoutMs, SmbScanner smbScanner = null, ILogger log = null)
+        {
+            _timeoutMs = timeoutMs;
+            _smbScanner = smbScanner ?? new SmbScanner();
+            _log = log ?? Logging.LogProvider.CreateLogger("SmbProcessor");
+        }
 
         public event ComputerStatusDelegate ComputerStatusEvent;
-        public async Task<APIResult<SmbInfo>> Scan(string host, TimeSpan timeout = default) {
+        public virtual async Task<APIResult<SmbInfo>> Scan(string host, TimeSpan timeout = default) {
             if (timeout == default) {
                 timeout = TimeSpan.FromMinutes(2);
             }
             
-            var scanner = new SmbScanner();
+            // var scanner = new SmbScanner();
 
-            var result = await Task.Run(() => scanner.Scan(host, 445, timeoutMs)).TimeoutAfter(timeout);
+            var result = await Task.Run(() => _smbScanner.Scan(host, 445, _timeoutMs)).TimeoutAfter(timeout);
 
             if (result.IsFailed) {
                 await SendComputerStatus(new CSVComputerStatus {
@@ -184,7 +194,7 @@ namespace SharpHoundCommonLib.Processors {
     }
 
     public class SmbScanner {
-        public async Task<SharpHoundRPC.Result<SmbScanInfo>> Scan(string host, int port, int timeoutMs = 10000) {
+        public virtual async Task<SharpHoundRPC.Result<SmbScanInfo>> Scan(string host, int port, int timeoutMs = 10000) {
             var scanInfo = new SmbScanInfo(host) {
                 SmbVersion = SmbVersion.Unknown
             };
