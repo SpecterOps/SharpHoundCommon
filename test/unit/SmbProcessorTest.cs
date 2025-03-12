@@ -35,22 +35,20 @@ namespace CommonLibTest {
             var mockSmbScanner = new Mock<SmbScanner>();
             
             
-            mockSmbScanner.Setup(x => x.Scan("primary.testlab.local",445, 2)).ReturnsAsync(() => {
+            mockSmbScanner.Setup(x => x.Scan("primary.testlab.local",445, 1)).ReturnsAsync(() => {
                 Task.Delay(100).Wait();
                 return NtStatus.StatusAccessDenied;
             });
-            var mockProcessor = new Mock<SmbProcessor>(2, mockSmbScanner.Object, null);
-            var processor = mockProcessor.Object;
+            var mockProcessor = new SmbProcessor(2, mockSmbScanner.Object);
             var receivedStatus = new List<CSVComputerStatus>();
-            processor.ComputerStatusEvent += async status =>  {
+            mockProcessor.ComputerStatusEvent += async status =>  {
                 receivedStatus.Add(status);
             };
-            var results = await processor.Scan("primary.testlab.local",TimeSpan.FromMilliseconds(1));
+            var results = await mockProcessor.Scan("primary.testlab.local",TimeSpan.FromMilliseconds(1));
             // Assert.Empty(results.Result);
             Assert.Single(receivedStatus);
             var status = receivedStatus[0];
             Assert.Equal("Timeout", status.Status);
         }
-        
     }
 }

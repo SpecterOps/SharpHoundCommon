@@ -43,7 +43,7 @@ namespace SharpHoundCommonLib.Processors {
 
             if (result.IsFailed) {
                 await SendComputerStatus(new CSVComputerStatus {
-                    Status = result.Status.ToString(),
+                    Status = result.Error,
                     Task = "SmbScan",
                     ComputerName = host
                 });
