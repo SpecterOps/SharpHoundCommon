@@ -19,6 +19,7 @@ namespace SharpHoundCommonLib.Processors {
     /// <param name="log"></param>
     public class SmbProcessor
     {
+        //TODO: Have this class take in our portscanner class and use that
         public delegate Task ComputerStatusDelegate(CSVComputerStatus status);
         private readonly ILogger _log;
         private readonly SmbScanner _smbScanner;
