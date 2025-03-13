@@ -36,8 +36,6 @@ namespace SharpHoundCommonLib.Processors {
             if (timeout == default) {
                 timeout = TimeSpan.FromMinutes(2);
             }
-            
-            // var scanner = new SmbScanner();
 
             var result = await Task.Run(() => _smbScanner.Scan(host, 445, _timeoutMs)).TimeoutAfter(timeout);
 
