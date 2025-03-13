@@ -139,10 +139,10 @@
   </h3>
   <span class="small pull-right mobile-hide">
     <span class="divider">|</span>
-    <a href="https://github.com/SpecterOps/SharpHoundCommon/new/217481ed7efb463a5e18b9df65274f38d266176b/apiSpec/new?filename=SharpHoundCommonLib_Processors_DCLdapProcessor__ctor_System_Int32_System_String_ILogger_.md&amp;value=---%0Auid%3A%20SharpHoundCommonLib.Processors.DCLdapProcessor.%23ctor(System.Int32%2CSystem.String%2CILogger)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+    <a href="https://github.com/SpecterOps/SharpHoundCommon/new/3086355b45141d41bc4d588c34ae3a35ea3ed995/apiSpec/new?filename=SharpHoundCommonLib_Processors_DCLdapProcessor__ctor_System_Int32_System_String_ILogger_.md&amp;value=---%0Auid%3A%20SharpHoundCommonLib.Processors.DCLdapProcessor.%23ctor(System.Int32%2CSystem.String%2CILogger)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
   </span>
   <span class="small pull-right mobile-hide">
-    <a href="https://github.com/SpecterOps/SharpHoundCommon/blob/217481ed7efb463a5e18b9df65274f38d266176b/src/CommonLib/Processors/DCLdapProcessor.cs/#L33">View Source</a>
+    <a href="https://github.com/SpecterOps/SharpHoundCommon/blob/3086355b45141d41bc4d588c34ae3a35ea3ed995/src/CommonLib/Processors/DCLdapProcessor.cs/#L35">View Source</a>
   </span>
   <a id="SharpHoundCommonLib_Processors_DCLdapProcessor__ctor_" data-uid="SharpHoundCommonLib.Processors.DCLdapProcessor.#ctor*"></a>
   <h4 id="SharpHoundCommonLib_Processors_DCLdapProcessor__ctor_System_Int32_System_String_ILogger_" data-uid="SharpHoundCommonLib.Processors.DCLdapProcessor.#ctor(System.Int32,System.String,ILogger)">DCLdapProcessor(Int32, String, ILogger)</h4>
@@ -150,7 +150,7 @@
   <div class="markdown level1 conceptual"></div>
   <h5 class="decalaration">Declaration</h5>
   <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">public DCLdapProcessor(int portScanTimeout, string dcHostname, ILogger log)</code></pre>
+    <pre><code class="lang-csharp hljs">public DCLdapProcessor(int portScanTimeout, string dcHostname, ILogger log = null)</code></pre>
   </div>
   <h5 class="parameters">Parameters</h5>
   <table class="table table-bordered table-striped table-condensed">
@@ -183,10 +183,10 @@
   </h3>
   <span class="small pull-right mobile-hide">
     <span class="divider">|</span>
-    <a href="https://github.com/SpecterOps/SharpHoundCommon/new/217481ed7efb463a5e18b9df65274f38d266176b/apiSpec/new?filename=SharpHoundCommonLib_Processors_DCLdapProcessor_CheckIsChannelBindingDisabled.md&amp;value=---%0Auid%3A%20SharpHoundCommonLib.Processors.DCLdapProcessor.CheckIsChannelBindingDisabled%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+    <a href="https://github.com/SpecterOps/SharpHoundCommon/new/3086355b45141d41bc4d588c34ae3a35ea3ed995/apiSpec/new?filename=SharpHoundCommonLib_Processors_DCLdapProcessor_CheckIsChannelBindingDisabled.md&amp;value=---%0Auid%3A%20SharpHoundCommonLib.Processors.DCLdapProcessor.CheckIsChannelBindingDisabled%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
   </span>
   <span class="small pull-right mobile-hide">
-    <a href="https://github.com/SpecterOps/SharpHoundCommon/blob/217481ed7efb463a5e18b9df65274f38d266176b/src/CommonLib/Processors/DCLdapProcessor.cs/#L99">View Source</a>
+    <a href="https://github.com/SpecterOps/SharpHoundCommon/blob/3086355b45141d41bc4d588c34ae3a35ea3ed995/src/CommonLib/Processors/DCLdapProcessor.cs/#L150">View Source</a>
   </span>
   <a id="SharpHoundCommonLib_Processors_DCLdapProcessor_CheckIsChannelBindingDisabled_" data-uid="SharpHoundCommonLib.Processors.DCLdapProcessor.CheckIsChannelBindingDisabled*"></a>
   <h4 id="SharpHoundCommonLib_Processors_DCLdapProcessor_CheckIsChannelBindingDisabled" data-uid="SharpHoundCommonLib.Processors.DCLdapProcessor.CheckIsChannelBindingDisabled">CheckIsChannelBindingDisabled()</h4>
@@ -194,7 +194,7 @@
   <div class="markdown level1 conceptual"></div>
   <h5 class="decalaration">Declaration</h5>
   <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">public Task&lt;APIResult&lt;bool&gt;&gt; CheckIsChannelBindingDisabled()</code></pre>
+    <pre><code class="lang-csharp hljs">public virtual Task&lt;Result&lt;bool&gt;&gt; CheckIsChannelBindingDisabled()</code></pre>
   </div>
   <h5 class="returns">Returns</h5>
   <table class="table table-bordered table-striped table-condensed">
@@ -206,17 +206,17 @@
     </thead>
     <tbody>
       <tr>
-        <td><span class="xref">System.Threading.Tasks.Task</span>&lt;<a class="xref" href="SharpHoundCommonLib.OutputTypes.APIResult-1.html">APIResult</a>&lt;<span class="xref">System.Boolean</span>&gt;&gt;</td>
+        <td><span class="xref">System.Threading.Tasks.Task</span>&lt;<a class="xref" href="SharpHoundRPC.Result-1.html">Result</a>&lt;<span class="xref">System.Boolean</span>&gt;&gt;</td>
         <td></td>
       </tr>
     </tbody>
   </table>
   <span class="small pull-right mobile-hide">
     <span class="divider">|</span>
-    <a href="https://github.com/SpecterOps/SharpHoundCommon/new/217481ed7efb463a5e18b9df65274f38d266176b/apiSpec/new?filename=SharpHoundCommonLib_Processors_DCLdapProcessor_CheckIsNtlmSigningRequired.md&amp;value=---%0Auid%3A%20SharpHoundCommonLib.Processors.DCLdapProcessor.CheckIsNtlmSigningRequired%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+    <a href="https://github.com/SpecterOps/SharpHoundCommon/new/3086355b45141d41bc4d588c34ae3a35ea3ed995/apiSpec/new?filename=SharpHoundCommonLib_Processors_DCLdapProcessor_CheckIsNtlmSigningRequired.md&amp;value=---%0Auid%3A%20SharpHoundCommonLib.Processors.DCLdapProcessor.CheckIsNtlmSigningRequired%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
   </span>
   <span class="small pull-right mobile-hide">
-    <a href="https://github.com/SpecterOps/SharpHoundCommon/blob/217481ed7efb463a5e18b9df65274f38d266176b/src/CommonLib/Processors/DCLdapProcessor.cs/#L78">View Source</a>
+    <a href="https://github.com/SpecterOps/SharpHoundCommon/blob/3086355b45141d41bc4d588c34ae3a35ea3ed995/src/CommonLib/Processors/DCLdapProcessor.cs/#L128">View Source</a>
   </span>
   <a id="SharpHoundCommonLib_Processors_DCLdapProcessor_CheckIsNtlmSigningRequired_" data-uid="SharpHoundCommonLib.Processors.DCLdapProcessor.CheckIsNtlmSigningRequired*"></a>
   <h4 id="SharpHoundCommonLib_Processors_DCLdapProcessor_CheckIsNtlmSigningRequired" data-uid="SharpHoundCommonLib.Processors.DCLdapProcessor.CheckIsNtlmSigningRequired">CheckIsNtlmSigningRequired()</h4>
@@ -224,7 +224,7 @@
   <div class="markdown level1 conceptual"></div>
   <h5 class="decalaration">Declaration</h5>
   <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">public Task&lt;APIResult&lt;bool&gt;&gt; CheckIsNtlmSigningRequired()</code></pre>
+    <pre><code class="lang-csharp hljs">public virtual Task&lt;Result&lt;bool&gt;&gt; CheckIsNtlmSigningRequired()</code></pre>
   </div>
   <h5 class="returns">Returns</h5>
   <table class="table table-bordered table-striped table-condensed">
@@ -236,26 +236,48 @@
     </thead>
     <tbody>
       <tr>
-        <td><span class="xref">System.Threading.Tasks.Task</span>&lt;<a class="xref" href="SharpHoundCommonLib.OutputTypes.APIResult-1.html">APIResult</a>&lt;<span class="xref">System.Boolean</span>&gt;&gt;</td>
+        <td><span class="xref">System.Threading.Tasks.Task</span>&lt;<a class="xref" href="SharpHoundRPC.Result-1.html">Result</a>&lt;<span class="xref">System.Boolean</span>&gt;&gt;</td>
         <td></td>
       </tr>
     </tbody>
   </table>
   <span class="small pull-right mobile-hide">
     <span class="divider">|</span>
-    <a href="https://github.com/SpecterOps/SharpHoundCommon/new/217481ed7efb463a5e18b9df65274f38d266176b/apiSpec/new?filename=SharpHoundCommonLib_Processors_DCLdapProcessor_Scan.md&amp;value=---%0Auid%3A%20SharpHoundCommonLib.Processors.DCLdapProcessor.Scan%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+    <a href="https://github.com/SpecterOps/SharpHoundCommon/new/3086355b45141d41bc4d588c34ae3a35ea3ed995/apiSpec/new?filename=SharpHoundCommonLib_Processors_DCLdapProcessor_Scan_System_String_System_TimeSpan_.md&amp;value=---%0Auid%3A%20SharpHoundCommonLib.Processors.DCLdapProcessor.Scan(System.String%2CSystem.TimeSpan)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
   </span>
   <span class="small pull-right mobile-hide">
-    <a href="https://github.com/SpecterOps/SharpHoundCommon/blob/217481ed7efb463a5e18b9df65274f38d266176b/src/CommonLib/Processors/DCLdapProcessor.cs/#L42">View Source</a>
+    <a href="https://github.com/SpecterOps/SharpHoundCommon/blob/3086355b45141d41bc4d588c34ae3a35ea3ed995/src/CommonLib/Processors/DCLdapProcessor.cs/#L46">View Source</a>
   </span>
   <a id="SharpHoundCommonLib_Processors_DCLdapProcessor_Scan_" data-uid="SharpHoundCommonLib.Processors.DCLdapProcessor.Scan*"></a>
-  <h4 id="SharpHoundCommonLib_Processors_DCLdapProcessor_Scan" data-uid="SharpHoundCommonLib.Processors.DCLdapProcessor.Scan">Scan()</h4>
+  <h4 id="SharpHoundCommonLib_Processors_DCLdapProcessor_Scan_System_String_System_TimeSpan_" data-uid="SharpHoundCommonLib.Processors.DCLdapProcessor.Scan(System.String,System.TimeSpan)">Scan(String, TimeSpan)</h4>
   <div class="markdown level1 summary"></div>
   <div class="markdown level1 conceptual"></div>
   <h5 class="decalaration">Declaration</h5>
   <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">public Task&lt;LdapService&gt; Scan()</code></pre>
+    <pre><code class="lang-csharp hljs">public Task&lt;LdapService&gt; Scan(string computerName, TimeSpan timeout = default(TimeSpan))</code></pre>
   </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">computerName</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.TimeSpan</span></td>
+        <td><span class="parametername">timeout</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
   <h5 class="returns">Returns</h5>
   <table class="table table-bordered table-striped table-condensed">
     <thead>
@@ -273,10 +295,10 @@
   </table>
   <span class="small pull-right mobile-hide">
     <span class="divider">|</span>
-    <a href="https://github.com/SpecterOps/SharpHoundCommon/new/217481ed7efb463a5e18b9df65274f38d266176b/apiSpec/new?filename=SharpHoundCommonLib_Processors_DCLdapProcessor_TestLdapPort.md&amp;value=---%0Auid%3A%20SharpHoundCommonLib.Processors.DCLdapProcessor.TestLdapPort%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+    <a href="https://github.com/SpecterOps/SharpHoundCommon/new/3086355b45141d41bc4d588c34ae3a35ea3ed995/apiSpec/new?filename=SharpHoundCommonLib_Processors_DCLdapProcessor_TestLdapPort.md&amp;value=---%0Auid%3A%20SharpHoundCommonLib.Processors.DCLdapProcessor.TestLdapPort%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
   </span>
   <span class="small pull-right mobile-hide">
-    <a href="https://github.com/SpecterOps/SharpHoundCommon/blob/217481ed7efb463a5e18b9df65274f38d266176b/src/CommonLib/Processors/DCLdapProcessor.cs/#L68">View Source</a>
+    <a href="https://github.com/SpecterOps/SharpHoundCommon/blob/3086355b45141d41bc4d588c34ae3a35ea3ed995/src/CommonLib/Processors/DCLdapProcessor.cs/#L118">View Source</a>
   </span>
   <a id="SharpHoundCommonLib_Processors_DCLdapProcessor_TestLdapPort_" data-uid="SharpHoundCommonLib.Processors.DCLdapProcessor.TestLdapPort*"></a>
   <h4 id="SharpHoundCommonLib_Processors_DCLdapProcessor_TestLdapPort" data-uid="SharpHoundCommonLib.Processors.DCLdapProcessor.TestLdapPort">TestLdapPort()</h4>
@@ -285,7 +307,7 @@
   <div class="markdown level1 conceptual"></div>
   <h5 class="decalaration">Declaration</h5>
   <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">public Task&lt;bool&gt; TestLdapPort()</code></pre>
+    <pre><code class="lang-csharp hljs">public virtual Task&lt;bool&gt; TestLdapPort()</code></pre>
   </div>
   <h5 class="returns">Returns</h5>
   <table class="table table-bordered table-striped table-condensed">
@@ -305,10 +327,10 @@
   </table>
   <span class="small pull-right mobile-hide">
     <span class="divider">|</span>
-    <a href="https://github.com/SpecterOps/SharpHoundCommon/new/217481ed7efb463a5e18b9df65274f38d266176b/apiSpec/new?filename=SharpHoundCommonLib_Processors_DCLdapProcessor_TestLdapsPort.md&amp;value=---%0Auid%3A%20SharpHoundCommonLib.Processors.DCLdapProcessor.TestLdapsPort%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+    <a href="https://github.com/SpecterOps/SharpHoundCommon/new/3086355b45141d41bc4d588c34ae3a35ea3ed995/apiSpec/new?filename=SharpHoundCommonLib_Processors_DCLdapProcessor_TestLdapsPort.md&amp;value=---%0Auid%3A%20SharpHoundCommonLib.Processors.DCLdapProcessor.TestLdapsPort%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
   </span>
   <span class="small pull-right mobile-hide">
-    <a href="https://github.com/SpecterOps/SharpHoundCommon/blob/217481ed7efb463a5e18b9df65274f38d266176b/src/CommonLib/Processors/DCLdapProcessor.cs/#L73">View Source</a>
+    <a href="https://github.com/SpecterOps/SharpHoundCommon/blob/3086355b45141d41bc4d588c34ae3a35ea3ed995/src/CommonLib/Processors/DCLdapProcessor.cs/#L123">View Source</a>
   </span>
   <a id="SharpHoundCommonLib_Processors_DCLdapProcessor_TestLdapsPort_" data-uid="SharpHoundCommonLib.Processors.DCLdapProcessor.TestLdapsPort*"></a>
   <h4 id="SharpHoundCommonLib_Processors_DCLdapProcessor_TestLdapsPort" data-uid="SharpHoundCommonLib.Processors.DCLdapProcessor.TestLdapsPort">TestLdapsPort()</h4>
@@ -316,7 +338,7 @@
   <div class="markdown level1 conceptual"></div>
   <h5 class="decalaration">Declaration</h5>
   <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">public Task&lt;bool&gt; TestLdapsPort()</code></pre>
+    <pre><code class="lang-csharp hljs">public virtual Task&lt;bool&gt; TestLdapsPort()</code></pre>
   </div>
   <h5 class="returns">Returns</h5>
   <table class="table table-bordered table-striped table-condensed">
@@ -329,6 +351,37 @@
     <tbody>
       <tr>
         <td><span class="xref">System.Threading.Tasks.Task</span>&lt;<span class="xref">System.Boolean</span>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="events">Events
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/SpecterOps/SharpHoundCommon/new/3086355b45141d41bc4d588c34ae3a35ea3ed995/apiSpec/new?filename=SharpHoundCommonLib_Processors_DCLdapProcessor_ComputerStatusEvent.md&amp;value=---%0Auid%3A%20SharpHoundCommonLib.Processors.DCLdapProcessor.ComputerStatusEvent%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/SpecterOps/SharpHoundCommon/blob/3086355b45141d41bc4d588c34ae3a35ea3ed995/src/CommonLib/Processors/DCLdapProcessor.cs/#L44">View Source</a>
+  </span>
+  <h4 id="SharpHoundCommonLib_Processors_DCLdapProcessor_ComputerStatusEvent" data-uid="SharpHoundCommonLib.Processors.DCLdapProcessor.ComputerStatusEvent">ComputerStatusEvent</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public event DCLdapProcessor.ComputerStatusDelegate ComputerStatusEvent</code></pre>
+  </div>
+  <h5 class="eventType">Event Type</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="SharpHoundCommonLib.Processors.DCLdapProcessor.ComputerStatusDelegate.html">DCLdapProcessor.ComputerStatusDelegate</a></td>
         <td></td>
       </tr>
     </tbody>
