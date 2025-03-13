@@ -23,39 +23,18 @@ namespace CommonLibTest {
         }
     
         [Fact]
-        public async Task DCLdapProcessor_CheckIsNtlmSigningRequired_TestTimeout() {
+        public async Task DCLdapProcessor_CheckScan_Timeout() {
             var mockProcessor = new Mock<DCLdapProcessor>(2, "primary.testlab.local", null);
             
             mockProcessor.Setup(x => x.CheckIsNtlmSigningRequired()).ReturnsAsync(() => {
                 Task.Delay(100).Wait();
                 return NtStatus.StatusAccessDenied;
             });
-
-            mockProcessor.Setup(x => x.TestLdapPort()).ReturnsAsync(true);
-            
-            var processor = mockProcessor.Object;
-            var receivedStatus = new List<CSVComputerStatus>();
-            processor.ComputerStatusEvent += async status =>  {
-                receivedStatus.Add(status);
-            };
-            var results = await processor.Scan("primary.testlab.local", TimeSpan.FromMilliseconds(1));
-
-            Assert.Single(receivedStatus);
-            var status = receivedStatus[0];
-            Assert.Equal("Timeout", status.Status);
-        }
-        
-        [Fact]
-        public async Task DCLdapProcessor_CheckIsChannelBindingDisabled_TestTimeout() {
-            var mockProcessor = new Mock<DCLdapProcessor>(2, "primary.testlab.local", null);
-            mockProcessor.CallBase = true;
             
             mockProcessor.Setup(x => x.CheckIsChannelBindingDisabled()).ReturnsAsync(() => {
-                Task.Delay(1000).Wait();
+                Task.Delay(100).Wait();
                 return NtStatus.StatusAccessDenied;
             });
-            
-            mockProcessor.Setup(x => x.TestLdapsPort()).ReturnsAsync(true);
 
             mockProcessor.Setup(x => x.TestLdapPort()).ReturnsAsync(true);
             mockProcessor.Setup(x => x.TestLdapsPort()).ReturnsAsync(true);
@@ -67,8 +46,10 @@ namespace CommonLibTest {
             };
             var results = await processor.Scan("primary.testlab.local", TimeSpan.FromMilliseconds(1));
 
-            Assert.Single(receivedStatus);
+            Assert.Equal(2, receivedStatus.Count);
             var status = receivedStatus[0];
+            Assert.Equal("Timeout", status.Status);
+            status = receivedStatus[1];
             Assert.Equal("Timeout", status.Status);
         }
         
