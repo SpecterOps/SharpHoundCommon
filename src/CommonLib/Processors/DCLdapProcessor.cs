@@ -54,48 +54,43 @@ public class DCLdapProcessor {
             isChannelBindingDisabled = new();
 
         if (hasLdap) {
-            isSigningRequired = await Task.Run(() => CheckIsNtlmSigningRequired()).TimeoutAfter(timeout);
+            isSigningRequired = await Task.Run(CheckIsNtlmSigningRequired).TimeoutAfter(timeout);
         }
 
         if (hasLdaps) {
-            isChannelBindingDisabled = await Task.Run(() => CheckIsChannelBindingDisabled()).TimeoutAfter(timeout);
+            isChannelBindingDisabled = await Task.Run(CheckIsChannelBindingDisabled).TimeoutAfter(timeout);
         }
-        
-        if (isSigningRequired.IsFailed || isChannelBindingDisabled.IsFailed) {
+
+        if (isSigningRequired.IsFailed) {
             await SendComputerStatus(new CSVComputerStatus {
                 Status = isSigningRequired.Error,
-                Task = "DCLdapScan",
+                Task = "DCLdapIsSigningRequired",
                 ComputerName = computerName
             });
-            _log.LogTrace("DCLdapScan failed on {ComputerName}: {Status}", computerName, isSigningRequired.Status);
-            _log.LogTrace("DCLdapScan failed on {ComputerName}: {Status}", computerName, isChannelBindingDisabled.Status);
-            return new LdapService(
-                hasLdap,
-                hasLdaps,
-                new APIResult<bool>
-                {
-                    Collected = isSigningRequired.IsSuccess,
-                    FailureReason = isSigningRequired.Error,
-                    Result = isSigningRequired.Value,
+            _log.LogTrace("DCLdapScan failed on IsSigningRequired for {ComputerName}: {Status}", computerName, isSigningRequired.Status);
+        } else {
+            await SendComputerStatus(new CSVComputerStatus {
+                Status = CSVComputerStatus.StatusSuccess,
+                Task = "DCLdapIsSigningRequired",
+                ComputerName = computerName
+            });
+        }
 
-                },
-                new APIResult<bool>
-                {
-                    Collected = isChannelBindingDisabled.IsSuccess,
-                    FailureReason = isChannelBindingDisabled.Error,
-                    Result = isChannelBindingDisabled.Value,
-
-                }
-            );
+        if (isChannelBindingDisabled.IsFailed) {
+            await SendComputerStatus(new CSVComputerStatus {
+                Status = isChannelBindingDisabled.Error,
+                Task = "DCLdapIsChannelBindingDisabled",
+                ComputerName = computerName
+            });
+            _log.LogTrace("DCLdapScan failed on IsChannelBindingDisabled for {ComputerName}: {Status}", computerName, isSigningRequired.Status);
+        } else {
+            await SendComputerStatus(new CSVComputerStatus {
+                Status = CSVComputerStatus.StatusSuccess,
+                Task = "DCLdapIsChannelBindingDisabled",
+                ComputerName = computerName
+            });
         }
         
-        await SendComputerStatus(new CSVComputerStatus {
-            Status = CSVComputerStatus.StatusSuccess,
-            Task = "DCLdapScan",
-            ComputerName = computerName
-        });
-        _log.LogTrace("DCLdapScan succeeded on ComputerName}", computerName);
-
         return new LdapService(
             hasLdap,
             hasLdaps,
