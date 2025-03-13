@@ -6,6 +6,7 @@ using SharpHoundCommonLib.ThirdParty.PSOpenAD;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
+using SharpHoundRPC;
 using SharpHoundRPC.PortScanner;
 
 namespace SharpHoundCommonLib.Processors;
@@ -25,39 +26,88 @@ public class DCLdapProcessor {
     private readonly int _ldapTimeout;
     private readonly Uri _ldapEndpoint;
     private readonly Uri _ldapSslEndpoint;
+    public delegate Task ComputerStatusDelegate(CSVComputerStatus status);
 
     private readonly string SEC_E_UNSUPPORTED_FUNCTION = "80090302";
     private readonly string SEC_E_BAD_BINDINGS = "80090346";
 
 
-    public DCLdapProcessor(int portScanTimeout, string dcHostname, ILogger log) {
-        _log = log;
+    public DCLdapProcessor(int portScanTimeout, string dcHostname, ILogger log = null) {
+        _log = log ?? Logging.LogProvider.CreateLogger("DCLdapProcessor");
         _scanner = new PortScanner();
         _portScanTimeout = portScanTimeout;
         _ldapTimeout = portScanTimeout / 1000;
         _ldapEndpoint = new Uri($"ldap://{dcHostname}:389");
         _ldapSslEndpoint = new Uri($"ldaps://{dcHostname}:636");
     }
+    
+    public event ComputerStatusDelegate ComputerStatusEvent;
 
-    public async Task<LdapService> Scan() {
+    public async Task<LdapService> Scan(string computerName, TimeSpan timeout = default) {
+        if (timeout == default) {
+            timeout = TimeSpan.FromMinutes(2);
+        }
+        
         var hasLdap = await TestLdapPort();
         var hasLdaps = await TestLdapsPort();
-        APIResult<bool> isSigningRequired = new(),
+        SharpHoundRPC.Result<bool> isSigningRequired = new(),
             isChannelBindingDisabled = new();
 
         if (hasLdap) {
-            isSigningRequired = await CheckIsNtlmSigningRequired();
+            isSigningRequired = await Task.Run(CheckIsNtlmSigningRequired).TimeoutAfter(timeout);
         }
 
         if (hasLdaps) {
-            isChannelBindingDisabled = await CheckIsChannelBindingDisabled();
+            isChannelBindingDisabled = await Task.Run(CheckIsChannelBindingDisabled).TimeoutAfter(timeout);
         }
 
+        if (isSigningRequired.IsFailed) {
+            await SendComputerStatus(new CSVComputerStatus {
+                Status = isSigningRequired.Error,
+                Task = "DCLdapIsSigningRequired",
+                ComputerName = computerName
+            });
+            _log.LogTrace("DCLdapScan failed on IsSigningRequired for {ComputerName}: {Status}", computerName, isSigningRequired.Status);
+        } else {
+            await SendComputerStatus(new CSVComputerStatus {
+                Status = CSVComputerStatus.StatusSuccess,
+                Task = "DCLdapIsSigningRequired",
+                ComputerName = computerName
+            });
+        }
+
+        if (isChannelBindingDisabled.IsFailed) {
+            await SendComputerStatus(new CSVComputerStatus {
+                Status = isChannelBindingDisabled.Error,
+                Task = "DCLdapIsChannelBindingDisabled",
+                ComputerName = computerName
+            });
+            _log.LogTrace("DCLdapScan failed on IsChannelBindingDisabled for {ComputerName}: {Status}", computerName, isSigningRequired.Status);
+        } else {
+            await SendComputerStatus(new CSVComputerStatus {
+                Status = CSVComputerStatus.StatusSuccess,
+                Task = "DCLdapIsChannelBindingDisabled",
+                ComputerName = computerName
+            });
+        }
+        
         return new LdapService(
             hasLdap,
             hasLdaps,
-            isSigningRequired,
-            isChannelBindingDisabled
+            new APIResult<bool>
+            {
+                Collected = isSigningRequired.IsSuccess,
+                FailureReason = isSigningRequired.Error,
+                Result = isSigningRequired.Value,
+
+            },
+            new APIResult<bool>
+            {
+                Collected = isChannelBindingDisabled.IsSuccess,
+                FailureReason = isChannelBindingDisabled.Error,
+                Result = isChannelBindingDisabled.Value,
+
+            }
         );
     }
 
@@ -66,25 +116,26 @@ public class DCLdapProcessor {
     /// </summary>
     /// <returns>bool</returns>
     [ExcludeFromCodeCoverage]
-    public async Task<bool> TestLdapPort() {
+    public virtual async Task<bool> TestLdapPort() {
         return await _scanner.CheckPort(_ldapEndpoint.Host, _ldapEndpoint.Port, _portScanTimeout);
     }
 
     [ExcludeFromCodeCoverage]
-    public async Task<bool> TestLdapsPort() {
+    public virtual async Task<bool> TestLdapsPort() {
         return await _scanner.CheckPort(_ldapSslEndpoint.Host, _ldapSslEndpoint.Port, _portScanTimeout);
     }
 
-    public async Task<APIResult<bool>> CheckIsNtlmSigningRequired() {
+    public virtual async Task<SharpHoundRPC.Result<bool>> CheckIsNtlmSigningRequired() {
         try {
             var options = new LdapAuthOptions() {
                 Signing = false
             };
             var accessibleWithoutSigning = await Authenticate(_ldapEndpoint, options);
 
-            return APIResult<bool>.Success(accessibleWithoutSigning == false);
+            return SharpHoundRPC.Result<bool>.Ok(accessibleWithoutSigning == false);
+
         } catch (Exception ex) {
-            return APIResult<bool>.Failure($"CheckIsNtlmSigningRequired failed: {ex}");
+            return SharpHoundRPC.Result<bool>.Fail($"CheckIsNtlmSigningRequired failed: {ex}");
         }
     }
 
@@ -96,7 +147,7 @@ public class DCLdapProcessor {
     // 3) Correct bindings to ensure NTLM auth is enabled
     // However, as of right now we only do #2. We can't do #1 right now since the
     // Window's SSPI APIs (InitSecurityContext) always add channel bindings.
-    public async Task<APIResult<bool>> CheckIsChannelBindingDisabled() {
+    public virtual async Task<SharpHoundRPC.Result<bool>> CheckIsChannelBindingDisabled() {
         try {
             // 1) Can we connect with *invalid* bindings
 
@@ -107,10 +158,10 @@ public class DCLdapProcessor {
                 Signing = false,
                 Bindings = bindings
             });
+            return SharpHoundRPC.Result<bool>.Ok(accessibleWithNoBindings);
 
-            return APIResult<bool>.Success(accessibleWithNoBindings);
         } catch (Exception ex) {
-            return APIResult<bool>.Failure($"CheckIsNtlmSigningRequired failed: {ex}");
+            return SharpHoundRPC.Result<bool>.Fail($"CheckIsNtlmSigningRequired failed: {ex}");
         }
     }
 
@@ -168,5 +219,9 @@ public class DCLdapProcessor {
         }
 
         return false;
+    }
+    
+    private async Task SendComputerStatus(CSVComputerStatus status) {
+        if (ComputerStatusEvent is not null) await ComputerStatusEvent.Invoke(status);
     }
 }
