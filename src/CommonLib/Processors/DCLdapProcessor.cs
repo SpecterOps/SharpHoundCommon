@@ -125,7 +125,7 @@ public class DCLdapProcessor {
         return await _scanner.CheckPort(_ldapSslEndpoint.Host, _ldapSslEndpoint.Port, _portScanTimeout);
     }
 
-    public virtual async Task<SharpHoundRPC.Result<bool>> CheckIsNtlmSigningRequired() {
+    public async Task<SharpHoundRPC.Result<bool>> CheckIsNtlmSigningRequired() {
         try {
             var options = new LdapAuthOptions() {
                 Signing = false
@@ -147,7 +147,7 @@ public class DCLdapProcessor {
     // 3) Correct bindings to ensure NTLM auth is enabled
     // However, as of right now we only do #2. We can't do #1 right now since the
     // Window's SSPI APIs (InitSecurityContext) always add channel bindings.
-    public virtual async Task<SharpHoundRPC.Result<bool>> CheckIsChannelBindingDisabled() {
+    public async Task<SharpHoundRPC.Result<bool>> CheckIsChannelBindingDisabled() {
         try {
             // 1) Can we connect with *invalid* bindings
 
@@ -171,7 +171,7 @@ public class DCLdapProcessor {
     /// <param name="endpoint"></param>
     /// <param name="options"></param>
     /// <returns></returns>
-    private async Task<bool> Authenticate(Uri endpoint, LdapAuthOptions options) {
+    public virtual async Task<bool> Authenticate(Uri endpoint, LdapAuthOptions options) {
         var host = endpoint.Host;
         var auth = new NtlmAuthenticationHandler($"LDAP/{host.ToUpper()}") {
             Options = options
