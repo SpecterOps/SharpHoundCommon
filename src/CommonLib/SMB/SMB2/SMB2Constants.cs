@@ -22,7 +22,6 @@
         public const ushort SigningRequired = 0x0002;
 
         // Expected response structure sizes
-        public const ushort ExpectedHeaderStructureSize = 0x40;
         public const ushort ExpectedNegotiateStructureSizeA = 0x41;
         public const ushort ExpectedNegotiateStructureSizeB = 0x65;
 

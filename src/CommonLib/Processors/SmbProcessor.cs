@@ -41,8 +41,8 @@ namespace SharpHoundCommonLib.Processors {
                     Task = "SmbScan",
                     ComputerName = host
                 });
-                _log.LogTrace("SmbScan failed on {ComputerName}: {Status}", host, result.Status);
-                return APIResult<SmbInfo>.Failure(result.Status.ToString());
+                _log.LogTrace("SmbScan failed on {ComputerName}: {Status}", host, result.Error);
+                return APIResult<SmbInfo>.Failure(result.Error);
             }
 
             if (result.Value == null)
@@ -52,7 +52,7 @@ namespace SharpHoundCommonLib.Processors {
                     Task = "SmbScan",
                     ComputerName = host
                 });
-                _log.LogTrace("SmbScan failed on {ComputerName}: {Status}", host, result.Status);
+                _log.LogTrace("SmbScan failed on {ComputerName} - null result: {Status}", host, result.Status);
                 return APIResult<SmbInfo>.Failure(result.Error ?? "Unknown error");
             }
             
