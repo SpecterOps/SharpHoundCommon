@@ -28,22 +28,23 @@ public class RegistryProcessor {
         _queries = [
             RegistryQuery.ForKey(RegistryHive.LocalMachine, @"SYSTEM\CurrentControlSet\Control\Lsa\MSV1_0")
                 .WithValues([
-                    "NtlmMinClientSec",
-                    "NtlmMinServerSec",
-                    "RestrictReceivingNTLMTraffic",
-                    "RestrictSendingNTLMTraffic",
+                    "ClientAllowedNTLMServers",     // Network security: Restrict NTLM: Add remote server exceptions for NTLM authentication
+                    "NtlmMinClientSec",             // Network security: Minimum session security for NTLM SSP based (including secure RPC) clients
+                    "NtlmMinServerSec",             // Network security: Minimum session security for NTLM SSP based (including secure RPC) servers
+                    "RestrictReceivingNTLMTraffic", // Network security: Restrict NTLM: Incoming NTLM traffic
+                    "RestrictSendingNTLMTraffic",   // Network security: Restrict NTLM: Outgoing NTLM traffic to remote servers
                 ]),
 
             RegistryQuery.ForKey(RegistryHive.LocalMachine, @"SYSTEM\CurrentControlSet\Control\Lsa\")
                 .WithValues([
-                    "LMCompatibilityLevel",
-                    "UseMachineId"
+                    "LMCompatibilityLevel",         // Network security: LAN Manager authentication level
+                    "UseMachineId"                  // Network security: Allow Local System to use computer identity for NTLM
                 ]),
 
             RegistryQuery.ForKey(RegistryHive.LocalMachine, @"SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters")
                 .WithValues([
-                    "RequireSecuritySignature",
-                    "EnableSecuritySignature"
+                    "EnableSecuritySignature",      // Microsoft network client: Digitally sign communications (if server agrees) 
+                    "RequireSecuritySignature",     // Microsoft network client: Digitally sign communications (always)
                 ])
         ];
     }
@@ -63,6 +64,9 @@ public class RegistryProcessor {
 
                 var name = key.ValueName;
                 switch (name) {
+                    case "ClientAllowedNTLMServers":
+                        output.ClientAllowedNTLMServers = (string[])key.Value;
+                        break;
                     case "NtlmMinClientSec":
                         output.NtlmMinClientSec = Convert.ToUInt32(key.Value);
                         break;
@@ -79,7 +83,7 @@ public class RegistryProcessor {
                         output.LmCompatibilityLevel = Convert.ToUInt32(key.Value);
                         break;
                     case "UseMachineId":
-                        output.UseMachine = Convert.ToUInt32(key.Value);
+                        output.UseMachineId = Convert.ToUInt32(key.Value);
                         break;
                     case "RequireSecuritySignature":
                         output.RequireSecuritySignature = Convert.ToUInt32(key.Value);
