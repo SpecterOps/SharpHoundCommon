@@ -52,9 +52,12 @@ namespace SharpHoundCommonLib.SMB
         /// <returns>Result object containing SMB signing information</returns>
         public async Task<SharpHoundRPC.Result<SmbScanInfo>> ScanHost(string host, int port = 445)
         {
+
             var isLocalMachine = NativeUtils.IsCurrentMachineFqdn(host);
             if (isLocalMachine)
             {
+                // When accessing the SMB directly port from localhost, it'll disconnect. 
+                // Side step that by just collecting the data from the registry.
                 return CheckRegistrySigningRequired(host);
             }
 
@@ -70,31 +73,36 @@ namespace SharpHoundCommonLib.SMB
             return await TrySMBNegotiate(host, port, false);
         }
 
+        /// <summary>
+        /// Determines if SMB signing is required using registry values.
+        /// </summary>
         private SharpHoundRPC.Result<SmbScanInfo> CheckRegistrySigningRequired(string host)
         {
             const string keyPath = @"SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters";
-            const string valueName = "RequireSecuritySignature";
+            const string requireValueName = "RequireSecuritySignature";
+            const string enableValueName = "EnableSecuritySignature";
 
             try
             {
-                var registryValue = Registry.GetValue($@"HKEY_LOCAL_MACHINE\{keyPath}", valueName, null);
+                var requireRegistryValue = Registry.GetValue($@"HKEY_LOCAL_MACHINE\{keyPath}", requireValueName, null);
+                var enableRegistryValue = Registry.GetValue($@"HKEY_LOCAL_MACHINE\{keyPath}", enableValueName, null);
 
-                if (registryValue == null)
+                bool signingRequired = false;
+                bool signingEnabled = false;
+
+                if (requireRegistryValue != null)
                 {
-                    // Value not set means SMB signing not explicitly required
-                    return SharpHoundRPC.Result<SmbScanInfo>.Ok(new SmbScanInfo(host)
-                    {
-                        SigningRequired = false
-                    });
+                    signingRequired = Convert.ToInt32(requireRegistryValue) != 0;
                 }
 
-                int requireSignature = Convert.ToInt32(registryValue);
-
-                bool signingRequired = requireSignature != 0;
+                if (enableRegistryValue != null)
+                {
+                    signingEnabled = Convert.ToInt32(enableRegistryValue) != 0;
+                }
 
                 return SharpHoundRPC.Result<SmbScanInfo>.Ok(new SmbScanInfo(host)
                 {
-                    SigningRequired = signingRequired
+                    SigningRequired = signingEnabled && signingRequired
                 });
             }
             catch (Exception ex)
@@ -102,6 +110,7 @@ namespace SharpHoundCommonLib.SMB
                 return SharpHoundRPC.Result<SmbScanInfo>.Fail($"Registry check failed: {ex.Message}");
             }
         }
+
 
         /// <summary>
         /// Sends either an SMB1 or SMB2 negoitate message to check if SMB signing is required.

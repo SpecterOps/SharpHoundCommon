@@ -43,6 +43,7 @@ public class RegistryProcessor {
             RegistryQuery.ForKey(RegistryHive.LocalMachine, @"SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters")
                 .WithValues([
                     "RequireSecuritySignature",
+                    "EnableSecuritySignature"
                 ])
         ];
     }
@@ -82,6 +83,9 @@ public class RegistryProcessor {
                         break;
                     case "RequireSecuritySignature":
                         output.RequireSecuritySignature = Convert.ToUInt32(key.Value);
+                        break;
+                    case "EnableSecuritySignature":
+                        output.EnableSecuritySignature = Convert.ToUInt32(key.Value);
                         break;
                 }
             }
