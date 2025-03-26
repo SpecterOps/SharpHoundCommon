@@ -10,6 +10,8 @@ using SharpHoundCommonLib.SMB.NetBIOS;
 using System.CodeDom;
 using Microsoft.Extensions.Logging;
 using SharpHoundRPC;
+using SharpHoundRPC.Registry;
+using Microsoft.Win32;
 
 namespace SharpHoundCommonLib.SMB
 {
@@ -50,6 +52,14 @@ namespace SharpHoundCommonLib.SMB
         /// <returns>Result object containing SMB signing information</returns>
         public async Task<SharpHoundRPC.Result<SmbScanInfo>> ScanHost(string host, int port = 445)
         {
+            var isLocalMachine = NativeUtils.IsCurrentMachineFqdn(host);
+            if (isLocalMachine)
+            {
+                return CheckRegistrySigningRequired(host);
+            }
+
+
+
             // Try SMB1 negotiate first as it'll elicit an SMB1 or SMB2 response (if either is enabled)
             var smb1result = await TrySMBNegotiate(host, port, true);
 
@@ -58,6 +68,39 @@ namespace SharpHoundCommonLib.SMB
 
             // SMB1 failed, so try an SMB2 negotiate in case SMB1 is disabled or the SMB3 dialect is required
             return await TrySMBNegotiate(host, port, false);
+        }
+
+        private SharpHoundRPC.Result<SmbScanInfo> CheckRegistrySigningRequired(string host)
+        {
+            const string keyPath = @"SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters";
+            const string valueName = "RequireSecuritySignature";
+
+            try
+            {
+                var registryValue = Registry.GetValue($@"HKEY_LOCAL_MACHINE\{keyPath}", valueName, null);
+
+                if (registryValue == null)
+                {
+                    // Value not set means SMB signing not explicitly required
+                    return SharpHoundRPC.Result<SmbScanInfo>.Ok(new SmbScanInfo(host)
+                    {
+                        SigningRequired = false
+                    });
+                }
+
+                int requireSignature = Convert.ToInt32(registryValue);
+
+                bool signingRequired = requireSignature != 0;
+
+                return SharpHoundRPC.Result<SmbScanInfo>.Ok(new SmbScanInfo(host)
+                {
+                    SigningRequired = signingRequired
+                });
+            }
+            catch (Exception ex)
+            {
+                return SharpHoundRPC.Result<SmbScanInfo>.Fail($"Registry check failed: {ex.Message}");
+            }
         }
 
         /// <summary>
