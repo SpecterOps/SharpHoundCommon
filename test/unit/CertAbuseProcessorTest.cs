@@ -85,7 +85,7 @@ namespace CommonLibTest {
         //     Assert.Empty(results);
         // }
 
-        [Fact]
+        [WindowsOnlyFact]
         public async Task CertAbuseProcessor_ProcessCAPermissions_NullSecurity_ReturnsNull()
         {
             var processor = new CertAbuseProcessor(new MockLdapUtils());
