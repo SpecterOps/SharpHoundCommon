@@ -10,5 +10,6 @@ public class RegistryData {
     public uint? NtlmMinClientSec { get; set; } = null;
     public uint? LmCompatibilityLevel { get; set; } = null;
     public uint? UseMachine { get; set; } = null;
+    public uint? RequireSecuritySignature { get; set; } = null;
 }
 #nullable disable

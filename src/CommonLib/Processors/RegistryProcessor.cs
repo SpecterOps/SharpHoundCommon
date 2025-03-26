@@ -26,7 +26,7 @@ public class RegistryProcessor {
         ];
 
         _queries = [
-            RegistryQuery.ForKey(RegistryHive.LocalMachine, @"System\CurrentControlSet\Control\Lsa\MSV1_0")
+            RegistryQuery.ForKey(RegistryHive.LocalMachine, @"SYSTEM\CurrentControlSet\Control\Lsa\MSV1_0")
                 .WithValues([
                     "NtlmMinClientSec",
                     "NtlmMinServerSec",
@@ -34,10 +34,15 @@ public class RegistryProcessor {
                     "RestrictSendingNTLMTraffic",
                 ]),
 
-            RegistryQuery.ForKey(RegistryHive.LocalMachine, @"System\CurrentControlSet\Control\Lsa\")
+            RegistryQuery.ForKey(RegistryHive.LocalMachine, @"SYSTEM\CurrentControlSet\Control\Lsa\")
                 .WithValues([
                     "LMCompatibilityLevel",
                     "UseMachineId"
+                ]),
+
+            RegistryQuery.ForKey(RegistryHive.LocalMachine, @"SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters")
+                .WithValues([
+                    "RequireSecuritySignature",
                 ])
         ];
     }
@@ -74,6 +79,9 @@ public class RegistryProcessor {
                         break;
                     case "UseMachineId":
                         output.UseMachine = Convert.ToUInt32(key.Value);
+                        break;
+                    case "RequireSecuritySignature":
+                        output.RequireSecuritySignature = Convert.ToUInt32(key.Value);
                         break;
                 }
             }
