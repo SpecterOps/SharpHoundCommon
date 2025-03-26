@@ -179,6 +179,9 @@ namespace SharpHoundCommonLib.SMB
         /// <para>
         /// <see href="https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-smb2/63abf97c-0d09-47e2-88d6-6bfa552949a5">MS-SMB2 2.2.4 SMB2 NEGOTIATE Response</see>
         /// </para>
+        /// <para>
+        /// <see href="https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-smb2/fb188936-5050-48d3-b350-dc43059638a4">MS-SMB2 2.2.1.2 SMB2 Packet Header - SYNC</see>
+        /// </para>
         /// </remarks>
         internal (bool error, bool signingRequired) CheckSMB2SigningRequired(byte[] responsePacket)
         {
@@ -201,18 +204,17 @@ namespace SharpHoundCommonLib.SMB
 
             // Validate structure size of negotiate response
             var negotiateStructureSize = reader.ReadUInt16();
-            if (negotiateStructureSize != SMB2Constants.ExpectedNegotiateStructureSizeA &&
-                negotiateStructureSize != SMB2Constants.ExpectedNegotiateStructureSizeB)
-            {
-                // Invalid structure size for negotiate response
-                return (true, false);
-            }
+            
 
             // Read security mode, which contains signing information
             var securityMode = reader.ReadUInt16();
 
             // Check if signing is required (bit 1)
+            bool signingEnabled = (securityMode & SMB2Constants.SigningEnabled) != 0;
             bool signingRequired = (securityMode & SMB2Constants.SigningRequired) != 0;
+
+            if (!signingEnabled)
+                return (false, false);
 
             return (false, signingRequired);
         }

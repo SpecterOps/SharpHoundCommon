@@ -165,7 +165,7 @@ namespace SharpHoundCommonLib.Processors {
                         return APIResult<CAEnrollmentEndpoint>.Success(output);
                     }
 
-                    Console.WriteLine($"WebException occurred: {ex}");
+                    _logger.LogError($"WebException occurred: {ex}");
 
                     return APIResult<CAEnrollmentEndpoint>
                         .Failure(
