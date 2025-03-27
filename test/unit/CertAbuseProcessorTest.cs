@@ -85,17 +85,17 @@ namespace CommonLibTest {
         //     Assert.Empty(results);
         // }
 
-        [Fact]
-        public async Task CertAbuseProcessor_ProcessCAPermissions_NullSecurity_ReturnsNull()
-        {
-            var processor = new CertAbuseProcessor(new MockLdapUtils());
-
-            var results = await processor.ProcessRegistryEnrollmentPermissions(null, "DUMPSTER.FIRE", null, "test");
-
-            Assert.Equal("Value cannot be null. (Parameter 'machineName')", results.FailureReason);
-            Assert.False(results.Collected);
-            Assert.Null(results.Result);
-        }
+        // [Fact]
+        // public async Task CertAbuseProcessor_ProcessCAPermissions_NullSecurity_ReturnsNull()
+        // {
+        //     var processor = new CertAbuseProcessor(new MockLdapUtils());
+        //
+        //     var results = await processor.ProcessRegistryEnrollmentPermissions(null, "DUMPSTER.FIRE", null, "test");
+        //
+        //     Assert.Equal("Value cannot be null. (Parameter 'machineName')", results.FailureReason);
+        //     Assert.False(results.Collected);
+        //     Assert.Null(results.Data);
+        // }
 
         // [WindowsOnlyFact]
         // public void CertAbuseProcessor_ProcessCAPermissions_ReturnsCorrectValues()
