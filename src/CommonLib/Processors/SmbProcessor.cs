@@ -23,8 +23,8 @@ namespace SharpHoundCommonLib.Processors {
         public SmbProcessor(int timeoutMs, ISmbScanner smbScanner = null, ILogger log = null)
         {
             _timeoutMs = timeoutMs;
-            _smbScanner = smbScanner ?? new SmbScanner(_log) { TimeoutMs = _timeoutMs };
             _log = log ?? Logging.LogProvider.CreateLogger("SmbProcessor");
+            _smbScanner = smbScanner ?? new SmbScanner(_log) { TimeoutMs = _timeoutMs };
         }
 
         public event ComputerStatusDelegate ComputerStatusEvent;
