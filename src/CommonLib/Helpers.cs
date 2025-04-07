@@ -207,7 +207,7 @@ namespace SharpHoundCommonLib {
         /// <returns></returns>
         public static long ConvertTimestampToUnixEpoch(string ldapTime) {
             try {
-                var dt = DateTime.ParseExact(ldapTime, "yyyyMMddHHmmss.0K", CultureInfo.CurrentCulture);
+                var dt = DateTime.ParseExact(ldapTime, "yyyyMMddHHmmss.0K", CultureInfo.CurrentCulture).ToUniversalTime();
                 return (long)dt.Subtract(EpochDiff).TotalSeconds;
             } catch {
                 return 0;
