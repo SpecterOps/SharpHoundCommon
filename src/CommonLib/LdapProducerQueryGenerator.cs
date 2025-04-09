@@ -76,7 +76,7 @@ public class LdapProducerQueryGenerator {
         }
 
         if (methods.HasFlag(CollectionMethod.GPOLocalGroup)) {
-            filter = filter.AddOUs();
+            filter = filter.AddOUs().AddDomains();
             properties.AddRange(CommonProperties.GPOLocalGroupProps);
         }
 
