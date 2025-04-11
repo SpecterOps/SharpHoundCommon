@@ -171,7 +171,7 @@ public class DCLdapProcessor {
     /// <param name="endpoint"></param>
     /// <param name="options"></param>
     /// <returns></returns>
-    public virtual async Task<bool> Authenticate(Uri endpoint, LdapAuthOptions options) {
+    protected internal virtual async Task<bool> Authenticate(Uri endpoint, LdapAuthOptions options) {
         var host = endpoint.Host;
         var auth = new NtlmAuthenticationHandler($"LDAP/{host.ToUpper()}") {
             Options = options

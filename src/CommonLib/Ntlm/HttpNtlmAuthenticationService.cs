@@ -57,7 +57,7 @@ public class HttpNtlmAuthenticationService {
         return ExtractAuthSchemes(getResponse);
     }
 
-    public string[] ExtractAuthSchemes(HttpResponseMessage response) {
+    internal string[] ExtractAuthSchemes(HttpResponseMessage response) {
         if (response.StatusCode == HttpStatusCode.OK) {
             throw new AuthNotRequiredException(
                 "Authorization was not solicited when enumerating Authentication schemes");
