@@ -36,18 +36,21 @@ namespace SharpHoundCommonLib.Processors
         /// <param name="objectDomain"></param>
         /// <param name="computerName"></param>
         /// <returns></returns>
-        public async Task<APIResult<ACE[]>> ProcessRegistryEnrollmentPermissions(string caName, string objectDomain, string computerName, string computerObjectId)
+        public async Task<AceRegistryAPIResult> ProcessRegistryEnrollmentPermissions(string caName, string objectDomain, string computerName, string computerObjectId)
         {
+            var data = new AceRegistryAPIResult();
+
             var aceData = GetCASecurity(computerName, caName);
-            
+            data.Collected = aceData.Collected;
             if (!aceData.Collected)
             {
-                return APIResult<ACE[]>.Failure(aceData.FailureReason);
+                data.FailureReason = aceData.FailureReason;
+                return data;
             }
 
             if (aceData.Value == null)
             {
-                return APIResult<ACE[]>.Success([]);
+                return data;
             }
 
             var descriptor = _utils.MakeSecurityDescriptor();
@@ -141,29 +144,33 @@ namespace SharpHoundCommonLib.Processors
                     });
             }
 
-            return APIResult<ACE[]>.Success(aces.ToArray());
+            data.Data = aces.ToArray();
+            return data;
         }
         
         /// <summary>
-        /// This function will retrieve the enrollment agent restrictions from a ca
+        /// This function will retrieve the enrollment agent restrictions from a CA
         /// </summary>
         /// <param name="caName"></param>
         /// <param name="objectDomain"></param>
         /// <param name="computerName"></param>
         /// <param name="computerObjectId"></param>
         /// <returns></returns>
-        public async Task<APIResult<EnrollmentAgentRestriction[]>> ProcessEAPermissions(string caName, string objectDomain, string computerName, string computerObjectId)
+        public async Task<EnrollmentAgentRegistryAPIResult> ProcessEAPermissions(string caName, string objectDomain, string computerName, string computerObjectId)
         {
+            var ret = new EnrollmentAgentRegistryAPIResult();
             var regData = GetEnrollmentAgentRights(computerName, caName);
 
-            if (!regData.Collected)
+            ret.Collected = regData.Collected;
+            if (!ret.Collected)
             {
-                return APIResult<EnrollmentAgentRestriction[]>.Failure(regData.FailureReason);
+                ret.FailureReason = regData.FailureReason;
+                return ret;
             }
 
             if (regData.Value == null)
             {
-                return APIResult<EnrollmentAgentRestriction[]>.Success([]);
+                return ret;
             }
             
             var isDomainController = await _utils.IsDomainController(computerObjectId, objectDomain);
@@ -178,7 +185,10 @@ namespace SharpHoundCommonLib.Processors
                     enrollmentAgentRestrictions.Add(restriction);
                 }
             }
-            return APIResult<EnrollmentAgentRestriction[]>.Success(enrollmentAgentRestrictions.ToArray());
+
+            ret.Restrictions = enrollmentAgentRestrictions.ToArray();
+
+            return ret;
         }
         
         public async Task<(IEnumerable<TypedPrincipal> resolvedTemplates, IEnumerable<string> unresolvedTemplates)> ProcessCertTemplates(IEnumerable<string> templates, string domainName)
@@ -238,25 +248,30 @@ namespace SharpHoundCommonLib.Processors
         /// <param name="caName"></param>
         /// <returns></returns>
         [ExcludeFromCodeCoverage]
-        public APIResult<bool> IsUserSpecifiesSanEnabled(string target, string caName)
+        public BoolRegistryAPIResult IsUserSpecifiesSanEnabled(string target, string caName)
         {
+            var ret = new BoolRegistryAPIResult();
             var subKey =
                 $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{caName}\\PolicyModules\\CertificateAuthority_MicrosoftDefault.Policy";
             const string subValue = "EditFlags";
             var data = Helpers.GetRegistryKeyData(target, subKey, subValue, _log);
 
+            ret.Collected = data.Collected;
             if (!data.Collected)
             {
-                return APIResult<bool>.Failure(data.FailureReason);
+                ret.FailureReason = data.FailureReason;
+                return ret;
             }
 
             if (data.Value == null)
             {
-                return APIResult<bool>.Success(false);
+                return ret;
             }
 
             var editFlags = (int)data.Value;
-            return APIResult<bool>.Success((editFlags & 0x00040000) == 0x00040000);
+            ret.Value = (editFlags & 0x00040000) == 0x00040000;
+
+            return ret;
         }
 
         /// <summary>
@@ -267,24 +282,30 @@ namespace SharpHoundCommonLib.Processors
         /// <param name="target"></param>
         /// <param name="caName"></param>
         /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         [ExcludeFromCodeCoverage]
-        public APIResult<bool> RoleSeparationEnabled(string target, string caName)
+        public BoolRegistryAPIResult RoleSeparationEnabled(string target, string caName)
         {
+            var ret = new BoolRegistryAPIResult();
             var regSubKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{caName}";
             const string regValue = "RoleSeparationEnabled";
             var data = Helpers.GetRegistryKeyData(target, regSubKey, regValue, _log);
 
+            ret.Collected = data.Collected;
             if (!data.Collected)
             {
-                return APIResult<bool>.Failure(data.FailureReason);
+                ret.FailureReason = data.FailureReason;
+                return ret;
             }
 
             if (data.Value == null)
             {
-                return APIResult<bool>.Success(false);
+                return ret;
             }
 
-            return APIResult<bool>.Success((int)data.Value == 1);
+            ret.Value = (int)data.Value == 1;
+
+            return ret;
         }
 
         public async Task<(bool Success, TypedPrincipal Principal)> GetRegistryPrincipal(SecurityIdentifier sid, string computerDomain, string computerName, bool isDomainController, string computerObjectId, SecurityIdentifier machineSid)

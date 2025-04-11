@@ -60,14 +60,11 @@ namespace SharpHoundCommonLib.OutputTypes {
 
     public class SmbInfo {
         public bool? SigningEnabled;
-        public string OsVersion;
-        public string OsBuild;
-        public string DnsComputerName { get; internal set; }
     }
 
     public class DCRegistryData {
-        public APIResult<int> CertificateMappingMethods { get; set; }
-        public APIResult<int> StrongCertificateBindingEnforcement { get; set; }
+        public IntRegistryAPIResult CertificateMappingMethods { get; set; }
+        public IntRegistryAPIResult StrongCertificateBindingEnforcement { get; set; }
     }
 
     public class ComputerStatus {

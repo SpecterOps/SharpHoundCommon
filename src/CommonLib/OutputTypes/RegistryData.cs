@@ -9,6 +9,9 @@ public class RegistryData {
     public uint? NtlmMinServerSec { get; set; } = null;
     public uint? NtlmMinClientSec { get; set; } = null;
     public uint? LmCompatibilityLevel { get; set; } = null;
-    public uint? UseMachine { get; set; } = null;
+    public uint? UseMachineId { get; set; } = null;
+    public uint? RequireSecuritySignature { get; set; } = null;
+    public uint? EnableSecuritySignature { get; set; } = null;
+    public string[]? ClientAllowedNTLMServers { get; set; } = null;
 }
 #nullable disable

@@ -5,17 +5,18 @@ using System.Threading.Tasks;
 using Moq;
 using SharpHoundCommonLib;
 using SharpHoundCommonLib.Processors;
+using SharpHoundCommonLib.SMB;
 using SharpHoundRPC;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace CommonLibTest {
     [SuppressMessage("Interoperability", "CA1416:Validate platform compatibility")]
-    public class SmbProcessorTest : IDisposable {
+    public class SMBProcessorTest : IDisposable {
 
         private readonly ITestOutputHelper _testOutputHelper;
 
-        public SmbProcessorTest(ITestOutputHelper testOutputHelper) {
+        public SMBProcessorTest(ITestOutputHelper testOutputHelper) {
             _testOutputHelper = testOutputHelper;
         }
 
@@ -24,18 +25,19 @@ namespace CommonLibTest {
     
         [Fact]
         public async Task SmbProcessor_TestTimeout() {
-            var mockSmbScanner = new Mock<SmbScanner>();
-            
-            
-            mockSmbScanner.Setup(x => x.Scan(It.IsAny<string>(),It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(() => {
-                Task.Delay(100).Wait();
-                return NtStatus.StatusAccessDenied;
-            });
+
+            var mockSmbScanner = new Mock<ISmbScanner>();
+            mockSmbScanner
+                .Setup(x => x.ScanHost(It.IsAny<string>(), It.IsAny<int>()))
+                .Returns(async () => {
+                    await Task.Delay(100);
+                    return NtStatus.StatusAccessDenied;
+                });
+
+
             var mockProcessor = new SmbProcessor(2, mockSmbScanner.Object);
             var receivedStatus = new List<CSVComputerStatus>();
-            mockProcessor.ComputerStatusEvent += async status =>  {
-                receivedStatus.Add(status);
-            };
+            mockProcessor.ComputerStatusEvent += async status => receivedStatus.Add(status);
             var results = await mockProcessor.Scan("primary.testlab.local",TimeSpan.FromMilliseconds(1));
 
             Assert.Single(receivedStatus);

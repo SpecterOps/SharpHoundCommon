@@ -4,9 +4,9 @@ namespace SharpHoundCommonLib.OutputTypes
 {
     public class CARegistryData
     {
-        public APIResult<ACE[]> CASecurity { get; set; }
-        public APIResult<EnrollmentAgentRestriction[]> EnrollmentAgentRestrictions { get; set; }
-        public APIResult<bool> IsUserSpecifiesSanEnabled { get; set; }
-        public APIResult<bool> RoleSeparationEnabled { get; set; }
+        public AceRegistryAPIResult CASecurity { get; set; }
+        public EnrollmentAgentRegistryAPIResult EnrollmentAgentRestrictions { get; set; }
+        public BoolRegistryAPIResult IsUserSpecifiesSanEnabled { get; set; }
+        public BoolRegistryAPIResult RoleSeparationEnabled { get; set; }
     }
 }
