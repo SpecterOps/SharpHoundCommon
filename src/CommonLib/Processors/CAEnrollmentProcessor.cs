@@ -107,7 +107,7 @@ namespace SharpHoundCommonLib.Processors {
             return endpoints;
         }
 
-        private (Uri httpUrl, Uri httpsUrl) BuildEnrollmentUrls(CAEnrollmentEndpointType type) {
+        internal (Uri httpUrl, Uri httpsUrl) BuildEnrollmentUrls(CAEnrollmentEndpointType type) {
             switch (type) {
                 case CAEnrollmentEndpointType.WebEnrollmentApplication:
                     return (new Uri($"http://{_caDnsHostname}/certsrv/"),
