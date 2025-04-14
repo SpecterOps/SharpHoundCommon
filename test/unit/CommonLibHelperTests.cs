@@ -197,7 +197,7 @@ namespace CommonLibTest {
         }
 
         [Fact]
-        public void ConvertTimestampToUnixEpoch_ValidTimestamp_ValidUnixEpoch() {
+        public void ConvertFileTimeToUnixEpoch_ValidTimestamp_ValidUnixEpoch() {
             var d = DateTime.Parse("2021-06-21T00:00:00");
             var result =
                 Helpers.ConvertFileTimeToUnixEpoch(d.ToFileTimeUtc().ToString()); // get the epoch
@@ -208,7 +208,7 @@ namespace CommonLibTest {
         }
 
         [Fact]
-        public void ConvertTimestampToUnixEpoch_InvalidTimestamp_FormatException() {
+        public void ConvertFileTimeToUnixEpoch_InvalidTimestamp_FormatException() {
             Exception ex = Assert.Throws<FormatException>(() =>
                 Helpers.ConvertFileTimeToUnixEpoch("-201adsfasf12180244"));
             Assert.Equal("The input string '-201adsfasf12180244' was not in a correct format.", ex.Message);
@@ -229,6 +229,24 @@ namespace CommonLibTest {
             var result = Helpers.DistinguishedNameToDomain(
                 @"DC=..Deleted-_msdcs.testlab.local\0ADEL:af1f072f-28d7-4b86-9b87-a408bfc9cb0d,CN=Deleted Objects,DC=testlab,DC=local");
             Assert.Equal("TESTLAB.LOCAL", result);
+        }
+        
+        [Fact]
+        public void ConvertTimestampToUnixEpoch_ValidTimestamp() {
+            var d = DateTime.Parse("2025-04-07T00:00:00.0000000-07:00");
+            var result =
+                Helpers.ConvertTimestampToUnixEpoch(d.ToString("yyyyMMddHHmmss.0K")); 
+            var dateTimeOffset = DateTimeOffset.FromUnixTimeSeconds(result); 
+
+            Assert.Equal(d.ToUniversalTime(), dateTimeOffset.DateTime);
+        }
+        
+        [Fact]
+        public void ConvertTimestampToUnixEpoch_InvalidTimestamp() {
+            var result =
+                Helpers.ConvertTimestampToUnixEpoch("-201adsfasf12180244"); 
+
+            Assert.Equal(result, 0);
         }
     }
 }

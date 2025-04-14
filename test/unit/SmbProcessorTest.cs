@@ -25,7 +25,7 @@ namespace CommonLibTest {
     
         [Fact]
         public async Task SmbProcessor_TestTimeout() {
-
+            
             var mockSmbScanner = new Mock<ISmbScanner>();
             mockSmbScanner
                 .Setup(x => x.ScanHost(It.IsAny<string>(), It.IsAny<int>()))
@@ -33,7 +33,6 @@ namespace CommonLibTest {
                     await Task.Delay(100);
                     return NtStatus.StatusAccessDenied;
                 });
-
 
             var mockProcessor = new SmbProcessor(2, mockSmbScanner.Object);
             var receivedStatus = new List<CSVComputerStatus>();
