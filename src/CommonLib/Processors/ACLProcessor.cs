@@ -366,10 +366,10 @@ namespace SharpHoundCommonLib.Processors {
                     _log.LogTrace("Processing ACE with rights {Rights} and guid {GUID} on object {Name}", aceRights,
                         aceType, objectName);
 
-                    //GenericAll applies to every object
-                    if (aceRights.HasFlag(ActiveDirectoryRights.GenericAll))
-                    {
-                        if (aceType is ACEGuids.AllGuid or "")
+                    //GenericAll, WriteDacl, and WriteOwner apply to every object
+                    //All three require ObjectType (aceType) is "AllGuid" or not set (see: https://github.com/SpecterOps/BloodHound/issues/613)
+                    if (aceType is ACEGuids.AllGuid or "") {
+                        if (aceRights.HasFlag(ActiveDirectoryRights.GenericAll)) {
                             aces.Add(new ACE
                             {
                                 PrincipalType = resolvedPrincipal.ObjectType,
@@ -378,30 +378,30 @@ namespace SharpHoundCommonLib.Processors {
                                 RightName = EdgeNames.GenericAll,
                                 InheritanceHash = aceInheritanceHash
                             });
-                        //This is a special case. If we don't continue here, every other ACE will match because GenericAll includes all other permissions
-                        continue;
+                            //This is a special case. If we don't continue here, every other ACE will match because GenericAll includes all other permissions
+                            continue;
+                        }
+                        if (aceRights.HasFlag(ActiveDirectoryRights.WriteDacl)) {
+                            aces.Add(new ACE
+                            {
+                                PrincipalType = resolvedPrincipal.ObjectType,
+                                PrincipalSID = resolvedPrincipal.ObjectIdentifier,
+                                IsInherited = inherited,
+                                RightName = EdgeNames.WriteDacl,
+                                InheritanceHash = aceInheritanceHash
+                            });
+                        }
+                        if (aceRights.HasFlag(ActiveDirectoryRights.WriteOwner)) {
+                            aces.Add(new ACE
+                            {
+                                PrincipalType = resolvedPrincipal.ObjectType,
+                                PrincipalSID = resolvedPrincipal.ObjectIdentifier,
+                                IsInherited = inherited,
+                                RightName = EdgeNames.WriteOwner,
+                                InheritanceHash = aceInheritanceHash
+                            });
+                        }
                     }
-
-                    //WriteDACL and WriteOwner are always useful no matter what the object type is as well because they enable all other attacks
-                    if (aceRights.HasFlag(ActiveDirectoryRights.WriteDacl))
-                        aces.Add(new ACE
-                        {
-                            PrincipalType = resolvedPrincipal.ObjectType,
-                            PrincipalSID = resolvedPrincipal.ObjectIdentifier,
-                            IsInherited = inherited,
-                            RightName = EdgeNames.WriteDacl,
-                            InheritanceHash = aceInheritanceHash
-                        });
-
-                    if (aceRights.HasFlag(ActiveDirectoryRights.WriteOwner))
-                        aces.Add(new ACE
-                        {
-                            PrincipalType = resolvedPrincipal.ObjectType,
-                            PrincipalSID = resolvedPrincipal.ObjectIdentifier,
-                            IsInherited = inherited,
-                            RightName = EdgeNames.WriteOwner,
-                            InheritanceHash = aceInheritanceHash
-                        });
 
                     //Cool ACE courtesy of @rookuu. Allows a principal to add itself to a group and no one else
                     if (aceRights.HasFlag(ActiveDirectoryRights.Self) &&
@@ -418,7 +418,8 @@ namespace SharpHoundCommonLib.Processors {
                         });
 
                     //Process object type specific ACEs. Extended rights apply to users, domains, computers, and cert templates
-                    if (aceRights.HasFlag(ActiveDirectoryRights.ExtendedRight))
+                    if (aceRights.HasFlag(ActiveDirectoryRights.ExtendedRight) ||
+                        aceRights.HasFlag(ActiveDirectoryRights.GenericAll)) //GenericAll also works (see: https://github.com/SpecterOps/BloodHound/issues/613#issuecomment-2728437374)
                     {
                         if (objectType == Label.Domain)
                         {
@@ -538,7 +539,8 @@ namespace SharpHoundCommonLib.Processors {
 
                     //GenericWrite encapsulates WriteProperty, so process them in tandem to avoid duplicate edges
                     if (aceRights.HasFlag(ActiveDirectoryRights.GenericWrite) ||
-                        aceRights.HasFlag(ActiveDirectoryRights.WriteProperty))
+                        aceRights.HasFlag(ActiveDirectoryRights.WriteProperty) || 
+                        aceRights.HasFlag(ActiveDirectoryRights.GenericAll)) //GenericAll also works (see: https://github.com/SpecterOps/BloodHound/issues/613#issuecomment-2728437374)
                     {
                         if (objectType is Label.User
                             or Label.Group
