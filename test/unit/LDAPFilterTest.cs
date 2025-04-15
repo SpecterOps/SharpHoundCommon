@@ -64,7 +64,7 @@ namespace CommonLibTest
             IEnumerable<string> filters = test.GetFilterList();
 
             int i = 0;
-            string userFilter = "(samaccounttype=805306368)";
+            string userFilter = "(|(samaccounttype=805306368)(samaccounttype=805306370))";
             string computerFilter = "(samaccounttype=805306369)";
             string[] expected = {userFilter, computerFilter};
 

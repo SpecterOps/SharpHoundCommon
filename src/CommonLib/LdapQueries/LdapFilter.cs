@@ -56,7 +56,7 @@ namespace SharpHoundCommonLib.LDAPQueries {
         /// <param name="conditions"></param>
         /// <returns></returns>
         public LdapFilter AddUsers(params string[] conditions) {
-            _filterParts.Add(BuildString("(samaccounttype=805306368)", conditions));
+            _filterParts.Add(BuildString("(|(samaccounttype=805306368)(samaccounttype=805306370))", conditions));
 
             return this;
         }
