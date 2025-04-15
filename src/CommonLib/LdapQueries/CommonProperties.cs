@@ -60,7 +60,7 @@
             LDAPProperties.SupportedEncryptionTypes, LDAPProperties.DSHeuristics,
             LDAPProperties.MinPwdLength, LDAPProperties.PwdProperties, LDAPProperties.MinPwdAge, 
             LDAPProperties.MaxPwdAge, LDAPProperties.PwdHistoryLength, LDAPProperties.LockoutDuration, 
-            LDAPProperties.LockoutThreshold, LDAPProperties.LockOutObservationWindow
+            LDAPProperties.LockoutThreshold, LDAPProperties.LockOutObservationWindow, LDAPProperties.PrincipalName
         };
 
         public static readonly string[] ContainerProps =
