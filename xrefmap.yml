@@ -9335,6 +9335,12 @@ references:
   commentId: F:SharpHoundCommonLib.Processors.ACEGuids.WriteSPN
   fullName: SharpHoundCommonLib.Processors.ACEGuids.WriteSPN
   nameWithType: ACEGuids.WriteSPN
+- uid: SharpHoundCommonLib.Processors.ACEGuids.WriteTitle
+  name: WriteTitle
+  href: api/SharpHoundCommonLib.Processors.ACEGuids.html#SharpHoundCommonLib_Processors_ACEGuids_WriteTitle
+  commentId: F:SharpHoundCommonLib.Processors.ACEGuids.WriteTitle
+  fullName: SharpHoundCommonLib.Processors.ACEGuids.WriteTitle
+  nameWithType: ACEGuids.WriteTitle
 - uid: SharpHoundCommonLib.Processors.ACLProcessor
   name: ACLProcessor
   href: api/SharpHoundCommonLib.Processors.ACLProcessor.html
@@ -9986,6 +9992,19 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.Processors.DCLdapProcessor.DCLdapProcessor
   nameWithType: DCLdapProcessor.DCLdapProcessor
+- uid: SharpHoundCommonLib.Processors.DCLdapProcessor.Authenticate(System.Uri,SharpHoundCommonLib.Processors.LdapAuthOptions)
+  name: Authenticate(Uri, LdapAuthOptions)
+  href: api/SharpHoundCommonLib.Processors.DCLdapProcessor.html#SharpHoundCommonLib_Processors_DCLdapProcessor_Authenticate_System_Uri_SharpHoundCommonLib_Processors_LdapAuthOptions_
+  commentId: M:SharpHoundCommonLib.Processors.DCLdapProcessor.Authenticate(System.Uri,SharpHoundCommonLib.Processors.LdapAuthOptions)
+  fullName: SharpHoundCommonLib.Processors.DCLdapProcessor.Authenticate(System.Uri, SharpHoundCommonLib.Processors.LdapAuthOptions)
+  nameWithType: DCLdapProcessor.Authenticate(Uri, LdapAuthOptions)
+- uid: SharpHoundCommonLib.Processors.DCLdapProcessor.Authenticate*
+  name: Authenticate
+  href: api/SharpHoundCommonLib.Processors.DCLdapProcessor.html#SharpHoundCommonLib_Processors_DCLdapProcessor_Authenticate_
+  commentId: Overload:SharpHoundCommonLib.Processors.DCLdapProcessor.Authenticate
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Processors.DCLdapProcessor.Authenticate
+  nameWithType: DCLdapProcessor.Authenticate
 - uid: SharpHoundCommonLib.Processors.DCLdapProcessor.CheckIsChannelBindingDisabled
   name: CheckIsChannelBindingDisabled()
   href: api/SharpHoundCommonLib.Processors.DCLdapProcessor.html#SharpHoundCommonLib_Processors_DCLdapProcessor_CheckIsChannelBindingDisabled
