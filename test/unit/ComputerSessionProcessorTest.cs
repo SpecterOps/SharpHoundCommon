@@ -49,6 +49,21 @@ namespace CommonLibTest {
             Assert.True(result.Collected);
             Assert.Empty(result.Results);
         }
+        
+        [Fact]
+        public async Task ComputerSessionProcessor_ReadUserSessions_FilteringDomainWorks() {
+            var mockNativeMethods = new Mock<NativeMethods>();
+
+            var apiResult = new NetSessionEnumResults[] {
+                new("temp", "\\\\192.168.92.110")
+            };
+            mockNativeMethods.Setup(x => x.NetSessionEnum(It.IsAny<string>())).Returns(apiResult);
+
+            var processor = new ComputerSessionProcessor(new MockLdapUtils(), mockNativeMethods.Object,null, "dfm");
+            var result = await processor.ReadUserSessions("win10", _computerSid, ".");
+            Assert.True(result.Collected);
+            Assert.Empty(result.Results);
+        }
 
         [Fact]
         public async Task ComputerSessionProcessor_ReadUserSessions_ResolvesHost() {
@@ -178,7 +193,8 @@ namespace CommonLibTest {
                 new("WIN10$", "TESTLAB"),
                 new("JOHN", "WIN10"),
                 new("SYSTEM", "NT AUTHORITY"),
-                new("ABC", "TESTLAB")
+                new("ABC", "TESTLAB"),
+                new("XYZ", ".")
             };
             mockNativeMethods.Setup(x => x.NetWkstaUserEnum(It.IsAny<string>())).Returns(apiResults);
 
