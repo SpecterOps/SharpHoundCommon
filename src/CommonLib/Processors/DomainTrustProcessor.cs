@@ -33,14 +33,9 @@ namespace SharpHoundCommonLib.Processors
             var trustInfoList = new List<(string TargetName, System.DirectoryServices.ActiveDirectory.TrustType TrustType)>();
             try
             {
-                using (System.DirectoryServices.ActiveDirectory.Domain ADDomainObj = 
-                    System.DirectoryServices.ActiveDirectory.Domain.GetDomain(
-                        new System.DirectoryServices.ActiveDirectory.DirectoryContext(
-                            System.DirectoryServices.ActiveDirectory.DirectoryContextType.Domain, domain)))
-                {
-                    trustInfoList.AddRange(from System.DirectoryServices.ActiveDirectory.TrustRelationshipInformation trust in ADDomainObj.GetAllTrustRelationships()
-                                           select (trust.TargetName, trust.TrustType));
-                }
+                _utils.GetDomain(domain, out var domainObject);
+                trustInfoList.AddRange(from System.DirectoryServices.ActiveDirectory.TrustRelationshipInformation trust in domainObject.GetAllTrustRelationships()
+                select (trust.TargetName, trust.TrustType));
             }
             catch 
             {
