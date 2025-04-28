@@ -214,6 +214,8 @@ public class DCLdapProcessor {
                         ex.ServerErrorMessage);
                     break;
             }
+        } catch (InvalidOperationException ex) {
+            _log.LogDebug("LDAP InvalidOperationException: {message}", ex.Message);
         } catch (Exception ex) {
             _log.LogError("An unhandled error occurred during the LDAP test: {ex}", ex);
         }
