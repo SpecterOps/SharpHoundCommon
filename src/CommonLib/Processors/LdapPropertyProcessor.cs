@@ -179,6 +179,9 @@ namespace SharpHoundCommonLib.Processors {
             var props = GetCommonProps(entry);
             entry.TryGetLongProperty(LDAPProperties.AdminCount, out var ac);
             props.Add("admincount", ac != 0);
+            entry.TryGetLongProperty(LDAPProperties.GroupType, out var groupType);
+            props.Add("groupscope", GetGroupScope(groupType));
+
             return props;
         }
 
@@ -850,6 +853,31 @@ namespace SharpHoundCommonLib.Processors {
 
                 return "";
             } catch (Exception) {
+                return "Unknown";
+            }
+        }
+
+        private static string GetGroupScope(long groupType)
+        {
+            // Constants from ADS_GROUP_TYPE_ENUM in Active Directory
+            const int ADS_GROUP_TYPE_GLOBAL_GROUP = 0x00000002;
+            const int ADS_GROUP_TYPE_DOMAIN_LOCAL_GROUP = 0x00000004;
+            const int ADS_GROUP_TYPE_UNIVERSAL_GROUP = 0x00000008;
+
+            if ((groupType & ADS_GROUP_TYPE_UNIVERSAL_GROUP) == ADS_GROUP_TYPE_UNIVERSAL_GROUP)
+            {
+                return "Universal";
+            }
+            else if ((groupType & ADS_GROUP_TYPE_DOMAIN_LOCAL_GROUP) == ADS_GROUP_TYPE_DOMAIN_LOCAL_GROUP)
+            {
+                return "DomainLocal";
+            }
+            else if ((groupType & ADS_GROUP_TYPE_GLOBAL_GROUP) == ADS_GROUP_TYPE_GLOBAL_GROUP)
+            {
+                return "Global";
+            }
+            else
+            {
                 return "Unknown";
             }
         }
