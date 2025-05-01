@@ -39,7 +39,7 @@ namespace SharpHoundCommonLib.Processors
             }
             catch 
             {
-                _log.LogWarning("Trust type enumeration using non-LDAP for {Domain} faild", domain);
+                _log.LogWarning("Trust type enumeration using non-LDAP for {Domain} failed", domain);
             }
 
             await foreach (var result in _utils.Query(new LdapQueryParameters {
