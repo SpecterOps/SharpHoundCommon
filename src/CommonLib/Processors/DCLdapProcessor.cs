@@ -171,12 +171,12 @@ public class DCLdapProcessor {
     /// <param name="endpoint"></param>
     /// <param name="options"></param>
     /// <returns></returns>
-    protected internal virtual async Task<bool> Authenticate(Uri endpoint, LdapAuthOptions options) {
+    protected internal virtual async Task<bool> Authenticate(Uri endpoint, LdapAuthOptions options, NtlmAuthenticationHandler ntlmAuth = null, LdapTransport ldapTransport = null) {
         var host = endpoint.Host;
-        var auth = new NtlmAuthenticationHandler($"LDAP/{host.ToUpper()}") {
+        var auth = ntlmAuth ?? new NtlmAuthenticationHandler($"LDAP/{host.ToUpper()}") {
             Options = options
         };
-        var transport = new LdapTransport(_log, endpoint);
+        var transport = ldapTransport ?? new LdapTransport(_log, endpoint);
 
         try {
             transport.InitializeConnectionAsync(_ldapTimeout);
@@ -214,7 +214,10 @@ public class DCLdapProcessor {
                         ex.ServerErrorMessage);
                     break;
             }
-        } catch (Exception ex) {
+        } catch (InvalidOperationException ex) {
+            _log.LogDebug("LDAP InvalidOperationException: {message}", ex.Message);
+        } catch (Exception ex)
+        {
             _log.LogError("An unhandled error occurred during the LDAP test: {ex}", ex);
         }
 

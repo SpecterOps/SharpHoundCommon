@@ -33,7 +33,7 @@ public class LdapTransport(ILogger logger, Uri ldapEndpoint) : INtlmTransport, I
         }
     }
 
-    public void InitializeConnectionAsync(int timeout = -1) {
+    public virtual void InitializeConnectionAsync(int timeout = -1) {
         if (_ldap == null) {
             _ldap = new LdapConnection();
             try {
