@@ -17,6 +17,7 @@ namespace SharpHoundCommonLib.Processors
         public delegate Task ComputerStatusDelegate(CSVComputerStatus status);
         private readonly ILogger _log;
         private readonly ILdapUtils _utils;
+        private static ConcurrentHashSet _unresolvablePrincipals = new(StringComparer.OrdinalIgnoreCase);
 
         public LocalGroupProcessor(ILdapUtils utils, ILogger log = null)
         {
@@ -233,6 +234,9 @@ namespace SharpHoundCommonLib.Processors
                             continue;
 
                         var sidValue = securityIdentifier.Value;
+                        
+                        if (_unresolvablePrincipals.Contains(sidValue)) 
+                            continue;
 
                         if (isDomainController)
                         {
@@ -274,6 +278,7 @@ namespace SharpHoundCommonLib.Processors
                             var lookupUserResult = server.LookupPrincipalBySid(securityIdentifier);
                             if (lookupUserResult.IsFailed)
                             {
+                                _unresolvablePrincipals.Add(sidValue);
                                 _log.LogTrace("Unable to resolve local sid {SID}: {Error}", sidValue, lookupUserResult.SError);
                                 continue;
                             }
