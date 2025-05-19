@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CommonLibTest.Facades;
+using Microsoft.Extensions.Logging;
 using Moq;
 using SharpHoundCommonLib;
 using SharpHoundCommonLib.Enums;
@@ -384,6 +385,22 @@ namespace CommonLibTest
                     Assert.Equal($"{machineDomainSid}-544", principal.ObjectIdentifier);
                     Assert.Equal(Label.LocalGroup, principal.ObjectType);
                 });
+        }
+        
+        [Fact]
+        public async Task LocalGroupProcessor_GetLocalGroups_UnresolvableSid()
+        {
+            var mockLogger = new Mock<ILogger<LocalGroupProcessor>>();
+            var mockProcessor = new Mock<LocalGroupProcessor>(new MockLdapUtils(), mockLogger.Object);
+            var mockSamServer = new MockSAMServer_UnresolvedSid();
+            mockProcessor.Setup(x => x.OpenSamServer(It.IsAny<string>())).Returns(mockSamServer);
+            var processor = mockProcessor.Object;
+            var machineDomainSid = $"{Consts.MockWorkstationMachineSid}-1000";
+            var results = await processor.GetLocalGroups("primary.testlab.local", machineDomainSid, "TESTLAB.LOCAL", false)
+                .ToArrayAsync();
+            
+            Assert.Equal(2, results.Length);
+            mockLogger.VerifyLog(LogLevel.Trace, $"Unable to resolve local sid {Consts.MockWorkstationMachineSid}: OpenDomain returned StatusSuccess");
         }
     }
 }
