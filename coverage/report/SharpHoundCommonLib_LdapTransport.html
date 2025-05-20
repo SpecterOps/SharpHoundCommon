@@ -17,11 +17,11 @@
 <tr><th>Class:</th><td>SharpHoundCommonLib.Ntlm.LdapTransport</td></tr>
 <tr><th>Assembly:</th><td>SharpHoundCommonLib</td></tr>
 <tr><th>File(s):</th><td><a href="#DaSharpHoundCommonSharpHoundCommonsrcCommonLibNtlmLdapTransportcs" class="navigatetohash">D:\a\SharpHoundCommon\SharpHoundCommon\src\CommonLib\Ntlm\LdapTransport.cs</a></td></tr>
-<tr><th>Covered lines:</th><td>0</td></tr>
-<tr><th>Uncovered lines:</th><td>53</td></tr>
+<tr><th>Covered lines:</th><td>1</td></tr>
+<tr><th>Uncovered lines:</th><td>52</td></tr>
 <tr><th>Coverable lines:</th><td>53</td></tr>
 <tr><th>Total lines:</th><td>88</td></tr>
-<tr><th>Line coverage:</th><td>0% (0 of 53)</td></tr>
+<tr><th>Line coverage:</th><td>1.8% (1 of 53)</td></tr>
 <tr><th>Covered branches:</th><td>0</td></tr>
 <tr><th>Total branches:</th><td>14</td></tr>
 <tr><th>Branch coverage:</th><td>0% (0 of 14)</td></tr>
@@ -31,7 +31,7 @@
 <table class="overview table-fixed">
 <thead><tr><th>Method</th><th>Branch coverage <a href="https://en.wikipedia.org/wiki/Code_coverage"><i class="icon-info-circled"></i></a></th><th>Cyclomatic complexity <a href="https://en.wikipedia.org/wiki/Cyclomatic_complexity"><i class="icon-info-circled"></i></a></th><th>NPath complexity <a href="https://modess.io/npath-complexity-cyclomatic-complexity-explained"><i class="icon-info-circled"></i></a></th><th>Sequence coverage <a href="https://en.wikipedia.org/wiki/Code_coverage"><i class="icon-info-circled"></i></a></th></tr></thead>
 <tbody>
-<tr><td title="System.Void SharpHoundCommonLib.Ntlm.LdapTransport::.ctor(Microsoft.Extensions.Logging.ILogger,System.Uri)"><a href="#file0_line10" class="navigatetohash">.ctor(...)</a></td><td>100%</td><td>1</td><td>0</td><td>0%</td></tr>
+<tr><td title="System.Void SharpHoundCommonLib.Ntlm.LdapTransport::.ctor(Microsoft.Extensions.Logging.ILogger,System.Uri)"><a href="#file0_line10" class="navigatetohash">.ctor(...)</a></td><td>100%</td><td>1</td><td>0</td><td>100%</td></tr>
 <tr><td title="System.Void SharpHoundCommonLib.Ntlm.LdapTransport::ThrowIfDisposed()"><a href="#file0_line24" class="navigatetohash">ThrowIfDisposed()</a></td><td>0%</td><td>2</td><td>0</td><td>0%</td></tr>
 <tr><td title="System.Void SharpHoundCommonLib.Ntlm.LdapTransport::ThrowIfHandleNull()"><a href="#file0_line30" class="navigatetohash">ThrowIfHandleNull()</a></td><td>0%</td><td>2</td><td>0</td><td>0%</td></tr>
 <tr><td title="System.Void SharpHoundCommonLib.Ntlm.LdapTransport::InitializeConnectionAsync(System.Int32)"><a href="#file0_line36" class="navigatetohash">InitializeConnectionAsync(...)</a></td><td>0%</td><td>4</td><td>0</td><td>0%</td></tr>
@@ -54,7 +54,7 @@
 <tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line7"></a><code>7</code></td><td></td><td class="lightgray"><code></code></td></tr>
 <tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line8"></a><code>8</code></td><td></td><td class="lightgray"><code>namespace&nbsp;SharpHoundCommonLib.Ntlm;</code></td></tr>
 <tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line9"></a><code>9</code></td><td></td><td class="lightgray"><code></code></td></tr>
-<tr class="coverableline" title="Not covered (0 visits)" data-coverage="{'AllTestMethods': {'VC': '0', 'LVS': 'red'}}"><td class="red">&nbsp;</td><td class="leftmargin rightmargin right">0</td><td class="rightmargin right"><a id="file0_line10"></a><code>10</code></td><td></td><td class="lightred"><code>public&nbsp;class&nbsp;LdapTransport(ILogger&nbsp;logger,&nbsp;Uri&nbsp;ldapEndpoint)&nbsp;:&nbsp;INtlmTransport,&nbsp;IDisposable&nbsp;{</code></td></tr>
+<tr class="coverableline" title="Covered (8 visits)" data-coverage="{'AllTestMethods': {'VC': '8', 'LVS': 'green'}}"><td class="green">&nbsp;</td><td class="leftmargin rightmargin right">8</td><td class="rightmargin right"><a id="file0_line10"></a><code>10</code></td><td></td><td class="lightgreen"><code>public&nbsp;class&nbsp;LdapTransport(ILogger&nbsp;logger,&nbsp;Uri&nbsp;ldapEndpoint)&nbsp;:&nbsp;INtlmTransport,&nbsp;IDisposable&nbsp;{</code></td></tr>
 <tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line11"></a><code>11</code></td><td></td><td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;private&nbsp;LdapConnection?&nbsp;_ldap;</code></td></tr>
 <tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line12"></a><code>12</code></td><td></td><td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;private&nbsp;bool&nbsp;_disposed;</code></td></tr>
 <tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line13"></a><code>13</code></td><td></td><td class="lightgray"><code></code></td></tr>
@@ -80,7 +80,7 @@
 <tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line33"></a><code>33</code></td><td></td><td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</code></td></tr>
 <tr class="coverableline" title="Not covered (0 visits)" data-coverage="{'AllTestMethods': {'VC': '0', 'LVS': 'red'}}"><td class="red">&nbsp;</td><td class="leftmargin rightmargin right">0</td><td class="rightmargin right"><a id="file0_line34"></a><code>34</code></td><td></td><td class="lightred"><code>&nbsp;&nbsp;&nbsp;&nbsp;}</code></td></tr>
 <tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line35"></a><code>35</code></td><td></td><td class="lightgray"><code></code></td></tr>
-<tr class="coverableline" title="Not covered (0 visits)" data-coverage="{'AllTestMethods': {'VC': '0', 'LVS': 'red'}}"><td class="red">&nbsp;</td><td class="leftmargin rightmargin right">0</td><td class="rightmargin right"><a id="file0_line36"></a><code>36</code></td><td></td><td class="lightred"><code>&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;void&nbsp;InitializeConnectionAsync(int&nbsp;timeout&nbsp;=&nbsp;-1)&nbsp;{</code></td></tr>
+<tr class="coverableline" title="Not covered (0 visits)" data-coverage="{'AllTestMethods': {'VC': '0', 'LVS': 'red'}}"><td class="red">&nbsp;</td><td class="leftmargin rightmargin right">0</td><td class="rightmargin right"><a id="file0_line36"></a><code>36</code></td><td></td><td class="lightred"><code>&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;virtual&nbsp;void&nbsp;InitializeConnectionAsync(int&nbsp;timeout&nbsp;=&nbsp;-1)&nbsp;{</code></td></tr>
 <tr class="coverableline" title="Not covered (0 visits, 0 of 2 branches are covered)" data-coverage="{'AllTestMethods': {'VC': '0', 'LVS': 'red'}}"><td class="red">&nbsp;</td><td class="leftmargin rightmargin right">0</td><td class="rightmargin right"><a id="file0_line37"></a><code>37</code></td><td class="percentagebar percentagebar0"><i class="icon-fork"></i></td><td class="lightred"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;(_ldap&nbsp;==&nbsp;null)&nbsp;{</code></td></tr>
 <tr class="coverableline" title="Not covered (0 visits)" data-coverage="{'AllTestMethods': {'VC': '0', 'LVS': 'red'}}"><td class="red">&nbsp;</td><td class="leftmargin rightmargin right">0</td><td class="rightmargin right"><a id="file0_line38"></a><code>38</code></td><td></td><td class="lightred"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_ldap&nbsp;=&nbsp;new&nbsp;LdapConnection();</code></td></tr>
 <tr class="coverableline" title="Not covered (0 visits)" data-coverage="{'AllTestMethods': {'VC': '0', 'LVS': 'red'}}"><td class="red">&nbsp;</td><td class="leftmargin rightmargin right">0</td><td class="rightmargin right"><a id="file0_line39"></a><code>39</code></td><td></td><td class="lightred"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;try&nbsp;{</code></td></tr>
@@ -135,11 +135,11 @@
 <tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line88"></a><code>88</code></td><td></td><td class="lightgray"><code>}</code></td></tr>
 </tbody>
 </table>
-<div class="footer">Generated by: ReportGenerator 4.8.9.0<br />4/18/2025 - 7:49:48 PM<br /><a href="https://github.com/danielpalme/ReportGenerator">GitHub</a> | <a href="http://www.palmmedia.de">www.palmmedia.de</a></div></div>
+<div class="footer">Generated by: ReportGenerator 4.8.9.0<br />5/20/2025 - 5:15:27 PM<br /><a href="https://github.com/danielpalme/ReportGenerator">GitHub</a> | <a href="http://www.palmmedia.de">www.palmmedia.de</a></div></div>
 <div class="containerright">
 <div class="containerrightfixed">
 <h1>Methods/Properties</h1>
-<a href="#file0_line10" class="navigatetohash percentagebar percentagebar0" title="Line coverage: 0% - .ctor(Microsoft.Extensions.Logging.ILogger,System.Uri)"><i class="icon-cube"></i>.ctor(Microsoft.Extensions.Logging.ILogger,System.Uri)</a><br />
+<a href="#file0_line10" class="navigatetohash percentagebar percentagebar100" title="Line coverage: 100% - .ctor(Microsoft.Extensions.Logging.ILogger,System.Uri)"><i class="icon-cube"></i>.ctor(Microsoft.Extensions.Logging.ILogger,System.Uri)</a><br />
 <a href="#file0_line21" class="navigatetohash percentagebar percentagebar0" title="Line coverage: 0% - IsSecureLdap()"><i class="icon-wrench"></i>IsSecureLdap()</a><br />
 <a href="#file0_line24" class="navigatetohash percentagebar percentagebar0" title="Line coverage: 0% - ThrowIfDisposed()"><i class="icon-cube"></i>ThrowIfDisposed()</a><br />
 <a href="#file0_line30" class="navigatetohash percentagebar percentagebar0" title="Line coverage: 0% - ThrowIfHandleNull()"><i class="icon-cube"></i>ThrowIfHandleNull()</a><br />

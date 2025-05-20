@@ -2912,12 +2912,24 @@ references:
   commentId: F:SharpHoundCommonLib.Enums.TrustType.Forest
   fullName: SharpHoundCommonLib.Enums.TrustType.Forest
   nameWithType: TrustType.Forest
+- uid: SharpHoundCommonLib.Enums.TrustType.Kerberos
+  name: Kerberos
+  href: api/SharpHoundCommonLib.Enums.TrustType.html#SharpHoundCommonLib_Enums_TrustType_Kerberos
+  commentId: F:SharpHoundCommonLib.Enums.TrustType.Kerberos
+  fullName: SharpHoundCommonLib.Enums.TrustType.Kerberos
+  nameWithType: TrustType.Kerberos
 - uid: SharpHoundCommonLib.Enums.TrustType.ParentChild
   name: ParentChild
   href: api/SharpHoundCommonLib.Enums.TrustType.html#SharpHoundCommonLib_Enums_TrustType_ParentChild
   commentId: F:SharpHoundCommonLib.Enums.TrustType.ParentChild
   fullName: SharpHoundCommonLib.Enums.TrustType.ParentChild
   nameWithType: TrustType.ParentChild
+- uid: SharpHoundCommonLib.Enums.TrustType.TreeRoot
+  name: TreeRoot
+  href: api/SharpHoundCommonLib.Enums.TrustType.html#SharpHoundCommonLib_Enums_TrustType_TreeRoot
+  commentId: F:SharpHoundCommonLib.Enums.TrustType.TreeRoot
+  fullName: SharpHoundCommonLib.Enums.TrustType.TreeRoot
+  nameWithType: TrustType.TreeRoot
 - uid: SharpHoundCommonLib.Enums.TrustType.Unknown
   name: Unknown
   href: api/SharpHoundCommonLib.Enums.TrustType.html#SharpHoundCommonLib_Enums_TrustType_Unknown
@@ -4532,6 +4544,12 @@ references:
   commentId: F:SharpHoundCommonLib.LDAPProperties.GroupPolicyOptions
   fullName: SharpHoundCommonLib.LDAPProperties.GroupPolicyOptions
   nameWithType: LDAPProperties.GroupPolicyOptions
+- uid: SharpHoundCommonLib.LDAPProperties.GroupType
+  name: GroupType
+  href: api/SharpHoundCommonLib.LDAPProperties.html#SharpHoundCommonLib_LDAPProperties_GroupType
+  commentId: F:SharpHoundCommonLib.LDAPProperties.GroupType
+  fullName: SharpHoundCommonLib.LDAPProperties.GroupType
+  nameWithType: LDAPProperties.GroupType
 - uid: SharpHoundCommonLib.LDAPProperties.HomeDirectory
   name: HomeDirectory
   href: api/SharpHoundCommonLib.LDAPProperties.html#SharpHoundCommonLib_LDAPProperties_HomeDirectory
@@ -9992,12 +10010,12 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.Processors.DCLdapProcessor.DCLdapProcessor
   nameWithType: DCLdapProcessor.DCLdapProcessor
-- uid: SharpHoundCommonLib.Processors.DCLdapProcessor.Authenticate(System.Uri,SharpHoundCommonLib.Processors.LdapAuthOptions)
-  name: Authenticate(Uri, LdapAuthOptions)
-  href: api/SharpHoundCommonLib.Processors.DCLdapProcessor.html#SharpHoundCommonLib_Processors_DCLdapProcessor_Authenticate_System_Uri_SharpHoundCommonLib_Processors_LdapAuthOptions_
-  commentId: M:SharpHoundCommonLib.Processors.DCLdapProcessor.Authenticate(System.Uri,SharpHoundCommonLib.Processors.LdapAuthOptions)
-  fullName: SharpHoundCommonLib.Processors.DCLdapProcessor.Authenticate(System.Uri, SharpHoundCommonLib.Processors.LdapAuthOptions)
-  nameWithType: DCLdapProcessor.Authenticate(Uri, LdapAuthOptions)
+- uid: SharpHoundCommonLib.Processors.DCLdapProcessor.Authenticate(System.Uri,SharpHoundCommonLib.Processors.LdapAuthOptions,SharpHoundCommonLib.Ntlm.NtlmAuthenticationHandler,SharpHoundCommonLib.Ntlm.LdapTransport)
+  name: Authenticate(Uri, LdapAuthOptions, NtlmAuthenticationHandler, LdapTransport)
+  href: api/SharpHoundCommonLib.Processors.DCLdapProcessor.html#SharpHoundCommonLib_Processors_DCLdapProcessor_Authenticate_System_Uri_SharpHoundCommonLib_Processors_LdapAuthOptions_SharpHoundCommonLib_Ntlm_NtlmAuthenticationHandler_SharpHoundCommonLib_Ntlm_LdapTransport_
+  commentId: M:SharpHoundCommonLib.Processors.DCLdapProcessor.Authenticate(System.Uri,SharpHoundCommonLib.Processors.LdapAuthOptions,SharpHoundCommonLib.Ntlm.NtlmAuthenticationHandler,SharpHoundCommonLib.Ntlm.LdapTransport)
+  fullName: SharpHoundCommonLib.Processors.DCLdapProcessor.Authenticate(System.Uri, SharpHoundCommonLib.Processors.LdapAuthOptions, SharpHoundCommonLib.Ntlm.NtlmAuthenticationHandler, SharpHoundCommonLib.Ntlm.LdapTransport)
+  nameWithType: DCLdapProcessor.Authenticate(Uri, LdapAuthOptions, NtlmAuthenticationHandler, LdapTransport)
 - uid: SharpHoundCommonLib.Processors.DCLdapProcessor.Authenticate*
   name: Authenticate
   href: api/SharpHoundCommonLib.Processors.DCLdapProcessor.html#SharpHoundCommonLib_Processors_DCLdapProcessor_Authenticate_
