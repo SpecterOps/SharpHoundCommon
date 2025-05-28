@@ -58,18 +58,21 @@ namespace SharpHoundCommonLib.SMB
             {
                 // When accessing the SMB directly port from localhost, it'll disconnect. 
                 // Side step that by just collecting the data from the registry.
+                _log.LogTrace($"Checking SMB registry on host {host}");
                 return CheckRegistrySigningRequired(host);
             }
 
 
 
             // Try SMB1 negotiate first as it'll elicit an SMB1 or SMB2 response (if either is enabled)
+            _log.LogTrace($"Negotiating SMB1 request to host {host}");
             var smb1result = await TrySMBNegotiate(host, port, true);
 
             if (smb1result.IsSuccess)
                 return smb1result;
 
             // SMB1 failed, so try an SMB2 negotiate in case SMB1 is disabled or the SMB3 dialect is required
+            _log.LogTrace($"Negotiating SMB2 request to host {host}");
             return await TrySMBNegotiate(host, port, false);
         }
 
@@ -256,7 +259,12 @@ namespace SharpHoundCommonLib.SMB
 
             // Validate structure size of negotiate response
             var negotiateStructureSize = reader.ReadUInt16();
-            
+
+            if (negotiateStructureSize != SMB2Constants.ExpectedNegotiateStructureSizeB)
+            {
+                _log.LogDebug($"Expected fixed-value SMB2 response structure size, got {negotiateStructureSize}. Packet: {Convert.ToBase64String(responsePacket)}");
+                return (true, false);
+            }
 
             // Read security mode, which contains signing information
             var securityMode = reader.ReadUInt16();
