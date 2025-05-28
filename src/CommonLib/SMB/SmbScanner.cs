@@ -260,7 +260,7 @@ namespace SharpHoundCommonLib.SMB
             // Validate structure size of negotiate response
             var negotiateStructureSize = reader.ReadUInt16();
 
-            if (negotiateStructureSize != SMB2Constants.ExpectedNegotiateStructureSizeB)
+            if (negotiateStructureSize != SMB2Constants.ExpectedNegotiateStructureSizeA)
             {
                 _log.LogDebug($"Expected fixed-value SMB2 response structure size {SMB2Constants.ExpectedNegotiateStructureSizeB}, got {negotiateStructureSize}. Packet: {Convert.ToBase64String(responsePacket)}");
                 return (true, false);
