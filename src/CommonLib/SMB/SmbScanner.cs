@@ -95,13 +95,22 @@ namespace SharpHoundCommonLib.SMB
                 var requireRegistryValue = Registry.GetValue($@"HKEY_LOCAL_MACHINE\{keyPath}", requireValueName, null);
                 var enableRegistryValue = Registry.GetValue($@"HKEY_LOCAL_MACHINE\{keyPath}", enableValueName, null);
 
-                if (requireRegistryValue == null || enableRegistryValue == null)
-                {
-                    return SharpHoundRPC.Result<SmbScanInfo>.Fail($"Could not acquire one or both of registries {requireValueName} or {enableValueName}");
-                }
+                if (requireRegistryValue == null && enableRegistryValue == null)
+                    return SharpHoundRPC.Result<SmbScanInfo>.Fail($"Could not acquire either of registries {requireValueName} and {enableValueName}");
 
-                var signingRequired = Convert.ToInt32(requireRegistryValue) != 0;
-                var signingEnabled = Convert.ToInt32(enableRegistryValue) != 0;
+                bool signingRequired = false;
+                bool signingEnabled = false;
+
+                if (requireRegistryValue != null)
+                    signingRequired = Convert.ToInt32(requireRegistryValue) != 0;
+                if (enableRegistryValue != null)
+                    signingEnabled = Convert.ToInt32(enableRegistryValue) != 0;
+
+                // signingEnabled and signingRequired must both be True to confirm that SMB signing is required on this computer,
+                // so if we only collect one registry and it's False, we can conclude that SMB signing is not required
+                // but if it's True, we can't conclude either way and will return a Fail result
+                if ((requireRegistryValue == null && signingEnabled) || (enableRegistryValue == null && signingRequired))
+                    return SharpHoundRPC.Result<SmbScanInfo>.Fail("Could not acquire enough registries to determine SMB Signing info");
 
                 return SharpHoundRPC.Result<SmbScanInfo>.Ok(new SmbScanInfo(host)
                 {
