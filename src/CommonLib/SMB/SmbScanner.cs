@@ -62,23 +62,14 @@ namespace SharpHoundCommonLib.SMB
                     return registryResult;
             }
 
-            // Try SMB1 negotiate first
-            _log.LogTrace($"Negotiating SMB1 request to host {host}");
+            // Try SMB1 negotiate first as it'll elicit an SMB1 or SMB2 response (if either is enabled)
             var smb1result = await TrySMBNegotiate(host, port, true);
 
-            // If it's enabled and signing isn't required, we can exit here
-            if (smb1result.IsSuccess && !smb1result.Value.SigningRequired)
+            if (smb1result.IsSuccess)
                 return smb1result;
 
-            // SMB1 failed or requires signing, so try an SMB2 negotiate in case it's vulnerable
-            _log.LogTrace($"Negotiating SMB2 request to host {host}");
-            var smb2result = await TrySMBNegotiate(host, port, false);
-
-            // Return SMB2 result, unless SMB1 is the only successful response
-            if (smb2result.IsSuccess || smb1result.IsFailed)
-                return smb2result;
-            else
-                return smb1result;
+            // SMB1 failed, so try an SMB2 negotiate in case SMB1 is disabled or the SMB3 dialect is required
+            return await TrySMBNegotiate(host, port, false);
         }
 
         /// <summary>
