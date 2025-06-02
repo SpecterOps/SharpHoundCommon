@@ -95,5 +95,6 @@
         public const string LockoutThreshold = "lockoutthreshold";
         public const string LockOutObservationWindow = "lockoutobservationwindow";
         public const string PrincipalName = "msds-principalname";
+        public const string GroupType = "grouptype";
     }
 }

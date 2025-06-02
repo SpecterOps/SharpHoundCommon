@@ -2,10 +2,12 @@
 {
     public enum TrustType
     {
+        TreeRoot,
         ParentChild,
         CrossLink,
-        Forest,
         External,
+        Forest,
+        Kerberos,
         Unknown
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.DirectoryServices.Protocols;
+using System.Linq;
 using System.Security.Principal;
 using Microsoft.Extensions.Logging;
 using SharpHoundCommonLib.Enums;
@@ -27,6 +28,20 @@ namespace SharpHoundCommonLib.Processors
         public async IAsyncEnumerable<DomainTrust> EnumerateDomainTrusts(string domain)
         {
             _log.LogDebug("Running trust enumeration for {Domain}", domain);
+
+            // Attempt to get trust type
+            var trustInfoList = new List<(string TargetName, System.DirectoryServices.ActiveDirectory.TrustType TrustType)>();
+            try
+            {
+                _utils.GetDomain(domain, out var domainObject);
+                trustInfoList.AddRange(from System.DirectoryServices.ActiveDirectory.TrustRelationshipInformation trust in domainObject.GetAllTrustRelationships()
+                select (trust.TargetName, trust.TrustType));
+            }
+            catch 
+            {
+                _log.LogWarning("Trust type enumeration using non-LDAP for {Domain} failed", domain);
+            }
+
             await foreach (var result in _utils.Query(new LdapQueryParameters {
                                    LDAPFilter = CommonFilters.TrustedDomains,
                                    Attributes = CommonProperties.DomainTrustProps,
@@ -90,7 +105,9 @@ namespace SharpHoundCommonLib.Processors
                     (attributes.HasFlag(TrustAttributes.WithinForest) ||
                     attributes.HasFlag(TrustAttributes.CrossOrganizationEnableTGTDelegation));
 
-                trust.TrustType = TrustAttributesToType(attributes);
+                var match = trustInfoList.FirstOrDefault(t => 
+                    t.TargetName.ToUpper().Equals(trust.TargetDomainName));
+                trust.TrustType = !string.IsNullOrEmpty(match.TargetName) ? (TrustType) match.TrustType : TrustAttributesToType(attributes);
 
                 yield return trust;
             }

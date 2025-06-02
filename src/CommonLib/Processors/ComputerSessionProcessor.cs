@@ -121,6 +121,11 @@ namespace SharpHoundCommonLib.Processors {
                     username.Equals("anonymous logon", StringComparison.CurrentCultureIgnoreCase)) {
                     continue;
                 }
+                
+                //Filter out domains that are "."
+                if (computerDomain.Equals(".")) {
+                    continue;
+                }
 
                 // Remove leading slashes for unc paths
                 computerSessionName = computerSessionName.TrimStart('\\');
@@ -237,6 +242,11 @@ namespace SharpHoundCommonLib.Processors {
 
                 //Filter out empty usernames and computer sessions
                 if (string.IsNullOrWhiteSpace(username) || username.EndsWith("$", StringComparison.Ordinal)) {
+                    continue;
+                }
+                
+                //Filter out domains that are "."
+                if (domain.Equals(".")) {
                     continue;
                 }
 

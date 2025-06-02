@@ -28,7 +28,7 @@ public class NtlmAuthenticationHandler : INtlmAuthenticationHandler {
         };
     }
 
-    public async Task<object> PerformNtlmAuthenticationAsync(INtlmTransport transport) {
+    public virtual async Task<object> PerformNtlmAuthenticationAsync(INtlmTransport transport) {
         using var context = new SspiContext(
             null,
             null,
