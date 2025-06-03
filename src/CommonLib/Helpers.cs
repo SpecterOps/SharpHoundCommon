@@ -23,7 +23,7 @@ namespace SharpHoundCommonLib {
         private static readonly DateTime EpochDiff = new(1970, 1, 1);
 
         private static readonly string[] FilteredSids = {
-            "S-1-5-2", "S-1-5-3", "S-1-5-4", "S-1-5-6", "S-1-5-7", "S-1-2", "S-1-2-0", "S-1-5-18",
+            "S-1-5-3", "S-1-5-4", "S-1-5-6", "S-1-2", "S-1-2-0", "S-1-5-17", "S-1-5-18",
             "S-1-5-19", "S-1-5-20", "S-1-0-0", "S-1-0", "S-1-2-1"
         };
 
