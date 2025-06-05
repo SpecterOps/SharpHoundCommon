@@ -370,9 +370,13 @@ namespace SharpHoundCommonLib
         public static async Task<Result<T>> ExecuteWithTimeout<T>(TimeSpan timeout, Func<TimeoutToken, T> func)
         {
             var timeoutToken = new TimeoutTokenSource(timeout);
-            var task = Task.Run(() => func(timeoutToken), timeoutToken.GetCancellationToken());
+            var task = Task.Run(() =>
+            {
+                timeoutToken.StartTimeout();
+                return func(timeoutToken);
+            }, timeoutToken.GetCancellationToken());
             var completedTask = await Task.WhenAny(task, Task.Delay(timeout, timeoutToken.GetCancellationToken()));
-            timeoutToken.Cancel();
+            timeoutToken.StopTimeout();
 
             if (completedTask == task)
             {
@@ -391,9 +395,16 @@ namespace SharpHoundCommonLib
 
         private class TimeoutTokenSource : TimeoutToken
         {
-            public TimeoutTokenSource(TimeSpan timeout) : base(timeout) {}
+            private readonly TimeSpan _timeout;
+
+            public TimeoutTokenSource(TimeSpan timeout) : base()
+            {
+                _timeout = timeout;
+            }
+
             public CancellationToken GetCancellationToken() => _cancellationTokenSource.Token;
-            public void Cancel() => _cancellationTokenSource.Cancel();
+            public void StartTimeout() => _cancellationTokenSource.CancelAfter(_timeout);
+            public void StopTimeout() => _cancellationTokenSource.Cancel();
         }
     }
 
@@ -401,9 +412,9 @@ namespace SharpHoundCommonLib
     {
         protected readonly CancellationTokenSource _cancellationTokenSource;
 
-        public TimeoutToken(TimeSpan timeout)
+        public TimeoutToken()
         {
-            _cancellationTokenSource = new CancellationTokenSource(timeout);
+            _cancellationTokenSource = new CancellationTokenSource();
         }
 
         public void ExitIfTimeoutExpired()
