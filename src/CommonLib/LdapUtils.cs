@@ -672,6 +672,7 @@ namespace SharpHoundCommonLib {
         /// <param name="hostname"></param>
         /// <returns></returns>
         private async Task<(bool Success, NetAPIStructs.WorkstationInfo100 Info)> GetWorkstationInfo(string hostname) {
+            // TODO: MC - This calls Port 445 should this call the ldap port?
             if (!await _portScanner.CheckPort(hostname))
                 return (false, default);
 
