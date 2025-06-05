@@ -57,9 +57,9 @@ namespace SharpHoundCommonLib.Processors
             if (timeout == default) {
                 timeout = TimeSpan.FromMinutes(2);
             }
-            
+
             //Open a handle to the server
-            var openServerResult = await Task.Run(() => OpenSamServer(computerName)).TimeoutAfter(timeout);
+            var openServerResult = await Task.Run(() => OpenSamServer(computerName));//.TimeoutAfter(timeout);
             if (openServerResult.IsFailed)
             {
                 _log.LogTrace("OpenServer failed on {ComputerName}: {Error}", computerName, openServerResult.SError);
@@ -78,7 +78,7 @@ namespace SharpHoundCommonLib.Processors
             //Try to get the machine sid for the computer if its not already cached
             SecurityIdentifier machineSid;
             if (!Cache.GetMachineSid(computerObjectId, out var tempMachineSid)) {
-                var getMachineSidResult = await Task.Run(() => server.GetMachineSid()).TimeoutAfter(timeout);
+                var getMachineSidResult = await Task.Run(() => server.GetMachineSid());//.TimeoutAfter(timeout);
                 if (getMachineSidResult.IsFailed)
                 {
                     _log.LogTrace("GetMachineSid failed on {ComputerName}: {Error}", computerName, getMachineSidResult.SError);
@@ -102,7 +102,7 @@ namespace SharpHoundCommonLib.Processors
             }
 
             //Get all available domains in the server
-            var getDomainsResult = await Task.Run(() => server.GetDomains()).TimeoutAfter(timeout);
+            var getDomainsResult = await Task.Run(() => server.GetDomains());//.TimeoutAfter(timeout);
             if (getDomainsResult.IsFailed)
             {
                 _log.LogTrace("GetDomains failed on {ComputerName}: {Error}", computerName, getDomainsResult.SError);
@@ -121,9 +121,9 @@ namespace SharpHoundCommonLib.Processors
                 //Skip non-builtin domains on domain controllers
                 if (isDomainController && !domainResult.Name.Equals("builtin", StringComparison.OrdinalIgnoreCase))
                     continue;
-                
+
                 //Open a handle to the domain
-                var openDomainResult = await Task.Run(() => server.OpenDomain(domainResult.Name)).TimeoutAfter(timeout);
+                var openDomainResult = await Task.Run(() => server.OpenDomain(domainResult.Name));//.TimeoutAfter(timeout);
                 if (openDomainResult.IsFailed)
                 {
                     _log.LogTrace("Failed to open domain {Domain} on {ComputerName}: {Error}", domainResult.Name, computerName, openDomainResult.SError);
@@ -142,7 +142,7 @@ namespace SharpHoundCommonLib.Processors
                 var domain = openDomainResult.Value;
 
                 //Open a handle to the available aliases
-                var getAliasesResult = await Task.Run(() => domain.GetAliases()).TimeoutAfter(timeout);
+                var getAliasesResult = await Task.Run(() => domain.GetAliases());//.TimeoutAfter(timeout);
 
                 if (getAliasesResult.IsFailed)
                 {
@@ -175,7 +175,7 @@ namespace SharpHoundCommonLib.Processors
                     };
 
                     //Open a handle to the alias
-                    var openAliasResult = await Task.Run(() => domain.OpenAlias(alias.Rid)).TimeoutAfter(timeout);
+                    var openAliasResult = await Task.Run(() => domain.OpenAlias(alias.Rid));//.TimeoutAfter(timeout);
                     if (openAliasResult.IsFailed)
                     {
                         _log.LogTrace("Failed to open alias {Alias} with RID {Rid} in domain {Domain} on computer {ComputerName}: {Error}", alias.Name, alias.Rid, domainResult.Name, computerName, openAliasResult.Error);
@@ -196,7 +196,7 @@ namespace SharpHoundCommonLib.Processors
                     
                     var localGroup = openAliasResult.Value;
                     //Call GetMembersInAlias to get raw group members
-                    var getMembersResult = await Task.Run(() => localGroup.GetMembers()).TimeoutAfter(timeout);
+                    var getMembersResult = await Task.Run(() => localGroup.GetMembers());//.TimeoutAfter(timeout);
                     if (getMembersResult.IsFailed)
                     {
                         _log.LogTrace("Failed to get members in alias {Alias} with RID {Rid} in domain {Domain} on computer {ComputerName}: {Error}", alias.Name, alias.Rid, domainResult.Name, computerName, openAliasResult.Error);

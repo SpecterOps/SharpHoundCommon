@@ -54,11 +54,11 @@ public class DCLdapProcessor {
             isChannelBindingDisabled = new();
 
         if (hasLdap) {
-            isSigningRequired = await Task.Run(CheckIsNtlmSigningRequired).TimeoutAfter(timeout);
+            isSigningRequired = await Task.Run(CheckIsNtlmSigningRequired);//.TimeoutAfter(timeout);
         }
 
         if (hasLdaps) {
-            isChannelBindingDisabled = await Task.Run(CheckIsChannelBindingDisabled).TimeoutAfter(timeout);
+            isChannelBindingDisabled = await Task.Run(CheckIsChannelBindingDisabled);//.TimeoutAfter(timeout);
         }
 
         if (isSigningRequired.IsFailed) {

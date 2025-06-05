@@ -33,7 +33,7 @@ namespace SharpHoundCommonLib.Processors {
                 timeout = TimeSpan.FromMinutes(2);
             }
 
-            var result = await Task.Run(() => _smbScanner.ScanHost(host, 445)).TimeoutAfter(timeout);
+            var result = await Task.Run(() => _smbScanner.ScanHost(host, 445));//.TimeoutAfter(timeout);
 
             if (result.IsFailed) {
                 await SendComputerStatus(new CSVComputerStatus {

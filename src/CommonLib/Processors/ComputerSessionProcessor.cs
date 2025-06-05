@@ -8,7 +8,6 @@ using Impersonate;
 using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
 using SharpHoundCommonLib.OutputTypes;
-using SharpHoundRPC;
 using SharpHoundRPC.NetAPINative;
 
 namespace SharpHoundCommonLib.Processors {
@@ -58,7 +57,7 @@ namespace SharpHoundCommonLib.Processors {
 
             _log.LogDebug("Running NetSessionEnum for {ObjectName}", computerName);
 
-            var result = await Task.Run(() => {
+            var meow = await Helpers.ExecuteWithTimeout(timeout, (timeoutToken) => {
                 NetAPIResult<IEnumerable<NetSessionEnumResults>> result;
                 if (_doLocalAdminSessionEnum) {
                     // If we are authenticating using a local admin, we need to impersonate for this
@@ -67,22 +66,33 @@ namespace SharpHoundCommonLib.Processors {
                         result = _nativeMethods.NetSessionEnum(computerName);
                     }
 
-                    if (result.IsFailed) {
-                        // Fall back to default User
-                        _log.LogDebug(
-                            "NetSessionEnum failed on {ComputerName} with local admin credentials: {Status}. Fallback to default user.",
-                            computerName, result.Status);
-                        result = _nativeMethods.NetSessionEnum(computerName);
-                    }
+                    timeoutToken.ExitIfTimeoutExpired();
+
+                    if (result.IsFailed)
+                        {
+                            // Fall back to default User
+                            _log.LogDebug(
+                                "NetSessionEnum failed on {ComputerName} with local admin credentials: {Status}. Fallback to default user.",
+                                computerName, result.Status);
+                            result = _nativeMethods.NetSessionEnum(computerName);
+                        }
                 } else {
                     result = _nativeMethods.NetSessionEnum(computerName);
                 }
 
                 return result;
-            }).TimeoutAfter(timeout);
+            });
 
-            if (result.IsFailed) {
-                await SendComputerStatus(new CSVComputerStatus {
+            NetAPIResult<IEnumerable<NetSessionEnumResults>> result;
+            if (meow.IsSuccess)
+                result = meow.Value;
+            else
+                result = NetAPIResult<IEnumerable<NetSessionEnumResults>>.Fail(meow.Error);
+
+            if (result.IsFailed)
+            {
+                await SendComputerStatus(new CSVComputerStatus
+                {
                     Status = result.GetErrorStatus(),
                     Task = "NetSessionEnum",
                     ComputerName = computerName
@@ -202,7 +212,7 @@ namespace SharpHoundCommonLib.Processors {
                 }
 
                 return result;
-            }).TimeoutAfter(timeout);
+            });//.TimeoutAfter(timeout);
 
             if (result.IsFailed) {
                 await SendComputerStatus(new CSVComputerStatus {
