@@ -73,6 +73,28 @@ namespace CommonLibTest
                  i++;
             }
         }
+        
+        [Fact]
+        public void LDAPFilter_GetFilterList_MergeFilter()
+        {
+            var test = new LdapFilter();
+            test.AddUsers();
+            test.AddComputers();
+            string mergeFilter = "(objectclass=*)";
+            test.AddFilter(mergeFilter, true);
+            
+            IEnumerable<string> filters = test.GetFilterList();
+            
+            int i = 0;
+            string computerFilter = "(samaccounttype=805306369)";
+            string userFilter = "(|(samaccounttype=805306368)(samaccounttype=805306370))";
+            string[] expected = {$"(&{userFilter}{mergeFilter})", $"(&{computerFilter}{mergeFilter})"};
+
+            foreach (var filter in filters) {
+                Assert.Equal(expected[i], filter);
+                i++;
+            }
+        }
 
         #endregion
     }
