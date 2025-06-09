@@ -13,6 +13,8 @@ using SharpHoundCommonLib.Processors;
 using Microsoft.Win32;
 using System.Threading.Tasks;
 using System.Threading;
+using SharpHoundRPC.NetAPINative;
+using SharpHoundRPC.Shared;
 
 namespace SharpHoundCommonLib
 {
@@ -359,24 +361,19 @@ namespace SharpHoundCommonLib
         }
 
         /// <summary>
-        /// Throws a TimeoutException if the task does not complete within the specified timeout interval.
+        /// Returns a Fail result if a task runs longer than its budgeted time.
         /// A cancellation token is passed to the executing function so it may exit cleanly if timeout is reached.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="timeout"></param>
         /// <param name="func"></param>
         /// <returns></returns>
-        /// <exception cref="TimeoutException"></exception>
-        public static async Task<Result<T>> ExecuteWithTimeout<T>(TimeSpan timeout, Func<TimeoutToken, T> func)
+        public static async Task<Result<T>> ExecuteWithTimeout<T>(TimeSpan timeout, Func<CancellationToken, T> func)
         {
-            var timeoutToken = new TimeoutTokenSource(timeout);
-            var task = Task.Run(() =>
-            {
-                timeoutToken.StartTimeout();
-                return func(timeoutToken);
-            }, timeoutToken.GetCancellationToken());
-            var completedTask = await Task.WhenAny(task, Task.Delay(timeout, timeoutToken.GetCancellationToken()));
-            timeoutToken.StopTimeout();
+            var cts = new CancellationTokenSource();
+            var task = Task.Run(() => func(cts.Token));
+            var completedTask = await Task.WhenAny(task, Task.Delay(timeout, cts.Token));
+            cts.Cancel();
 
             if (completedTask == task)
             {
@@ -385,43 +382,89 @@ namespace SharpHoundCommonLib
                     return Result<T>.Ok(await task);
                 }
                 catch (OperationCanceledException)
-                {
-                    return Result<T>.Fail("Timeout");
-                }
+                { }
             }
 
             return Result<T>.Fail("Timeout");
         }
 
-        private class TimeoutTokenSource : TimeoutToken
+        /// <summary>
+        /// Returns a Fail result if a task runs longer than its budgeted time.
+        /// A cancellation token is passed to the executing function so it may exit cleanly if timeout is reached.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="timeout"></param>
+        /// <param name="func"></param>
+        /// <returns></returns>
+        public static async Task<Result<T>> ExecuteWithTimeout<T>(TimeSpan timeout, Func<CancellationToken, Task<T>> func)
         {
-            private readonly TimeSpan _timeout;
+            var cts = new CancellationTokenSource();
+            var task = func(cts.Token);
+            var completedTask = await Task.WhenAny(task, Task.Delay(timeout, cts.Token));
+            cts.Cancel();
 
-            public TimeoutTokenSource(TimeSpan timeout) : base()
+            if (completedTask == task)
             {
-                _timeout = timeout;
+                try
+                {
+                    return Result<T>.Ok(await task);
+                }
+                catch (OperationCanceledException)
+                { }
             }
 
-            public CancellationToken GetCancellationToken() => _cancellationTokenSource.Token;
-            public void StartTimeout() => _cancellationTokenSource.CancelAfter(_timeout);
-            public void StopTimeout() => _cancellationTokenSource.Cancel();
-        }
-    }
-
-    public class TimeoutToken
-    {
-        protected readonly CancellationTokenSource _cancellationTokenSource;
-
-        public TimeoutToken()
-        {
-            _cancellationTokenSource = new CancellationTokenSource();
+            return Result<T>.Fail("Timeout");
         }
 
-        public void ExitIfTimeoutExpired()
+        /// <summary>
+        /// Returns a Fail result if a task runs longer than its budgeted time.
+        /// A cancellation token is passed to the executing function so it may exit cleanly if timeout is reached.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="timeout"></param>
+        /// <param name="func"></param>
+        /// <returns></returns>
+        public static async Task<NetAPIResult<T>> ExecuteNetAPIWithTimeout<T>(TimeSpan timeout, Func<CancellationToken, NetAPIResult<T>> func)
         {
-            // At the time this is thrown, the Task has already been orphaned
-            // so no catch is necessary
-            _cancellationTokenSource.Token.ThrowIfCancellationRequested();
+            var result = await ExecuteWithTimeout(timeout, func);
+            if (result.IsSuccess)
+                return result.Value;
+            else
+                return NetAPIResult<T>.Fail(result.Error);
+        }
+
+        /// <summary>
+        /// Returns a Fail result if a task runs longer than its budgeted time.
+        /// A cancellation token is passed to the executing function so it may exit cleanly if timeout is reached.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="timeout"></param>
+        /// <param name="func"></param>
+        /// <returns></returns>
+        public static async Task<SharpHoundRPC.Result<T>> ExecuteRPCWithTimeout<T>(TimeSpan timeout, Func<CancellationToken, SharpHoundRPC.Result<T>> func)
+        {
+            var result = await ExecuteWithTimeout(timeout, func);
+            if (result.IsSuccess)
+                return result.Value;
+            else
+                return SharpHoundRPC.Result<T>.Fail(result.Error);
+        }
+
+        /// <summary>
+        /// Returns a Fail result if a task runs longer than its budgeted time.
+        /// A cancellation token is passed to the executing function so it may exit cleanly if timeout is reached.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="timeout"></param>
+        /// <param name="func"></param>
+        /// <returns></returns>
+        public static async Task<SharpHoundRPC.Result<T>> ExecuteRPCWithTimeout<T>(TimeSpan timeout, Func<CancellationToken, Task<SharpHoundRPC.Result<T>>> func)
+        {
+            var result = await ExecuteWithTimeout(timeout, func);
+            if (result.IsSuccess)
+                return result.Value;
+            else
+                return SharpHoundRPC.Result<T>.Fail(result.Error);
         }
     }
 

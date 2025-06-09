@@ -6,7 +6,6 @@ using SharpHoundCommonLib.ThirdParty.PSOpenAD;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
-using SharpHoundRPC;
 using SharpHoundRPC.PortScanner;
 
 namespace SharpHoundCommonLib.Processors;
@@ -54,11 +53,11 @@ public class DCLdapProcessor {
             isChannelBindingDisabled = new();
 
         if (hasLdap) {
-            isSigningRequired = await Task.Run(CheckIsNtlmSigningRequired);//.TimeoutAfter(timeout);
+            isSigningRequired = await Helpers.ExecuteRPCWithTimeout(timeout, (_) => CheckIsNtlmSigningRequired());
         }
 
         if (hasLdaps) {
-            isChannelBindingDisabled = await Task.Run(CheckIsChannelBindingDisabled);//.TimeoutAfter(timeout);
+            isChannelBindingDisabled = await Helpers.ExecuteRPCWithTimeout(timeout, (_) => CheckIsChannelBindingDisabled());
         }
 
         if (isSigningRequired.IsFailed) {
