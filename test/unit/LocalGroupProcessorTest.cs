@@ -213,7 +213,7 @@ namespace CommonLibTest
             Assert.Equal("GetMachineSid", status.Task);
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public async Task LocalGroupProcessor_GetLocalGroups_GetDomainsResultFailed() {
             var mockProcessor = new Mock<LocalGroupProcessor>(new MockLdapUtils(), null);
             var mockSamServer = new MockFailSAMServer_GetDomains();
@@ -233,7 +233,7 @@ namespace CommonLibTest
             Assert.Equal("GetDomains", status.Task);
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public async Task LocalGroupProcessor_GetLocalGroups_OpenDomainResultFailed()
         {
             var mockProcessor = new Mock<LocalGroupProcessor>(new MockLdapUtils(), null);
@@ -254,7 +254,7 @@ namespace CommonLibTest
             Assert.Equal("OpenDomain - BUILTIN", status.Task);
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public async Task LocalGroupProcessor_GetLocalGroups_GetAliasesFailed()
         {
             var mockProcessor = new Mock<LocalGroupProcessor>(new MockLdapUtils(), null);
@@ -275,7 +275,7 @@ namespace CommonLibTest
             Assert.Equal("GetAliases - BUILTIN", status.Task);
         }
         
-        [Fact]
+        [WindowsOnlyFact]
         public async Task LocalGroupProcessor_GetLocalGroups_OpenAliasFailed()
         {
             var mockProcessor = new Mock<LocalGroupProcessor>(new MockLdapUtils(), null);
@@ -298,7 +298,7 @@ namespace CommonLibTest
             Assert.Equal("OpenAlias - Administrators", status.Task);
         }
         
-        [Fact]
+        [WindowsOnlyFact]
         public async Task LocalGroupProcessor_GetLocalGroups_GetMembersFailed()
         {
             var mockProcessor = new Mock<LocalGroupProcessor>(new MockLdapUtils(), null);
@@ -321,7 +321,7 @@ namespace CommonLibTest
             Assert.Equal("GetMembersInAlias - Users", status.Task);
         }
         
-        [Fact]
+        [WindowsOnlyFact]
         public async Task LocalGroupProcessor_GetLocalGroups_LookupPrincipalBySid()
         {
             var mockProcessor = new Mock<LocalGroupProcessor>(new MockLdapUtils(), null);
@@ -351,7 +351,7 @@ namespace CommonLibTest
                 });
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public async Task LocalGroupProcessor_GetLocalGroups_PreviouslyCached()
         {
             var mockProcessor = new Mock<LocalGroupProcessor>(new MockLdapUtils(), null);

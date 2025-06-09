@@ -271,7 +271,7 @@ namespace SharpHoundCommonLib.Processors
                             }
                             
                             //Attempt to lookup the principal in the server directly
-                            var lookupUserResult = server.LookupPrincipalBySid(securityIdentifier);
+                            var lookupUserResult = await Helpers.ExecuteRPCWithTimeout(timeout, timeoutToken => server.LookupPrincipalBySid(securityIdentifier, timeoutToken));
                             if (lookupUserResult.IsFailed)
                             {
                                 _log.LogTrace("Unable to resolve local sid {SID}: {Error}", sidValue, lookupUserResult.SError);

@@ -36,7 +36,7 @@ namespace CommonLibTest.Facades
             return Result<SecurityIdentifier>.Fail(NtStatus.StatusAccessDenied);
         }
 
-        public Result<(string Name, SharedEnums.SidNameUse Type)> LookupPrincipalBySid(SecurityIdentifier securityIdentifier)
+        public Result<(string Name, SharedEnums.SidNameUse Type)> LookupPrincipalBySid(SecurityIdentifier securityIdentifier, CancellationToken cancellationToken = default)
         {
             throw new System.NotImplementedException();
         }

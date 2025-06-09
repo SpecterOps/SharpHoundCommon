@@ -87,12 +87,17 @@ namespace SharpHoundRPC.Wrappers
         }
 
         public Result<(string Name, SharedEnums.SidNameUse Type)> LookupPrincipalBySid(
-            SecurityIdentifier securityIdentifier)
+            SecurityIdentifier securityIdentifier,
+            CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             var openDomainResult = OpenDomain(securityIdentifier);
             if (openDomainResult.IsFailed) return $"OpenDomain returned {openDomainResult.Status}";
 
             var domain = openDomainResult.Value;
+
+            cancellationToken.ThrowIfCancellationRequested();
 
             return domain.LookupPrincipalByRid(securityIdentifier.Rid());
         }

@@ -34,7 +34,7 @@ namespace CommonLibTest.Facades
             return Result<SecurityIdentifier>.Ok(securityIdentifier);
         }
 
-        public Result<(string Name, SharedEnums.SidNameUse Type)> LookupPrincipalBySid(SecurityIdentifier securityIdentifier)
+        public Result<(string Name, SharedEnums.SidNameUse Type)> LookupPrincipalBySid(SecurityIdentifier securityIdentifier, CancellationToken cancellationToken = default)
         {
             throw new System.NotImplementedException();
         }

@@ -13,7 +13,8 @@ namespace SharpHoundRPC.Wrappers
         Result<SecurityIdentifier> GetMachineSid(string testName = null, CancellationToken cancellationToken = default);
 
         Result<(string Name, SharedEnums.SidNameUse Type)> LookupPrincipalBySid(
-            SecurityIdentifier securityIdentifier);
+            SecurityIdentifier securityIdentifier,
+            CancellationToken cancellationToken = default);
 
         Result<ISAMDomain> OpenDomain(string domainName, SAMEnums.DomainAccessMask requestedDomainAccess =
             SAMEnums.DomainAccessMask.Lookup |
