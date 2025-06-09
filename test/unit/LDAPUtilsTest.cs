@@ -225,6 +225,31 @@ namespace CommonLibTest {
         }
 
         [Fact]
+        public async Task Test_ResolveSearchResult_TrustAccount() {
+            var utils = new MockLdapUtils();
+            var attribs = new Dictionary<string, object> {
+                { LDAPProperties.ObjectClass, new[] { "top"} },
+                { LDAPProperties.SAMAccountType, "805306370" },
+                { LDAPProperties.SAMAccountName, "DOMAIN1$" }
+            };
+
+            const string sid = "S-1-5-21-3130019616-2776909439-2417379446-2105";
+            const string dn = "CN=DOMAIN1$,CN=USERS,DC=TESTLAB,DC=LOCAL";
+            var guid = new Guid().ToString();
+
+            var mock = new MockDirectoryObject(dn, attribs, sid, guid);
+
+            var (success, result) = await LdapUtils.ResolveSearchResult(mock, utils);
+            Assert.True(success);
+            Assert.Equal(sid, result.ObjectId);
+            Assert.Equal(Label.User, result.ObjectType);
+            Assert.Equal("DOMAIN1$@TESTLAB.LOCAL", result.DisplayName);
+            Assert.Equal("S-1-5-21-3130019616-2776909439-2417379446", result.DomainSid);
+            Assert.Equal("TESTLAB.LOCAL", result.Domain);
+            Assert.False(result.Deleted);
+        }
+
+        [Fact]
         public async Task Test_ResolveHostToSid_BlankHost() {
             var spn = "MSSQLSvc/:1433";
             var utils = new LdapUtils();

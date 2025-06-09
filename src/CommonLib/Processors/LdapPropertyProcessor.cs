@@ -116,8 +116,14 @@ namespace SharpHoundCommonLib.Processors {
             if (!entry.TryGetLongProperty(LDAPProperties.DomainFunctionalLevel, out var functionalLevel)) {
                 functionalLevel = -1;
             }
-
             props.Add("functionallevel", FunctionalLevelToString((int)functionalLevel));
+
+            if (entry.TryGetProperty(LDAPProperties.PrincipalName, out var principalname)) {          
+                if (!string.IsNullOrEmpty(principalname) && principalname.IndexOf('\\') > 0) {
+                    var netBios = principalname.Split('\\')[0];
+                    props.Add("netbios", netBios);
+                }
+            }
 
             var dn = entry.GetProperty(LDAPProperties.DistinguishedName);
             var dsh = await _utils.GetDSHueristics(domain, dn);
