@@ -100,7 +100,8 @@ namespace SharpHoundCommonLib.SMB
                 // signingEnabled and signingRequired must both be True to confirm that SMB signing is required on this computer,
                 // so if we only collect one registry and it's False, we can conclude that SMB signing is not required
                 // but if it's True, we can't conclude either way and will return a Fail result
-                if ((requireRegistryValue == null && signingEnabled) || (enableRegistryValue == null && signingRequired))
+                // Note however that signingRequired implies signingEnabled
+                if (requireRegistryValue == null && signingEnabled)
                     return SharpHoundRPC.Result<SmbScanInfo>.Fail("Could not acquire enough registries to determine SMB Signing info");
 
                 return SharpHoundRPC.Result<SmbScanInfo>.Ok(new SmbScanInfo(host)
