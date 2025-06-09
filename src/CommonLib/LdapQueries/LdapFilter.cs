@@ -255,17 +255,19 @@ namespace SharpHoundCommonLib.LDAPQueries {
             return filterPartsDistinct;
         }
 
-        private string MergeFilter(string filterA, string filterB) {
-            return $"(&{filterA}{filterB})";
+        private string MergeFilters(params string[] filters) {
+            return $"(&{string.Join("", filters)})";
         }
 
         public IEnumerable<string> GetFilterList() {
             foreach (var filter in _filterParts.Distinct())
             {
                 if (_mandatory.Count > 0) {
-                    foreach (var mandatory in _mandatory) {
-                        yield return MergeFilter(filter, mandatory);
-                    }
+                    var filters = new List<string>(_mandatory)
+                    {
+                        filter
+                    };
+                    yield return MergeFilters(filters.ToArray());
                 } else {
                     yield return filter;
                 }
