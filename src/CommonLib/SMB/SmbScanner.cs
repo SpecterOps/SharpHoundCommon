@@ -7,9 +7,7 @@ using System.Threading.Tasks;
 using SharpHoundCommonLib.SMB.SMB1;
 using SharpHoundCommonLib.SMB.SMB2;
 using SharpHoundCommonLib.SMB.NetBIOS;
-using System.CodeDom;
 using Microsoft.Extensions.Logging;
-using SharpHoundRPC;
 using SharpHoundRPC.Registry;
 using Microsoft.Win32;
 
@@ -45,23 +43,24 @@ namespace SharpHoundCommonLib.SMB
         /// <summary>
         /// Scans SMB on the remote server by sending an SMB negotiate message
         /// and analyzing the response. It will attempt to elicit a response using 
-        /// an SMB1 message and then SMB2 (if SMB1 fails).
+        /// an SMB1 message and then SMB2.
         /// </summary>
         /// <param name="host">The hostname or IP address to check</param>
         /// <param name="port">The port to connect to (default SMB port is 445)</param>
         /// <returns>Result object containing SMB signing information</returns>
         public async Task<SharpHoundRPC.Result<SmbScanInfo>> ScanHost(string host, int port = 445)
         {
-
-            var isLocalMachine = NativeUtils.IsCurrentMachineFqdn(host);
-            if (isLocalMachine)
+            if (NativeUtils.IsCurrentMachineFqdn(host))
             {
                 // When accessing the SMB directly port from localhost, it'll disconnect. 
                 // Side step that by just collecting the data from the registry.
-                return CheckRegistrySigningRequired(host);
+                _log.LogTrace($"Checking SMB registry on host {host}");
+                var registryResult = CheckRegistrySigningRequired(host);
+
+                // If registry check succeeds that's all we need, otherwise we'll follow up with SMB Negotiate
+                if (registryResult.IsSuccess)
+                    return registryResult;
             }
-
-
 
             // Try SMB1 negotiate first as it'll elicit an SMB1 or SMB2 response (if either is enabled)
             var smb1result = await TrySMBNegotiate(host, port, true);
@@ -78,7 +77,7 @@ namespace SharpHoundCommonLib.SMB
         /// </summary>
         private SharpHoundRPC.Result<SmbScanInfo> CheckRegistrySigningRequired(string host)
         {
-            const string keyPath = @"SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters";
+            const string keyPath = @"SYSTEM\CurrentControlSet\Services\LanManServer\Parameters";
             const string requireValueName = "RequireSecuritySignature";
             const string enableValueName = "EnableSecuritySignature";
 
@@ -87,23 +86,30 @@ namespace SharpHoundCommonLib.SMB
                 var requireRegistryValue = Registry.GetValue($@"HKEY_LOCAL_MACHINE\{keyPath}", requireValueName, null);
                 var enableRegistryValue = Registry.GetValue($@"HKEY_LOCAL_MACHINE\{keyPath}", enableValueName, null);
 
-                bool signingRequired = false;
-                bool signingEnabled = false;
+                bool required = false;
 
+                // RequireSecuritySignature is enough to tell us whether or not signing is required
                 if (requireRegistryValue != null)
                 {
-                    signingRequired = Convert.ToInt32(requireRegistryValue) != 0;
+                    required = Convert.ToInt32(requireRegistryValue) != 0;
+                    return SharpHoundRPC.Result<SmbScanInfo>.Ok(new SmbScanInfo(host)
+                    {
+                        SigningRequired = required,
+                    });
+                }
+                // But if it doesn't exist, we can know that signing ISN'T required if EnableSecuritySignature is False
+                else if (enableRegistryValue != null)
+                {
+                    required = Convert.ToInt32(enableRegistryValue) != 0;
+                    if (!required)
+                        return SharpHoundRPC.Result<SmbScanInfo>.Ok(new SmbScanInfo(host)
+                        {
+                            SigningRequired = false,
+                        });
                 }
 
-                if (enableRegistryValue != null)
-                {
-                    signingEnabled = Convert.ToInt32(enableRegistryValue) != 0;
-                }
-
-                return SharpHoundRPC.Result<SmbScanInfo>.Ok(new SmbScanInfo(host)
-                {
-                    SigningRequired = signingEnabled && signingRequired
-                });
+                // But if EnableSecuritySignature is also missing or is True, we can't conclude anything
+                return SharpHoundRPC.Result<SmbScanInfo>.Fail("Could not acquire enough registries to determine SMB Signing info");
             }
             catch (Exception ex)
             {
@@ -256,7 +262,12 @@ namespace SharpHoundCommonLib.SMB
 
             // Validate structure size of negotiate response
             var negotiateStructureSize = reader.ReadUInt16();
-            
+
+            if (negotiateStructureSize != SMB2Constants.ExpectedNegotiateStructureSizeA)
+            {
+                _log.LogDebug($"Expected fixed-value SMB2 response structure size {SMB2Constants.ExpectedNegotiateStructureSizeA}, got {negotiateStructureSize}. Packet: {Convert.ToBase64String(responsePacket)}");
+                return (true, false);
+            }
 
             // Read security mode, which contains signing information
             var securityMode = reader.ReadUInt16();
