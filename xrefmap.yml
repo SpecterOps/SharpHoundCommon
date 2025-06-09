@@ -4772,6 +4772,12 @@ references:
   commentId: F:SharpHoundCommonLib.LDAPProperties.PrimaryGroupID
   fullName: SharpHoundCommonLib.LDAPProperties.PrimaryGroupID
   nameWithType: LDAPProperties.PrimaryGroupID
+- uid: SharpHoundCommonLib.LDAPProperties.PrincipalName
+  name: PrincipalName
+  href: api/SharpHoundCommonLib.LDAPProperties.html#SharpHoundCommonLib_LDAPProperties_PrincipalName
+  commentId: F:SharpHoundCommonLib.LDAPProperties.PrincipalName
+  fullName: SharpHoundCommonLib.LDAPProperties.PrincipalName
+  nameWithType: LDAPProperties.PrincipalName
 - uid: SharpHoundCommonLib.LDAPProperties.ProfilePath
   name: ProfilePath
   href: api/SharpHoundCommonLib.LDAPProperties.html#SharpHoundCommonLib_LDAPProperties_ProfilePath
