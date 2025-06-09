@@ -82,7 +82,8 @@ namespace CommonLibTest {
                 (accountType: "536870912", label: Label.Group),
                 (accountType: "536870913", label: Label.Group),
                 (accountType: "805306369", Label.Computer),
-                (accountType: "805306368", Label.User)
+                (accountType: "805306368", Label.User),
+                (accountType: "805306370", Label.User)
             };
 
             foreach (var e in accountTypeLookup) {
