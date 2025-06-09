@@ -263,7 +263,7 @@ namespace SharpHoundCommonLib.SMB
 
             if (negotiateStructureSize != SMB2Constants.ExpectedNegotiateStructureSizeA)
             {
-                _log.LogDebug($"Expected fixed-value SMB2 response structure size {SMB2Constants.ExpectedNegotiateStructureSizeB}, got {negotiateStructureSize}. Packet: {Convert.ToBase64String(responsePacket)}");
+                _log.LogDebug($"Expected fixed-value SMB2 response structure size {SMB2Constants.ExpectedNegotiateStructureSizeA}, got {negotiateStructureSize}. Packet: {Convert.ToBase64String(responsePacket)}");
                 return (true, false);
             }
 
