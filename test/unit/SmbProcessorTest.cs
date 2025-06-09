@@ -28,7 +28,7 @@ namespace CommonLibTest {
             
             var mockSmbScanner = new Mock<ISmbScanner>();
             mockSmbScanner
-                .Setup(x => x.ScanHost(It.IsAny<string>(), It.IsAny<int>()))
+                .Setup(x => x.ScanHost(It.IsAny<string>(), It.IsAny<int>(), default))
                 .Returns(async () => {
                     await Task.Delay(100);
                     return NtStatus.StatusAccessDenied;

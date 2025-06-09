@@ -7,6 +7,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using SharpHoundRPC.PortScanner;
+using System.Threading;
 
 namespace SharpHoundCommonLib.Processors;
 
@@ -53,11 +54,11 @@ public class DCLdapProcessor {
             isChannelBindingDisabled = new();
 
         if (hasLdap) {
-            isSigningRequired = await Helpers.ExecuteRPCWithTimeout(timeout, (_) => CheckIsNtlmSigningRequired());
+            isSigningRequired = await Helpers.ExecuteRPCWithTimeout(timeout, CheckIsNtlmSigningRequired);
         }
 
         if (hasLdaps) {
-            isChannelBindingDisabled = await Helpers.ExecuteRPCWithTimeout(timeout, (_) => CheckIsChannelBindingDisabled());
+            isChannelBindingDisabled = await Helpers.ExecuteRPCWithTimeout(timeout, CheckIsChannelBindingDisabled);
         }
 
         if (isSigningRequired.IsFailed) {
@@ -124,12 +125,12 @@ public class DCLdapProcessor {
         return await _scanner.CheckPort(_ldapSslEndpoint.Host, _ldapSslEndpoint.Port, _portScanTimeout);
     }
 
-    public async Task<SharpHoundRPC.Result<bool>> CheckIsNtlmSigningRequired() {
+    public async Task<SharpHoundRPC.Result<bool>> CheckIsNtlmSigningRequired(CancellationToken cancellationToken = default) {
         try {
             var options = new LdapAuthOptions() {
                 Signing = false
             };
-            var accessibleWithoutSigning = await Authenticate(_ldapEndpoint, options);
+            var accessibleWithoutSigning = await Authenticate(_ldapEndpoint, options, cancellationToken : cancellationToken);
 
             return SharpHoundRPC.Result<bool>.Ok(accessibleWithoutSigning == false);
 
@@ -146,7 +147,7 @@ public class DCLdapProcessor {
     // 3) Correct bindings to ensure NTLM auth is enabled
     // However, as of right now we only do #2. We can't do #1 right now since the
     // Window's SSPI APIs (InitSecurityContext) always add channel bindings.
-    public async Task<SharpHoundRPC.Result<bool>> CheckIsChannelBindingDisabled() {
+    public async Task<SharpHoundRPC.Result<bool>> CheckIsChannelBindingDisabled(CancellationToken cancellationToken = default) {
         try {
             // 1) Can we connect with *invalid* bindings
 
@@ -156,7 +157,7 @@ public class DCLdapProcessor {
             var accessibleWithNoBindings = await Authenticate(_ldapSslEndpoint, new LdapAuthOptions() {
                 Signing = false,
                 Bindings = bindings
-            });
+            }, cancellationToken : cancellationToken);
             return SharpHoundRPC.Result<bool>.Ok(accessibleWithNoBindings);
 
         } catch (Exception ex) {
@@ -170,7 +171,7 @@ public class DCLdapProcessor {
     /// <param name="endpoint"></param>
     /// <param name="options"></param>
     /// <returns></returns>
-    protected internal virtual async Task<bool> Authenticate(Uri endpoint, LdapAuthOptions options, NtlmAuthenticationHandler ntlmAuth = null, LdapTransport ldapTransport = null) {
+    protected internal virtual async Task<bool> Authenticate(Uri endpoint, LdapAuthOptions options, NtlmAuthenticationHandler ntlmAuth = null, LdapTransport ldapTransport = null, CancellationToken cancellationToken = default) {
         var host = endpoint.Host;
         var auth = ntlmAuth ?? new NtlmAuthenticationHandler($"LDAP/{host.ToUpper()}") {
             Options = options
@@ -179,7 +180,7 @@ public class DCLdapProcessor {
 
         try {
             transport.InitializeConnectionAsync(_ldapTimeout);
-            await auth.PerformNtlmAuthenticationAsync(transport);
+            await auth.PerformNtlmAuthenticationAsync(transport, cancellationToken);
             return true;
         } catch (LdapNativeException ex) {
             switch (ex.ErrorCode) {

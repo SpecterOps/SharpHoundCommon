@@ -1,9 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using SharpHoundCommonLib.OutputTypes;
 using System;
-using System.Collections.Specialized;
 using System.Threading.Tasks;
-using SharpHoundRPC;
 using SharpHoundCommonLib.SMB;
 
 namespace SharpHoundCommonLib.Processors {
@@ -33,7 +31,7 @@ namespace SharpHoundCommonLib.Processors {
                 timeout = TimeSpan.FromMinutes(2);
             }
 
-            var result = await Helpers.ExecuteRPCWithTimeout(timeout, (_) => _smbScanner.ScanHost(host, 445));
+            var result = await Helpers.ExecuteRPCWithTimeout(timeout, (timeoutToken) => _smbScanner.ScanHost(host, 445, timeoutToken));
 
             if (result.IsFailed) {
                 await SendComputerStatus(new CSVComputerStatus {

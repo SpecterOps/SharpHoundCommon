@@ -1,13 +1,13 @@
 ﻿using Microsoft.Extensions.Logging;
 using SharpHoundCommonLib.Processors;
 using SharpHoundCommonLib.ThirdParty.PSOpenAD;
-using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SharpHoundCommonLib.Ntlm;
 
 interface INtlmAuthenticationHandler {
-    Task<object> PerformNtlmAuthenticationAsync(INtlmTransport transport);
+    Task<object> PerformNtlmAuthenticationAsync(INtlmTransport transport, CancellationToken cancellationToken = default);
 }
 
 /// <summary>
@@ -28,7 +28,7 @@ public class NtlmAuthenticationHandler : INtlmAuthenticationHandler {
         };
     }
 
-    public virtual async Task<object> PerformNtlmAuthenticationAsync(INtlmTransport transport) {
+    public virtual async Task<object> PerformNtlmAuthenticationAsync(INtlmTransport transport, CancellationToken cancellationToken = default) {
         using var context = new SspiContext(
             null,
             null,
@@ -39,11 +39,15 @@ public class NtlmAuthenticationHandler : INtlmAuthenticationHandler {
             Options.Signing
         );
 
+        cancellationToken.ThrowIfCancellationRequested();
+
         // NEGOTIATE
         var negotiateMsgBytes = context.Step();
 
         // CHALLENGE
         var challengeMessageBytes = await transport.NegotiateAsync(negotiateMsgBytes);
+
+        cancellationToken.ThrowIfCancellationRequested();
 
         // AUTHENTICATE
         var authenticateMsgBytes = context.Step(challengeMessageBytes);

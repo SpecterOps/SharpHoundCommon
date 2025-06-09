@@ -78,7 +78,7 @@ namespace SharpHoundCommonLib.Processors
             //Try to get the machine sid for the computer if its not already cached
             SecurityIdentifier machineSid;
             if (!Cache.GetMachineSid(computerObjectId, out var tempMachineSid)) {
-                var getMachineSidResult = await Helpers.ExecuteRPCWithTimeout(timeout, (_) => server.GetMachineSid());
+                var getMachineSidResult = await Helpers.ExecuteRPCWithTimeout(timeout, (timeoutToken) => server.GetMachineSid(cancellationToken: timeoutToken));
                 if (getMachineSidResult.IsFailed)
                 {
                     _log.LogTrace("GetMachineSid failed on {ComputerName}: {Error}", computerName, getMachineSidResult.SError);
@@ -123,7 +123,7 @@ namespace SharpHoundCommonLib.Processors
                     continue;
 
                 //Open a handle to the domain
-                var openDomainResult = await Helpers.ExecuteRPCWithTimeout(timeout, (_) => server.OpenDomain(domainResult.Name));
+                var openDomainResult = await Helpers.ExecuteRPCWithTimeout(timeout, (timeoutToken) => server.OpenDomain(domainResult.Name, cancellationToken: timeoutToken));
                 if (openDomainResult.IsFailed)
                 {
                     _log.LogTrace("Failed to open domain {Domain} on {ComputerName}: {Error}", domainResult.Name, computerName, openDomainResult.SError);

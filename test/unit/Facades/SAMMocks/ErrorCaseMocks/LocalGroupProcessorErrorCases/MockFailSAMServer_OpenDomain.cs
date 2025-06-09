@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Security.Principal;
+using System.Threading;
 using SharpHoundRPC;
 using SharpHoundRPC.SAMRPCNative;
 using SharpHoundRPC.Shared;
@@ -27,7 +28,7 @@ namespace CommonLibTest.Facades
             throw new System.NotImplementedException();
         }
 
-        public Result<SecurityIdentifier> GetMachineSid(string testName = null)
+        public Result<SecurityIdentifier> GetMachineSid(string testName = null, CancellationToken cancellationToken = default)
         {
             var securityIdentifier = new SecurityIdentifier(Consts.MockWorkstationMachineSid);
             return Result<SecurityIdentifier>.Ok(securityIdentifier);
@@ -39,7 +40,8 @@ namespace CommonLibTest.Facades
         }
 
         public Result<ISAMDomain> OpenDomain(string domainName,
-            SAMEnums.DomainAccessMask requestedDomainAccess = SAMEnums.DomainAccessMask.ListAccounts | SAMEnums.DomainAccessMask.Lookup)
+            SAMEnums.DomainAccessMask requestedDomainAccess = SAMEnums.DomainAccessMask.ListAccounts | SAMEnums.DomainAccessMask.Lookup,
+            CancellationToken cancellationToken = default)
         {
             // if (domainName.Equals("builtin", StringComparison.OrdinalIgnoreCase))
             // {
