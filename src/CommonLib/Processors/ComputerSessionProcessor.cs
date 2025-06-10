@@ -136,8 +136,16 @@ namespace SharpHoundCommonLib.Processors {
                 if (computerSessionName is "[::1]" or "127.0.0.1")
                     resolvedComputerSID = computerSid;
                 else if (await _utils.ResolveHostToSid(computerSessionName, computerDomain) is (true, var tempSid))
+                {
                     //Attempt to resolve the host name to a SID
                     resolvedComputerSID = tempSid;
+                    await SendComputerStatus(new CSVComputerStatus {
+                        Status = CSVComputerStatus.StatusSuccess,
+                        Task = "NetSessionEnum",
+                        ComputerName = computerSessionName,
+                    });
+                }
+                    
 
                 //Throw out this data if we couldn't resolve it successfully. 
                 if (resolvedComputerSID == null || !resolvedComputerSID.StartsWith("S-1")) {
@@ -151,10 +159,17 @@ namespace SharpHoundCommonLib.Processors {
                 } else {
                     var res = await _utils.ResolveAccountName(username, computerDomain);
                     if (res.Success)
+                    {
+                        await SendComputerStatus(new CSVComputerStatus {
+                            Status = CSVComputerStatus.StatusSuccess,
+                            Task = "NetSessionEnum",
+                            ComputerName = computerSessionName,
+                        });
                         results.Add(new Session {
                             ComputerSID = resolvedComputerSID,
                             UserSID = res.Principal.ObjectIdentifier
                         });
+                    }
                 }
             }
 
