@@ -7,11 +7,9 @@ using SharpHoundCommonLib.Enums;
 using Xunit;
 
 namespace CommonLibTest {
-    public class CommonLibHelperTest
-    {
+    public class CommonLibHelperTest {
         [Fact]
-        public void RemoveDistinguishedNamePrefix_ExpectedResult()
-        {
+        public void RemoveDistinguishedNamePrefix_ExpectedResult() {
             var dn = "CN=Jeff Smith,OU=Sales,DC=Fabrikam,DC=COM";
             var result = Helpers.RemoveDistinguishedNamePrefix(dn);
             Assert.Equal("OU=Sales,DC=Fabrikam,DC=COM", result);
@@ -27,8 +25,7 @@ namespace CommonLibTest {
         }
 
         [Fact]
-        public void SplitGPLinkProperty_ValidPropFilterEnabled_ExpectedResult()
-        {
+        public void SplitGPLinkProperty_ValidPropFilterEnabled_ExpectedResult() {
             var isPropFilterEnabled = false;
             //TODO: Ari, proper test string?
             var testGPLinkProperty =
@@ -42,8 +39,7 @@ namespace CommonLibTest {
         }
 
         [Fact]
-        public void SplitGPLinkProperty_ValidPropFilterDisabled_ExpectedResult()
-        {
+        public void SplitGPLinkProperty_ValidPropFilterDisabled_ExpectedResult() {
             var isPropFilterEnabled = false;
             //TODO: Ari, proper test string?
             var testGPLinkProperty =
@@ -58,8 +54,7 @@ namespace CommonLibTest {
 
         /// 
         [Fact]
-        public void SplitGPLinkProperty_PropWithUnsupportedDelimiter_FilterEnabled_ExpectedResult()
-        {
+        public void SplitGPLinkProperty_PropWithUnsupportedDelimiter_FilterEnabled_ExpectedResult() {
             var isPropFilterEnabled = true;
             //TODO: Ari, proper test string?
             var testGPLinkProperty =
@@ -73,8 +68,7 @@ namespace CommonLibTest {
         }
 
         [Fact]
-        public void SplitGPLinkProperty_InValidPropFilterDisabled_ExpectedResult()
-        {
+        public void SplitGPLinkProperty_InValidPropFilterDisabled_ExpectedResult() {
             var isPropFilterEnabled = false;
             //TODO: Ari, proper test string?
             var testGPLinkProperty = "/*obviously wrong data*/";
@@ -83,8 +77,7 @@ namespace CommonLibTest {
         }
 
         [Fact]
-        public void SamAccountTypeToType_ValidString_CorrectLabel()
-        {
+        public void SamAccountTypeToType_ValidString_CorrectLabel() {
             var accountTypeLookup = new (string accountType, Label label)[] {
                 (accountType: "268435456", label: Label.Group),
                 (accountType: "268435457", label: Label.Group),
@@ -95,16 +88,14 @@ namespace CommonLibTest {
                 (accountType: "805306370", Label.User)
             };
 
-            foreach (var e in accountTypeLookup)
-            {
+            foreach (var e in accountTypeLookup) {
                 var result = Helpers.SamAccountTypeToType(e.accountType);
                 Assert.Equal(result, e.label);
             }
         }
 
         [Fact]
-        public void SamAccountTypeToType_InValidString_CorrectLabel()
-        {
+        public void SamAccountTypeToType_InValidString_CorrectLabel() {
             var result = Helpers.SamAccountTypeToType("nonsense_^&^^&(*^*^*&(&^&(^*AAAA");
             Assert.Equal(Label.Base, result);
         }
@@ -122,8 +113,7 @@ namespace CommonLibTest {
         // }
 
         [Fact]
-        public void ConvertGuidToHexGuid_ValidStringGuid_ValidHex()
-        {
+        public void ConvertGuidToHexGuid_ValidStringGuid_ValidHex() {
             // Atmoic conversion test. Add as many variants as needed to increase confidence.
 
             var guid = Guid.NewGuid();
@@ -135,8 +125,7 @@ namespace CommonLibTest {
         }
 
         [Fact]
-        public void DistinguishedNameToDomain_ValidDistinguishedName_ExpectedDomainValue()
-        {
+        public void DistinguishedNameToDomain_ValidDistinguishedName_ExpectedDomainValue() {
             var expected = "FABRIKAM.COM";
             var actual =
                 Helpers.DistinguishedNameToDomain("CN=Jeff Smith,OU=Sales,DC=Fabrikam,DC=COM");
@@ -144,16 +133,14 @@ namespace CommonLibTest {
         }
 
         [Fact]
-        public void DistinguishedNameToDomain_InValidDistinguishedName_ReturnsNull()
-        {
+        public void DistinguishedNameToDomain_InValidDistinguishedName_ReturnsNull() {
             var testDCQuery = "[LDAP:/o=foo/ou=foo Group (ABC123)/cn=foouser (blah)123; DX=wjatvar][]";
             var actual = Helpers.DistinguishedNameToDomain(testDCQuery);
             Assert.Null(actual);
         }
 
         [Fact]
-        public void StripServicePrincipalName_ValidServicePrincipal_ExpectedHostName()
-        {
+        public void StripServicePrincipalName_ValidServicePrincipal_ExpectedHostName() {
             var testString = "www/WEB-SERVER-01.adsec.local";
             var expected = "WEB-SERVER-01.adsec.local";
             var actual = Helpers.StripServicePrincipalName(testString);
@@ -161,8 +148,7 @@ namespace CommonLibTest {
         }
 
         [Fact]
-        public void StripServicePrincipalName_InValidServicePrincipal_ExpectedHostName()
-        {
+        public void StripServicePrincipalName_InValidServicePrincipal_ExpectedHostName() {
             var testString = "234234f___bb4::fadfs";
             var expected = "234234f___bb4::fadfs";
             var actual = Helpers.StripServicePrincipalName(testString);
@@ -170,8 +156,7 @@ namespace CommonLibTest {
         }
 
         [Fact]
-        public void StripServicePrincipalName_EmptyHost_Valid()
-        {
+        public void StripServicePrincipalName_EmptyHost_Valid() {
             var testString = "MSSQLSvc/:1433";
             var expected = "";
             var actual = Helpers.StripServicePrincipalName(testString);
@@ -179,8 +164,7 @@ namespace CommonLibTest {
         }
 
         [Fact]
-        public void B64ToBytes_String_ValidBase64String()
-        {
+        public void B64ToBytes_String_ValidBase64String() {
             var testString = "obviously nonsense";
             var exampleBytes = Encoding.UTF8.GetBytes(testString);
             var compareString = Convert.ToBase64String(exampleBytes);
@@ -189,8 +173,7 @@ namespace CommonLibTest {
         }
 
         [Fact]
-        public void ConvertFileTimeToUnixEpoch_ValidFileTime_ValidUnixEpoch()
-        {
+        public void ConvertFileTimeToUnixEpoch_ValidFileTime_ValidUnixEpoch() {
             var testFileTime = "132260149842749745";
             var result = Helpers.ConvertFileTimeToUnixEpoch(testFileTime);
             var expected = 1581541384;
@@ -198,30 +181,26 @@ namespace CommonLibTest {
         }
 
         [Fact]
-        public void ConvertFileTimeToUnixEpoch_Null_NegativeOne()
-        {
+        public void ConvertFileTimeToUnixEpoch_Null_NegativeOne() {
             var result = Helpers.ConvertFileTimeToUnixEpoch(null);
             Assert.Equal(-1, result);
         }
 
         [Fact]
-        public void ConvertFileTimeToUnixEpoch_WrongFormat_FortmatException()
-        {
+        public void ConvertFileTimeToUnixEpoch_WrongFormat_FortmatException() {
             Exception ex =
                 Assert.Throws<FormatException>(() => Helpers.ConvertFileTimeToUnixEpoch("asdsf"));
             Assert.Equal("The input string 'asdsf' was not in a correct format.", ex.Message);
         }
 
         [Fact]
-        public void ConvertFileTimeToUnixEpoch_BadInput_CastExceptionReturnsNegativeOne()
-        {
+        public void ConvertFileTimeToUnixEpoch_BadInput_CastExceptionReturnsNegativeOne() {
             var result = Helpers.ConvertFileTimeToUnixEpoch("-3242432");
             Assert.Equal(-1, result);
         }
 
         [Fact]
-        public void ConvertFileTimeToUnixEpoch_ValidTimestamp_ValidUnixEpoch()
-        {
+        public void ConvertFileTimeToUnixEpoch_ValidTimestamp_ValidUnixEpoch() {
             var d = DateTime.Parse("2021-06-21T00:00:00");
             var result =
                 Helpers.ConvertFileTimeToUnixEpoch(d.ToFileTimeUtc().ToString()); // get the epoch
@@ -232,16 +211,14 @@ namespace CommonLibTest {
         }
 
         [Fact]
-        public void ConvertFileTimeToUnixEpoch_InvalidTimestamp_FormatException()
-        {
+        public void ConvertFileTimeToUnixEpoch_InvalidTimestamp_FormatException() {
             Exception ex = Assert.Throws<FormatException>(() =>
                 Helpers.ConvertFileTimeToUnixEpoch("-201adsfasf12180244"));
             Assert.Equal("The input string '-201adsfasf12180244' was not in a correct format.", ex.Message);
         }
 
         [Fact]
-        public void DistinguishedNameToDomain_RegularObject_CorrectDomain()
-        {
+        public void DistinguishedNameToDomain_RegularObject_CorrectDomain() {
             var result = Helpers.DistinguishedNameToDomain(
                 "CN=Account Operators,CN=Builtin,DC=testlab,DC=local");
             Assert.Equal("TESTLAB.LOCAL", result);
@@ -251,16 +228,14 @@ namespace CommonLibTest {
         }
 
         [Fact]
-        public void DistinguishedNameToDomain_DeletedObjects_CorrectDomain()
-        {
+        public void DistinguishedNameToDomain_DeletedObjects_CorrectDomain() {
             var result = Helpers.DistinguishedNameToDomain(
                 @"DC=..Deleted-_msdcs.testlab.local\0ADEL:af1f072f-28d7-4b86-9b87-a408bfc9cb0d,CN=Deleted Objects,DC=testlab,DC=local");
             Assert.Equal("TESTLAB.LOCAL", result);
         }
 
         [Fact]
-        public void ConvertTimestampToUnixEpoch_ValidTimestamp()
-        {
+        public void ConvertTimestampToUnixEpoch_ValidTimestamp() {
             var d = DateTime.Parse("2025-04-07T00:00:00.0000000-07:00");
             var result =
                 Helpers.ConvertTimestampToUnixEpoch(d.ToString("yyyyMMddHHmmss.0K"));
@@ -270,8 +245,7 @@ namespace CommonLibTest {
         }
 
         [Fact]
-        public void ConvertTimestampToUnixEpoch_InvalidTimestamp()
-        {
+        public void ConvertTimestampToUnixEpoch_InvalidTimestamp() {
             var result =
                 Helpers.ConvertTimestampToUnixEpoch("-201adsfasf12180244");
 
@@ -279,11 +253,9 @@ namespace CommonLibTest {
         }
 
         [Fact]
-        public async Task ExecuteWithTimeout_Success()
-        {
+        public async Task ExecuteWithTimeout_Success() {
             var timeout = TimeSpan.FromSeconds(1);
-            var func = (CancellationToken t) =>
-            {
+            var func = (CancellationToken t) => {
                 Thread.Sleep(TimeSpan.FromMilliseconds(100));
                 return true;
             };
@@ -293,11 +265,9 @@ namespace CommonLibTest {
         }
 
         [Fact]
-        public async Task ExecuteWithTimeout_Timeout()
-        {
+        public async Task ExecuteWithTimeout_Timeout() {
             var timeout = TimeSpan.FromMilliseconds(100);
-            var func = (CancellationToken t) =>
-            {
+            var func = (CancellationToken t) => {
                 Thread.Sleep(TimeSpan.FromSeconds(1));
                 return true;
             };
@@ -307,11 +277,9 @@ namespace CommonLibTest {
         }
 
         [Fact]
-        public async Task ExecuteWithTimeout_Task_Success()
-        {
+        public async Task ExecuteWithTimeout_Task_Success() {
             var timeout = TimeSpan.FromSeconds(1);
-            var func = async (CancellationToken t) =>
-            {
+            var func = async (CancellationToken t) => {
                 await Task.Delay(TimeSpan.FromMilliseconds(100));
                 return true;
             };
@@ -321,17 +289,49 @@ namespace CommonLibTest {
         }
 
         [Fact]
-        public async Task ExecuteWithTimeout_Task_Timeout()
-        {
+        public async Task ExecuteWithTimeout_Task_Timeout() {
             var timeout = TimeSpan.FromMilliseconds(100);
-            var func = async (CancellationToken t) =>
-            {
+            var func = async (CancellationToken t) => {
                 await Task.Delay(TimeSpan.FromSeconds(1));
                 return true;
             };
             var result = await Helpers.ExecuteWithTimeout(timeout, func);
             Assert.False(result.IsSuccess);
             Assert.Equal("Timeout", result.Error);
+        }
+
+        [Fact]
+        public async Task ExecuteWithTimeout_Timeout_Cancel() {
+            var shouldRemainFalse = false;
+            var timeout = TimeSpan.FromMilliseconds(100);
+            var func = (CancellationToken t) => {
+                Thread.Sleep(TimeSpan.FromMilliseconds(500));
+                t.ThrowIfCancellationRequested();
+                shouldRemainFalse = true;
+                return true;
+            };
+            var result = await Helpers.ExecuteWithTimeout(timeout, func);
+            await Task.Delay(TimeSpan.FromMilliseconds(600));
+            Assert.False(result.IsSuccess);
+            Assert.Equal("Timeout", result.Error);
+            Assert.False(shouldRemainFalse);
+        }
+
+        [Fact]
+        public async Task ExecuteWithTimeout_Task_Timeout_Cancel() {
+            var shouldRemainFalse = false;
+            var timeout = TimeSpan.FromMilliseconds(100);
+            var func = async (CancellationToken t) => {
+                await Task.Delay(TimeSpan.FromMilliseconds(500));
+                t.ThrowIfCancellationRequested();
+                shouldRemainFalse = true;
+                return true;
+            };
+            var result = await Helpers.ExecuteWithTimeout(timeout, func);
+            await Task.Delay(TimeSpan.FromMilliseconds(600));
+            Assert.False(result.IsSuccess);
+            Assert.Equal("Timeout", result.Error);
+            Assert.False(shouldRemainFalse);
         }
     }
 }

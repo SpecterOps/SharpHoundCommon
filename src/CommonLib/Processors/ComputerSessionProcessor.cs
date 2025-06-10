@@ -68,25 +68,23 @@ namespace SharpHoundCommonLib.Processors {
 
                     timeoutToken.ThrowIfCancellationRequested();
 
-                    if (result.IsFailed)
-                        {
-                            // Fall back to default User
-                            _log.LogDebug(
-                                "NetSessionEnum failed on {ComputerName} with local admin credentials: {Status}. Fallback to default user.",
-                                computerName, result.Status);
-                            result = _nativeMethods.NetSessionEnum(computerName);
-                        }
-                } else {
+                    if (result.IsFailed) {
+                        // Fall back to default User
+                        _log.LogDebug(
+                            "NetSessionEnum failed on {ComputerName} with local admin credentials: {Status}. Fallback to default user.",
+                            computerName, result.Status);
+                        result = _nativeMethods.NetSessionEnum(computerName);
+                    }
+                }
+                else {
                     result = _nativeMethods.NetSessionEnum(computerName);
                 }
 
                 return result;
             });
 
-            if (result.IsFailed)
-            {
-                await SendComputerStatus(new CSVComputerStatus
-                {
+            if (result.IsFailed) {
+                await SendComputerStatus(new CSVComputerStatus {
                     Status = result.GetErrorStatus(),
                     Task = "NetSessionEnum",
                     ComputerName = computerName
@@ -125,7 +123,7 @@ namespace SharpHoundCommonLib.Processors {
                     username.Equals("anonymous logon", StringComparison.CurrentCultureIgnoreCase)) {
                     continue;
                 }
-                
+
                 //Filter out domains that are "."
                 if (computerDomain.Equals(".")) {
                     continue;
@@ -151,7 +149,8 @@ namespace SharpHoundCommonLib.Processors {
                 if (matchSuccess) {
                     results.AddRange(
                         sids.Select(s => new Session { ComputerSID = resolvedComputerSID, UserSID = s }));
-                } else {
+                }
+                else {
                     var res = await _utils.ResolveAccountName(username, computerDomain);
                     if (res.Success)
                         results.Add(new Session {
@@ -193,18 +192,18 @@ namespace SharpHoundCommonLib.Processors {
                                LogonType.LOGON32_LOGON_NEW_CREDENTIALS, LogonProvider.LOGON32_PROVIDER_WINNT50)) {
                         result = _nativeMethods.NetWkstaUserEnum(computerName);
                     }
-                    
+
                     timeoutToken.ThrowIfCancellationRequested();
 
-                    if (result.IsFailed)
-                    {
+                    if (result.IsFailed) {
                         // Fall back to default User
                         _log.LogDebug(
                             "NetWkstaUserEnum failed on {ComputerName} with local admin credentials: {Status}. Fallback to default user.",
                             computerName, result.Status);
                         result = _nativeMethods.NetWkstaUserEnum(computerName);
                     }
-                } else {
+                }
+                else {
                     result = _nativeMethods.NetWkstaUserEnum(computerName);
                 }
 
@@ -251,7 +250,7 @@ namespace SharpHoundCommonLib.Processors {
                 if (string.IsNullOrWhiteSpace(username) || username.EndsWith("$", StringComparison.Ordinal)) {
                     continue;
                 }
-                
+
                 //Filter out domains that are "."
                 if (domain.Equals(".")) {
                     continue;
@@ -319,7 +318,8 @@ namespace SharpHoundCommonLib.Processors {
                 ret.Results = results.ToArray();
 
                 return ret;
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                 _log.LogTrace("Registry session enum failed on {ComputerName}: {Status}", computerName, e.Message);
                 await SendComputerStatus(new CSVComputerStatus {
                     Status = e.Message,
@@ -329,7 +329,8 @@ namespace SharpHoundCommonLib.Processors {
                 ret.Collected = false;
                 ret.FailureReason = e.Message;
                 return ret;
-            } finally {
+            }
+            finally {
                 key?.Dispose();
             }
         }

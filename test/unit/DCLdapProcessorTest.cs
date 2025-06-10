@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using CommonLibTest.Facades;
@@ -12,7 +10,6 @@ using SharpHoundCommonLib;
 using SharpHoundCommonLib.Enums;
 using SharpHoundCommonLib.Ntlm;
 using SharpHoundCommonLib.Processors;
-using SharpHoundRPC;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -30,19 +27,19 @@ namespace CommonLibTest {
 
         public void Dispose() {
         }
-        
+
         [Fact]
         public async Task DCLdapProcessor_Scan() {
             var mockProcessor = new Mock<DCLdapProcessor>(It.IsAny<int>(), "primary.testlab.local", null);
-            
-            mockProcessor.Setup(x => x.Authenticate(It.IsAny<Uri>(), It.IsAny<LdapAuthOptions>(),null, null, It.IsAny<CancellationToken>())).ReturnsAsync(false);
+
+            mockProcessor.Setup(x => x.Authenticate(It.IsAny<Uri>(), It.IsAny<LdapAuthOptions>(), null, null, It.IsAny<CancellationToken>())).ReturnsAsync(false);
 
             mockProcessor.Setup(x => x.TestLdapPort()).ReturnsAsync(true);
             mockProcessor.Setup(x => x.TestLdapsPort()).ReturnsAsync(true);
-            
+
             var processor = mockProcessor.Object;
             var receivedStatus = new List<CSVComputerStatus>();
-            processor.ComputerStatusEvent += async status =>  {
+            processor.ComputerStatusEvent += async status => {
                 receivedStatus.Add(status);
             };
             var results = await processor.Scan("primary.testlab.local", TimeSpan.FromMinutes(2));
@@ -57,19 +54,19 @@ namespace CommonLibTest {
             Assert.True(results.IsSigningRequired.Result);
             Assert.False(results.IsChannelBindingDisabled.Result);
         }
-        
+
         [Fact]
         public async Task DCLdapProcessor_Scan_Failed() {
             var mockProcessor = new Mock<DCLdapProcessor>(It.IsAny<int>(), "primary.testlab.local", null);
-            
+
             mockProcessor.Setup(x => x.Authenticate(It.IsAny<Uri>(), It.IsAny<LdapAuthOptions>(), null, null, It.IsAny<CancellationToken>())).Throws(new Exception("Error"));
 
             mockProcessor.Setup(x => x.TestLdapPort()).ReturnsAsync(true);
             mockProcessor.Setup(x => x.TestLdapsPort()).ReturnsAsync(true);
-            
+
             var processor = mockProcessor.Object;
             var receivedStatus = new List<CSVComputerStatus>();
-            processor.ComputerStatusEvent += async status =>  {
+            processor.ComputerStatusEvent += async status => {
                 receivedStatus.Add(status);
             };
             var results = await processor.Scan("primary.testlab.local", TimeSpan.FromMinutes(2));
@@ -86,11 +83,11 @@ namespace CommonLibTest {
             Assert.False(results.IsSigningRequired.Collected);
             Assert.False(results.IsChannelBindingDisabled.Collected);
         }
-    
+
         [Fact]
         public async Task DCLdapProcessor_CheckScan_Timeout() {
             var mockProcessor = new Mock<DCLdapProcessor>(2, "primary.testlab.local", null);
-            
+
             mockProcessor.Setup(x => x.Authenticate(It.IsAny<Uri>(), It.IsAny<LdapAuthOptions>(), null, null, It.IsAny<CancellationToken>())).Returns(async () => {
                 await Task.Delay(100);
                 return false;
@@ -98,11 +95,10 @@ namespace CommonLibTest {
 
             mockProcessor.Setup(x => x.TestLdapPort()).ReturnsAsync(true);
             mockProcessor.Setup(x => x.TestLdapsPort()).ReturnsAsync(true);
-            
+
             var processor = mockProcessor.Object;
             var receivedStatus = new List<CSVComputerStatus>();
-            processor.ComputerStatusEvent += status =>
-            {
+            processor.ComputerStatusEvent += status => {
                 receivedStatus.Add(status);
                 return Task.CompletedTask;
             };
@@ -113,15 +109,14 @@ namespace CommonLibTest {
             Assert.Equal("Timeout", status.Status);
             status = receivedStatus[1];
             Assert.Equal("Timeout", status.Status);
-            Assert.Equal("Timeout",results.IsSigningRequired.FailureReason);
-            Assert.Equal("Timeout",results.IsChannelBindingDisabled.FailureReason);
+            Assert.Equal("Timeout", results.IsSigningRequired.FailureReason);
+            Assert.Equal("Timeout", results.IsChannelBindingDisabled.FailureReason);
         }
 
         [Fact]
-        public async Task DCLdapProcessor_CheckIsNtlmSigningRequired()
-        {
+        public async Task DCLdapProcessor_CheckIsNtlmSigningRequired() {
             var mockProcessor = new Mock<DCLdapProcessor>(It.IsAny<int>(), "primary.testlab.local", null);
-            mockProcessor.Setup(x => x.Authenticate(It.IsAny<Uri>(), It.IsAny<LdapAuthOptions>(),null, null, It.IsAny<CancellationToken>())).ReturnsAsync(false);
+            mockProcessor.Setup(x => x.Authenticate(It.IsAny<Uri>(), It.IsAny<LdapAuthOptions>(), null, null, It.IsAny<CancellationToken>())).ReturnsAsync(false);
             var processor = mockProcessor.Object;
             var result = await processor.CheckIsNtlmSigningRequired();
             Assert.True(result.IsSuccess);
@@ -129,8 +124,7 @@ namespace CommonLibTest {
         }
 
         [Fact]
-        public async Task DCLdapProcessor_CheckIsNtlmSigningRequired_Exception()
-        {
+        public async Task DCLdapProcessor_CheckIsNtlmSigningRequired_Exception() {
             var mockProcessor = new Mock<DCLdapProcessor>(It.IsAny<int>(), "primary.testlab.local", null);
             mockProcessor.Setup(x => x.Authenticate(It.IsAny<Uri>(), It.IsAny<LdapAuthOptions>(), null, null, It.IsAny<CancellationToken>())).Throws(new Exception("Error"));
             var processor = mockProcessor.Object;
@@ -138,14 +132,13 @@ namespace CommonLibTest {
             Assert.True(result.IsFailed);
             Assert.Contains("CheckIsNtlmSigningRequired failed: System.Exception: Error", result.Error);
         }
-        
+
         [Fact]
-        public async Task DCLdapProcessor_Authenticate_InvalidCredentialsException_SEC_E_UNSUPPORTED_FUNCTION()
-        {
+        public async Task DCLdapProcessor_Authenticate_InvalidCredentialsException_SEC_E_UNSUPPORTED_FUNCTION() {
             var exception = "ErrorTest";
             var endpoint = "http://primary.testlab.local/";
             var expected = $"LDAP endpoint '{endpoint}' does not support NTLM";
-            
+
             var mockLogger = new Mock<ILogger<DCLdapProcessor>>();
             var mockLdapTransport = new Mock<LdapTransport>(null, It.IsAny<Uri>());
             mockLdapTransport.Setup(x => x.InitializeConnectionAsync(It.IsAny<int>())).Throws(new LdapNativeException("Error", (int)LdapErrorCodes.InvalidCredentials, SEC_E_UNSUPPORTED_FUNCTION));
@@ -154,14 +147,13 @@ namespace CommonLibTest {
             Assert.False(result);
             mockLogger.VerifyLogContains(LogLevel.Debug, expected);
         }
-        
+
         [Fact]
-        public async Task DCLdapProcessor_Authenticate_InvalidCredentialsException_SEC_E_BAD_BINDINGS()
-        {
+        public async Task DCLdapProcessor_Authenticate_InvalidCredentialsException_SEC_E_BAD_BINDINGS() {
             var exception = "ErrorTest";
             var endpoint = "http://primary.testlab.local/";
             var expected = $"Bad bindings with the LDAPS endpoint '{endpoint}'. Server error: {SEC_E_BAD_BINDINGS}";
-            
+
             var mockLogger = new Mock<ILogger<DCLdapProcessor>>();
             var mockLdapTransport = new Mock<LdapTransport>(null, It.IsAny<Uri>());
             mockLdapTransport.Setup(x => x.InitializeConnectionAsync(It.IsAny<int>())).Throws(new LdapNativeException("Error", (int)LdapErrorCodes.InvalidCredentials, SEC_E_BAD_BINDINGS));
@@ -170,14 +162,13 @@ namespace CommonLibTest {
             Assert.False(result);
             mockLogger.VerifyLogContains(LogLevel.Debug, expected);
         }
-        
+
         [Fact]
-        public async Task DCLdapProcessor_Authenticate_InvalidCredentialsException_Unhandled()
-        {
+        public async Task DCLdapProcessor_Authenticate_InvalidCredentialsException_Unhandled() {
             var exception = "ErrorTest";
             var endpoint = "http://primary.testlab.local/";
             var expected = $"Unhandled LDAP InvalidCred error code during LDAP test: SharpHoundCommonLib.Ntlm.LdapNativeException: {exception}. LDAP error code: {(int)LdapErrorCodes.InvalidCredentials}.";
-            
+
             var mockLogger = new Mock<ILogger<DCLdapProcessor>>();
             var mockLdapTransport = new Mock<LdapTransport>(null, It.IsAny<Uri>());
             mockLdapTransport.Setup(x => x.InitializeConnectionAsync(It.IsAny<int>())).Throws(new LdapNativeException(exception, (int)LdapErrorCodes.InvalidCredentials, "80090347"));
@@ -186,14 +177,13 @@ namespace CommonLibTest {
             Assert.False(result);
             mockLogger.VerifyLogContains(LogLevel.Error, expected);
         }
-        
+
         [Fact]
-        public async Task DCLdapProcessor_Authenticate_StrongAuthRequiredException()
-        {
+        public async Task DCLdapProcessor_Authenticate_StrongAuthRequiredException() {
             var exception = "ErrorTest";
             var endpoint = "http://primary.testlab.local/";
             var expected = $"LDAP requires signing. Endpoint: {endpoint}";
-            
+
             var mockLogger = new Mock<ILogger<DCLdapProcessor>>();
             var mockLdapTransport = new Mock<LdapTransport>(null, It.IsAny<Uri>());
             mockLdapTransport.Setup(x => x.InitializeConnectionAsync(It.IsAny<int>())).Throws(new LdapNativeException(exception, (int)LdapErrorCodes.StrongAuthRequired, null));
@@ -202,14 +192,13 @@ namespace CommonLibTest {
             Assert.False(result);
             mockLogger.VerifyLog(LogLevel.Debug, expected);
         }
-        
+
         [Fact]
-        public async Task DCLdapProcessor_Authenticate_ServerDownException()
-        {
+        public async Task DCLdapProcessor_Authenticate_ServerDownException() {
             var exception = "ErrorTest";
             var endpoint = "http://primary.testlab.local/";
             var expected = $"LDAP endpoint '{endpoint}' not accessible";
-            
+
             var mockLogger = new Mock<ILogger<DCLdapProcessor>>();
             var mockLdapTransport = new Mock<LdapTransport>(null, It.IsAny<Uri>());
             mockLdapTransport.Setup(x => x.InitializeConnectionAsync(It.IsAny<int>())).Throws(new LdapNativeException(exception, (int)LdapErrorCodes.ServerDown));
@@ -218,10 +207,9 @@ namespace CommonLibTest {
             Assert.False(result);
             mockLogger.VerifyLog(LogLevel.Debug, expected);
         }
-        
+
         [Fact]
-        public async Task DCLdapProcessor_Authenticate_LdapUnhandledException()
-        {
+        public async Task DCLdapProcessor_Authenticate_LdapUnhandledException() {
             var endpoint = "http://primary.testlab.local/";
             var exception = "ErrorTest";
             var expected = $"Unhandled LdapException error code during LDAP test: SharpHoundCommonLib.Ntlm.LdapNativeException: {exception}. LDAP error code: {(int)LdapErrorCodes.LocalError}";
@@ -236,8 +224,7 @@ namespace CommonLibTest {
         }
 
         [Fact]
-        public async Task DCLdapProcessor_Authenticate_InvalidOperationException()
-        {
+        public async Task DCLdapProcessor_Authenticate_InvalidOperationException() {
             var endpoint = "http://primary.testlab.local/";
             var exception = "Server did return a challenge";
             var expected = $"LDAP InvalidOperationException: {exception}";
@@ -253,10 +240,9 @@ namespace CommonLibTest {
             Assert.False(result);
             mockLogger.VerifyLog(LogLevel.Debug, expected);
         }
-        
+
         [Fact]
-        public async Task DCLdapProcessor_Authenticate_UnhandledException()
-        {
+        public async Task DCLdapProcessor_Authenticate_UnhandledException() {
             var endpoint = "http://primary.testlab.local/";
             var exception = "Unhandled exception";
             var expected = $"An unhandled error occurred during the LDAP test: System.Exception: {exception}";
