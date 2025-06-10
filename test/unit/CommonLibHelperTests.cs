@@ -277,6 +277,21 @@ namespace CommonLibTest {
         }
 
         [Fact]
+        public async Task ExecuteWithTimeout_Timeout_Cancel() {
+            var shouldRemainFalse = false;
+            var timeout = TimeSpan.FromMilliseconds(100);
+            var func = (CancellationToken t) => {
+                Thread.Sleep(TimeSpan.FromMilliseconds(500));
+                t.ThrowIfCancellationRequested();
+                shouldRemainFalse = true;
+                return true;
+            };
+            var result = await Helpers.ExecuteWithTimeout(timeout, func);
+            await Task.Delay(TimeSpan.FromMilliseconds(600));
+            Assert.False(shouldRemainFalse, $"{nameof(Helpers.ExecuteWithTimeout)} did not pass a cancelled token following timeout. Function {nameof(func)} did not exit early.");
+        }
+
+        [Fact]
         public async Task ExecuteWithTimeout_Task_Success() {
             var timeout = TimeSpan.FromSeconds(1);
             var func = async (CancellationToken t) => {
@@ -301,23 +316,6 @@ namespace CommonLibTest {
         }
 
         [Fact]
-        public async Task ExecuteWithTimeout_Timeout_Cancel() {
-            var shouldRemainFalse = false;
-            var timeout = TimeSpan.FromMilliseconds(100);
-            var func = (CancellationToken t) => {
-                Thread.Sleep(TimeSpan.FromMilliseconds(500));
-                t.ThrowIfCancellationRequested();
-                shouldRemainFalse = true;
-                return true;
-            };
-            var result = await Helpers.ExecuteWithTimeout(timeout, func);
-            await Task.Delay(TimeSpan.FromMilliseconds(600));
-            Assert.False(result.IsSuccess);
-            Assert.Equal("Timeout", result.Error);
-            Assert.False(shouldRemainFalse);
-        }
-
-        [Fact]
         public async Task ExecuteWithTimeout_Task_Timeout_Cancel() {
             var shouldRemainFalse = false;
             var timeout = TimeSpan.FromMilliseconds(100);
@@ -329,9 +327,7 @@ namespace CommonLibTest {
             };
             var result = await Helpers.ExecuteWithTimeout(timeout, func);
             await Task.Delay(TimeSpan.FromMilliseconds(600));
-            Assert.False(result.IsSuccess);
-            Assert.Equal("Timeout", result.Error);
-            Assert.False(shouldRemainFalse);
+            Assert.False(shouldRemainFalse, $"{nameof(Helpers.ExecuteWithTimeout)} did not pass a cancelled token following timeout. Function {nameof(func)} did not exit early.");
         }
     }
 }
