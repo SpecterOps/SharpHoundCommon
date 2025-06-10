@@ -618,6 +618,24 @@ namespace SharpHoundCommonLib.Processors {
                                 RightName = EdgeNames.AddKeyCredentialLink,
                                 InheritanceHash = aceInheritanceHash
                             });
+                        else if (objectType is Label.User or Label.Computer && aceType == ACEGuids.WriteAltSecurityIdentities)
+                            aces.Add(new ACE
+                            {
+                                PrincipalType = resolvedPrincipal.ObjectType,
+                                PrincipalSID = resolvedPrincipal.ObjectIdentifier,
+                                IsInherited = inherited,
+                                RightName = EdgeNames.WriteAltSecurityIdentities,
+                                InheritanceHash = aceInheritanceHash
+                            });
+                        else if (objectType is Label.User or Label.Computer && aceType == ACEGuids.WritePublicInformation)
+                            aces.Add(new ACE
+                            {
+                                PrincipalType = resolvedPrincipal.ObjectType,
+                                PrincipalSID = resolvedPrincipal.ObjectIdentifier,
+                                IsInherited = inherited,
+                                RightName = EdgeNames.WritePublicInformation,
+                                InheritanceHash = aceInheritanceHash
+                            });
                         else if (objectType is Label.CertTemplate)
                         {
                             if (aceType == ACEGuids.PKIEnrollmentFlag)
