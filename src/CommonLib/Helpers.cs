@@ -399,7 +399,7 @@ namespace SharpHoundCommonLib
         public static async Task<Result<T>> ExecuteWithTimeout<T>(TimeSpan timeout, Func<CancellationToken, Task<T>> func)
         {
             var cts = new CancellationTokenSource();
-            var task = func(cts.Token);
+            var task = func.Invoke(cts.Token);
             var completedTask = await Task.WhenAny(task, Task.Delay(timeout, cts.Token));
             cts.Cancel();
 

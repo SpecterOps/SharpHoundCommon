@@ -91,8 +91,8 @@ namespace CommonLibTest {
         public async Task DCLdapProcessor_CheckScan_Timeout() {
             var mockProcessor = new Mock<DCLdapProcessor>(2, "primary.testlab.local", null);
             
-            mockProcessor.Setup(x => x.Authenticate(It.IsAny<Uri>(), It.IsAny<LdapAuthOptions>(), null, null, It.IsAny<CancellationToken>())).ReturnsAsync(() => {
-                Task.Delay(100).Wait();
+            mockProcessor.Setup(x => x.Authenticate(It.IsAny<Uri>(), It.IsAny<LdapAuthOptions>(), null, null, It.IsAny<CancellationToken>())).Returns(async () => {
+                await Task.Delay(100);
                 return false;
             });
 
@@ -101,8 +101,10 @@ namespace CommonLibTest {
             
             var processor = mockProcessor.Object;
             var receivedStatus = new List<CSVComputerStatus>();
-            processor.ComputerStatusEvent += async status =>  {
+            processor.ComputerStatusEvent += status =>
+            {
                 receivedStatus.Add(status);
+                return Task.CompletedTask;
             };
             var results = await processor.Scan("primary.testlab.local", TimeSpan.FromMilliseconds(1));
 
