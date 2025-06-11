@@ -346,6 +346,13 @@ namespace SharpHoundCommonLib {
             return Result<T>.Fail("Timeout");
         }
 
+        // These two ExecuteWithTimeout functions should perform equivalently -
+        // they both create a new task from a function arg
+        // But where the one below can invoke an async function directly to spawn the Task
+        // The one above spawns a Task from a synchronous function.
+        // The caller shouldn't have to worry about which they're using however,
+        // the compiler should figure it out intrinsically
+
         /// <summary>
         /// Returns a Fail result if a task runs longer than its budgeted time.
         /// A cancellation token is passed to the executing function so it may exit cleanly if timeout is reached.
