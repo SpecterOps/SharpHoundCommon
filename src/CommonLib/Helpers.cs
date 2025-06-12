@@ -333,10 +333,10 @@ namespace SharpHoundCommonLib {
         public static async Task<Result<T>> ExecuteWithTimeout<T>(TimeSpan timeout, Func<CancellationToken, T> func) {
             var cts = new CancellationTokenSource();
             var task = Task.Factory.StartNew(() => func(cts.Token), cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
-            var completedTask = await Task.WhenAny(task, Task.Delay(timeout, cts.Token));
+            await Task.WhenAny(task, Task.Delay(timeout, cts.Token));
             cts.Cancel();
 
-            if (completedTask == task) {
+            if (task.IsCompleted) {
                 try {
                     return Result<T>.Ok(await task);
                 }
@@ -364,10 +364,10 @@ namespace SharpHoundCommonLib {
         public static async Task<Result<T>> ExecuteWithTimeout<T>(TimeSpan timeout, Func<CancellationToken, Task<T>> func) {
             var cts = new CancellationTokenSource();
             var task = func.Invoke(cts.Token);
-            var completedTask = await Task.WhenAny(task, Task.Delay(timeout, cts.Token));
+            await Task.WhenAny(task, Task.Delay(timeout, cts.Token));
             cts.Cancel();
 
-            if (completedTask == task) {
+            if (task.IsCompleted) {
                 try {
                     return Result<T>.Ok(await task);
                 }
