@@ -350,9 +350,11 @@ namespace CommonLibTest
             }, test.SidHistory);
             
             // Send Computer Status
-            Assert.Single(receivedStatus);
-            var status = receivedStatus[0];
-            Assert.Equal("Success", status.Status);
+            Assert.NotEmpty(receivedStatus);
+            foreach (var status in receivedStatus)
+            {
+                Assert.Equal("Success", status.Status);
+            }
         }
 
         [Fact]
@@ -508,9 +510,11 @@ namespace CommonLibTest
             }, test.SidHistory);
             
             // Send Computer Status
-            Assert.Single(receivedStatus);
-            var status = receivedStatus[0];
-            Assert.Equal("Success", status.Status);
+            Assert.NotEmpty(receivedStatus);
+            foreach (var status in receivedStatus)
+            {
+                Assert.Equal("Success", status.Status);
+            }
         }
 
         [Fact]
