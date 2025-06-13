@@ -16,7 +16,7 @@ namespace SharpHoundCommonLib.SMB
     // Define an interface
     public interface ISmbScanner
     {
-        public Task<SharpHoundRPC.Result<SmbScanInfo>> ScanHost(string host, int port = 445);
+        public Task<SharpHoundRPC.Result<SmbScanInfo>> ScanHost(string host, int port = 445, CancellationToken cancellationToken = default);
     }
 
     /// <summary>
@@ -48,8 +48,9 @@ namespace SharpHoundCommonLib.SMB
         /// <param name="host">The hostname or IP address to check</param>
         /// <param name="port">The port to connect to (default SMB port is 445)</param>
         /// <returns>Result object containing SMB signing information</returns>
-        public async Task<SharpHoundRPC.Result<SmbScanInfo>> ScanHost(string host, int port = 445)
+        public async Task<SharpHoundRPC.Result<SmbScanInfo>> ScanHost(string host, int port = 445, CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             if (NativeUtils.IsCurrentMachineFqdn(host))
             {
                 // When accessing the SMB directly port from localhost, it'll disconnect. 
@@ -62,11 +63,15 @@ namespace SharpHoundCommonLib.SMB
                     return registryResult;
             }
 
+            cancellationToken.ThrowIfCancellationRequested();
+
             // Try SMB1 negotiate first as it'll elicit an SMB1 or SMB2 response (if either is enabled)
             var smb1result = await TrySMBNegotiate(host, port, true);
 
             if (smb1result.IsSuccess)
                 return smb1result;
+
+            cancellationToken.ThrowIfCancellationRequested();
 
             // SMB1 failed, so try an SMB2 negotiate in case SMB1 is disabled or the SMB3 dialect is required
             return await TrySMBNegotiate(host, port, false);

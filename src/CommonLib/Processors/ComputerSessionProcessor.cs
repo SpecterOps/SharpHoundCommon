@@ -8,7 +8,6 @@ using Impersonate;
 using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
 using SharpHoundCommonLib.OutputTypes;
-using SharpHoundRPC;
 using SharpHoundRPC.NetAPINative;
 
 namespace SharpHoundCommonLib.Processors {
@@ -58,7 +57,7 @@ namespace SharpHoundCommonLib.Processors {
 
             _log.LogDebug("Running NetSessionEnum for {ObjectName}", computerName);
 
-            var result = await Task.Run(() => {
+            var result = await Helpers.ExecuteNetAPIWithTimeout(timeout, (timeoutToken) => {
                 NetAPIResult<IEnumerable<NetSessionEnumResults>> result;
                 if (_doLocalAdminSessionEnum) {
                     // If we are authenticating using a local admin, we need to impersonate for this
@@ -67,6 +66,8 @@ namespace SharpHoundCommonLib.Processors {
                         result = _nativeMethods.NetSessionEnum(computerName);
                     }
 
+                    timeoutToken.ThrowIfCancellationRequested();
+
                     if (result.IsFailed) {
                         // Fall back to default User
                         _log.LogDebug(
@@ -74,12 +75,13 @@ namespace SharpHoundCommonLib.Processors {
                             computerName, result.Status);
                         result = _nativeMethods.NetSessionEnum(computerName);
                     }
-                } else {
+                }
+                else {
                     result = _nativeMethods.NetSessionEnum(computerName);
                 }
 
                 return result;
-            }).TimeoutAfter(timeout);
+            });
 
             if (result.IsFailed) {
                 await SendComputerStatus(new CSVComputerStatus {
@@ -121,7 +123,7 @@ namespace SharpHoundCommonLib.Processors {
                     username.Equals("anonymous logon", StringComparison.CurrentCultureIgnoreCase)) {
                     continue;
                 }
-                
+
                 //Filter out domains that are "."
                 if (computerDomain.Equals(".")) {
                     continue;
@@ -147,7 +149,8 @@ namespace SharpHoundCommonLib.Processors {
                 if (matchSuccess) {
                     results.AddRange(
                         sids.Select(s => new Session { ComputerSID = resolvedComputerSID, UserSID = s }));
-                } else {
+                }
+                else {
                     var res = await _utils.ResolveAccountName(username, computerDomain);
                     if (res.Success)
                         results.Add(new Session {
@@ -180,7 +183,7 @@ namespace SharpHoundCommonLib.Processors {
 
             _log.LogDebug("Running NetWkstaUserEnum for {ObjectName}", computerName);
 
-            var result = await Task.Run(() => {
+            var result = await Helpers.ExecuteNetAPIWithTimeout(timeout, (timeoutToken) => {
                 NetAPIResult<IEnumerable<NetWkstaUserEnumResults>>
                     result;
                 if (_doLocalAdminSessionEnum) {
@@ -190,6 +193,8 @@ namespace SharpHoundCommonLib.Processors {
                         result = _nativeMethods.NetWkstaUserEnum(computerName);
                     }
 
+                    timeoutToken.ThrowIfCancellationRequested();
+
                     if (result.IsFailed) {
                         // Fall back to default User
                         _log.LogDebug(
@@ -197,12 +202,13 @@ namespace SharpHoundCommonLib.Processors {
                             computerName, result.Status);
                         result = _nativeMethods.NetWkstaUserEnum(computerName);
                     }
-                } else {
+                }
+                else {
                     result = _nativeMethods.NetWkstaUserEnum(computerName);
                 }
 
                 return result;
-            }).TimeoutAfter(timeout);
+            });
 
             if (result.IsFailed) {
                 await SendComputerStatus(new CSVComputerStatus {
@@ -244,7 +250,7 @@ namespace SharpHoundCommonLib.Processors {
                 if (string.IsNullOrWhiteSpace(username) || username.EndsWith("$", StringComparison.Ordinal)) {
                     continue;
                 }
-                
+
                 //Filter out domains that are "."
                 if (domain.Equals(".")) {
                     continue;
@@ -312,7 +318,8 @@ namespace SharpHoundCommonLib.Processors {
                 ret.Results = results.ToArray();
 
                 return ret;
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                 _log.LogTrace("Registry session enum failed on {ComputerName}: {Status}", computerName, e.Message);
                 await SendComputerStatus(new CSVComputerStatus {
                     Status = e.Message,
@@ -322,7 +329,8 @@ namespace SharpHoundCommonLib.Processors {
                 ret.Collected = false;
                 ret.FailureReason = e.Message;
                 return ret;
-            } finally {
+            }
+            finally {
                 key?.Dispose();
             }
         }

@@ -1,7 +1,7 @@
 FROM mono:6.12.0
 
 # Install .NET SDK
-ENV DOTNET_VERSION=7.0
+ENV DOTNET_VERSION=8.0
 
 RUN curl -sSL https://dot.net/v1/dotnet-install.sh  \
     | bash -s -- -Channel $DOTNET_VERSION -InstallDir /usr/share/dotnet \
