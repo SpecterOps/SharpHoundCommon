@@ -58,7 +58,7 @@ namespace SharpHoundCommonLib.Processors {
                         await SendComputerStatus(new CSVComputerStatus {
                             Status = CSVComputerStatus.StatusSuccess,
                             Task = nameof(ReadSPNTargets),
-                            ComputerName = spn,
+                            ComputerName = Helpers.StripServicePrincipalName(spn).ToUpper().TrimEnd('$'),
                         });
                         yield return new SPNPrivilege {
                             ComputerSID = host,

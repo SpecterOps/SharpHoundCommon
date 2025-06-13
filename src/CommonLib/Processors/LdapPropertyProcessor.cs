@@ -249,7 +249,7 @@ namespace SharpHoundCommonLib.Processors {
                         await SendComputerStatus(new CSVComputerStatus {
                             Status = CSVComputerStatus.StatusSuccess,
                             Task = nameof(ReadUserProperties),
-                            ComputerName = d,
+                            ComputerName = Helpers.StripServicePrincipalName(d).ToUpper().TrimEnd('$'),
                         });
                         comps.Add(new TypedPrincipal {
                             ObjectIdentifier = resolvedHost.SecurityIdentifier,

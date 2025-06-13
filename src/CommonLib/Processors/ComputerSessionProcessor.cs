@@ -103,7 +103,6 @@ namespace SharpHoundCommonLib.Processors {
             ret.Collected = true;
             var results = new List<Session>();
 
-            // TODO: MC does this enumerate machines based on a session? If so should this send computer status?
             foreach (var sesInfo in result.Value) {
                 var username = sesInfo.Username;
                 var computerSessionName = sesInfo.ComputerName;
