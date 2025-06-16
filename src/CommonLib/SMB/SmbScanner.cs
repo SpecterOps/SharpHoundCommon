@@ -386,11 +386,11 @@ namespace SharpHoundCommonLib.SMB
         private async Task ConnectWithTimeoutAsync(TcpClient client, string host, int port, CancellationToken cancellationToken)
         {
             var connectTask = client.ConnectAsync(host, port);
-            var timeoutTask = Task.Delay(-1, cancellationToken);
+            var cancellationTask = Task.Delay(-1, cancellationToken);
 
-            var completedTask = await Task.WhenAny(connectTask, timeoutTask);
+            var completedTask = await Task.WhenAny(connectTask, cancellationTask);
 
-            if (completedTask == timeoutTask)
+            if (completedTask == cancellationTask)
             {
                 // The timeout task completed first, so the connect task timed out
                 throw new OperationCanceledException("Connection attempt timed out", cancellationToken);

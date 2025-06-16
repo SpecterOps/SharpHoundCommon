@@ -330,9 +330,11 @@ namespace SharpHoundCommonLib {
         /// <param name="timeout"></param>
         /// <param name="func"></param>
         /// <returns></returns>
-        public static async Task<Result<T>> ExecuteWithTimeout<T>(TimeSpan timeout, Func<CancellationToken, T> func) {
-            var cts = new CancellationTokenSource();
-            var task = Task.Factory.StartNew(() => func(cts.Token), cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+        public static async Task<Result<T>> ExecuteWithTimeout<T>(TimeSpan timeout, Func<CancellationToken, T> func, CancellationToken parentToken = default) {
+            // cts will cancel its token if the parentToken is cancelled
+            // a default parentToken will never cancel so should noop this CreateLinkedTokenSource
+            var cts = CancellationTokenSource.CreateLinkedTokenSource(parentToken);
+            var task = Task.Factory.StartNew(() => func(cts.Token), cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Current);
             await Task.WhenAny(task, Task.Delay(timeout, cts.Token));
             cts.Cancel();
 
@@ -361,8 +363,10 @@ namespace SharpHoundCommonLib {
         /// <param name="timeout"></param>
         /// <param name="func"></param>
         /// <returns></returns>
-        public static async Task<Result<T>> ExecuteWithTimeout<T>(TimeSpan timeout, Func<CancellationToken, Task<T>> func) {
-            var cts = new CancellationTokenSource();
+        public static async Task<Result<T>> ExecuteWithTimeout<T>(TimeSpan timeout, Func<CancellationToken, Task<T>> func, CancellationToken parentToken = default) {
+            // cts will cancel its token if the parentToken is cancelled
+            // a default parentToken will never cancel so should noop this CreateLinkedTokenSource
+            var cts = CancellationTokenSource.CreateLinkedTokenSource(parentToken);
             var task = func.Invoke(cts.Token);
             await Task.WhenAny(task, Task.Delay(timeout, cts.Token));
             cts.Cancel();

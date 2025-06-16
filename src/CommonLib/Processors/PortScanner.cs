@@ -62,6 +62,7 @@ namespace SharpHoundCommonLib.Processors {
                 PortScanCache.TryAdd(key, true);
                 return true;
             } catch (Exception e) {
+                // task threw exception
                 _log.LogDebug(e, "Exception checking {Hostname}:{Port}", hostname, port);
                 if (throwError) {
                     throw;
