@@ -389,6 +389,32 @@ namespace SharpHoundCommonLib {
         /// <param name="timeout"></param>
         /// <param name="func"></param>
         /// <returns></returns>
+        public static async Task<Result> ExecuteWithTimeout(TimeSpan timeout, Func<CancellationToken, Task> func, CancellationToken parentToken = default) {
+            // cts will cancel its token if the parentToken is cancelled
+            // a default parentToken will never cancel so should noop this CreateLinkedTokenSource
+            var cts = CancellationTokenSource.CreateLinkedTokenSource(parentToken);
+            var task = func.Invoke(cts.Token);
+            await Task.WhenAny(task, Task.Delay(timeout, cts.Token));
+            cts.Cancel();
+
+            if (task.IsCompleted) {
+                try {
+                    return Result.Ok();
+                }
+                catch (OperationCanceledException) { }
+            }
+
+            return Result.Fail("Timeout");
+        }
+
+        /// <summary>
+        /// Returns a Fail result if a task runs longer than its budgeted time.
+        /// A cancellation token is passed to the executing function so it may exit cleanly if timeout is reached.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="timeout"></param>
+        /// <param name="func"></param>
+        /// <returns></returns>
         public static async Task<NetAPIResult<T>> ExecuteNetAPIWithTimeout<T>(TimeSpan timeout, Func<CancellationToken, NetAPIResult<T>> func) {
             var result = await ExecuteWithTimeout(timeout, func);
             if (result.IsSuccess)

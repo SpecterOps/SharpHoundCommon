@@ -41,27 +41,21 @@ namespace SharpHoundCommonLib.Processors {
             try {
                 using var client = new TcpClient();
                 var ca = await Helpers.ExecuteWithTimeout(TimeSpan.FromMilliseconds(timeout), (_) => client.ConnectAsync(hostname, port));
-                if (!ca.IsSuccess)
-                {
+                if (!ca.IsSuccess) {
                     _log.LogDebug("{HostName} did not respond to scan on port {Port} within {Timeout}ms", hostname, port,
                         timeout);
                     if (throwError) {
                         throw new TimeoutException("Timed Out");
                     }
-                    PortScanCache.TryAdd(key, false);
-                    return false;
-                }
-                if (ca.Value.IsFaulted)
-                {
-                    _log.LogDebug("PortScan faulted on {Hostname}:{Port} with error {Error}", hostname, port,
-                        ca.Error);
+
                     PortScanCache.TryAdd(key, false);
                     return false;
                 }
 
                 PortScanCache.TryAdd(key, true);
                 return true;
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                 // task threw exception
                 _log.LogDebug(e, "Exception checking {Hostname}:{Port}", hostname, port);
                 if (throwError) {
