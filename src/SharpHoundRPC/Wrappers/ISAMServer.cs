@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Security.Principal;
+using System.Threading;
 using SharpHoundRPC.SAMRPCNative;
 using SharpHoundRPC.Shared;
 
@@ -9,14 +10,16 @@ namespace SharpHoundRPC.Wrappers
     {
         Result<IEnumerable<(string Name, int Rid)>> GetDomains();
         Result<SecurityIdentifier> LookupDomain(string name);
-        Result<SecurityIdentifier> GetMachineSid(string testName = null);
+        Result<SecurityIdentifier> GetMachineSid(string testName = null, CancellationToken cancellationToken = default);
 
         Result<(string Name, SharedEnums.SidNameUse Type)> LookupPrincipalBySid(
-            SecurityIdentifier securityIdentifier);
+            SecurityIdentifier securityIdentifier,
+            CancellationToken cancellationToken = default);
 
         Result<ISAMDomain> OpenDomain(string domainName, SAMEnums.DomainAccessMask requestedDomainAccess =
             SAMEnums.DomainAccessMask.Lookup |
-            SAMEnums.DomainAccessMask.ListAccounts);
+            SAMEnums.DomainAccessMask.ListAccounts,
+            CancellationToken cancellationToken = default);
 
         Result<ISAMDomain> OpenDomain(SecurityIdentifier securityIdentifier,
             SAMEnums.DomainAccessMask requestedDomainAccess =

@@ -11,19 +11,23 @@ using System.IO;
 using System.Security;
 using SharpHoundCommonLib.Processors;
 using Microsoft.Win32;
+using System.Threading.Tasks;
+using System.Threading;
+using SharpHoundRPC.NetAPINative;
+using SharpHoundRPC.Shared;
 
 namespace SharpHoundCommonLib {
     public static class Helpers {
         private static readonly HashSet<string> Groups = new() { "268435456", "268435457", "536870912", "536870913" };
         private static readonly HashSet<string> Computers = new() { "805306369" };
-        private static readonly HashSet<string> Users = new() { "805306368" };
+        private static readonly HashSet<string> Users = new() { "805306368", "805306370" };
 
         private static readonly Regex DCReplaceRegex = new("DC=", RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private static readonly Regex SPNRegex = new(@".*\/.*", RegexOptions.Compiled);
         private static readonly DateTime EpochDiff = new(1970, 1, 1);
 
         private static readonly string[] FilteredSids = {
-            "S-1-5-2", "S-1-5-3", "S-1-5-4", "S-1-5-6", "S-1-5-7", "S-1-2", "S-1-2-0", "S-1-5-18",
+            "S-1-5-3", "S-1-5-4", "S-1-5-6", "S-1-2", "S-1-2-0", "S-1-5-17", "S-1-5-18",
             "S-1-5-19", "S-1-5-20", "S-1-0-0", "S-1-0", "S-1-2-1"
         };
 
@@ -135,7 +139,8 @@ namespace SharpHoundCommonLib {
             int idx;
             if (distinguishedName.ToUpper().Contains("DELETED OBJECTS")) {
                 idx = distinguishedName.IndexOf("DC=", 3, StringComparison.Ordinal);
-            } else {
+            }
+            else {
                 idx = distinguishedName.IndexOf("DC=",
                     StringComparison.CurrentCultureIgnoreCase);
             }
@@ -193,7 +198,8 @@ namespace SharpHoundCommonLib {
 
             try {
                 toReturn = (long)Math.Floor(DateTime.FromFileTimeUtc(time).Subtract(EpochDiff).TotalSeconds);
-            } catch {
+            }
+            catch {
                 toReturn = -1;
             }
 
@@ -209,7 +215,8 @@ namespace SharpHoundCommonLib {
             try {
                 var dt = DateTime.ParseExact(ldapTime, "yyyyMMddHHmmss.0K", CultureInfo.CurrentCulture).ToUniversalTime();
                 return (long)dt.Subtract(EpochDiff).TotalSeconds;
-            } catch {
+            }
+            catch {
                 return 0;
             }
         }
@@ -263,19 +270,23 @@ namespace SharpHoundCommonLib {
                 data.Value = value;
 
                 data.Collected = true;
-            } catch (IOException e) {
+            }
+            catch (IOException e) {
                 log.LogDebug(e, "Error getting data from registry for {Target}: {RegSubKey}:{RegValue}",
                     target, subkey, subvalue);
                 data.FailureReason = "Target machine was not found or not connectable";
-            } catch (SecurityException e) {
+            }
+            catch (SecurityException e) {
                 log.LogDebug(e, "Error getting data from registry for {Target}: {RegSubKey}:{RegValue}",
                     target, subkey, subvalue);
                 data.FailureReason = "User does not have the proper permissions to perform this operation";
-            } catch (UnauthorizedAccessException e) {
+            }
+            catch (UnauthorizedAccessException e) {
                 log.LogDebug(e, "Error getting data from registry for {Target}: {RegSubKey}:{RegValue}",
                     target, subkey, subvalue);
                 data.FailureReason = "User does not have the necessary registry rights";
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                 log.LogDebug(e, "Error getting data from registry for {Target}: {RegSubKey}:{RegValue}",
                     target, subkey, subvalue);
                 data.FailureReason = e.Message;
@@ -300,7 +311,7 @@ namespace SharpHoundCommonLib {
             CommonOids.ClientAuthentication,
             CommonOids.AnyPurpose
         };
-        
+
         public static string DumpDirectoryObject(this IDirectoryObject directoryObject) {
             var builder = new StringBuilder();
             builder.AppendLine("PropertyName : PropertyValue");
@@ -309,6 +320,109 @@ namespace SharpHoundCommonLib {
             }
 
             return builder.ToString();
+        }
+
+        /// <summary>
+        /// Returns a Fail result if a task runs longer than its budgeted time.
+        /// A cancellation token is passed to the executing function so it may exit cleanly if timeout is reached.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="timeout"></param>
+        /// <param name="func"></param>
+        /// <returns></returns>
+        public static async Task<Result<T>> ExecuteWithTimeout<T>(TimeSpan timeout, Func<CancellationToken, T> func) {
+            var cts = new CancellationTokenSource();
+            var task = Task.Factory.StartNew(() => func(cts.Token), cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+            await Task.WhenAny(task, Task.Delay(timeout, cts.Token));
+            cts.Cancel();
+
+            if (task.IsCompleted) {
+                try {
+                    return Result<T>.Ok(await task);
+                }
+                catch (OperationCanceledException) { }
+            }
+
+            return Result<T>.Fail("Timeout");
+        }
+
+        // These two ExecuteWithTimeout functions should perform equivalently -
+        // they both create a new task from a function arg
+        // But where the one below can invoke an async function directly to spawn the Task
+        // The one above spawns a Task from a synchronous function.
+        // The caller shouldn't have to worry about which they're using however,
+        // the compiler should figure it out intrinsically
+
+        /// <summary>
+        /// Returns a Fail result if a task runs longer than its budgeted time.
+        /// A cancellation token is passed to the executing function so it may exit cleanly if timeout is reached.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="timeout"></param>
+        /// <param name="func"></param>
+        /// <returns></returns>
+        public static async Task<Result<T>> ExecuteWithTimeout<T>(TimeSpan timeout, Func<CancellationToken, Task<T>> func) {
+            var cts = new CancellationTokenSource();
+            var task = func.Invoke(cts.Token);
+            await Task.WhenAny(task, Task.Delay(timeout, cts.Token));
+            cts.Cancel();
+
+            if (task.IsCompleted) {
+                try {
+                    return Result<T>.Ok(await task);
+                }
+                catch (OperationCanceledException) { }
+            }
+
+            return Result<T>.Fail("Timeout");
+        }
+
+        /// <summary>
+        /// Returns a Fail result if a task runs longer than its budgeted time.
+        /// A cancellation token is passed to the executing function so it may exit cleanly if timeout is reached.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="timeout"></param>
+        /// <param name="func"></param>
+        /// <returns></returns>
+        public static async Task<NetAPIResult<T>> ExecuteNetAPIWithTimeout<T>(TimeSpan timeout, Func<CancellationToken, NetAPIResult<T>> func) {
+            var result = await ExecuteWithTimeout(timeout, func);
+            if (result.IsSuccess)
+                return result.Value;
+            else
+                return NetAPIResult<T>.Fail(result.Error);
+        }
+
+        /// <summary>
+        /// Returns a Fail result if a task runs longer than its budgeted time.
+        /// A cancellation token is passed to the executing function so it may exit cleanly if timeout is reached.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="timeout"></param>
+        /// <param name="func"></param>
+        /// <returns></returns>
+        public static async Task<SharpHoundRPC.Result<T>> ExecuteRPCWithTimeout<T>(TimeSpan timeout, Func<CancellationToken, SharpHoundRPC.Result<T>> func) {
+            var result = await ExecuteWithTimeout(timeout, func);
+            if (result.IsSuccess)
+                return result.Value;
+            else
+                return SharpHoundRPC.Result<T>.Fail(result.Error);
+        }
+
+        /// <summary>
+        /// Returns a Fail result if a task runs longer than its budgeted time.
+        /// A cancellation token is passed to the executing function so it may exit cleanly if timeout is reached.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="timeout"></param>
+        /// <param name="func"></param>
+        /// <returns></returns>
+        public static async Task<SharpHoundRPC.Result<T>> ExecuteRPCWithTimeout<T>(TimeSpan timeout, Func<CancellationToken, Task<SharpHoundRPC.Result<T>>> func) {
+            var result = await ExecuteWithTimeout(timeout, func);
+            if (result.IsSuccess)
+                return result.Value;
+            else
+                return SharpHoundRPC.Result<T>.Fail(result.Error);
         }
     }
 

@@ -407,7 +407,7 @@ namespace SharpHoundCommonLib.Processors {
                     if (aceRights.HasFlag(ActiveDirectoryRights.Self) &&
                         !aceRights.HasFlag(ActiveDirectoryRights.WriteProperty) &&
                         !aceRights.HasFlag(ActiveDirectoryRights.GenericWrite) && objectType == Label.Group &&
-                        aceType == ACEGuids.WriteMember)
+                        aceType is ACEGuids.WriteMember or ACEGuids.AllGuid)
                         aces.Add(new ACE
                         {
                             PrincipalType = resolvedPrincipal.ObjectType,

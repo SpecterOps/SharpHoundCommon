@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading;
 using System.Threading.Tasks;
 using Moq;
 using SharpHoundCommonLib;
@@ -28,7 +29,7 @@ namespace CommonLibTest {
             
             var mockSmbScanner = new Mock<ISmbScanner>();
             mockSmbScanner
-                .Setup(x => x.ScanHost(It.IsAny<string>(), It.IsAny<int>()))
+                .Setup(x => x.ScanHost(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
                 .Returns(async () => {
                     await Task.Delay(100);
                     return NtStatus.StatusAccessDenied;

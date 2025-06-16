@@ -1157,6 +1157,15 @@ namespace CommonLibTest
                     }, "S-1-5-21-3130019616-2776909439-2417379446",""), 
                     "maxpwdage", 
                     "12 days, 23 hours, 25 minutes, 10 seconds" 
+                },
+                new object[] 
+                { 
+                    new MockDirectoryObject("DC\u003dtestlab,DC\u003dlocal", new Dictionary<string, object>
+                    {
+                        {LDAPProperties.PrincipalName, "TESTLAB\\S-1-5-21-3130019616-2776909439-2417379446"}
+                    }, "S-1-5-21-3130019616-2776909439-2417379446",""), 
+                    "netbios", 
+                    "TESTLAB"
                 }
             };
         
