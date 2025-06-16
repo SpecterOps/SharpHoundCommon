@@ -204,6 +204,8 @@ namespace CommonLibTest
                 }, "S-1-5-21-3130019616-2776909439-2417379446-1101", "");
 
             var processor = new LdapPropertyProcessor(new MockLdapUtils());
+            var receivedStatus = new List<CSVComputerStatus>();
+            processor.ComputerStatusEvent += async status => { receivedStatus.Add(status); };
             var test = await processor.ReadUserProperties(mock, "testlab.local");
             var props = test.Props;
             var keys = props.Keys;
@@ -230,6 +232,13 @@ namespace CommonLibTest
                 }
             };
             Assert.Equal(expected, atdr);
+            
+            // Send Computer Status
+            Assert.NotEmpty(receivedStatus);
+            foreach (var status in receivedStatus)
+            {
+                Assert.Equal("Success", status.Status);
+            }
         }
 
         [Fact]
@@ -295,8 +304,6 @@ namespace CommonLibTest
                 }, "S-1-5-21-3130019616-2776909439-2417379446-1101","");
 
             var processor = new LdapPropertyProcessor(new MockLdapUtils());
-            var receivedStatus = new List<CSVComputerStatus>();
-            processor.ComputerStatusEvent += async status => { receivedStatus.Add(status); };
             var test = await processor.ReadUserProperties(mock, "testlab.local");
             var props = test.Props;
             var keys = props.Keys;
@@ -348,13 +355,6 @@ namespace CommonLibTest
                 ObjectIdentifier = "S-1-5-21-3130019616-2776909439-2417379446-1105",
                 ObjectType = Label.User
             }, test.SidHistory);
-            
-            // Send Computer Status
-            Assert.NotEmpty(receivedStatus);
-            foreach (var status in receivedStatus)
-            {
-                Assert.Equal("Success", status.Status);
-            }
         }
 
         [Fact]
