@@ -275,49 +275,33 @@ namespace SharpHoundCommonLib.Processors {
 
             _log.LogDebug("Running RegSessionEnum for {ObjectName}", computerName);
 
-            RegistryKey key = null;
-
             try {
-                var task = OpenRegistryKey(computerName, RegistryHive.Users);
-
-                if (await Task.WhenAny(task, Task.Delay(10000)) != task) {
-                    _log.LogDebug("Hit timeout on registry enum on {Server}. Abandoning registry enum", computerName);
-                    ret.Collected = false;
-                    ret.FailureReason = "Timeout";
+                using (var key = await SHRegistryKey.Connect(RegistryHive.Users, computerName)) {
+                    ret.Collected = true;
                     await SendComputerStatus(new CSVComputerStatus {
-                        Status = "Timeout",
+                        Status = CSVComputerStatus.StatusSuccess,
                         Task = "RegistrySessionEnum",
                         ComputerName = computerName
                     });
+                    _log.LogTrace("Registry session enum succeeded on {ComputerName}", computerName);
+                    var results = new List<Session>();
+                    foreach (var subkey in key.GetSubKeyNames()) {
+                        if (!SidRegex.IsMatch(subkey)) {
+                            continue;
+                        }
+
+                        if (await _utils.ResolveIDAndType(subkey, computerDomain) is (true, var principal)) {
+                            results.Add(new Session() {
+                                ComputerSID = computerSid,
+                                UserSID = principal.ObjectIdentifier
+                            });
+                        }
+                    }
+
+                    ret.Results = results.ToArray();
+
                     return ret;
                 }
-
-                key = task.Result;
-
-                ret.Collected = true;
-                await SendComputerStatus(new CSVComputerStatus {
-                    Status = CSVComputerStatus.StatusSuccess,
-                    Task = "RegistrySessionEnum",
-                    ComputerName = computerName
-                });
-                _log.LogTrace("Registry session enum succeeded on {ComputerName}", computerName);
-                var results = new List<Session>();
-                foreach (var subkey in key.GetSubKeyNames()) {
-                    if (!SidRegex.IsMatch(subkey)) {
-                        continue;
-                    }
-
-                    if (await _utils.ResolveIDAndType(subkey, computerDomain) is (true, var principal)) {
-                        results.Add(new Session() {
-                            ComputerSID = computerSid,
-                            UserSID = principal.ObjectIdentifier
-                        });
-                    }
-                }
-
-                ret.Results = results.ToArray();
-
-                return ret;
             }
             catch (Exception e) {
                 _log.LogTrace("Registry session enum failed on {ComputerName}: {Status}", computerName, e.Message);
@@ -330,13 +314,6 @@ namespace SharpHoundCommonLib.Processors {
                 ret.FailureReason = e.Message;
                 return ret;
             }
-            finally {
-                key?.Dispose();
-            }
-        }
-
-        private static Task<RegistryKey> OpenRegistryKey(string computerName, RegistryHive hive) {
-            return Task.Run(() => RegistryKey.OpenRemoteBaseKey(hive, computerName));
         }
 
         private async Task SendComputerStatus(CSVComputerStatus status) {

@@ -40,7 +40,7 @@ namespace SharpHoundCommonLib.Processors
         {
             var data = new AceRegistryAPIResult();
 
-            var aceData = GetCASecurity(computerName, caName);
+            var aceData = await GetCASecurity(computerName, caName);
             data.Collected = aceData.Collected;
             if (!aceData.Collected)
             {
@@ -159,7 +159,7 @@ namespace SharpHoundCommonLib.Processors
         public async Task<EnrollmentAgentRegistryAPIResult> ProcessEAPermissions(string caName, string objectDomain, string computerName, string computerObjectId)
         {
             var ret = new EnrollmentAgentRegistryAPIResult();
-            var regData = GetEnrollmentAgentRights(computerName, caName);
+            var regData = await GetEnrollmentAgentRights(computerName, caName);
 
             ret.Collected = regData.Collected;
             if (!ret.Collected)
@@ -216,12 +216,12 @@ namespace SharpHoundCommonLib.Processors
         /// <param name="caName"></param>
         /// <returns></returns>
         [ExcludeFromCodeCoverage]
-        private RegistryResult GetCASecurity(string target, string caName)
+        private async Task<RegistryResult> GetCASecurity(string target, string caName)
         {
             var regSubKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{caName}";
             const string regValue = "Security";
         
-            return Helpers.GetRegistryKeyData(target, regSubKey, regValue, _log);
+            return await Helpers.GetRegistryKeyData(target, regSubKey, regValue, _log);
         }
 
         /// <summary>
@@ -231,12 +231,12 @@ namespace SharpHoundCommonLib.Processors
         /// <param name="caName"></param>
         /// <returns></returns>
         [ExcludeFromCodeCoverage]
-        private RegistryResult GetEnrollmentAgentRights(string target, string caName)
+        private async Task<RegistryResult> GetEnrollmentAgentRights(string target, string caName)
         {
             var regSubKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{caName}";
             var regValue = "EnrollmentAgentRights";
 
-            return Helpers.GetRegistryKeyData(target, regSubKey, regValue, _log);
+            return await Helpers.GetRegistryKeyData(target, regSubKey, regValue, _log);
         }
 
         /// <summary>
@@ -248,13 +248,13 @@ namespace SharpHoundCommonLib.Processors
         /// <param name="caName"></param>
         /// <returns></returns>
         [ExcludeFromCodeCoverage]
-        public BoolRegistryAPIResult IsUserSpecifiesSanEnabled(string target, string caName)
+        public async Task<BoolRegistryAPIResult> IsUserSpecifiesSanEnabled(string target, string caName)
         {
             var ret = new BoolRegistryAPIResult();
             var subKey =
                 $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{caName}\\PolicyModules\\CertificateAuthority_MicrosoftDefault.Policy";
             const string subValue = "EditFlags";
-            var data = Helpers.GetRegistryKeyData(target, subKey, subValue, _log);
+            var data = await Helpers.GetRegistryKeyData(target, subKey, subValue, _log);
 
             ret.Collected = data.Collected;
             if (!data.Collected)
@@ -284,12 +284,12 @@ namespace SharpHoundCommonLib.Processors
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
         [ExcludeFromCodeCoverage]
-        public BoolRegistryAPIResult RoleSeparationEnabled(string target, string caName)
+        public async Task<BoolRegistryAPIResult> RoleSeparationEnabled(string target, string caName)
         {
             var ret = new BoolRegistryAPIResult();
             var regSubKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{caName}";
             const string regValue = "RoleSeparationEnabled";
-            var data = Helpers.GetRegistryKeyData(target, regSubKey, regValue, _log);
+            var data = await Helpers.GetRegistryKeyData(target, regSubKey, regValue, _log);
 
             ret.Collected = data.Collected;
             if (!data.Collected)
