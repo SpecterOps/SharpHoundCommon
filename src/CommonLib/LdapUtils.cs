@@ -165,7 +165,8 @@ namespace SharpHoundCommonLib {
                     Cache.AddType(sid, type);
                     return (true, type);
                 }
-            } catch {
+            }
+            catch {
                 //pass
             }
 
@@ -180,7 +181,8 @@ namespace SharpHoundCommonLib {
                         }
                     }
                 }
-            } catch {
+            }
+            catch {
                 //pass
             }
 
@@ -210,7 +212,8 @@ namespace SharpHoundCommonLib {
                     Cache.AddType(guid, type);
                     return (true, type);
                 }
-            } catch {
+            }
+            catch {
                 //pass
             }
 
@@ -225,7 +228,8 @@ namespace SharpHoundCommonLib {
                         }
                     }
                 }
-            } catch {
+            }
+            catch {
                 //pass
             }
 
@@ -258,7 +262,7 @@ namespace SharpHoundCommonLib {
 
             if (!securityIdentifier.Equals("S-1-5-9", StringComparison.OrdinalIgnoreCase)) {
                 var tempDomain = domain;
-                if (GetDomain(tempDomain, out var domainObject) && domainObject.Name != null) {
+                if (await GetDomain(tempDomain) is (true, var domainObject) && domainObject.Name != null) {
                     tempDomain = domainObject.Name;
                 }
 
@@ -279,12 +283,13 @@ namespace SharpHoundCommonLib {
                 return (true, cachedForest);
             }
 
-            if (GetDomain(domain, out var domainObject)) {
+            if (await GetDomain(domain) is (true, var domainObject)) {
                 try {
                     var forestName = domainObject.Forest.Name.ToUpper();
                     DomainToForestCache.TryAdd(domain, forestName);
                     return (true, forestName);
-                } catch {
+                }
+                catch {
                     //pass
                 }
             }
@@ -320,7 +325,8 @@ namespace SharpHoundCommonLib {
             string domainSid;
             try {
                 domainSid = new SecurityIdentifier(sid).AccountDomainSid?.Value.ToUpper();
-            } catch {
+            }
+            catch {
                 var match = SIDRegex.Match(sid);
                 domainSid = match.Success ? match.Groups[1].Value : null;
             }
@@ -339,7 +345,8 @@ namespace SharpHoundCommonLib {
                     Cache.AddDomainSidMapping(domainSid, Helpers.DistinguishedNameToDomain(dn));
                     return (true, Helpers.DistinguishedNameToDomain(dn));
                 }
-            } catch {
+            }
+            catch {
                 //pass
             }
 
@@ -359,7 +366,8 @@ namespace SharpHoundCommonLib {
                         }
                     }
                 }
-            } catch {
+            }
+            catch {
                 //pass
             }
 
@@ -368,7 +376,8 @@ namespace SharpHoundCommonLib {
         }
 
         private async Task<(bool Success, string DomainName)> ConvertDomainSidToDomainNameFromLdap(string domainSid) {
-            if (!GetDomain(out var domain) || domain?.Name == null) {
+            var (domainSuccess, domain) = await GetDomain();
+            if (!domainSuccess || domain?.Name == null) {
                 return (false, string.Empty);
             }
 
@@ -420,18 +429,20 @@ namespace SharpHoundCommonLib {
                     domainSid = sid;
                     return (true, domainSid);
                 }
-            } catch {
+            }
+            catch {
                 //we expect this to fail sometimes
             }
 
-            if (GetDomain(domainName, out var domainObject))
+            if (await GetDomain(domainName) is (true, var domainObject))
                 try {
                     var entry = domainObject.GetDirectoryEntry().ToDirectoryObject();
                     if (entry.TryGetSecurityIdentifier(out domainSid)) {
                         Cache.AddDomainSidMapping(domainName, domainSid);
                         return (true, domainSid);
                     }
-                } catch {
+                }
+                catch {
                     //we expect this to fail sometimes (not sure why, but better safe than sorry)
                 }
 
@@ -442,7 +453,8 @@ namespace SharpHoundCommonLib {
                     domainSid = sid.AccountDomainSid.ToString().ToUpper();
                     Cache.AddDomainSidMapping(domainName, domainSid);
                     return (true, domainSid);
-                } catch {
+                }
+                catch {
                     //We expect this to fail if the username doesn't exist in the domain
                 }
 
@@ -468,9 +480,9 @@ namespace SharpHoundCommonLib {
         /// <param name="domain"></param>
         /// <param name="domainName"></param>
         /// <returns></returns>
-        public bool GetDomain(string domainName, out Domain domain) {
+        public async Task<(bool, Domain)> GetDomain(string domainName) {
             var cacheKey = domainName ?? _nullCacheKey;
-            if (_domainCache.TryGetValue(cacheKey, out domain)) return true;
+            if (_domainCache.TryGetValue(cacheKey, out var domain)) return (true, domain);
 
             try {
                 DirectoryContext context;
@@ -485,18 +497,19 @@ namespace SharpHoundCommonLib {
                         ? new DirectoryContext(DirectoryContextType.Domain, domainName)
                         : new DirectoryContext(DirectoryContextType.Domain);
 
-                domain = Domain.GetDomain(context);
-                if (domain == null) return false;
+                domain = await GetDomainWithTimeout(context);
+                if (domain == null) return (false, null);
                 _domainCache.TryAdd(cacheKey, domain);
-                return true;
-            } catch (Exception e) {
+                return (true, domain);
+            }
+            catch (Exception e) {
                 _log.LogDebug(e, "GetDomain call failed for domain name {Name}", domainName);
-                return false;
+                return (false, null);
             }
         }
 
-        public static bool GetDomain(string domainName, LdapConfig ldapConfig, out Domain domain) {
-            if (_domainCache.TryGetValue(domainName, out domain)) return true;
+        public static async Task<(bool, Domain)> GetDomain(string domainName, LdapConfig ldapConfig) {
+            if (_domainCache.TryGetValue(domainName, out var domain)) return (true, domain);
 
             try {
                 DirectoryContext context;
@@ -511,14 +524,15 @@ namespace SharpHoundCommonLib {
                         ? new DirectoryContext(DirectoryContextType.Domain, domainName)
                         : new DirectoryContext(DirectoryContextType.Domain);
 
-                domain = Domain.GetDomain(context);
-                if (domain == null) return false;
+                domain = await GetDomainWithTimeout(context);
+                if (domain == null) return (false, null);
                 _domainCache.TryAdd(domainName, domain);
-                return true;
-            } catch (Exception e) {
+                return (true, domain);
+            }
+            catch (Exception e) {
                 Logging.Logger.LogDebug("Static GetDomain call failed for domain {DomainName}: {Error}", domainName,
                     e.Message);
-                return false;
+                return (false, null);
             }
         }
 
@@ -529,8 +543,8 @@ namespace SharpHoundCommonLib {
         /// <param name="domain"></param>
         /// <param name="domainName"></param>
         /// <returns></returns>
-        public bool GetDomain(out Domain domain) {
-            if (_domainCache.TryGetValue(_nullCacheKey, out domain)) return true;
+        public async Task<(bool, Domain)> GetDomain() {
+            if (_domainCache.TryGetValue(_nullCacheKey, out var domain)) return (true, domain);
 
             try {
                 var context = _ldapConfig.Username != null
@@ -538,12 +552,13 @@ namespace SharpHoundCommonLib {
                         _ldapConfig.Password)
                     : new DirectoryContext(DirectoryContextType.Domain);
 
-                domain = Domain.GetDomain(context);
+                domain = await GetDomainWithTimeout(context);
                 _domainCache.TryAdd(_nullCacheKey, domain);
-                return true;
-            } catch (Exception e) {
+                return (true, domain);
+            }
+            catch (Exception e) {
                 _log.LogDebug(e, "GetDomain call failed for blank domain");
-                return false;
+                return (false, null);
             }
         }
 
@@ -604,7 +619,9 @@ namespace SharpHoundCommonLib {
             }
 
             //Try some socket magic to get the NETBIOS name
-            if (RequestNETBIOSNameFromComputer(strippedHost, domain, out var netBiosName)) {
+            string netBiosName = null;
+            var requestNetBiosName = await Timeout.ExecuteWithTimeout(TimeSpan.FromMinutes(1), (_) => RequestNETBIOSNameFromComputer(strippedHost, domain, out netBiosName));
+            if (requestNetBiosName.IsSuccess && requestNetBiosName.Value) {
                 if (!string.IsNullOrWhiteSpace(netBiosName)) {
                     var result = await ResolveAccountName($"{netBiosName}$", domain);
                     if (result.Success) {
@@ -612,6 +629,9 @@ namespace SharpHoundCommonLib {
                         return (true, result.Principal.ObjectIdentifier);
                     }
                 }
+            }
+            else if (requestNetBiosName.Error == "Timeout") {
+                _log.LogDebug("RequestNETBIOSNameFromComputer timeout on host {Host}, domain {Domain}.", strippedHost, domain);
             }
 
             //Start by handling non-IP address names
@@ -632,7 +652,8 @@ namespace SharpHoundCommonLib {
                         _hostResolutionMap.TryAdd(strippedHost, result.Principal.ObjectIdentifier);
                         return (true, result.Principal.ObjectIdentifier);
                     }
-                } else {
+                }
+                else {
                     //Format: WIN10 (probably a netbios name)
                     var result = await ResolveAccountName($"{strippedHost}$", domain);
                     if (result.Success) {
@@ -658,7 +679,8 @@ namespace SharpHoundCommonLib {
                     _hostResolutionMap.TryAdd(strippedHost, result.Principal.ObjectIdentifier);
                     return (true, result.Principal.ObjectIdentifier);
                 }
-            } catch {
+            }
+            catch {
                 //pass
             }
 
@@ -676,7 +698,7 @@ namespace SharpHoundCommonLib {
                 return (false, default);
 
             var result = await Timeout.ExecuteNetAPIWithTimeout(TimeSpan.FromMinutes(2), (_) => _nativeMethods.CallNetWkstaGetInfo(hostname));
-            
+
             if (result.IsSuccess)
                 return (true, result.Value);
             else
@@ -693,18 +715,20 @@ namespace SharpHoundCommonLib {
             var sids = new List<string>();
 
             await foreach (var result in Query(new LdapQueryParameters {
-                               DomainName = domain,
-                               Attributes = new[] { LDAPProperties.ObjectSID },
-                               GlobalCatalog = true,
-                               LDAPFilter = new LdapFilter().AddUsers($"(samaccountname={name})").GetFilter()
-                           })) {
+                DomainName = domain,
+                Attributes = new[] { LDAPProperties.ObjectSID },
+                GlobalCatalog = true,
+                LDAPFilter = new LdapFilter().AddUsers($"(samaccountname={name})").GetFilter()
+            })) {
                 if (result.IsSuccess && result.Value.TryGetSecurityIdentifier(out var sid)) {
                     if (await GetWellKnownPrincipal(sid, domain) is (true, var principal)) {
                         sids.Add(principal.ObjectIdentifier);
-                    } else {
+                    }
+                    else {
                         sids.Add(sid);
                     }
-                } else {
+                }
+                else {
                     return (false, Array.Empty<string>());
                 }
             }
@@ -774,7 +798,8 @@ namespace SharpHoundCommonLib {
                         }
 
                         remoteEndpoint = new IPEndPoint(address, 137);
-                    } catch {
+                    }
+                    catch {
                         //Failed to resolve an IP, so return null
                         netbios = null;
                         return false;
@@ -793,11 +818,13 @@ namespace SharpHoundCommonLib {
 
                     netbios = null;
                     return false;
-                } catch (SocketException) {
+                }
+                catch (SocketException) {
                     netbios = null;
                     return false;
                 }
-            } finally {
+            }
+            finally {
                 //Make sure we close the socket if its open
                 requestSocket.Close();
             }
@@ -905,7 +932,8 @@ namespace SharpHoundCommonLib {
 
                     return (false, default);
                 }
-            } catch {
+            }
+            catch {
                 _unresolvablePrincipals.Add(distinguishedName);
                 return (false, default);
             }
@@ -1031,17 +1059,19 @@ namespace SharpHoundCommonLib {
                 if (entry.TryGetProperty(property, out var searchBase)) {
                     return (true, searchBase);
                 }
-            } catch {
+            }
+            catch {
                 //pass
             }
 
-            if (GetDomain(domain, out var domainObj)) {
+            if (await GetDomain(domain) is (true, var domainObj)) {
                 try {
                     var entry = domainObj.GetDirectoryEntry().ToDirectoryObject();
                     if (entry.TryGetProperty(property, out var searchBase)) {
                         return (true, searchBase);
                     }
-                } catch {
+                }
+                catch {
                     //pass
                 }
 
@@ -1136,7 +1166,8 @@ namespace SharpHoundCommonLib {
                 if (distinguishedName.IndexOf(DirectoryPaths.NTAuthStoreLocation, StringComparison.OrdinalIgnoreCase) >=
                     0)
                     type = Label.NTAuthStore;
-            } else if (objectClasses.Contains(ObjectClass.OIDContainerClass, StringComparer.OrdinalIgnoreCase)) {
+            }
+            else if (objectClasses.Contains(ObjectClass.OIDContainerClass, StringComparer.OrdinalIgnoreCase)) {
                 if (distinguishedName.StartsWith(DirectoryPaths.OIDContainerLocation,
                         StringComparison.OrdinalIgnoreCase))
                     type = Label.Container;
@@ -1176,11 +1207,13 @@ namespace SharpHoundCommonLib {
 
             if (directoryObject.TryGetDistinguishedName(out var distinguishedName)) {
                 domain = Helpers.DistinguishedNameToDomain(distinguishedName);
-            } else {
+            }
+            else {
                 if (objectIdentifier.StartsWith("S-1-5") &&
                     await utils.GetDomainNameFromSid(objectIdentifier) is (true, var domainName)) {
                     domain = domainName;
-                } else {
+                }
+                else {
                     return (false, default);
                 }
             }
@@ -1189,9 +1222,11 @@ namespace SharpHoundCommonLib {
             var match = SIDRegex.Match(objectIdentifier);
             if (match.Success) {
                 domainSid = match.Groups[1].Value;
-            } else if (await utils.GetDomainSidFromDomainName(domain) is (true, var sid)) {
+            }
+            else if (await utils.GetDomainSidFromDomainName(domain) is (true, var sid)) {
                 domainSid = sid;
-            } else {
+            }
+            else {
                 Logging.Logger.LogWarning("Failed to resolve domain sid for object {Identifier}", objectIdentifier);
                 domainSid = null;
             }
@@ -1239,90 +1274,112 @@ namespace SharpHoundCommonLib {
                 case Label.Group:
                 case Label.Base:
                     if (!string.IsNullOrWhiteSpace(samAccountName)) {
-                        displayName = $"{samAccountName}@{domain}";    
-                    }else if (directoryObject.TryGetProperty(LDAPProperties.CanonicalName, out var canonicalName)) {
+                        displayName = $"{samAccountName}@{domain}";
+                    }
+                    else if (directoryObject.TryGetProperty(LDAPProperties.CanonicalName, out var canonicalName)) {
                         displayName = $"{canonicalName}@{domain}";
-                    }else if (directoryObject.TryGetProperty(LDAPProperties.Name, out var name)) {
+                    }
+                    else if (directoryObject.TryGetProperty(LDAPProperties.Name, out var name)) {
                         displayName = $"{name}@{domain}";
-                    } else {
+                    }
+                    else {
                         displayName = $"UNKNOWN@{domain}";
                     }
                     break;
                 case Label.Computer: {
-                    var shortName = samAccountName?.TrimEnd('$');
-                    if (directoryObject.TryGetProperty(LDAPProperties.DNSHostName, out var dns)) {
-                        displayName = dns;
-                    } else if (!string.IsNullOrWhiteSpace(shortName)) {
-                        displayName = $"{shortName}.{domain}";
-                    } else if (directoryObject.TryGetProperty(LDAPProperties.CanonicalName,
-                                   out var canonicalName)) {
-                        displayName = $"{canonicalName}.{domain}";
-                    } else if (directoryObject.TryGetProperty(LDAPProperties.Name, out var name)) {
-                        displayName = $"{name}.{domain}";
-                    } else {
-                        displayName = $"UNKNOWN.{domain}";
-                    }
+                        var shortName = samAccountName?.TrimEnd('$');
+                        if (directoryObject.TryGetProperty(LDAPProperties.DNSHostName, out var dns)) {
+                            displayName = dns;
+                        }
+                        else if (!string.IsNullOrWhiteSpace(shortName)) {
+                            displayName = $"{shortName}.{domain}";
+                        }
+                        else if (directoryObject.TryGetProperty(LDAPProperties.CanonicalName,
+                                       out var canonicalName)) {
+                            displayName = $"{canonicalName}.{domain}";
+                        }
+                        else if (directoryObject.TryGetProperty(LDAPProperties.Name, out var name)) {
+                            displayName = $"{name}.{domain}";
+                        }
+                        else {
+                            displayName = $"UNKNOWN.{domain}";
+                        }
 
-                    break;
-                }
+                        break;
+                    }
                 case Label.GPO:
                 case Label.IssuancePolicy: {
-                    if (directoryObject.TryGetProperty(LDAPProperties.DisplayName, out var ldapDisplayName)) {
-                        displayName = $"{ldapDisplayName}@{domain}";
-                    } else if (directoryObject.TryGetProperty(LDAPProperties.CanonicalName,
-                                   out var canonicalName)) {
-                        displayName = $"{canonicalName}@{domain}";
-                    } else {
-                        displayName = $"UNKNOWN@{domain}";
-                    }
+                        if (directoryObject.TryGetProperty(LDAPProperties.DisplayName, out var ldapDisplayName)) {
+                            displayName = $"{ldapDisplayName}@{domain}";
+                        }
+                        else if (directoryObject.TryGetProperty(LDAPProperties.CanonicalName,
+                                       out var canonicalName)) {
+                            displayName = $"{canonicalName}@{domain}";
+                        }
+                        else {
+                            displayName = $"UNKNOWN@{domain}";
+                        }
 
-                    break;
-                }
+                        break;
+                    }
                 case Label.Domain:
                     displayName = domain;
                     break;
                 case Label.OU: {
-                    if (directoryObject.TryGetProperty(LDAPProperties.Name, out var name)) {
-                        displayName = $"{name}@{domain}";
-                    } else if (directoryObject.TryGetProperty(LDAPProperties.OU, out var ou)) {
-                        displayName = $"{ou}@{domain}";
-                    } else {
-                        displayName = $"UNKNOWN@{domain}";
-                    }
+                        if (directoryObject.TryGetProperty(LDAPProperties.Name, out var name)) {
+                            displayName = $"{name}@{domain}";
+                        }
+                        else if (directoryObject.TryGetProperty(LDAPProperties.OU, out var ou)) {
+                            displayName = $"{ou}@{domain}";
+                        }
+                        else {
+                            displayName = $"UNKNOWN@{domain}";
+                        }
 
-                    break;
-                }
+                        break;
+                    }
                 case Label.Container: {
-                    if (directoryObject.TryGetProperty(LDAPProperties.Name, out var name)) {
-                        displayName = $"{name}@{domain}";
-                    } else if (directoryObject.TryGetProperty(LDAPProperties.CanonicalName,
-                                   out var canonicalName)) {
-                        displayName = $"{canonicalName}@{domain}";
-                    } else {
-                        displayName = $"UNKNOWN@{domain}";
-                    }
+                        if (directoryObject.TryGetProperty(LDAPProperties.Name, out var name)) {
+                            displayName = $"{name}@{domain}";
+                        }
+                        else if (directoryObject.TryGetProperty(LDAPProperties.CanonicalName,
+                                       out var canonicalName)) {
+                            displayName = $"{canonicalName}@{domain}";
+                        }
+                        else {
+                            displayName = $"UNKNOWN@{domain}";
+                        }
 
-                    break;
-                }
+                        break;
+                    }
                 case Label.Configuration:
                 case Label.RootCA:
                 case Label.AIACA:
                 case Label.NTAuthStore:
                 case Label.EnterpriseCA:
                 case Label.CertTemplate: {
-                    if (directoryObject.TryGetProperty(LDAPProperties.Name, out var name)) {
-                        displayName = $"{name}@{domain}";
-                    } else {
-                        displayName = $"UNKNOWN@{domain}";
-                    }
+                        if (directoryObject.TryGetProperty(LDAPProperties.Name, out var name)) {
+                            displayName = $"{name}@{domain}";
+                        }
+                        else {
+                            displayName = $"UNKNOWN@{domain}";
+                        }
 
-                    break;
-                }
+                        break;
+                    }
                 default:
                     throw new ArgumentOutOfRangeException();
             }
 
             return displayName.ToUpper();
+        }
+
+        private static async Task<Domain> GetDomainWithTimeout(DirectoryContext context) {
+            var result = await Timeout.ExecuteWithTimeout(TimeSpan.FromMinutes(2), (_) => Domain.GetDomain(context));
+            if (result.IsSuccess)
+                return result.Value;
+            else
+                throw new TimeoutException("Timeout retrieving domain.");
         }
     }
 }

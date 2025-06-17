@@ -24,33 +24,45 @@ namespace SharpHoundCommonLib {
             _portScanner = scanner ?? new PortScanner();
         }
 
-        public IAsyncEnumerable<Result<string>> RangedRetrieval(string distinguishedName,
+        public async IAsyncEnumerable<Result<string>> RangedRetrieval(string distinguishedName,
             string attributeName, CancellationToken cancellationToken = new()) {
             var domain = Helpers.DistinguishedNameToDomain(distinguishedName);
 
-            if (!GetPool(domain, out var pool)) {
-                return new List<Result<string>> {Result<string>.Fail("Failed to resolve a connection pool")}.ToAsyncEnumerable();
+            var (getPoolSuccess, pool) = await GetPool(domain);
+            if (!getPoolSuccess) {
+                yield return Result<string>.Fail("Failed to resolve a connection pool");
+                yield break;
             }
 
-            return pool.RangedRetrieval(distinguishedName, attributeName, cancellationToken);
+            await foreach (var result in pool.RangedRetrieval(distinguishedName, attributeName, cancellationToken)) {
+                yield return result;
+            }
         }
 
-        public IAsyncEnumerable<LdapResult<IDirectoryObject>> PagedQuery(LdapQueryParameters queryParameters,
+        public async IAsyncEnumerable<LdapResult<IDirectoryObject>> PagedQuery(LdapQueryParameters queryParameters,
             CancellationToken cancellationToken = new()) {
-            if (!GetPool(queryParameters.DomainName, out var pool)) {
-                return new List<LdapResult<IDirectoryObject>> {LdapResult<IDirectoryObject>.Fail("Failed to resolve a connection pool", queryParameters)}.ToAsyncEnumerable();
+            var (getPoolSuccess, pool) = await GetPool(queryParameters.DomainName);
+            if (!getPoolSuccess) {
+                yield return LdapResult<IDirectoryObject>.Fail("Failed to resolve a connection pool", queryParameters);
+                yield break;
             }
 
-            return pool.PagedQuery(queryParameters, cancellationToken);
+            await foreach (var result in pool.PagedQuery(queryParameters, cancellationToken)) {
+                yield return result;
+            }
         }
 
-        public IAsyncEnumerable<LdapResult<IDirectoryObject>> Query(LdapQueryParameters queryParameters,
+        public async IAsyncEnumerable<LdapResult<IDirectoryObject>> Query(LdapQueryParameters queryParameters,
             CancellationToken cancellationToken = new()) {
-            if (!GetPool(queryParameters.DomainName, out var pool)) {
-                return new List<LdapResult<IDirectoryObject>> {LdapResult<IDirectoryObject>.Fail("Failed to resolve a connection pool", queryParameters)}.ToAsyncEnumerable();
+            var (getPoolSuccess, pool) = await GetPool(queryParameters.DomainName);
+            if (!getPoolSuccess) {
+                yield return LdapResult<IDirectoryObject>.Fail("Failed to resolve a connection pool", queryParameters);
+                yield break;
             }
 
-            return pool.Query(queryParameters, cancellationToken);
+            await foreach (var result in pool.Query(queryParameters, cancellationToken)) {
+                yield return result;
+            }
         }
 
         public void ReleaseConnection(LdapConnectionWrapper connectionWrapper, bool connectionFaulted = false) {
@@ -73,24 +85,24 @@ namespace SharpHoundCommonLib {
             return (success, message);
         }
 
-        private bool GetPool(string identifier, out LdapConnectionPool pool) {
+        private async Task<(bool, LdapConnectionPool)> GetPool(string identifier) {
             if (string.IsNullOrWhiteSpace(identifier)) {
-                pool = default;
-                return false;
+                return (false, default);
             }
 
-            var resolved = ResolveIdentifier(identifier);
-            if (!_pools.TryGetValue(resolved, out pool)) {
+            var resolved = await ResolveIdentifier(identifier);
+            if (!_pools.TryGetValue(resolved, out var pool)) {
                 pool = new LdapConnectionPool(identifier, resolved, _ldapConfig, scanner: _portScanner);
                 _pools.TryAdd(resolved, pool);
             }
 
-            return true;
+            return (true, pool);
         }
 
         public async Task<(bool Success, LdapConnectionWrapper ConnectionWrapper, string Message)> GetLdapConnection(
             string identifier, bool globalCatalog) {
-            if (!GetPool(identifier, out var pool)) {
+            var (getPoolSuccess, pool) = await GetPool(identifier);
+            if (!getPoolSuccess) {
                 return (false, default, $"Unable to resolve a pool for {identifier}");
             }
 
@@ -101,21 +113,22 @@ namespace SharpHoundCommonLib {
             return await pool.GetConnectionAsync();
         }
     
-        public (bool Success, LdapConnectionWrapper connectionWrapper, string Message) GetLdapConnectionForServer(
+        public async Task<(bool Success, LdapConnectionWrapper connectionWrapper, string Message)> GetLdapConnectionForServer(
             string identifier, string server, bool globalCatalog) {
-            if (!GetPool(identifier, out var pool)) {
+            var (getPoolSuccess, pool) = await GetPool(identifier);
+            if (!getPoolSuccess) {
                 return (false, default, $"Unable to resolve a pool for {identifier}");
             }
         
             return pool.GetConnectionForSpecificServerAsync(server, globalCatalog);
         }
 
-        private string ResolveIdentifier(string identifier) {
+        private async Task<string> ResolveIdentifier(string identifier) {
             if (_resolvedIdentifiers.TryGetValue(identifier, out var resolved)) {
                 return resolved;
             }
             
-            if (GetDomainSidFromDomainName(identifier, out var sid)) {
+            if (await GetDomainSidFromDomainName(identifier) is (true, var sid)) {
                 _log.LogDebug("Resolved identifier {Identifier} to {Resolved}", identifier, sid);
                 _resolvedIdentifiers.TryAdd(identifier, sid);
                 return sid;
@@ -124,26 +137,25 @@ namespace SharpHoundCommonLib {
             return identifier;
         }
     
-        private bool GetDomainSidFromDomainName(string domainName, out string domainSid) {
-            if (Cache.GetDomainSidMapping(domainName, out domainSid)) return true;
+        private async Task<(bool, string)> GetDomainSidFromDomainName(string domainName) {
+            if (Cache.GetDomainSidMapping(domainName, out var domainSid)) return (true, domainSid);
 
             try {
                 var entry = new DirectoryEntry($"LDAP://{domainName}").ToDirectoryObject();
                 if (entry.TryGetSecurityIdentifier(out var sid)) {
                     Cache.AddDomainSidMapping(domainName, sid);
-                    domainSid = sid;
-                    return true;
+                    return (true, sid);
                 }
             }
             catch {
                 //we expect this to fail sometimes
             }
 
-            if (LdapUtils.GetDomain(domainName, _ldapConfig, out var domainObject))
+            if (await LdapUtils.GetDomain(domainName, _ldapConfig) is (true, var domainObject))
                 try {
                     if (domainObject.GetDirectoryEntry().ToDirectoryObject().TryGetSecurityIdentifier(out domainSid)) {
                         Cache.AddDomainSidMapping(domainName, domainSid);
-                        return true;
+                        return (true, domainSid);
                     }
                 }
                 catch {
@@ -156,13 +168,13 @@ namespace SharpHoundCommonLib {
                     var sid = (SecurityIdentifier)account.Translate(typeof(SecurityIdentifier));
                     domainSid = sid.AccountDomainSid.ToString();
                     Cache.AddDomainSidMapping(domainName, domainSid);
-                    return true;
+                    return (true, domainSid);
                 }
                 catch {
                     //We expect this to fail if the username doesn't exist in the domain
                 }
 
-            return false;
+            return (false, null);
         }
 
         public void Dispose() {

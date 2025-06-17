@@ -31,14 +31,11 @@ namespace SharpHoundCommonLib.Processors
 
             // Attempt to get trust type
             var trustInfoList = new List<(string TargetName, System.DirectoryServices.ActiveDirectory.TrustType TrustType)>();
-            try
-            {
-                _utils.GetDomain(domain, out var domainObject);
+            if (await _utils.GetDomain(domain) is (true, var domainObject)) {
                 trustInfoList.AddRange(from System.DirectoryServices.ActiveDirectory.TrustRelationshipInformation trust in domainObject.GetAllTrustRelationships()
-                select (trust.TargetName, trust.TrustType));
+                                        select (trust.TargetName, trust.TrustType));
             }
-            catch 
-            {
+            else {
                 _log.LogWarning("Trust type enumeration using non-LDAP for {Domain} failed", domain);
             }
 

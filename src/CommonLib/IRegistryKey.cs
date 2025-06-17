@@ -29,7 +29,7 @@ namespace SharpHoundCommonLib {
         /// <param name="machineName"></param>
         /// <returns></returns>
         /// <exception cref="TimeoutException"></exception>
-        /// ArgumentException
+        /// <exception cref="ArgumentException"></exception>
         /// <exception cref="System.IO.IOException"></exception>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="System.Security.SecurityException"></exception>

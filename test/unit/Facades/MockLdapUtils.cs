@@ -693,12 +693,12 @@ namespace CommonLibTest.Facades
             return (false, default);
         }
 
-        public bool GetDomain(string domainName, out Domain domain) {
-            throw new NotImplementedException();
+        public Task<(bool, Domain)> GetDomain(string domainName) {
+            return Task.FromResult<(bool, Domain)>((false, null));
         }
 
-        public bool GetDomain(out Domain domain) {
-            throw new NotImplementedException();
+        public Task<(bool, Domain)> GetDomain() {
+            return Task.FromResult<(bool, Domain)>((false, null));
         }
 
         public async Task<(bool Success, TypedPrincipal Principal)> ResolveAccountName(string name, string domain) {
@@ -1017,11 +1017,6 @@ namespace CommonLibTest.Facades
         }
 
         public void ResetUtils() {
-            throw new NotImplementedException();
-        }
-
-        public Domain GetDomain(string domainName = null)
-        {
             throw new NotImplementedException();
         }
 

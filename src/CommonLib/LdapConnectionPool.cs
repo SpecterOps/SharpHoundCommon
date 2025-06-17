@@ -388,7 +388,8 @@ namespace SharpHoundCommonLib {
                 return result;
             }
 
-            if (!CreateSearchRequest(queryParameters, connectionWrapper, out var searchRequest)) {
+            var (searchRequestSuccess, searchRequest) = await CreateSearchRequest(queryParameters, connectionWrapper);
+            if (!searchRequestSuccess) {
                 result.Success = false;
                 result.Message = "Failed to create search request";
                 ReleaseConnection(connectionWrapper);
@@ -428,7 +429,8 @@ namespace SharpHoundCommonLib {
             };
             var connectionWrapper = connectionResult.ConnectionWrapper;
 
-            if (!CreateSearchRequest(queryParameters, connectionWrapper, out var searchRequest)) {
+            var (searchRequestSuccess, searchRequest) = await CreateSearchRequest(queryParameters, connectionWrapper);
+            if (!searchRequestSuccess) {
                 ReleaseConnection(connectionWrapper);
                 yield return Result<string>.Fail("Failed to create search request");
                 yield break;
@@ -560,8 +562,8 @@ namespace SharpHoundCommonLib {
                 MaxBackoffDelay.TotalSeconds));
         }
 
-        private bool CreateSearchRequest(LdapQueryParameters queryParameters,
-            LdapConnectionWrapper connectionWrapper, out SearchRequest searchRequest) {
+        private async Task<(bool, SearchRequest)> CreateSearchRequest(LdapQueryParameters queryParameters,
+            LdapConnectionWrapper connectionWrapper) {
             string basePath;
             if (!string.IsNullOrWhiteSpace(queryParameters.SearchBase)) {
                 basePath = queryParameters.SearchBase;
@@ -570,11 +572,10 @@ namespace SharpHoundCommonLib {
                 if (CallDsGetDcName(queryParameters.DomainName, out var info) && info != null) {
                     tempPath = Helpers.DomainNameToDistinguishedName(info.Value.DomainName);
                     connectionWrapper.SaveContext(queryParameters.NamingContext, basePath);
-                } else if (LdapUtils.GetDomain(queryParameters.DomainName, _ldapConfig, out var domainObject)) {
+                } else if (await LdapUtils.GetDomain(queryParameters.DomainName, _ldapConfig) is (true, var domainObject)) {
                     tempPath = Helpers.DomainNameToDistinguishedName(domainObject.Name);
                 } else {
-                    searchRequest = null;
-                    return false;
+                    return (false, null);
                 }
 
                 basePath = queryParameters.NamingContext switch {
@@ -592,7 +593,7 @@ namespace SharpHoundCommonLib {
                 basePath = $"{queryParameters.RelativeSearchBase},{basePath}";
             }
 
-            searchRequest = new SearchRequest(basePath, queryParameters.LDAPFilter, queryParameters.SearchScope,
+            var searchRequest = new SearchRequest(basePath, queryParameters.LDAPFilter, queryParameters.SearchScope,
                 queryParameters.Attributes);
             searchRequest.Controls.Add(new SearchOptionsControl(SearchOption.DomainScope));
             if (queryParameters.IncludeDeleted) {
@@ -605,7 +606,7 @@ namespace SharpHoundCommonLib {
                 });
             }
 
-            return true;
+            return (true, searchRequest);
         }
 
         private bool CallDsGetDcName(string domainName, out NetAPIStructs.DomainControllerInfo? info) {
@@ -728,7 +729,8 @@ namespace SharpHoundCommonLib {
                     }
                 }
 
-                if (!LdapUtils.GetDomain(_identifier, _ldapConfig, out var domainObject) || domainObject.Name == null) {
+                var (getDomainSuccess, domainObject) = await LdapUtils.GetDomain(_identifier, _ldapConfig);
+                if (!getDomainSuccess || domainObject?.Name == null) {
                     //If we don't get a result here, we effectively have no other ways to resolve this domain, so we'll just have to exit out
                     _log.LogDebug(
                         "Could not get domain object from GetDomain, unable to create ldap connection for domain {Domain}",

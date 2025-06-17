@@ -66,11 +66,12 @@ namespace SharpHoundCommonLib.Processors {
             string domain;
             //If our dn is null, use our default domain
             if (string.IsNullOrEmpty(distinguishedName)) {
-                if (!_utils.GetDomain(out var d)) {
-                    return ret;    
+                var (getDomainSuccess, domainResult) = await _utils.GetDomain();
+                if (!getDomainSuccess) {
+                    return ret;
                 }
 
-                domain = d.Name;
+                domain = domainResult.Name;
             } else {
                 domain = Helpers.DistinguishedNameToDomain(distinguishedName);    
             }
