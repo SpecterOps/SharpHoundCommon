@@ -51,6 +51,18 @@ public class TimeoutTests {
     }
 
     [Fact]
+    public async Task ExecuteWithTimeout_ParentTokenCancel() {
+        var cancelledToken = new CancellationToken(true);
+        var timeout = TimeSpan.FromSeconds(1);
+        var func = (CancellationToken t) => {
+            Thread.Sleep(TimeSpan.FromMilliseconds(100));
+        };
+        var result = await SharpHoundCommonLib.Timeout.ExecuteWithTimeout(timeout, func, cancelledToken);
+        Assert.False(result.IsSuccess);
+        Assert.Equal("Cancellation requested", result.Error);
+    }
+
+    [Fact]
     public async Task ExecuteWithTimeout_T_Success() {
         var timeout = TimeSpan.FromSeconds(1);
         var func = (CancellationToken t) => {
@@ -103,6 +115,19 @@ public class TimeoutTests {
     }
 
     [Fact]
+    public async Task ExecuteWithTimeout_T_ParentTokenCancel() {
+        var cancelledToken = new CancellationToken(true);
+        var timeout = TimeSpan.FromSeconds(1);
+        var func = (CancellationToken t) => {
+            Thread.Sleep(TimeSpan.FromMilliseconds(100));
+            return true;
+        };
+        var result = await SharpHoundCommonLib.Timeout.ExecuteWithTimeout(timeout, func, cancelledToken);
+        Assert.False(result.IsSuccess);
+        Assert.Equal("Cancellation requested", result.Error);
+    }
+
+    [Fact]
     public async Task ExecuteWithTimeout_Task_Success() {
         var timeout = TimeSpan.FromSeconds(1);
         var func = async (CancellationToken t) => {
@@ -145,6 +170,18 @@ public class TimeoutTests {
             throw new ApplicationException("I am an exception");
         };
         await Assert.ThrowsAsync<ApplicationException>(() => SharpHoundCommonLib.Timeout.ExecuteWithTimeout(timeout, func));
+    }
+
+    [Fact]
+    public async Task ExecuteWithTimeout_Task_ParentTokenCancel() {
+        var cancelledToken = new CancellationToken(true);
+        var timeout = TimeSpan.FromSeconds(1);
+        var func = async (CancellationToken t) => {
+            await Task.Delay(TimeSpan.FromMilliseconds(100));
+        };
+        var result = await SharpHoundCommonLib.Timeout.ExecuteWithTimeout(timeout, func, cancelledToken);
+        Assert.False(result.IsSuccess);
+        Assert.Equal("Cancellation requested", result.Error);
     }
 
     [Fact]
@@ -198,5 +235,18 @@ public class TimeoutTests {
 #pragma warning restore CS0162 // Unreachable code detected
         };
         await Assert.ThrowsAsync<ApplicationException>(() => SharpHoundCommonLib.Timeout.ExecuteWithTimeout(timeout, func));
+    }
+
+    [Fact]
+    public async Task ExecuteWithTimeout_Task_T_ParentTokenCancel() {
+        var cancelledToken = new CancellationToken(true);
+        var timeout = TimeSpan.FromSeconds(1);
+        var func = async (CancellationToken t) => {
+            await Task.Delay(TimeSpan.FromMilliseconds(100));
+            return true;
+        };
+        var result = await SharpHoundCommonLib.Timeout.ExecuteWithTimeout(timeout, func, cancelledToken);
+        Assert.False(result.IsSuccess);
+        Assert.Equal("Cancellation requested", result.Error);
     }
 }

@@ -29,7 +29,10 @@ public static class Timeout {
             catch (OperationCanceledException) { }
         }
 
-        return Result<T>.Fail("Timeout");
+        if (parentToken.IsCancellationRequested)
+            return Result<T>.Fail("Cancellation requested");
+        else
+            return Result<T>.Fail("Timeout");
     }
 
     /// <summary>
@@ -55,7 +58,10 @@ public static class Timeout {
             catch (OperationCanceledException) { }
         }
 
-        return Result.Fail("Timeout");
+        if (parentToken.IsCancellationRequested)
+            return Result.Fail("Cancellation requested");
+        else
+            return Result.Fail("Timeout");
     }
 
     // These two ExecuteWithTimeout functions should perform equivalently -
@@ -88,7 +94,10 @@ public static class Timeout {
             catch (OperationCanceledException) { }
         }
 
-        return Result<T>.Fail("Timeout");
+        if (parentToken.IsCancellationRequested)
+            return Result<T>.Fail("Cancellation requested");
+        else
+            return Result<T>.Fail("Timeout");
     }
 
     /// <summary>
@@ -114,7 +123,10 @@ public static class Timeout {
             catch (OperationCanceledException) { }
         }
 
-        return Result.Fail("Timeout");
+        if (parentToken.IsCancellationRequested)
+            return Result.Fail("Cancellation requested");
+        else
+            return Result.Fail("Timeout");
     }
 
     /// <summary>
