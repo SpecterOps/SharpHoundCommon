@@ -47,6 +47,7 @@ namespace SharpHoundCommonLib.Processors {
                         PortScanCache.TryAdd(key, false);
                         return false;
                     }
+                    _log.LogTrace("CheckPort Succeeded for {HostName}:{Port}", hostname, port);
 
                     PortScanCache.TryAdd(key, true);
                     return true;

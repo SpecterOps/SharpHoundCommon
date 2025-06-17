@@ -257,5 +257,37 @@ namespace CommonLibTest {
             var status = receivedStatus[0];
             Assert.Equal("Timeout", status.Status);
         }
+
+        [Fact]
+        public async Task ComputerSessionProcessor_ReadUserSessionSendsComputerStatus()
+        {
+            var nativeMethods = new Mock<NativeMethods>();
+            nativeMethods.Setup(x => x.NetWkstaUserEnum(It.IsAny<string>())).Returns(() => {
+                Task.Delay(1000).Wait();
+                return Array.Empty<NetWkstaUserEnumResults>();
+            });
+            var receivedStatus = new List<CSVComputerStatus>();
+            var mockNativeMethods = new Mock<NativeMethods>();
+            var apiResult = new NetSessionEnumResults[] {
+                new("admin", "\\\\127.0.0.1")
+            };
+            mockNativeMethods.Setup(x => x.NetSessionEnum(It.IsAny<string>())).Returns(apiResult);
+
+            var expected = new Session[] {
+                new() {
+                    ComputerSID = _computerSid,
+                    UserSID = "S-1-5-21-3130019616-2776909439-2417379446-2116"
+                }
+            };
+
+            var processor = new ComputerSessionProcessor(new MockLdapUtils(), mockNativeMethods.Object,null, "dfm");
+            processor.ComputerStatusEvent += async status => { receivedStatus.Add(status); };
+            var result = await processor.ReadUserSessions("win10", _computerSid, _computerDomain);
+            Assert.True(result.Collected);
+            Assert.Equal(expected, result.Results); 
+            Assert.Single(receivedStatus);
+            var status = receivedStatus[0];
+            Assert.Equal("Success", status.Status);
+        }
     }
 }
