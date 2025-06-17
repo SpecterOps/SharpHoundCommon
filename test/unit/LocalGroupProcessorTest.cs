@@ -169,8 +169,9 @@ namespace CommonLibTest {
             var processor = mockProcessor.Object;
             var machineDomainSid = $"{Consts.MockDomainSid}-1000";
             var receivedStatus = new List<CSVComputerStatus>();
-            processor.ComputerStatusEvent += async status => {
+            processor.ComputerStatusEvent += status => {
                 receivedStatus.Add(status);
+                return Task.CompletedTask;
             };
             var results = await processor.GetLocalGroups("primary.testlab.local", machineDomainSid, "testlab.local", true, TimeSpan.FromMilliseconds(1))
                 .ToArrayAsync();
