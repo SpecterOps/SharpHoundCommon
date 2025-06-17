@@ -255,8 +255,23 @@ namespace SharpHoundCommonLib.LDAPQueries {
             return filterPartsDistinct;
         }
 
+        private string MergeFilters(params string[] filters) {
+            return $"(&{string.Join("", filters)})";
+        }
+
         public IEnumerable<string> GetFilterList() {
-            return _filterParts.Distinct();
+            foreach (var filter in _filterParts.Distinct())
+            {
+                if (_mandatory.Count > 0) {
+                    var filters = new List<string>(_mandatory)
+                    {
+                        filter
+                    };
+                    yield return MergeFilters(filters.ToArray());
+                } else {
+                    yield return filter;
+                }
+            }
         }
     }
 }

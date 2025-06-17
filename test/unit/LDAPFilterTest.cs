@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using SharpHoundCommonLib.LDAPQueries;
 using Xunit;
 using Xunit.Abstractions;
@@ -72,6 +73,37 @@ namespace CommonLibTest
                  Assert.Equal(expected[i], filter);
                  i++;
             }
+        }
+
+        [Fact]
+        public void LDAPFilter_GetFilterList_MergeFilter()
+        {
+            var test = new LdapFilter();
+            test.AddUsers();
+            test.AddComputers();
+            string mandatoryFilter1 = "(objectclass=*)";
+            string mandatoryFilter2 = "(iamamandatoryfilter=1)";
+            test.AddFilter(mandatoryFilter1, true);
+            test.AddFilter(mandatoryFilter2, true);
+
+            IEnumerable<string> filters = test.GetFilterList();
+
+            string computerFilter = "(samaccounttype=805306369)";
+            string userFilter = "(|(samaccounttype=805306368)(samaccounttype=805306370))";
+
+            // Check that each filter includes all mandatory filters
+            foreach (var filter in filters)
+            {
+                Assert.StartsWith("(&", filter);
+                Assert.Contains(mandatoryFilter1, filter);
+                Assert.Contains(mandatoryFilter2, filter);
+            }
+
+            // Check that each of userFilter and computerFilter are accounted for
+            Assert.Single(filters.Where(f => f.Contains(userFilter)));
+            Assert.Single(filters.Where(f => f.Contains(computerFilter)));
+
+            Assert.Equal(2, filters.Count());
         }
 
         #endregion
