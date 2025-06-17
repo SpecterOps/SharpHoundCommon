@@ -56,7 +56,7 @@ namespace SharpHoundCommonLib.LDAPQueries {
         /// <param name="conditions"></param>
         /// <returns></returns>
         public LdapFilter AddUsers(params string[] conditions) {
-            _filterParts.Add(BuildString("(samaccounttype=805306368)", conditions));
+            _filterParts.Add(BuildString("(|(samaccounttype=805306368)(samaccounttype=805306370))", conditions));
 
             return this;
         }
@@ -255,8 +255,23 @@ namespace SharpHoundCommonLib.LDAPQueries {
             return filterPartsDistinct;
         }
 
+        private string MergeFilters(params string[] filters) {
+            return $"(&{string.Join("", filters)})";
+        }
+
         public IEnumerable<string> GetFilterList() {
-            return _filterParts.Distinct();
+            foreach (var filter in _filterParts.Distinct())
+            {
+                if (_mandatory.Count > 0) {
+                    var filters = new List<string>(_mandatory)
+                    {
+                        filter
+                    };
+                    yield return MergeFilters(filters.ToArray());
+                } else {
+                    yield return filter;
+                }
+            }
         }
     }
 }
