@@ -29,7 +29,7 @@ namespace CommonLibTest {
         public async Task LocalGroupProcessor_TestWorkstation() {
             var mockProcessor = new Mock<LocalGroupProcessor>(new MockLdapUtils(), null);
             var mockSamServer = new MockWorkstationSAMServer();
-            mockProcessor.Setup(x => x.OpenSamServer(It.IsAny<string>())).ReturnsAsync(mockSamServer);
+            mockProcessor.Setup(x => x.OpenSamServer(It.IsAny<string>(), It.IsAny<TimeSpan>())).ReturnsAsync(mockSamServer);
             var processor = mockProcessor.Object;
             var machineDomainSid = $"{Consts.MockWorkstationMachineSid}-1001";
             var results = await processor.GetLocalGroups("win10.testlab.local", machineDomainSid, "TESTLAB.LOCAL", false)
@@ -57,7 +57,7 @@ namespace CommonLibTest {
         public async Task LocalGroupProcessor_TestDomainController() {
             var mockProcessor = new Mock<LocalGroupProcessor>(new MockLdapUtils(), null);
             var mockSamServer = new MockDCSAMServer();
-            mockProcessor.Setup(x => x.OpenSamServer(It.IsAny<string>())).ReturnsAsync(mockSamServer);
+            mockProcessor.Setup(x => x.OpenSamServer(It.IsAny<string>(), It.IsAny<TimeSpan>())).ReturnsAsync(mockSamServer);
 
             var processor = mockProcessor.Object;
             var machineDomainSid = $"{Consts.MockWorkstationMachineSid}-1000";
@@ -120,7 +120,7 @@ namespace CommonLibTest {
 
             var result = await resultTask;
 
-            Assert.Equal(null, result);
+            Assert.Null(result);
         }
 
         [Fact]
@@ -136,7 +136,7 @@ namespace CommonLibTest {
 
             var result = await resultTask;
 
-            Assert.Equal(null, result);
+            Assert.Null(result);
         }
 
         [Fact]
@@ -162,9 +162,8 @@ namespace CommonLibTest {
             var mockUtils = new Mock<MockLdapUtils>();
             var mockProcessor = new Mock<LocalGroupProcessor>(mockUtils.Object, null);
 
-            mockProcessor.Setup(x => x.OpenSamServer(It.IsAny<string>())).ReturnsAsync(() => {
-                Task.Delay(100).Wait();
-                return NtStatus.StatusAccessDenied;
+            mockProcessor.Setup(x => x.OpenSamServer(It.IsAny<string>(), It.IsAny<TimeSpan>())).ReturnsAsync(() => {
+                return SharpHoundRPC.Result<ISAMServer>.Fail("Timeout");
             });
             var processor = mockProcessor.Object;
             var machineDomainSid = $"{Consts.MockDomainSid}-1000";
@@ -173,7 +172,7 @@ namespace CommonLibTest {
                 receivedStatus.Add(status);
                 return Task.CompletedTask;
             };
-            var results = await processor.GetLocalGroups("primary.testlab.local", machineDomainSid, "testlab.local", true, TimeSpan.FromMilliseconds(1))
+            var results = await processor.GetLocalGroups("primary.testlab.local", machineDomainSid, "testlab.local", true, TimeSpan.FromMilliseconds(10))
                 .ToArrayAsync();
             Assert.Empty(results);
             Assert.Single(receivedStatus);
@@ -185,12 +184,13 @@ namespace CommonLibTest {
         public async Task LocalGroupProcessor_GetLocalGroups_GetMachineSidResultFailed() {
             var mockProcessor = new Mock<LocalGroupProcessor>(new MockLdapUtils(), null);
             var mockSamServer = new MockFailSAMServer_GetMachineSid();
-            mockProcessor.Setup(x => x.OpenSamServer(It.IsAny<string>())).ReturnsAsync(mockSamServer);
+            mockProcessor.Setup(x => x.OpenSamServer(It.IsAny<string>(), It.IsAny<TimeSpan>())).ReturnsAsync(mockSamServer);
             var processor = mockProcessor.Object;
             var machineDomainSid = $"{Consts.MockWorkstationMachineSid}-1000";
             var receivedStatus = new List<CSVComputerStatus>();
-            processor.ComputerStatusEvent += async status => {
+            processor.ComputerStatusEvent += status => {
                 receivedStatus.Add(status);
+                return Task.CompletedTask;
             };
             var results = await processor.GetLocalGroups("primary.testlab.local", machineDomainSid, "TESTLAB.LOCAL", true)
                 .ToArrayAsync();
@@ -205,12 +205,13 @@ namespace CommonLibTest {
         public async Task LocalGroupProcessor_GetLocalGroups_GetDomainsResultFailed() {
             var mockProcessor = new Mock<LocalGroupProcessor>(new MockLdapUtils(), null);
             var mockSamServer = new MockFailSAMServer_GetDomains();
-            mockProcessor.Setup(x => x.OpenSamServer(It.IsAny<string>())).ReturnsAsync(mockSamServer);
+            mockProcessor.Setup(x => x.OpenSamServer(It.IsAny<string>(), It.IsAny<TimeSpan>())).ReturnsAsync(mockSamServer);
             var processor = mockProcessor.Object;
             var machineDomainSid = $"{Consts.MockWorkstationMachineSid}-1000";
             var receivedStatus = new List<CSVComputerStatus>();
-            processor.ComputerStatusEvent += async status => {
+            processor.ComputerStatusEvent += status => {
                 receivedStatus.Add(status);
+                return Task.CompletedTask;
             };
             var results = await processor.GetLocalGroups("primary.testlab.local", machineDomainSid, "TESTLAB.LOCAL", true)
                 .ToArrayAsync();
@@ -225,12 +226,13 @@ namespace CommonLibTest {
         public async Task LocalGroupProcessor_GetLocalGroups_OpenDomainResultFailed() {
             var mockProcessor = new Mock<LocalGroupProcessor>(new MockLdapUtils(), null);
             var mockSamServer = new MockFailSAMServer_OpenDomain();
-            mockProcessor.Setup(x => x.OpenSamServer(It.IsAny<string>())).ReturnsAsync(mockSamServer);
+            mockProcessor.Setup(x => x.OpenSamServer(It.IsAny<string>(), It.IsAny<TimeSpan>())).ReturnsAsync(mockSamServer);
             var processor = mockProcessor.Object;
             var machineDomainSid = $"{Consts.MockWorkstationMachineSid}-1000";
             var receivedStatus = new List<CSVComputerStatus>();
-            processor.ComputerStatusEvent += async status => {
+            processor.ComputerStatusEvent += status => {
                 receivedStatus.Add(status);
+                return Task.CompletedTask;
             };
             var results = await processor.GetLocalGroups("primary.testlab.local", machineDomainSid, "TESTLAB.LOCAL", true)
                 .ToArrayAsync();
@@ -245,12 +247,13 @@ namespace CommonLibTest {
         public async Task LocalGroupProcessor_GetLocalGroups_GetAliasesFailed() {
             var mockProcessor = new Mock<LocalGroupProcessor>(new MockLdapUtils(), null);
             var mockSamServer = new MockFailSAMServer_GetAliases();
-            mockProcessor.Setup(x => x.OpenSamServer(It.IsAny<string>())).ReturnsAsync(mockSamServer);
+            mockProcessor.Setup(x => x.OpenSamServer(It.IsAny<string>(), It.IsAny<TimeSpan>())).ReturnsAsync(mockSamServer);
             var processor = mockProcessor.Object;
             var machineDomainSid = $"{Consts.MockWorkstationMachineSid}-1000";
             var receivedStatus = new List<CSVComputerStatus>();
-            processor.ComputerStatusEvent += async status => {
+            processor.ComputerStatusEvent += status => {
                 receivedStatus.Add(status);
+                return Task.CompletedTask;
             };
             var results = await processor.GetLocalGroups("primary.testlab.local", machineDomainSid, "TESTLAB.LOCAL", true)
                 .ToArrayAsync();
@@ -265,12 +268,13 @@ namespace CommonLibTest {
         public async Task LocalGroupProcessor_GetLocalGroups_OpenAliasFailed() {
             var mockProcessor = new Mock<LocalGroupProcessor>(new MockLdapUtils(), null);
             var mockSamServer = new MockFailSAMServer_OpenAlias();
-            mockProcessor.Setup(x => x.OpenSamServer(It.IsAny<string>())).ReturnsAsync(mockSamServer);
+            mockProcessor.Setup(x => x.OpenSamServer(It.IsAny<string>(), It.IsAny<TimeSpan>())).ReturnsAsync(mockSamServer);
             var processor = mockProcessor.Object;
             var machineDomainSid = $"{Consts.MockWorkstationMachineSid}-1000";
             var receivedStatus = new List<CSVComputerStatus>();
-            processor.ComputerStatusEvent += async status => {
+            processor.ComputerStatusEvent += status => {
                 receivedStatus.Add(status);
+                return Task.CompletedTask;
             };
             var results = await processor.GetLocalGroups("primary.testlab.local", machineDomainSid, "TESTLAB.LOCAL", true)
                 .ToArrayAsync();
@@ -287,12 +291,13 @@ namespace CommonLibTest {
         public async Task LocalGroupProcessor_GetLocalGroups_GetMembersFailed() {
             var mockProcessor = new Mock<LocalGroupProcessor>(new MockLdapUtils(), null);
             var mockSamServer = new MockFailSAMServer_GetMembers();
-            mockProcessor.Setup(x => x.OpenSamServer(It.IsAny<string>())).ReturnsAsync(mockSamServer);
+            mockProcessor.Setup(x => x.OpenSamServer(It.IsAny<string>(), It.IsAny<TimeSpan>())).ReturnsAsync(mockSamServer);
             var processor = mockProcessor.Object;
             var machineDomainSid = $"{Consts.MockWorkstationMachineSid}-1000";
             var receivedStatus = new List<CSVComputerStatus>();
-            processor.ComputerStatusEvent += async status => {
+            processor.ComputerStatusEvent += status => {
                 receivedStatus.Add(status);
+                return Task.CompletedTask;
             };
             var results = await processor.GetLocalGroups("primary.testlab.local", machineDomainSid, "TESTLAB.LOCAL", true)
                 .ToArrayAsync();
@@ -309,12 +314,13 @@ namespace CommonLibTest {
         public async Task LocalGroupProcessor_GetLocalGroups_LookupPrincipalBySid() {
             var mockProcessor = new Mock<LocalGroupProcessor>(new MockLdapUtils(), null);
             var mockSamServer = new MockFailSAMServer_LookupPrincipalBySid();
-            mockProcessor.Setup(x => x.OpenSamServer(It.IsAny<string>())).ReturnsAsync(mockSamServer);
+            mockProcessor.Setup(x => x.OpenSamServer(It.IsAny<string>(), It.IsAny<TimeSpan>())).ReturnsAsync(mockSamServer);
             var processor = mockProcessor.Object;
             var machineDomainSid = $"{Consts.MockWorkstationMachineSid}-1000";
             var receivedStatus = new List<CSVComputerStatus>();
-            processor.ComputerStatusEvent += async status => {
+            processor.ComputerStatusEvent += status => {
                 receivedStatus.Add(status);
+                return Task.CompletedTask;
             };
             var results = await processor.GetLocalGroups("primary.testlab.local", machineDomainSid, "TESTLAB.LOCAL", false)
                 .ToArrayAsync();
@@ -325,7 +331,7 @@ namespace CommonLibTest {
             Assert.Equal($"{machineDomainSid}-544", adminGroup.ObjectIdentifier);
             Assert.Equal("S-1-5-21-4243161961-3815211218-2888324771-512", adminGroup.Results[0].ObjectIdentifier);
             var rdpGroup = results.First(x => x.ObjectIdentifier.EndsWith("-555"));
-            Assert.Equal(1, rdpGroup.Results.Length);
+            Assert.Single(rdpGroup.Results);
             Assert.Collection(rdpGroup.Results,
                 principal => {
                     Assert.Equal($"{machineDomainSid}-544", principal.ObjectIdentifier);
@@ -337,7 +343,7 @@ namespace CommonLibTest {
         public async Task LocalGroupProcessor_GetLocalGroups_PreviouslyCached() {
             var mockProcessor = new Mock<LocalGroupProcessor>(new MockLdapUtils(), null);
             var mockSamServer = new MockFailSAMServer_PreviouslyCached();
-            mockProcessor.Setup(x => x.OpenSamServer(It.IsAny<string>())).ReturnsAsync(mockSamServer);
+            mockProcessor.Setup(x => x.OpenSamServer(It.IsAny<string>(), It.IsAny<TimeSpan>())).ReturnsAsync(mockSamServer);
             var processor = mockProcessor.Object;
             var machineDomainSid = $"{Consts.MockWorkstationMachineSid}-1001";
             var results = await processor.GetLocalGroups("win10.testlab.local", machineDomainSid, "TESTLAB.LOCAL", false)
