@@ -40,7 +40,7 @@ namespace SharpHoundCommonLib.Processors {
 
             try {
                 using var client = new TcpClient();
-                var ca = await Helpers.ExecuteWithTimeout(TimeSpan.FromMilliseconds(timeout), (_) => client.ConnectAsync(hostname, port));
+                var ca = await Timeout.ExecuteWithTimeout(TimeSpan.FromMilliseconds(timeout), (_) => client.ConnectAsync(hostname, port));
                 if (!ca.IsSuccess) {
                     _log.LogDebug("{HostName} did not respond to scan on port {Port} within {Timeout}ms", hostname, port,
                         timeout);

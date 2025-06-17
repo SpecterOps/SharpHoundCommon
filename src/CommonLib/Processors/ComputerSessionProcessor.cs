@@ -57,7 +57,7 @@ namespace SharpHoundCommonLib.Processors {
 
             _log.LogDebug("Running NetSessionEnum for {ObjectName}", computerName);
 
-            var result = await Helpers.ExecuteNetAPIWithTimeout(timeout, (timeoutToken) => {
+            var result = await Timeout.ExecuteNetAPIWithTimeout(timeout, (timeoutToken) => {
                 NetAPIResult<IEnumerable<NetSessionEnumResults>> result;
                 if (_doLocalAdminSessionEnum) {
                     // If we are authenticating using a local admin, we need to impersonate for this
@@ -183,7 +183,7 @@ namespace SharpHoundCommonLib.Processors {
 
             _log.LogDebug("Running NetWkstaUserEnum for {ObjectName}", computerName);
 
-            var result = await Helpers.ExecuteNetAPIWithTimeout(timeout, (timeoutToken) => {
+            var result = await Timeout.ExecuteNetAPIWithTimeout(timeout, (timeoutToken) => {
                 NetAPIResult<IEnumerable<NetWkstaUserEnumResults>>
                     result;
                 if (_doLocalAdminSessionEnum) {

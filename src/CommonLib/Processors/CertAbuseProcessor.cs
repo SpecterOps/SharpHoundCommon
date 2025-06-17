@@ -365,7 +365,7 @@ namespace SharpHoundCommonLib.Processors
                 }
 
                 var server = openServerResult.Value;
-                var getMachineSidResult = await Helpers.ExecuteRPCWithTimeout(TimeSpan.FromMinutes(2), (timeoutToken) => server.GetMachineSid(cancellationToken: timeoutToken));
+                var getMachineSidResult = await Timeout.ExecuteRPCWithTimeout(TimeSpan.FromMinutes(2), (timeoutToken) => server.GetMachineSid(cancellationToken: timeoutToken));
                 if (getMachineSidResult.IsFailed)
                 {
                     _log.LogTrace("GetMachineSid failed on {ComputerName}: {Error}", computerName, getMachineSidResult.SError);
@@ -445,7 +445,7 @@ namespace SharpHoundCommonLib.Processors
 
         public virtual async Task<SharpHoundRPC.Result<ISAMServer>> OpenSamServer(string computerName)
         {
-            var result = await Helpers.ExecuteRPCWithTimeout(TimeSpan.FromMinutes(2), (_) => SAMServer.OpenServer(computerName));
+            var result = await Timeout.ExecuteRPCWithTimeout(TimeSpan.FromMinutes(2), (_) => SAMServer.OpenServer(computerName));
             if (result.IsFailed)
             {
                 return SharpHoundRPC.Result<ISAMServer>.Fail(result.SError);

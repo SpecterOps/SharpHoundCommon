@@ -259,7 +259,7 @@ namespace CommonLibTest {
                 Thread.Sleep(TimeSpan.FromMilliseconds(100));
                 return true;
             };
-            var result = await Helpers.ExecuteWithTimeout(timeout, func);
+            var result = await SharpHoundCommonLib.Timeout.ExecuteWithTimeout(timeout, func);
             Assert.True(result.IsSuccess);
             Assert.True(result.Value);
         }
@@ -271,7 +271,7 @@ namespace CommonLibTest {
                 Thread.Sleep(TimeSpan.FromSeconds(1));
                 return true;
             };
-            var result = await Helpers.ExecuteWithTimeout(timeout, func);
+            var result = await SharpHoundCommonLib.Timeout.ExecuteWithTimeout(timeout, func);
             Assert.False(result.IsSuccess);
             Assert.Equal("Timeout", result.Error);
         }
@@ -286,9 +286,9 @@ namespace CommonLibTest {
                 shouldRemainFalse = true;
                 return true;
             };
-            var result = await Helpers.ExecuteWithTimeout(timeout, func);
+            var result = await SharpHoundCommonLib.Timeout.ExecuteWithTimeout(timeout, func);
             await Task.Delay(TimeSpan.FromMilliseconds(600));
-            Assert.False(shouldRemainFalse, $"{nameof(Helpers.ExecuteWithTimeout)} did not pass a cancelled token following timeout. Function {nameof(func)} did not exit early.");
+            Assert.False(shouldRemainFalse, $"{nameof(SharpHoundCommonLib.Timeout.ExecuteWithTimeout)} did not pass a cancelled token following timeout. Function {nameof(func)} did not exit early.");
         }
 
         [Fact]
@@ -298,7 +298,7 @@ namespace CommonLibTest {
                 await Task.Delay(TimeSpan.FromMilliseconds(100));
                 return true;
             };
-            var result = await Helpers.ExecuteWithTimeout(timeout, func);
+            var result = await SharpHoundCommonLib.Timeout.ExecuteWithTimeout(timeout, func);
             Assert.True(result.IsSuccess);
             Assert.True(result.Value);
         }
@@ -310,7 +310,7 @@ namespace CommonLibTest {
                 await Task.Delay(TimeSpan.FromSeconds(1));
                 return true;
             };
-            var result = await Helpers.ExecuteWithTimeout(timeout, func);
+            var result = await SharpHoundCommonLib.Timeout.ExecuteWithTimeout(timeout, func);
             Assert.False(result.IsSuccess);
             Assert.Equal("Timeout", result.Error);
         }
@@ -325,9 +325,9 @@ namespace CommonLibTest {
                 shouldRemainFalse = true;
                 return true;
             };
-            var result = await Helpers.ExecuteWithTimeout(timeout, func);
+            var result = await SharpHoundCommonLib.Timeout.ExecuteWithTimeout(timeout, func);
             await Task.Delay(TimeSpan.FromMilliseconds(600));
-            Assert.False(shouldRemainFalse, $"{nameof(Helpers.ExecuteWithTimeout)} did not pass a cancelled token following timeout. Function {nameof(func)} did not exit early.");
+            Assert.False(shouldRemainFalse, $"{nameof(SharpHoundCommonLib.Timeout.ExecuteWithTimeout)} did not pass a cancelled token following timeout. Function {nameof(func)} did not exit early.");
         }
     }
 }

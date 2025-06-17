@@ -35,8 +35,8 @@ namespace SharpHoundCommonLib.Processors {
             var endpoints = new List<APIResult<CAEnrollmentEndpoint>>();
 
             try {
-                var webEnrollmentTask = await Helpers.ExecuteWithTimeout(TimeSpan.FromMinutes(2), _ => ScanHttpEndpoint(CAEnrollmentEndpointType.WebEnrollmentApplication));
-                var webServiceTask = await Helpers.ExecuteWithTimeout(TimeSpan.FromMinutes(2), _ => ScanHttpEndpoint(CAEnrollmentEndpointType.EnrollmentWebService));
+                var webEnrollmentTask = await Timeout.ExecuteWithTimeout(TimeSpan.FromMinutes(2), _ => ScanHttpEndpoint(CAEnrollmentEndpointType.WebEnrollmentApplication));
+                var webServiceTask = await Timeout.ExecuteWithTimeout(TimeSpan.FromMinutes(2), _ => ScanHttpEndpoint(CAEnrollmentEndpointType.EnrollmentWebService));
 
                 if(webEnrollmentTask.IsSuccess)
                     endpoints.AddRange(webEnrollmentTask.Value);

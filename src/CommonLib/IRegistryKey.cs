@@ -35,7 +35,7 @@ namespace SharpHoundCommonLib {
         /// <exception cref="System.Security.SecurityException"></exception>
         /// <exception cref="UnauthorizedAccessException"></exception>
         public static async Task<SHRegistryKey> Connect(RegistryHive hive, string machineName) {
-            var remoteKey = await Helpers.ExecuteWithTimeout(TimeSpan.FromSeconds(10), (_) => RegistryKey.OpenRemoteBaseKey(hive, machineName));
+            var remoteKey = await Timeout.ExecuteWithTimeout(TimeSpan.FromSeconds(10), (_) => RegistryKey.OpenRemoteBaseKey(hive, machineName));
             if (remoteKey.IsSuccess)
                 return new SHRegistryKey(remoteKey.Value);
             else

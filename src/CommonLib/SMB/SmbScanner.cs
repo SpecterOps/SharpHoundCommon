@@ -125,7 +125,7 @@ namespace SharpHoundCommonLib.SMB {
                     negoReqBytes = negotiateRequest.ToBytes();
                 }
 
-                var negoResp = await Helpers.ExecuteWithTimeout(TimeSpan.FromMilliseconds(TimeoutMs), (timeoutToken) => SendAndReceiveData(host, port, negoReqBytes, timeoutToken));
+                var negoResp = await Timeout.ExecuteWithTimeout(TimeSpan.FromMilliseconds(TimeoutMs), (timeoutToken) => SendAndReceiveData(host, port, negoReqBytes, timeoutToken));
                 if (!negoResp.IsSuccess)
                     throw new OperationCanceledException("Connection attempt timed out");
 

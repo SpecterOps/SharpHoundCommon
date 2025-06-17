@@ -675,7 +675,7 @@ namespace SharpHoundCommonLib {
             if (!await _portScanner.CheckPort(hostname))
                 return (false, default);
 
-            var result = await Helpers.ExecuteNetAPIWithTimeout(TimeSpan.FromMinutes(2), (_) => _nativeMethods.CallNetWkstaGetInfo(hostname));
+            var result = await Timeout.ExecuteNetAPIWithTimeout(TimeSpan.FromMinutes(2), (_) => _nativeMethods.CallNetWkstaGetInfo(hostname));
             
             if (result.IsSuccess)
                 return (true, result.Value);

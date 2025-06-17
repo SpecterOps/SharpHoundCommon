@@ -28,7 +28,7 @@ namespace SharpHoundCommonLib.Processors
 
         public virtual async Task<SharpHoundRPC.Result<ISAMServer>> OpenSamServer(string computerName)
         {
-            var result = await Helpers.ExecuteRPCWithTimeout(TimeSpan.FromMinutes(2), (_) => SAMServer.OpenServer(computerName));
+            var result = await Timeout.ExecuteRPCWithTimeout(TimeSpan.FromMinutes(2), (_) => SAMServer.OpenServer(computerName));
             if (result.IsFailed)
             {
                 return SharpHoundRPC.Result<ISAMServer>.Fail(result.SError);
@@ -78,7 +78,7 @@ namespace SharpHoundCommonLib.Processors
             //Try to get the machine sid for the computer if its not already cached
             SecurityIdentifier machineSid;
             if (!Cache.GetMachineSid(computerObjectId, out var tempMachineSid)) {
-                var getMachineSidResult = await Helpers.ExecuteRPCWithTimeout(timeout, (timeoutToken) => server.GetMachineSid(cancellationToken: timeoutToken));
+                var getMachineSidResult = await Timeout.ExecuteRPCWithTimeout(timeout, (timeoutToken) => server.GetMachineSid(cancellationToken: timeoutToken));
                 if (getMachineSidResult.IsFailed)
                 {
                     _log.LogTrace("GetMachineSid failed on {ComputerName}: {Error}", computerName, getMachineSidResult.SError);
@@ -102,7 +102,7 @@ namespace SharpHoundCommonLib.Processors
             }
 
             //Get all available domains in the server
-            var getDomainsResult = await Helpers.ExecuteRPCWithTimeout(timeout, (_) => server.GetDomains());
+            var getDomainsResult = await Timeout.ExecuteRPCWithTimeout(timeout, (_) => server.GetDomains());
             if (getDomainsResult.IsFailed)
             {
                 _log.LogTrace("GetDomains failed on {ComputerName}: {Error}", computerName, getDomainsResult.SError);
@@ -123,7 +123,7 @@ namespace SharpHoundCommonLib.Processors
                     continue;
 
                 //Open a handle to the domain
-                var openDomainResult = await Helpers.ExecuteRPCWithTimeout(timeout, (timeoutToken) => server.OpenDomain(domainResult.Name, cancellationToken: timeoutToken));
+                var openDomainResult = await Timeout.ExecuteRPCWithTimeout(timeout, (timeoutToken) => server.OpenDomain(domainResult.Name, cancellationToken: timeoutToken));
                 if (openDomainResult.IsFailed)
                 {
                     _log.LogTrace("Failed to open domain {Domain} on {ComputerName}: {Error}", domainResult.Name, computerName, openDomainResult.SError);
@@ -142,7 +142,7 @@ namespace SharpHoundCommonLib.Processors
                 var domain = openDomainResult.Value;
 
                 //Open a handle to the available aliases
-                var getAliasesResult = await Helpers.ExecuteRPCWithTimeout(timeout, (_) => domain.GetAliases());
+                var getAliasesResult = await Timeout.ExecuteRPCWithTimeout(timeout, (_) => domain.GetAliases());
 
                 if (getAliasesResult.IsFailed)
                 {
@@ -175,7 +175,7 @@ namespace SharpHoundCommonLib.Processors
                     };
 
                     //Open a handle to the alias
-                    var openAliasResult = await Helpers.ExecuteRPCWithTimeout(timeout, (_) => domain.OpenAlias(alias.Rid));
+                    var openAliasResult = await Timeout.ExecuteRPCWithTimeout(timeout, (_) => domain.OpenAlias(alias.Rid));
                     if (openAliasResult.IsFailed)
                     {
                         _log.LogTrace("Failed to open alias {Alias} with RID {Rid} in domain {Domain} on computer {ComputerName}: {Error}", alias.Name, alias.Rid, domainResult.Name, computerName, openAliasResult.Error);
@@ -196,7 +196,7 @@ namespace SharpHoundCommonLib.Processors
                     
                     var localGroup = openAliasResult.Value;
                     //Call GetMembersInAlias to get raw group members
-                    var getMembersResult = await Helpers.ExecuteRPCWithTimeout(timeout, (_) => localGroup.GetMembers());
+                    var getMembersResult = await Timeout.ExecuteRPCWithTimeout(timeout, (_) => localGroup.GetMembers());
                     if (getMembersResult.IsFailed)
                     {
                         _log.LogTrace("Failed to get members in alias {Alias} with RID {Rid} in domain {Domain} on computer {ComputerName}: {Error}", alias.Name, alias.Rid, domainResult.Name, computerName, openAliasResult.Error);
@@ -271,7 +271,7 @@ namespace SharpHoundCommonLib.Processors
                             }
                             
                             //Attempt to lookup the principal in the server directly
-                            var lookupUserResult = await Helpers.ExecuteRPCWithTimeout(timeout, timeoutToken => server.LookupPrincipalBySid(securityIdentifier, timeoutToken));
+                            var lookupUserResult = await Timeout.ExecuteRPCWithTimeout(timeout, timeoutToken => server.LookupPrincipalBySid(securityIdentifier, timeoutToken));
                             if (lookupUserResult.IsFailed)
                             {
                                 _log.LogTrace("Unable to resolve local sid {SID}: {Error}", sidValue, lookupUserResult.SError);
