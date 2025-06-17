@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.DirectoryServices;
+using System.Runtime.CompilerServices;
 using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
@@ -25,7 +26,7 @@ namespace SharpHoundCommonLib {
         }
 
         public async IAsyncEnumerable<Result<string>> RangedRetrieval(string distinguishedName,
-            string attributeName, CancellationToken cancellationToken = new()) {
+            string attributeName, [EnumeratorCancellation] CancellationToken cancellationToken = new()) {
             var domain = Helpers.DistinguishedNameToDomain(distinguishedName);
 
             var (getPoolSuccess, pool) = await GetPool(domain);
@@ -40,7 +41,7 @@ namespace SharpHoundCommonLib {
         }
 
         public async IAsyncEnumerable<LdapResult<IDirectoryObject>> PagedQuery(LdapQueryParameters queryParameters,
-            CancellationToken cancellationToken = new()) {
+            [EnumeratorCancellation] CancellationToken cancellationToken = new()) {
             var (getPoolSuccess, pool) = await GetPool(queryParameters.DomainName);
             if (!getPoolSuccess) {
                 yield return LdapResult<IDirectoryObject>.Fail("Failed to resolve a connection pool", queryParameters);
@@ -53,7 +54,7 @@ namespace SharpHoundCommonLib {
         }
 
         public async IAsyncEnumerable<LdapResult<IDirectoryObject>> Query(LdapQueryParameters queryParameters,
-            CancellationToken cancellationToken = new()) {
+            [EnumeratorCancellation] CancellationToken cancellationToken = new()) {
             var (getPoolSuccess, pool) = await GetPool(queryParameters.DomainName);
             if (!getPoolSuccess) {
                 yield return LdapResult<IDirectoryObject>.Fail("Failed to resolve a connection pool", queryParameters);
@@ -120,7 +121,7 @@ namespace SharpHoundCommonLib {
                 return (false, default, $"Unable to resolve a pool for {identifier}");
             }
         
-            return pool.GetConnectionForSpecificServerAsync(server, globalCatalog);
+            return await pool.GetConnectionForSpecificServerAsync(server, globalCatalog);
         }
 
         private async Task<string> ResolveIdentifier(string identifier) {
