@@ -35,18 +35,16 @@ namespace SharpHoundCommonLib.Processors {
             var endpoints = new List<APIResult<CAEnrollmentEndpoint>>();
 
             try {
-                var webEnrollmentTask = await Timeout.ExecuteWithTimeout(TimeSpan.FromMinutes(2), _ => ScanHttpEndpoint(CAEnrollmentEndpointType.WebEnrollmentApplication));
-                var webServiceTask = await Timeout.ExecuteWithTimeout(TimeSpan.FromMinutes(2), _ => ScanHttpEndpoint(CAEnrollmentEndpointType.EnrollmentWebService));
+                var webEnrollmentTask = ScanHttpEndpoint(CAEnrollmentEndpointType.WebEnrollmentApplication);
+                var webServiceTask = ScanHttpEndpoint(CAEnrollmentEndpointType.EnrollmentWebService);
 
-                if(webEnrollmentTask.IsSuccess)
-                    endpoints.AddRange(webEnrollmentTask.Value);
-                else
-                    _logger.LogError(webEnrollmentTask.Error);
-                
-                if(webServiceTask.IsSuccess)
-                    endpoints.AddRange(webServiceTask.Value);
-                else
-                    _logger.LogError(webServiceTask.Error);
+                await Task.WhenAll(
+                    webEnrollmentTask,
+                    webServiceTask
+                );
+
+                endpoints.AddRange(await webEnrollmentTask);
+                endpoints.AddRange(await webServiceTask);
             } catch (Exception ex) {
                 _logger.LogError(ex, "An error occurred while scanning enrollment endpoints");
             }
