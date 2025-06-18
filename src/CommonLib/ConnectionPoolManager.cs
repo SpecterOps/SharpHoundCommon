@@ -152,7 +152,7 @@ namespace SharpHoundCommonLib {
                 //we expect this to fail sometimes
             }
 
-            if (LdapUtils.GetDomain(domainName, _ldapConfig) is (true, var domainObject))
+            if (LdapUtils.GetDomain(domainName, _ldapConfig, out var domainObject))
                 try {
                     // TODO: MC - Confirm GetDirectoryEntry is not a Blocking External Call
                     if (domainObject.GetDirectoryEntry().ToDirectoryObject().TryGetSecurityIdentifier(out domainSid)) {

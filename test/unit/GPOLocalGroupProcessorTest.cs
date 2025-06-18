@@ -182,7 +182,7 @@ namespace CommonLibTest {
                 .Returns(mockGCPFileSysPathResults.ToAsyncEnumerable)
                 .Returns(Array.Empty<LdapResult<IDirectoryObject>>().ToAsyncEnumerable);
             var domain = MockableDomain.Construct("TESTLAB.LOCAL");
-            mockLDAPUtils.Setup(x => x.GetDomain()).Returns((true, domain));
+            mockLDAPUtils.Setup(x => x.GetDomain(out domain)).Returns(true);
 
             var processor = new GPOLocalGroupProcessor(mockLDAPUtils.Object);
             
