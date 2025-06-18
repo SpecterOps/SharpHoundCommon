@@ -638,6 +638,7 @@ namespace SharpHoundCommonLib {
         private bool CallDsGetDcName(string domainName, out NetAPIStructs.DomainControllerInfo? info) {
             if (DCInfoCache.TryGetValue(domainName.ToUpper().Trim(), out info)) return info != null;
 
+            // Blocking External Call
             var apiResult = _nativeMethods.CallDsGetDcName(null, domainName,
                 (uint)(NetAPIEnums.DSGETDCNAME_FLAGS.DS_FORCE_REDISCOVERY |
                        NetAPIEnums.DSGETDCNAME_FLAGS.DS_RETURN_DNS_NAME |
@@ -729,7 +730,8 @@ namespace SharpHoundCommonLib {
                 }
 
                 string tempDomainName;
-
+                
+                // Blocking External Call
                 var dsGetDcNameResult = _nativeMethods.CallDsGetDcName(null, _identifier,
                     (uint)(NetAPIEnums.DSGETDCNAME_FLAGS.DS_FORCE_REDISCOVERY |
                            NetAPIEnums.DSGETDCNAME_FLAGS.DS_RETURN_DNS_NAME |
@@ -787,6 +789,7 @@ namespace SharpHoundCommonLib {
                     return (true, portConnectionResult.connection, "");
                 }
 
+                // Blocking External Call - Possible on domainObject.DomainControllers as it calls DsGetDcNameWrapper
                 foreach (DomainController dc in domainObject.DomainControllers) {
                     portConnectionResult =
                         await CreateLDAPConnectionWithPortCheck(dc.Name, globalCatalog);
@@ -902,6 +905,7 @@ namespace SharpHoundCommonLib {
             var testResult = new LdapConnectionTestResult();
             try {
                 //Attempt an initial bind. If this fails, likely auth is invalid, or its not a valid target
+                // Blocking External Call
                 connection.Bind();
             }
             catch (LdapException e) {
@@ -986,6 +990,7 @@ namespace SharpHoundCommonLib {
         }
 
         private async Task<SearchResponse> SendRequestWithTimeout(LdapConnection connection, SearchRequest request, CancellationToken cancellationToken) {
+            // Blocking External Call
             var result = await Timeout.ExecuteWithTimeout(TimeSpan.FromMinutes(2), (_) => connection.SendRequest(request), cancellationToken);
             if (result.IsSuccess)
                 return (SearchResponse)result.Value;

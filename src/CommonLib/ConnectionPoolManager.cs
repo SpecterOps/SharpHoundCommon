@@ -154,6 +154,7 @@ namespace SharpHoundCommonLib {
 
             if (LdapUtils.GetDomain(domainName, _ldapConfig) is (true, var domainObject))
                 try {
+                    // TODO: MC - Confirm GetDirectoryEntry is not a Blocking External Call
                     if (domainObject.GetDirectoryEntry().ToDirectoryObject().TryGetSecurityIdentifier(out domainSid)) {
                         Cache.AddDomainSidMapping(domainName, domainSid);
                         return (true, domainSid);
@@ -166,6 +167,8 @@ namespace SharpHoundCommonLib {
             foreach (var name in _translateNames)
                 try {
                     var account = new NTAccount(domainName, name);
+                    // Blocking External Call
+                    // Calls Win32.LsaOpenPolicy and either Win32NativeLsaLookupNames2 or Win32Native.LsaLookupNames
                     var sid = (SecurityIdentifier)account.Translate(typeof(SecurityIdentifier));
                     domainSid = sid.AccountDomainSid.ToString();
                     Cache.AddDomainSidMapping(domainName, domainSid);

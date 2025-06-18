@@ -172,8 +172,10 @@ namespace SharpHoundCommonLib {
 
             try {
                 using (var ctx = new PrincipalContext(ContextType.Domain)) {
+                    // Blocking External Call
                     var principal = Principal.FindByIdentity(ctx, IdentityType.Sid, sid);
                     if (principal != null) {
+                        // Blocking External Call
                         var entry = ((DirectoryEntry)principal.GetUnderlyingObject()).ToDirectoryObject();
                         if (entry.GetLabel(out type)) {
                             Cache.AddType(sid, type);
@@ -219,8 +221,10 @@ namespace SharpHoundCommonLib {
 
             try {
                 using (var ctx = new PrincipalContext(ContextType.Domain)) {
+                    // Blocking External Call
                     var principal = Principal.FindByIdentity(ctx, IdentityType.Guid, guid);
                     if (principal != null) {
+                        // Blocking External Call
                         var entry = ((DirectoryEntry)principal.GetUnderlyingObject()).ToDirectoryObject();
                         if (entry.GetLabel(out type)) {
                             Cache.AddType(guid, type);
@@ -357,6 +361,7 @@ namespace SharpHoundCommonLib {
 
             try {
                 using (var ctx = new PrincipalContext(ContextType.Domain)) {
+                    // Blocking External Call
                     var principal = Principal.FindByIdentity(ctx, IdentityType.Sid, sid);
                     if (principal != null) {
                         var dn = principal.DistinguishedName;
@@ -664,6 +669,7 @@ namespace SharpHoundCommonLib {
             }
 
             try {
+                // Blocking External Call
                 var resolvedHostname = (await Dns.GetHostEntryAsync(strippedHost)).HostName;
                 var split = resolvedHostname.Split('.');
                 var name = split[0];
@@ -696,7 +702,8 @@ namespace SharpHoundCommonLib {
         private async Task<(bool Success, NetAPIStructs.WorkstationInfo100 Info)> GetWorkstationInfo(string hostname) {
             if (!await _portScanner.CheckPort(hostname))
                 return (false, default);
-
+            
+            // Blocking External Call
             var result = await Timeout.ExecuteNetAPIWithTimeout(TimeSpan.FromMinutes(2), (_) => _nativeMethods.CallNetWkstaGetInfo(hostname));
 
             if (result.IsSuccess)
@@ -787,9 +794,11 @@ namespace SharpHoundCommonLib {
                     try {
                         IPAddress address;
                         if (server.Contains("."))
+                            // Blocking External Call
                             address = Dns
                                 .GetHostAddresses(server).First(x => x.AddressFamily == AddressFamily.InterNetwork);
                         else
+                            // Blocking External Call
                             address = Dns.GetHostAddresses($"{server}.{domain}")[0];
 
                         if (address == null) {
@@ -806,10 +815,13 @@ namespace SharpHoundCommonLib {
                     }
 
                 var originEndpoint = new IPEndPoint(IPAddress.Any, 0);
+                // Blocking External Call
                 requestSocket.Bind(originEndpoint);
 
                 try {
+                    // Blocking External Call
                     requestSocket.SendTo(NameRequest, remoteEndpoint);
+                    // Blocking External Call
                     var receivedByteCount = requestSocket.ReceiveFrom(receiveBuffer, ref remoteEndpoint);
                     if (receivedByteCount >= 90) {
                         netbios = new ASCIIEncoding().GetString(receiveBuffer, 57, 16).Trim('\0', ' ');
@@ -914,9 +926,11 @@ namespace SharpHoundCommonLib {
 
             try {
                 using (var ctx = new PrincipalContext(ContextType.Domain)) {
+                    // Blocking External Call
                     var lookupPrincipal =
                         Principal.FindByIdentity(ctx, IdentityType.DistinguishedName, distinguishedName);
                     if (lookupPrincipal != null) {
+                        // Blocking External Call
                         var entry = ((DirectoryEntry)lookupPrincipal.GetUnderlyingObject()).ToDirectoryObject();
                         if (entry.GetObjectIdentifier(out var identifier) && entry.GetLabel(out var label)) {
                             if (await GetWellKnownPrincipal(identifier, domain) is (true, var wellKnownPrincipal)) {
@@ -1375,6 +1389,7 @@ namespace SharpHoundCommonLib {
         }
 
         private static async Task<Domain> GetDomainWithTimeout(DirectoryContext context) {
+            // Blocking External Call
             var result = await Timeout.ExecuteWithTimeout(TimeSpan.FromMinutes(2), (_) => Domain.GetDomain(context));
             if (result.IsSuccess)
                 return result.Value;

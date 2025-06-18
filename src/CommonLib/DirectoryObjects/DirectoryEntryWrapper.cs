@@ -20,9 +20,11 @@ public class DirectoryEntryWrapper : IDirectoryObject {
 
     private bool CheckCache(string propertyName) {
         try {
+            // Blocking External Call
             if (!_entry.Properties.Contains(propertyName))
                 _entry.RefreshCache(new[] { propertyName });
-
+            
+            // Blocking External Call
             return _entry.Properties.Contains(propertyName);
         }
         catch {
@@ -35,7 +37,8 @@ public class DirectoryEntryWrapper : IDirectoryObject {
         if (!CheckCache(propertyName)) {
             return false;
         }
-
+        
+        // Blocking External Call
         var s = _entry.Properties[propertyName].Value;
         value = s switch {
             string st => st,
@@ -51,7 +54,8 @@ public class DirectoryEntryWrapper : IDirectoryObject {
         if (!CheckCache(propertyName)) {
             return false;
         }
-
+        
+        // Blocking External Call
         var prop = _entry.Properties[propertyName].Value;
         if (prop is not byte[] b) return false;
         value = b;
@@ -65,6 +69,7 @@ public class DirectoryEntryWrapper : IDirectoryObject {
         }
 
         var dest = new List<string>();
+        // Blocking External Call
         foreach (var val in _entry.Properties[propertyName]) {
             if (val is string s) {
                 dest.Add(s);
@@ -81,6 +86,7 @@ public class DirectoryEntryWrapper : IDirectoryObject {
             return false;
         }
 
+        // Blocking External Call
         var raw = _entry.Properties[propertyName].Value;
         if (raw is not byte[][] b) {
             return false;
@@ -132,6 +138,7 @@ public class DirectoryEntryWrapper : IDirectoryObject {
             return false;
         }
 
+        // Blocking External Call
         var raw = _entry.Properties[LDAPProperties.ObjectSID][0];
         try {
             securityIdentifier = raw switch {
@@ -163,11 +170,13 @@ public class DirectoryEntryWrapper : IDirectoryObject {
 
     public string GetProperty(string propertyName) {
         CheckCache(propertyName);
+        // Blocking External Call
         return _entry.Properties[propertyName].Value as string;
     }
 
     public byte[] GetByteProperty(string propertyName) {
         CheckCache(propertyName);
+        // Blocking External Call
         return _entry.Properties[propertyName].Value as byte[];
     }
 
@@ -175,13 +184,15 @@ public class DirectoryEntryWrapper : IDirectoryObject {
         if (!CheckCache(propertyName)) {
             return 0;
         }
-
+        
+        // Blocking External Call
         var prop = _entry.Properties[propertyName];
         return prop.Count;
         
     }
 
     public IEnumerable<string> PropertyNames() {
+        // Blocking External Call
         foreach (var property in _entry.Properties.PropertyNames)
             yield return property.ToString().ToLower();
     }
