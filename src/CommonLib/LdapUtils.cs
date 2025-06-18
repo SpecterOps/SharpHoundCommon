@@ -262,7 +262,7 @@ namespace SharpHoundCommonLib {
 
             if (!securityIdentifier.Equals("S-1-5-9", StringComparison.OrdinalIgnoreCase)) {
                 var tempDomain = domain;
-                if (await GetDomain(tempDomain) is (true, var domainObject) && domainObject.Name != null) {
+                if (GetDomain(tempDomain) is (true, var domainObject) && domainObject.Name != null) {
                     tempDomain = domainObject.Name;
                 }
 
@@ -283,7 +283,7 @@ namespace SharpHoundCommonLib {
                 return (true, cachedForest);
             }
 
-            if (await GetDomain(domain) is (true, var domainObject)) {
+            if (GetDomain(domain) is (true, var domainObject)) {
                 try {
                     var forestName = domainObject.Forest.Name.ToUpper();
                     DomainToForestCache.TryAdd(domain, forestName);
@@ -376,7 +376,7 @@ namespace SharpHoundCommonLib {
         }
 
         private async Task<(bool Success, string DomainName)> ConvertDomainSidToDomainNameFromLdap(string domainSid) {
-            var (domainSuccess, domain) = await GetDomain();
+            var (domainSuccess, domain) = GetDomain();
             if (!domainSuccess || domain?.Name == null) {
                 return (false, string.Empty);
             }
@@ -434,7 +434,7 @@ namespace SharpHoundCommonLib {
                 //we expect this to fail sometimes
             }
 
-            if (await GetDomain(domainName) is (true, var domainObject))
+            if (GetDomain(domainName) is (true, var domainObject))
                 try {
                     var entry = domainObject.GetDirectoryEntry().ToDirectoryObject();
                     if (entry.TryGetSecurityIdentifier(out domainSid)) {
@@ -480,7 +480,7 @@ namespace SharpHoundCommonLib {
         /// <param name="domain"></param>
         /// <param name="domainName"></param>
         /// <returns></returns>
-        public async Task<(bool, Domain)> GetDomain(string domainName) {
+        public (bool, Domain) GetDomain(string domainName) {
             var cacheKey = domainName ?? _nullCacheKey;
             if (_domainCache.TryGetValue(cacheKey, out var domain)) return (true, domain);
 
@@ -497,7 +497,7 @@ namespace SharpHoundCommonLib {
                         ? new DirectoryContext(DirectoryContextType.Domain, domainName)
                         : new DirectoryContext(DirectoryContextType.Domain);
 
-                domain = await GetDomainWithTimeout(context);
+                domain = GetDomainWithTimeout(context).GetAwaiter().GetResult();
                 if (domain == null) return (false, null);
                 _domainCache.TryAdd(cacheKey, domain);
                 return (true, domain);
@@ -508,7 +508,7 @@ namespace SharpHoundCommonLib {
             }
         }
 
-        public static async Task<(bool, Domain)> GetDomain(string domainName, LdapConfig ldapConfig) {
+        public static (bool, Domain) GetDomain(string domainName, LdapConfig ldapConfig) {
             if (_domainCache.TryGetValue(domainName, out var domain)) return (true, domain);
 
             try {
@@ -524,7 +524,7 @@ namespace SharpHoundCommonLib {
                         ? new DirectoryContext(DirectoryContextType.Domain, domainName)
                         : new DirectoryContext(DirectoryContextType.Domain);
 
-                domain = await GetDomainWithTimeout(context);
+                domain = GetDomainWithTimeout(context).GetAwaiter().GetResult();
                 if (domain == null) return (false, null);
                 _domainCache.TryAdd(domainName, domain);
                 return (true, domain);
@@ -543,7 +543,7 @@ namespace SharpHoundCommonLib {
         /// <param name="domain"></param>
         /// <param name="domainName"></param>
         /// <returns></returns>
-        public async Task<(bool, Domain)> GetDomain() {
+        public (bool, Domain) GetDomain() {
             if (_domainCache.TryGetValue(_nullCacheKey, out var domain)) return (true, domain);
 
             try {
@@ -552,7 +552,7 @@ namespace SharpHoundCommonLib {
                         _ldapConfig.Password)
                     : new DirectoryContext(DirectoryContextType.Domain);
 
-                domain = await GetDomainWithTimeout(context);
+                domain = GetDomainWithTimeout(context).GetAwaiter().GetResult();
                 _domainCache.TryAdd(_nullCacheKey, domain);
                 return (true, domain);
             }
@@ -1064,7 +1064,7 @@ namespace SharpHoundCommonLib {
                 //pass
             }
 
-            if (await GetDomain(domain) is (true, var domainObj)) {
+            if (GetDomain(domain) is (true, var domainObj)) {
                 try {
                     var entry = domainObj.GetDirectoryEntry().ToDirectoryObject();
                     if (entry.TryGetProperty(property, out var searchBase)) {

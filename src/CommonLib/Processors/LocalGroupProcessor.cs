@@ -26,9 +26,9 @@ namespace SharpHoundCommonLib.Processors
 
         public event ComputerStatusDelegate ComputerStatusEvent;
 
-        public virtual async Task<SharpHoundRPC.Result<ISAMServer>> OpenSamServer(string computerName, TimeSpan timeout)
+        public virtual SharpHoundRPC.Result<ISAMServer> OpenSamServer(string computerName, TimeSpan timeout)
         {
-            var result = await Timeout.ExecuteRPCWithTimeout(timeout, (_) => SAMServer.OpenServer(computerName));
+            var result = Timeout.ExecuteRPCWithTimeout(timeout, (_) => SAMServer.OpenServer(computerName)).GetAwaiter().GetResult();
             if (result.IsFailed)
             {
                 return SharpHoundRPC.Result<ISAMServer>.Fail(result.SError);
@@ -59,7 +59,7 @@ namespace SharpHoundCommonLib.Processors
             }
 
             //Open a handle to the server
-            var openServerResult = await OpenSamServer(computerName, timeout);
+            var openServerResult = OpenSamServer(computerName, timeout);
             if (openServerResult.IsFailed)
             {
                 _log.LogTrace("OpenServer failed on {ComputerName}: {Error}", computerName, openServerResult.SError);

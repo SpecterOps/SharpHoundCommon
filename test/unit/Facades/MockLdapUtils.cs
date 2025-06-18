@@ -693,12 +693,12 @@ namespace CommonLibTest.Facades
             return (false, default);
         }
 
-        public Task<(bool, Domain)> GetDomain(string domainName) {
-            return Task.FromResult<(bool, Domain)>((false, null));
+        public (bool, Domain) GetDomain(string domainName) {
+            return (false, null);
         }
 
-        public Task<(bool, Domain)> GetDomain() {
-            return Task.FromResult<(bool, Domain)>((false, null));
+        public (bool, Domain) GetDomain() {
+            return (false, null);
         }
 
         public async Task<(bool Success, TypedPrincipal Principal)> ResolveAccountName(string name, string domain) {

@@ -80,12 +80,12 @@ namespace SharpHoundCommonLib {
         /// </summary>
         /// <param name="domainName">The domain name to retrieve the Domain object for</param>
         /// <returns>True if the domain was found, false if not</returns>
-        Task<(bool, System.DirectoryServices.ActiveDirectory.Domain)> GetDomain(string domainName);
+        (bool, System.DirectoryServices.ActiveDirectory.Domain) GetDomain(string domainName);
         /// <summary>
         /// Attempts to retrieve the Domain object for the user's current domain
         /// </summary>
         /// <returns>True if the domain was found, false if not</returns>
-        Task<(bool, System.DirectoryServices.ActiveDirectory.Domain)> GetDomain();
+        (bool, System.DirectoryServices.ActiveDirectory.Domain) GetDomain();
 
         Task<(bool Success, string ForestName)> GetForest(string domain);
         /// <summary>

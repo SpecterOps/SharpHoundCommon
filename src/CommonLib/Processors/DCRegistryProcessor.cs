@@ -25,12 +25,12 @@ namespace SharpHoundCommonLib.Processors
         /// <param name="target"></param>
         /// <returns>IntRegistryAPIResult</returns>
         [ExcludeFromCodeCoverage]
-        public async Task<IntRegistryAPIResult> GetCertificateMappingMethods(string target)
+        public IntRegistryAPIResult GetCertificateMappingMethods(string target)
         {
             var ret = new IntRegistryAPIResult();
             const string subKey = @"SYSTEM\CurrentControlSet\Control\SecurityProviders\Schannel";
             const string subValue = "CertificateMappingMethods";
-            var data = await Helpers.GetRegistryKeyData(target, subKey, subValue, _log);
+            var data = Helpers.GetRegistryKeyData(target, subKey, subValue, _log);
 
             ret.Collected = data.Collected;
             if (!data.Collected)
@@ -57,12 +57,12 @@ namespace SharpHoundCommonLib.Processors
         /// <param name="target"></param>
         /// <returns>IntRegistryAPIResult</returns>
         [ExcludeFromCodeCoverage]
-        public async Task<IntRegistryAPIResult> GetStrongCertificateBindingEnforcement(string target)
+        public IntRegistryAPIResult GetStrongCertificateBindingEnforcement(string target)
         {
             var ret = new IntRegistryAPIResult();
             const string subKey = @"SYSTEM\CurrentControlSet\Services\Kdc";
             const string subValue = "StrongCertificateBindingEnforcement";
-            var data = await Helpers.GetRegistryKeyData(target, subKey, subValue, _log);
+            var data = Helpers.GetRegistryKeyData(target, subKey, subValue, _log);
 
             ret.Collected = data.Collected;
             if (!data.Collected)

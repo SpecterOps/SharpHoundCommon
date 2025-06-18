@@ -298,7 +298,7 @@ namespace SharpHoundCommonLib {
                         var backoffDelay = GetNextBackoff(retryCount);
                         await Task.Delay(backoffDelay, cancellationToken);
                         var (success, ldapConnectionWrapperNew, _) =
-                            await GetConnectionForSpecificServerAsync(serverName, queryParameters.GlobalCatalog);
+                            GetConnectionForSpecificServerAsync(serverName, queryParameters.GlobalCatalog);
 
                         if (success) {
                             _log.LogDebug("PagedQuery - Recovered from ServerDown successfully");
@@ -404,7 +404,7 @@ namespace SharpHoundCommonLib {
                 return result;
             }
 
-            var (searchRequestSuccess, searchRequest) = await CreateSearchRequest(queryParameters, connectionWrapper);
+            var (searchRequestSuccess, searchRequest) = CreateSearchRequest(queryParameters, connectionWrapper);
             if (!searchRequestSuccess) {
                 result.Success = false;
                 result.Message = "Failed to create search request";
@@ -445,7 +445,7 @@ namespace SharpHoundCommonLib {
             };
             var connectionWrapper = connectionResult.ConnectionWrapper;
 
-            var (searchRequestSuccess, searchRequest) = await CreateSearchRequest(queryParameters, connectionWrapper);
+            var (searchRequestSuccess, searchRequest) = CreateSearchRequest(queryParameters, connectionWrapper);
             if (!searchRequestSuccess) {
                 ReleaseConnection(connectionWrapper);
                 yield return Result<string>.Fail("Failed to create search request");
@@ -585,7 +585,7 @@ namespace SharpHoundCommonLib {
                 MaxBackoffDelay.TotalSeconds));
         }
 
-        private async Task<(bool, SearchRequest)> CreateSearchRequest(LdapQueryParameters queryParameters,
+        private (bool, SearchRequest) CreateSearchRequest(LdapQueryParameters queryParameters,
             LdapConnectionWrapper connectionWrapper) {
             string basePath;
             if (!string.IsNullOrWhiteSpace(queryParameters.SearchBase)) {
@@ -597,7 +597,7 @@ namespace SharpHoundCommonLib {
                     tempPath = Helpers.DomainNameToDistinguishedName(info.Value.DomainName);
                     connectionWrapper.SaveContext(queryParameters.NamingContext, basePath);
                 }
-                else if (await LdapUtils.GetDomain(queryParameters.DomainName, _ldapConfig) is (true, var domainObject)) {
+                else if (LdapUtils.GetDomain(queryParameters.DomainName, _ldapConfig) is (true, var domainObject)) {
                     tempPath = Helpers.DomainNameToDistinguishedName(domainObject.Name);
                 }
                 else {
@@ -670,9 +670,9 @@ namespace SharpHoundCommonLib {
             return (true, connectionWrapper, null);
         }
 
-        public async Task<(bool Success, LdapConnectionWrapper connectionWrapper, string Message)>
+        public (bool Success, LdapConnectionWrapper connectionWrapper, string Message)
             GetConnectionForSpecificServerAsync(string server, bool globalCatalog) {
-            return await CreateNewConnectionForServer(server, globalCatalog);
+            return CreateNewConnectionForServer(server, globalCatalog).GetAwaiter().GetResult();
         }
 
         public async Task<(bool Success, LdapConnectionWrapper ConnectionWrapper, string Message)>
@@ -757,7 +757,7 @@ namespace SharpHoundCommonLib {
                     }
                 }
 
-                var (getDomainSuccess, domainObject) = await LdapUtils.GetDomain(_identifier, _ldapConfig);
+                var (getDomainSuccess, domainObject) = LdapUtils.GetDomain(_identifier, _ldapConfig);
                 if (!getDomainSuccess || domainObject?.Name == null) {
                     //If we don't get a result here, we effectively have no other ways to resolve this domain, so we'll just have to exit out
                     _log.LogDebug(

@@ -258,11 +258,11 @@ namespace SharpHoundCommonLib {
             return false;
         }
 
-        public static async Task<RegistryResult> GetRegistryKeyData(string target, string subkey, string subvalue, ILogger log) {
+        public static RegistryResult GetRegistryKeyData(string target, string subkey, string subvalue, ILogger log) {
             var data = new RegistryResult();
 
             try {
-                var baseKey = await OpenRemoteRegistry(target);
+                var baseKey = OpenRemoteRegistry(target);
                 var value = baseKey.GetValue(subkey, subvalue);
                 data.Value = value;
 
@@ -292,8 +292,8 @@ namespace SharpHoundCommonLib {
             return data;
         }
 
-        public static async Task<IRegistryKey> OpenRemoteRegistry(string target) {
-            return await SHRegistryKey.Connect(RegistryHive.LocalMachine, target);
+        public static IRegistryKey OpenRemoteRegistry(string target) {
+            return SHRegistryKey.Connect(RegistryHive.LocalMachine, target).GetAwaiter().GetResult();
         }
 
         public static string[] AuthenticationOIDs = new string[] {

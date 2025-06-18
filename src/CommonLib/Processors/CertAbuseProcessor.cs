@@ -40,7 +40,7 @@ namespace SharpHoundCommonLib.Processors
         {
             var data = new AceRegistryAPIResult();
 
-            var aceData = await GetCASecurity(computerName, caName);
+            var aceData = GetCASecurity(computerName, caName);
             data.Collected = aceData.Collected;
             if (!aceData.Collected)
             {
@@ -159,7 +159,7 @@ namespace SharpHoundCommonLib.Processors
         public async Task<EnrollmentAgentRegistryAPIResult> ProcessEAPermissions(string caName, string objectDomain, string computerName, string computerObjectId)
         {
             var ret = new EnrollmentAgentRegistryAPIResult();
-            var regData = await GetEnrollmentAgentRights(computerName, caName);
+            var regData = GetEnrollmentAgentRights(computerName, caName);
 
             ret.Collected = regData.Collected;
             if (!ret.Collected)
@@ -216,12 +216,12 @@ namespace SharpHoundCommonLib.Processors
         /// <param name="caName"></param>
         /// <returns></returns>
         [ExcludeFromCodeCoverage]
-        private async Task<RegistryResult> GetCASecurity(string target, string caName)
+        private RegistryResult GetCASecurity(string target, string caName)
         {
             var regSubKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{caName}";
             const string regValue = "Security";
         
-            return await Helpers.GetRegistryKeyData(target, regSubKey, regValue, _log);
+            return Helpers.GetRegistryKeyData(target, regSubKey, regValue, _log);
         }
 
         /// <summary>
@@ -231,12 +231,12 @@ namespace SharpHoundCommonLib.Processors
         /// <param name="caName"></param>
         /// <returns></returns>
         [ExcludeFromCodeCoverage]
-        private async Task<RegistryResult> GetEnrollmentAgentRights(string target, string caName)
+        private RegistryResult GetEnrollmentAgentRights(string target, string caName)
         {
             var regSubKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{caName}";
             var regValue = "EnrollmentAgentRights";
 
-            return await Helpers.GetRegistryKeyData(target, regSubKey, regValue, _log);
+            return Helpers.GetRegistryKeyData(target, regSubKey, regValue, _log);
         }
 
         /// <summary>
@@ -248,13 +248,13 @@ namespace SharpHoundCommonLib.Processors
         /// <param name="caName"></param>
         /// <returns></returns>
         [ExcludeFromCodeCoverage]
-        public async Task<BoolRegistryAPIResult> IsUserSpecifiesSanEnabled(string target, string caName)
+        public BoolRegistryAPIResult IsUserSpecifiesSanEnabled(string target, string caName)
         {
             var ret = new BoolRegistryAPIResult();
             var subKey =
                 $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{caName}\\PolicyModules\\CertificateAuthority_MicrosoftDefault.Policy";
             const string subValue = "EditFlags";
-            var data = await Helpers.GetRegistryKeyData(target, subKey, subValue, _log);
+            var data = Helpers.GetRegistryKeyData(target, subKey, subValue, _log);
 
             ret.Collected = data.Collected;
             if (!data.Collected)
@@ -284,12 +284,12 @@ namespace SharpHoundCommonLib.Processors
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
         [ExcludeFromCodeCoverage]
-        public async Task<BoolRegistryAPIResult> RoleSeparationEnabled(string target, string caName)
+        public BoolRegistryAPIResult RoleSeparationEnabled(string target, string caName)
         {
             var ret = new BoolRegistryAPIResult();
             var regSubKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{caName}";
             const string regValue = "RoleSeparationEnabled";
-            var data = await Helpers.GetRegistryKeyData(target, regSubKey, regValue, _log);
+            var data = Helpers.GetRegistryKeyData(target, regSubKey, regValue, _log);
 
             ret.Collected = data.Collected;
             if (!data.Collected)
@@ -351,7 +351,7 @@ namespace SharpHoundCommonLib.Processors
             if (!Cache.GetMachineSid(computerObjectId, out var tempMachineSid))
             {
                 // Open a handle to the server
-                var openServerResult = await OpenSamServer(computerName);
+                var openServerResult = OpenSamServer(computerName);
                 if (openServerResult.IsFailed)
                 {
                     _log.LogTrace("OpenServer failed on {ComputerName}: {Error}", computerName, openServerResult.SError);
@@ -443,9 +443,9 @@ namespace SharpHoundCommonLib.Processors
             return (false, default);
         }
 
-        public virtual async Task<SharpHoundRPC.Result<ISAMServer>> OpenSamServer(string computerName)
+        public virtual SharpHoundRPC.Result<ISAMServer> OpenSamServer(string computerName)
         {
-            var result = await Timeout.ExecuteRPCWithTimeout(TimeSpan.FromMinutes(2), (_) => SAMServer.OpenServer(computerName));
+            var result = Timeout.ExecuteRPCWithTimeout(TimeSpan.FromMinutes(2), (_) => SAMServer.OpenServer(computerName)).GetAwaiter().GetResult();
             if (result.IsFailed)
             {
                 return SharpHoundRPC.Result<ISAMServer>.Fail(result.SError);
