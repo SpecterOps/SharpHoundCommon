@@ -611,6 +611,7 @@ namespace SharpHoundCommonLib {
             if (await GetWorkstationInfo(strippedHost) is (true, var workstationInfo)) {
                 var tempName = workstationInfo.ComputerName;
                 var tempDomain = workstationInfo.LanGroup;
+                _log.LogTrace("Get workstation info for {HostName} succeeded. Workstation {ComputerName} found.", host, tempName);
 
                 if (string.IsNullOrWhiteSpace(tempDomain)) {
                     tempDomain = domain;
@@ -702,8 +703,10 @@ namespace SharpHoundCommonLib {
         /// <param name="hostname"></param>
         /// <returns></returns>
         private async Task<(bool Success, NetAPIStructs.WorkstationInfo100 Info)> GetWorkstationInfo(string hostname) {
-            if (!await _portScanner.CheckPort(hostname))
+            if (!await _portScanner.CheckPort(hostname)) {
+                _log.LogTrace("CheckPort returned false for {HostName}.", hostname);
                 return (false, default);
+            }
             
             // Blocking External Call
             var result = await Timeout.ExecuteNetAPIWithTimeout(TimeSpan.FromMinutes(2), (_) => _nativeMethods.CallNetWkstaGetInfo(hostname));

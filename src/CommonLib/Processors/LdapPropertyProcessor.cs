@@ -17,6 +17,8 @@ using SharpHoundCommonLib.OutputTypes;
 namespace SharpHoundCommonLib.Processors {
     public class LdapPropertyProcessor {
         private static readonly HashSet<string> ReservedAttributes = new();
+        public delegate Task ComputerStatusDelegate(CSVComputerStatus status);
+        public event ComputerStatusDelegate ComputerStatusEvent;
 
         static LdapPropertyProcessor() {
             ReservedAttributes.UnionWith(CommonProperties.TypeResolutionProps);
@@ -249,10 +251,17 @@ namespace SharpHoundCommonLib.Processors {
 
                     var resolvedHost = await _utils.ResolveHostToSid(d, domain);
                     if (resolvedHost.Success && resolvedHost.SecurityIdentifier.Contains("S-1"))
+                    {
+                        await SendComputerStatus(new CSVComputerStatus {
+                            Status = CSVComputerStatus.StatusSuccess,
+                            Task = nameof(ReadUserProperties),
+                            ComputerName = Helpers.StripServicePrincipalName(d).ToUpper().TrimEnd('$'),
+                        });
                         comps.Add(new TypedPrincipal {
                             ObjectIdentifier = resolvedHost.SecurityIdentifier,
                             ObjectType = Label.Computer
                         });
+                    }
                 }
             }
 
@@ -369,10 +378,17 @@ namespace SharpHoundCommonLib.Processors {
 
                     var resolvedHost = await _utils.ResolveHostToSid(d, domain);
                     if (resolvedHost.Success && resolvedHost.SecurityIdentifier.Contains("S-1"))
+                    {
+                        await SendComputerStatus(new CSVComputerStatus {
+                            Status = CSVComputerStatus.StatusSuccess,
+                            Task = nameof(ReadComputerProperties),
+                            ComputerName = d,
+                        });
                         comps.Add(new TypedPrincipal {
                             ObjectIdentifier = resolvedHost.SecurityIdentifier,
                             ObjectType = Label.Computer
                         });
+                    }
                 }
             }
 
@@ -916,6 +932,10 @@ namespace SharpHoundCommonLib.Processors {
             IS_TEXT_UNICODE_REVERSE_MASK = 0x00F0,
             IS_TEXT_UNICODE_NOT_UNICODE_MASK = 0x0F00,
             IS_TEXT_UNICODE_NOT_ASCII_MASK = 0xF000
+        }
+        
+        private async Task SendComputerStatus(CSVComputerStatus status) {
+            if (ComputerStatusEvent is not null) await ComputerStatusEvent.Invoke(status);
         }
     }
 

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using SharpHoundCommonLib.Enums;
 using SharpHoundCommonLib.OutputTypes;
@@ -9,6 +10,8 @@ namespace SharpHoundCommonLib.Processors {
         private const string MSSQLSPNString = "mssqlsvc";
         private readonly ILogger _log;
         private readonly ILdapUtils _utils;
+        public delegate Task ComputerStatusDelegate(CSVComputerStatus status);
+        public event ComputerStatusDelegate ComputerStatusEvent;
 
         public SPNProcessors(ILdapUtils utils, ILogger log = null) {
             _utils = utils;
@@ -52,6 +55,11 @@ namespace SharpHoundCommonLib.Processors {
 
                     if (await _utils.ResolveHostToSid(spn, domainName) is (true, var host) && host.StartsWith("S-1")) {
                         _log.LogTrace("Resolved {SPN} to {Hostname}", spn, host);
+                        await SendComputerStatus(new CSVComputerStatus {
+                            Status = CSVComputerStatus.StatusSuccess,
+                            Task = nameof(ReadSPNTargets),
+                            ComputerName = Helpers.StripServicePrincipalName(spn).ToUpper().TrimEnd('$'),
+                        });
                         yield return new SPNPrivilege {
                             ComputerSID = host,
                             Port = port,
@@ -60,6 +68,10 @@ namespace SharpHoundCommonLib.Processors {
                     }
                 }
             }
+        }
+        
+        private async Task SendComputerStatus(CSVComputerStatus status) {
+            if (ComputerStatusEvent is not null) await ComputerStatusEvent.Invoke(status);
         }
     }
 }
