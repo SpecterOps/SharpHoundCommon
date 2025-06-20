@@ -101,10 +101,10 @@ public class HttpNtlmAuthenticationService {
         return schemes;
     }
 
-    private async Task AuthWithBadChannelBindingsAsync(Uri url, string authScheme, TimeSpan timeout) {
+    private async Task AuthWithBadChannelBindingsAsync(Uri url, string authScheme, TimeSpan timeout, NtlmAuthenticationHandler ntlmAuth = null) {
         var httpClient = _httpClientFactory.CreateUnauthenticatedClient();
         var transport = new HttpTransport(httpClient, url, authScheme, _logger);
-        var ntlmAuthHandler = new NtlmAuthenticationHandler($"HTTP/{url.Host}");
+        var ntlmAuthHandler = ntlmAuth ?? new NtlmAuthenticationHandler($"HTTP/{url.Host}");
 
         var result = await Timeout.ExecuteWithTimeout(timeout, (_) => ntlmAuthHandler.PerformNtlmAuthenticationAsync(transport));
 
