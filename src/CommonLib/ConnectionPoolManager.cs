@@ -25,45 +25,36 @@ namespace SharpHoundCommonLib {
             _portScanner = scanner ?? new PortScanner();
         }
 
-        public async IAsyncEnumerable<Result<string>> RangedRetrieval(string distinguishedName,
-            string attributeName, [EnumeratorCancellation] CancellationToken cancellationToken = new()) {
+        public IAsyncEnumerable<Result<string>> RangedRetrieval(string distinguishedName,
+            string attributeName, CancellationToken cancellationToken = new()) {
             var domain = Helpers.DistinguishedNameToDomain(distinguishedName);
 
             var (getPoolSuccess, pool) = GetPool(domain);
             if (!getPoolSuccess) {
-                yield return Result<string>.Fail("Failed to resolve a connection pool");
-                yield break;
+                return new List<Result<string>> {Result<string>.Fail("Failed to resolve a connection pool")}.ToAsyncEnumerable();
             }
 
-            await foreach (var result in pool.RangedRetrieval(distinguishedName, attributeName, cancellationToken)) {
-                yield return result;
-            }
+            return pool.RangedRetrieval(distinguishedName, attributeName, cancellationToken);
         }
 
-        public async IAsyncEnumerable<LdapResult<IDirectoryObject>> PagedQuery(LdapQueryParameters queryParameters,
-            [EnumeratorCancellation] CancellationToken cancellationToken = new()) {
+        public IAsyncEnumerable<LdapResult<IDirectoryObject>> PagedQuery(LdapQueryParameters queryParameters,
+            CancellationToken cancellationToken = new()) {
             var (getPoolSuccess, pool) = GetPool(queryParameters.DomainName);
             if (!getPoolSuccess) {
-                yield return LdapResult<IDirectoryObject>.Fail("Failed to resolve a connection pool", queryParameters);
-                yield break;
+                return new List<LdapResult<IDirectoryObject>> {LdapResult<IDirectoryObject>.Fail("Failed to resolve a connection pool", queryParameters)}.ToAsyncEnumerable();
             }
 
-            await foreach (var result in pool.PagedQuery(queryParameters, cancellationToken)) {
-                yield return result;
-            }
+             return pool.PagedQuery(queryParameters, cancellationToken);
         }
 
-        public async IAsyncEnumerable<LdapResult<IDirectoryObject>> Query(LdapQueryParameters queryParameters,
-            [EnumeratorCancellation] CancellationToken cancellationToken = new()) {
+        public IAsyncEnumerable<LdapResult<IDirectoryObject>> Query(LdapQueryParameters queryParameters,
+            CancellationToken cancellationToken = new()) {
             var (getPoolSuccess, pool) = GetPool(queryParameters.DomainName);
             if (!getPoolSuccess) {
-                yield return LdapResult<IDirectoryObject>.Fail("Failed to resolve a connection pool", queryParameters);
-                yield break;
+                return new List<LdapResult<IDirectoryObject>> {LdapResult<IDirectoryObject>.Fail("Failed to resolve a connection pool", queryParameters)}.ToAsyncEnumerable();
             }
 
-            await foreach (var result in pool.Query(queryParameters, cancellationToken)) {
-                yield return result;
-            }
+            return pool.Query(queryParameters, cancellationToken);
         }
 
         public void ReleaseConnection(LdapConnectionWrapper connectionWrapper, bool connectionFaulted = false) {
