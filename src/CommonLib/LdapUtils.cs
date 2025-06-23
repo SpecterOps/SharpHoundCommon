@@ -7,6 +7,7 @@ using System.DirectoryServices.ActiveDirectory;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Security.Cryptography;
 using System.Security.Principal;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -501,7 +502,7 @@ namespace SharpHoundCommonLib {
                         ? new DirectoryContext(DirectoryContextType.Domain, domainName)
                         : new DirectoryContext(DirectoryContextType.Domain);
 
-                domain = GetDomainWithTimeout(context).GetAwaiter().GetResult();
+                domain = Domain.GetDomain(context);
                 if (domain == null) return false;
                 _domainCache.TryAdd(cacheKey, domain);
                 return true;
@@ -529,7 +530,7 @@ namespace SharpHoundCommonLib {
                         ? new DirectoryContext(DirectoryContextType.Domain, domainName)
                         : new DirectoryContext(DirectoryContextType.Domain);
 
-                domain = GetDomainWithTimeout(context).GetAwaiter().GetResult();
+                domain = Domain.GetDomain(context);
                 if (domain == null) return false;
                 _domainCache.TryAdd(domainName, domain);
                 return true;
@@ -558,7 +559,7 @@ namespace SharpHoundCommonLib {
                         _ldapConfig.Password)
                     : new DirectoryContext(DirectoryContextType.Domain);
 
-                domain = GetDomainWithTimeout(context).GetAwaiter().GetResult();
+                domain = Domain.GetDomain(context);
                 _domainCache.TryAdd(_nullCacheKey, domain);
                 return true;
             }
@@ -627,18 +628,18 @@ namespace SharpHoundCommonLib {
             }
 
             //Try some socket magic to get the NETBIOS name
-            string netBiosName = null;
-            var requestNetBiosName = await Timeout.ExecuteWithTimeout(TimeSpan.FromMinutes(1), (_) => RequestNETBIOSNameFromComputer(strippedHost, domain, out netBiosName));
-            if (requestNetBiosName.IsSuccess && requestNetBiosName.Value) {
-                if (!string.IsNullOrWhiteSpace(netBiosName)) {
-                    var result = await ResolveAccountName($"{netBiosName}$", domain);
-                    if (result.Success) {
-                        _hostResolutionMap.TryAdd(strippedHost, result.Principal.ObjectIdentifier);
-                        return (true, result.Principal.ObjectIdentifier);
+            try {
+                var (requestNetBiosNameSuccess, netBiosName) = await RequestNETBIOSNameFromComputerWithTimeout(strippedHost, domain);
+                if (requestNetBiosNameSuccess) {
+                    if (!string.IsNullOrWhiteSpace(netBiosName)) {
+                        var result = await ResolveAccountName($"{netBiosName}$", domain);
+                        if (result.Success) {
+                            _hostResolutionMap.TryAdd(strippedHost, result.Principal.ObjectIdentifier);
+                            return (true, result.Principal.ObjectIdentifier);
+                        }
                     }
                 }
-            }
-            else if (requestNetBiosName.Error == "Timeout") {
+            } catch (TimeoutException) {
                 _log.LogDebug("RequestNETBIOSNameFromComputer timeout on host {Host}, domain {Domain}.", strippedHost, domain);
             }
 
@@ -776,6 +777,14 @@ namespace SharpHoundCommonLib {
             return (false, default);
         }
 
+        private static async Task<(bool, string)> RequestNETBIOSNameFromComputerWithTimeout(string server, string domain) {
+            var result = await Timeout.ExecuteWithTimeout(TimeSpan.FromMinutes(1), async (timeoutToken) => await RequestNETBIOSNameFromComputerAsync(server, domain, timeoutToken));
+            if (result.IsSuccess)
+                return (result.Value.Item1, result.Value.Item2);
+            else
+                throw new TimeoutException();
+        }
+
         /// <summary>
         ///     Uses a socket and a set of bytes to request the NETBIOS name from a remote computer
         /// </summary>
@@ -783,7 +792,7 @@ namespace SharpHoundCommonLib {
         /// <param name="domain"></param>
         /// <param name="netbios"></param>
         /// <returns></returns>
-        private static bool RequestNETBIOSNameFromComputer(string server, string domain, out string netbios) {
+        private static async Task<(bool, string)> RequestNETBIOSNameFromComputerAsync(string server, string domain, CancellationToken cancellationToken = default) {
             var receiveBuffer = new byte[1024];
             var requestSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             try {
@@ -799,46 +808,42 @@ namespace SharpHoundCommonLib {
                     try {
                         IPAddress address;
                         if (server.Contains("."))
-                            // Blocking External Call
-                            address = Dns
-                                .GetHostAddresses(server).First(x => x.AddressFamily == AddressFamily.InterNetwork);
+                            address = (await Dns
+                                .GetHostAddressesAsync(server)).First(x => x.AddressFamily == AddressFamily.InterNetwork);
                         else
-                            // Blocking External Call
-                            address = Dns.GetHostAddresses($"{server}.{domain}")[0];
+                            address = (await Dns.GetHostAddressesAsync($"{server}.{domain}"))[0];
 
                         if (address == null) {
-                            netbios = null;
-                            return false;
+                            return (false, null);
                         }
 
                         remoteEndpoint = new IPEndPoint(address, 137);
                     }
                     catch {
                         //Failed to resolve an IP, so return null
-                        netbios = null;
-                        return false;
+                        return (false, null);
                     }
 
                 var originEndpoint = new IPEndPoint(IPAddress.Any, 0);
+                cancellationToken.ThrowIfCancellationRequested();
                 // Blocking External Call
                 requestSocket.Bind(originEndpoint);
 
                 try {
                     // Blocking External Call
                     requestSocket.SendTo(NameRequest, remoteEndpoint);
+                    cancellationToken.ThrowIfCancellationRequested();
                     // Blocking External Call
                     var receivedByteCount = requestSocket.ReceiveFrom(receiveBuffer, ref remoteEndpoint);
                     if (receivedByteCount >= 90) {
-                        netbios = new ASCIIEncoding().GetString(receiveBuffer, 57, 16).Trim('\0', ' ');
-                        return true;
+                        var netbios = new ASCIIEncoding().GetString(receiveBuffer, 57, 16).Trim('\0', ' ');
+                        return (true, netbios);
                     }
 
-                    netbios = null;
-                    return false;
+                    return (false, null);
                 }
                 catch (SocketException) {
-                    netbios = null;
-                    return false;
+                    return (false, null);
                 }
             }
             finally {
@@ -1391,15 +1396,6 @@ namespace SharpHoundCommonLib {
             }
 
             return displayName.ToUpper();
-        }
-
-        private static async Task<Domain> GetDomainWithTimeout(DirectoryContext context) {
-            // Blocking External Call
-            var result = await Timeout.ExecuteWithTimeout(TimeSpan.FromMinutes(2), (_) => Domain.GetDomain(context));
-            if (result.IsSuccess)
-                return result.Value;
-            else
-                throw new TimeoutException("Timeout retrieving domain.");
         }
     }
 }
