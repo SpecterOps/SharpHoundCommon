@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 using CommonLibTest.Facades;
 using Moq;
@@ -8,7 +7,6 @@ using Newtonsoft.Json;
 using SharpHoundCommonLib;
 using SharpHoundCommonLib.OutputTypes;
 using SharpHoundCommonLib.Processors;
-using SharpHoundRPC;
 using SharpHoundRPC.NetAPINative;
 using Xunit;
 using Xunit.Abstractions;

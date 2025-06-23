@@ -19,7 +19,7 @@ public static class Timeout {
         // cts will cancel its token if the parentToken is cancelled
         // a default parentToken will never cancel so should noop this CreateLinkedTokenSource
         var cts = CancellationTokenSource.CreateLinkedTokenSource(parentToken);
-        var task = Task.Factory.StartNew(() => func(cts.Token), cts.Token, TaskCreationOptions.None, TaskScheduler.Current);
+        var task = Task.Factory.StartNew(() => func(cts.Token), cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Current);
         await Task.WhenAny(task, Task.Delay(timeout, cts.Token));
         cts.Cancel();
 
@@ -48,7 +48,7 @@ public static class Timeout {
         // cts will cancel its token if the parentToken is cancelled
         // a default parentToken will never cancel so should noop this CreateLinkedTokenSource
         var cts = CancellationTokenSource.CreateLinkedTokenSource(parentToken);
-        var task = Task.Factory.StartNew(() => func(cts.Token), cts.Token, TaskCreationOptions.None, TaskScheduler.Current);
+        var task = Task.Factory.StartNew(() => func(cts.Token), cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Current);
         await Task.WhenAny(task, Task.Delay(timeout, cts.Token));
         cts.Cancel();
 

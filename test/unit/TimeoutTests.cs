@@ -5,6 +5,8 @@ using Xunit;
 
 namespace CommonLibTest;
 
+[CollectionDefinition("NonParallelCollection", DisableParallelization = true)]
+[Collection("NonParallelCollection")]
 public class TimeoutTests {
     [Fact]
     public async Task ExecuteWithTimeout_Success() {
