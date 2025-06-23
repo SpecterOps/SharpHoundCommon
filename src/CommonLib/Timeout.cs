@@ -9,6 +9,7 @@ public static class Timeout {
     /// <summary>
     /// Returns a Fail result if a task runs longer than its budgeted time.
     /// A cancellation token is passed to the executing function so it may exit cleanly if timeout is reached.
+    /// Be careful not to stack these calls - too many will take excessive CPU resources.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="timeout"></param>
@@ -38,6 +39,7 @@ public static class Timeout {
     /// <summary>
     /// Returns a Fail result if a task runs longer than its budgeted time.
     /// A cancellation token is passed to the executing function so it may exit cleanly if timeout is reached.
+    /// Be careful not to stack these calls - too many will take excessive CPU resources.
     /// </summary>
     /// <param name="timeout"></param>
     /// <param name="func"></param>
