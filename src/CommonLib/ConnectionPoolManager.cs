@@ -44,7 +44,7 @@ namespace SharpHoundCommonLib {
                 return new List<LdapResult<IDirectoryObject>> {LdapResult<IDirectoryObject>.Fail("Failed to resolve a connection pool", queryParameters)}.ToAsyncEnumerable();
             }
 
-             return pool.PagedQuery(queryParameters, cancellationToken);
+            return pool.PagedQuery(queryParameters, cancellationToken);
         }
 
         public IAsyncEnumerable<LdapResult<IDirectoryObject>> Query(LdapQueryParameters queryParameters,

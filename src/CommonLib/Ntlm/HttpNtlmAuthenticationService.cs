@@ -106,7 +106,7 @@ public class HttpNtlmAuthenticationService {
         var transport = new HttpTransport(httpClient, url, authScheme, _logger);
         var ntlmAuthHandler = ntlmAuth ?? new NtlmAuthenticationHandler($"HTTP/{url.Host}");
 
-        var result = await Timeout.ExecuteWithTimeout(timeout, (_) => ntlmAuthHandler.PerformNtlmAuthenticationAsync(transport));
+        var result = await Timeout.ExecuteWithTimeout(timeout, (timeoutToken) => ntlmAuthHandler.PerformNtlmAuthenticationAsync(transport, timeoutToken));
 
         if (!result.IsSuccess) {
             throw new TimeoutException($"Timeout during NTLM authentication for {url} with {authScheme}");
