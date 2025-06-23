@@ -1,18 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Moq;
-using SharpHoundCommonLib;
 using SharpHoundCommonLib.Ntlm;
-using SharpHoundCommonLib.OutputTypes;
-using SharpHoundCommonLib.Processors;
-using SharpHoundRPC;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -83,52 +77,52 @@ namespace CommonLibTest {
             Assert.Equal("Negotiate", result[1]);
         }
 
-        // [Fact]
-        // public void HttpNtlmAuthenticationService_EnsureRequiresAuth_GetSupportedNtlmAuthSchemesAsync_Timeout() {
-        //     var url = new Uri("http://primary.testlab.local/");
-        //     var service = new HttpNtlmAuthenticationService(new HttpClientFactory(), null);
-        //     var ex = Assert.ThrowsAsync<TimeoutException>(() =>
-        //         service.EnsureRequiresAuth(url, true, TimeSpan.FromMilliseconds(1)));
-        //     Assert.Equal($"Timeout getting supported NTLM auth schemes for {url}", ex.Result.Message);
+        [Fact]
+        public void HttpNtlmAuthenticationService_EnsureRequiresAuth_GetSupportedNtlmAuthSchemesAsync_Timeout() {
+            var url = new Uri("http://primary.testlab.local/");
+            var service = new HttpNtlmAuthenticationService(new HttpClientFactory(), null);
+            var ex = Assert.ThrowsAsync<TimeoutException>(() =>
+                service.EnsureRequiresAuth(url, true, TimeSpan.FromMilliseconds(1)));
+            Assert.Equal($"Timeout getting supported NTLM auth schemes for {url}", ex.Result.Message);
 
-        // }
+        }
 
-        // [Fact]
-        // public void HttpNtlmAuthenticationService_AuthWithBadChannelBindingsAsync_Timeout() {
-        //     var url = new Uri("http://primary.testlab.local/");
-        //     var authScheme = "NTLM";
-        //     var service = new HttpNtlmAuthenticationService(new HttpClientFactory(), null);
-        //     var httpResponseMessage = new HttpResponseMessage {
-        //         StatusCode = HttpStatusCode.InternalServerError,
-        //     };
-        //     var mockAuthenticator = new Mock<NtlmAuthenticationHandler>(It.IsAny<string>(), null);
-        //     mockAuthenticator.Setup(x =>
-        //         x.PerformNtlmAuthenticationAsync(It.IsAny<INtlmTransport>(), It.IsAny<CancellationToken>())).Returns(async () => {
-        //             await Task.Delay(1000);
-        //             return httpResponseMessage;
-        //         });
+        [Fact]
+        public void HttpNtlmAuthenticationService_AuthWithBadChannelBindingsAsync_Timeout() {
+            var url = new Uri("http://primary.testlab.local/");
+            var authScheme = "NTLM";
+            var service = new HttpNtlmAuthenticationService(new HttpClientFactory(), null);
+            var httpResponseMessage = new HttpResponseMessage {
+                StatusCode = HttpStatusCode.InternalServerError,
+            };
+            var mockAuthenticator = new Mock<NtlmAuthenticationHandler>(It.IsAny<string>(), null);
+            mockAuthenticator.Setup(x =>
+                x.PerformNtlmAuthenticationAsync(It.IsAny<INtlmTransport>(), It.IsAny<CancellationToken>())).Returns(async () => {
+                    await Task.Delay(1000);
+                    return httpResponseMessage;
+                });
 
-        //     var ex = Assert.ThrowsAsync<TimeoutException>(async () => await TestPrivateMethod.InstanceMethod<Task>(service,
-        //         "AuthWithBadChannelBindingsAsync",
-        //         [
-        //             url, authScheme, TimeSpan.FromMilliseconds(1), mockAuthenticator.Object
-        //         ]));
-        //     Assert.Equal($"Timeout during NTLM authentication for {url} with {authScheme}", ex.Result.Message);
+            var ex = Assert.ThrowsAsync<TimeoutException>(async () => await TestPrivateMethod.InstanceMethod<Task>(service,
+                "AuthWithBadChannelBindingsAsync",
+                [
+                    url, authScheme, TimeSpan.FromMilliseconds(1), mockAuthenticator.Object
+                ]));
+            Assert.Equal($"Timeout during NTLM authentication for {url} with {authScheme}", ex.Result.Message);
 
-        // }
+        }
 
-        // [Fact]
-        // public void HttpNtlmAuthenticationService_AuthWithChannelBindingAsync_Timeout() {
-        //     var url = new Uri("http://primary.testlab.local/");
-        //     var authScheme = "NTLM";
-        //     var service = new HttpNtlmAuthenticationService(new HttpClientFactory(), null);
-        //     var ex = Assert.ThrowsAsync<TimeoutException>(async () => await TestPrivateMethod.InstanceMethod<Task>(service,
-        //         "AuthWithChannelBindingAsync",
-        //         [
-        //             url, authScheme, TimeSpan.FromMilliseconds(1)
-        //         ]));
-        //     Assert.Equal($"Timeout during channel binding authentication for {url} with {authScheme}", ex.Result.Message);
+        [Fact]
+        public void HttpNtlmAuthenticationService_AuthWithChannelBindingAsync_Timeout() {
+            var url = new Uri("http://primary.testlab.local/");
+            var authScheme = "NTLM";
+            var service = new HttpNtlmAuthenticationService(new HttpClientFactory(), null);
+            var ex = Assert.ThrowsAsync<TimeoutException>(async () => await TestPrivateMethod.InstanceMethod<Task>(service,
+                "AuthWithChannelBindingAsync",
+                [
+                    url, authScheme, TimeSpan.FromMilliseconds(1)
+                ]));
+            Assert.Equal($"Timeout during channel binding authentication for {url} with {authScheme}", ex.Result.Message);
 
-        // }
+        }
     }
 }
