@@ -57,8 +57,8 @@ public class HttpNtlmAuthenticationService {
         var httpClient = _httpClientFactory.CreateUnauthenticatedClient();
         using var getRequest = new HttpRequestMessage(HttpMethod.Get, url);
 
-        var result = await Timeout.ExecuteWithTimeout(timeout, async (_) => {
-            var getResponse = await httpClient.SendAsync(getRequest);
+        var result = await Timeout.ExecuteWithTimeout(timeout, async (timeoutToken) => {
+            var getResponse = await httpClient.SendAsync(getRequest, timeoutToken);
             return ExtractAuthSchemes(getResponse);
         });
 
@@ -153,9 +153,9 @@ public class HttpNtlmAuthenticationService {
 
         using var client = new HttpClient(handler);
 
-        var result = await Timeout.ExecuteWithTimeout(timeout, async (_) => {
+        var result = await Timeout.ExecuteWithTimeout(timeout, async (timeoutToken) => {
             try {
-                HttpResponseMessage response = await client.GetAsync(url);
+                HttpResponseMessage response = await client.GetAsync(url, timeoutToken);
                 return response.StatusCode == HttpStatusCode.OK;
             }
             catch (AuthenticationException ex) {
