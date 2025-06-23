@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using SharpHoundCommonLib.Enums;
 using SharpHoundCommonLib.OutputTypes;
-using SharpHoundRPC;
 using SharpHoundRPC.Shared;
 using SharpHoundRPC.Wrappers;
 
@@ -26,8 +25,12 @@ namespace SharpHoundCommonLib.Processors
 
         public event ComputerStatusDelegate ComputerStatusEvent;
 
-        public virtual SharpHoundRPC.Result<ISAMServer> OpenSamServer(string computerName, TimeSpan timeout)
+        public virtual SharpHoundRPC.Result<ISAMServer> OpenSamServer(string computerName, TimeSpan timeout = default)
         {
+            if (timeout == default) {
+                timeout = TimeSpan.FromMinutes(2);
+            }
+
             var result = Timeout.ExecuteRPCWithTimeout(timeout, (_) => SAMServer.OpenServer(computerName)).GetAwaiter().GetResult();
             if (result.IsFailed)
             {
