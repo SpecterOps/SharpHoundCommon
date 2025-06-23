@@ -9,7 +9,6 @@ public static class Timeout {
     /// <summary>
     /// Returns a Fail result if a task runs longer than its budgeted time.
     /// A cancellation token is passed to the executing function so it may exit cleanly if timeout is reached.
-    /// Be careful not to stack these calls - too many will take excessive CPU resources.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="timeout"></param>
@@ -19,7 +18,7 @@ public static class Timeout {
         // cts will cancel its token if the parentToken is cancelled
         // a default parentToken will never cancel so should noop this CreateLinkedTokenSource
         var cts = CancellationTokenSource.CreateLinkedTokenSource(parentToken);
-        var task = Task.Factory.StartNew(() => func(cts.Token), cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Current);
+        var task = Task.Factory.StartNew(() => func(cts.Token), cts.Token, TaskCreationOptions.None, TaskScheduler.Current);
         await Task.WhenAny(task, Task.Delay(timeout, cts.Token));
         cts.Cancel();
 
@@ -39,7 +38,6 @@ public static class Timeout {
     /// <summary>
     /// Returns a Fail result if a task runs longer than its budgeted time.
     /// A cancellation token is passed to the executing function so it may exit cleanly if timeout is reached.
-    /// Be careful not to stack these calls - too many will take excessive CPU resources.
     /// </summary>
     /// <param name="timeout"></param>
     /// <param name="func"></param>
@@ -48,7 +46,7 @@ public static class Timeout {
         // cts will cancel its token if the parentToken is cancelled
         // a default parentToken will never cancel so should noop this CreateLinkedTokenSource
         var cts = CancellationTokenSource.CreateLinkedTokenSource(parentToken);
-        var task = Task.Factory.StartNew(() => func(cts.Token), cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Current);
+        var task = Task.Factory.StartNew(() => func(cts.Token), cts.Token, TaskCreationOptions.None, TaskScheduler.Current);
         await Task.WhenAny(task, Task.Delay(timeout, cts.Token));
         cts.Cancel();
 
