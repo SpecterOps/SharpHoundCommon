@@ -502,6 +502,7 @@ namespace SharpHoundCommonLib {
                         ? new DirectoryContext(DirectoryContextType.Domain, domainName)
                         : new DirectoryContext(DirectoryContextType.Domain);
 
+                // Blocking External Call
                 domain = Domain.GetDomain(context);
                 if (domain == null) return false;
                 _domainCache.TryAdd(cacheKey, domain);
@@ -530,6 +531,7 @@ namespace SharpHoundCommonLib {
                         ? new DirectoryContext(DirectoryContextType.Domain, domainName)
                         : new DirectoryContext(DirectoryContextType.Domain);
 
+                // Blocking External Call
                 domain = Domain.GetDomain(context);
                 if (domain == null) return false;
                 _domainCache.TryAdd(domainName, domain);
@@ -559,6 +561,7 @@ namespace SharpHoundCommonLib {
                         _ldapConfig.Password)
                     : new DirectoryContext(DirectoryContextType.Domain);
 
+                // Blocking External Call
                 domain = Domain.GetDomain(context);
                 _domainCache.TryAdd(_nullCacheKey, domain);
                 return true;
