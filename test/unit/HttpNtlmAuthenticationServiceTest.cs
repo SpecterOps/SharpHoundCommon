@@ -28,52 +28,45 @@ namespace CommonLibTest {
 
         public void Dispose() {
         }
-    
+
         [Fact]
-        public async Task HttpNtlmAuthenticationService_ExtractAuthSchemes_AuthNotRequiredException()
-        {
+        public void HttpNtlmAuthenticationService_ExtractAuthSchemes_AuthNotRequiredException() {
             var service = new HttpNtlmAuthenticationService(new HttpClientFactory(), null);
-            var httpResponseMessage = new HttpResponseMessage
-            {
+            var httpResponseMessage = new HttpResponseMessage {
                 StatusCode = HttpStatusCode.OK,
             };
 
             var ex = Assert.Throws<AuthNotRequiredException>(() => service.ExtractAuthSchemes(httpResponseMessage));
 
-            Assert.Equal(ex.Message, "Authorization was not solicited when enumerating Authentication schemes");
+            Assert.Equal("Authorization was not solicited when enumerating Authentication schemes", ex.Message);
         }
-        
+
         [Fact]
-        public async Task HttpNtlmAuthenticationService_ExtractAuthSchemes_HttpForbiddenException()
-        {
+        public void HttpNtlmAuthenticationService_ExtractAuthSchemes_HttpForbiddenException() {
             var service = new HttpNtlmAuthenticationService(new HttpClientFactory(), null);
-            var httpResponseMessage = new HttpResponseMessage
-            {
+            var httpResponseMessage = new HttpResponseMessage {
                 StatusCode = HttpStatusCode.Forbidden,
             };
 
             var ex = Assert.Throws<HttpForbiddenException>(() => service.ExtractAuthSchemes(httpResponseMessage));
 
-            Assert.Equal(ex.Message, "Forbidden when enumerating Auth schemes");
+            Assert.Equal("Forbidden when enumerating Auth schemes", ex.Message);
         }
-        
+
         [Fact]
-        public async Task HttpNtlmAuthenticationService_ExtractAuthSchemes_HttpServerErrorException()
-        {
+        public void HttpNtlmAuthenticationService_ExtractAuthSchemes_HttpServerErrorException() {
             var service = new HttpNtlmAuthenticationService(new HttpClientFactory(), null);
-            var httpResponseMessage = new HttpResponseMessage
-            {
+            var httpResponseMessage = new HttpResponseMessage {
                 StatusCode = HttpStatusCode.InternalServerError,
             };
 
             var ex = Assert.Throws<HttpServerErrorException>(() => service.ExtractAuthSchemes(httpResponseMessage));
 
-            Assert.Equal(ex.Message, "Server Error when enumerating Auth schemes");
+            Assert.Equal("Server Error when enumerating Auth schemes", ex.Message);
         }
-        
+
         [Fact]
-        public async Task HttpNtlmAuthenticationService_ExtractAuthSchemes_Success()
-        {
+        public void HttpNtlmAuthenticationService_ExtractAuthSchemes_Success() {
             var service = new HttpNtlmAuthenticationService(new HttpClientFactory(), null);
             var httpResponseMessage = new HttpResponseMessage();
             httpResponseMessage.StatusCode = HttpStatusCode.Accepted;
@@ -86,61 +79,54 @@ namespace CommonLibTest {
 
             var result = service.ExtractAuthSchemes(httpResponseMessage);
 
-            Assert.Equal(result[0], "NTLM");
-            Assert.Equal(result[1], "Negotiate");
+            Assert.Equal("NTLM", result[0]);
+            Assert.Equal("Negotiate", result[1]);
         }
 
         [Fact]
-        public async Task HttpNtlmAuthenticationService_EnsureRequiresAuth_GetSupportedNtlmAuthSchemesAsync_Timeout()
-        {
+        public void HttpNtlmAuthenticationService_EnsureRequiresAuth_GetSupportedNtlmAuthSchemesAsync_Timeout() {
             var url = new Uri("http://primary.testlab.local/");
             var service = new HttpNtlmAuthenticationService(new HttpClientFactory(), null);
-            var ex = Assert.ThrowsAsync<TimeoutException>(() => 
+            var ex = Assert.ThrowsAsync<TimeoutException>(() =>
                 service.EnsureRequiresAuth(url, true, TimeSpan.FromMilliseconds(1)));
             Assert.Equal($"Timeout getting supported NTLM auth schemes for {url}", ex.Result.Message);
 
         }
 
         [Fact]
-        public async Task HttpNtlmAuthenticationService_AuthWithBadChannelBindingsAsync_Timeout()
-        {
+        public void HttpNtlmAuthenticationService_AuthWithBadChannelBindingsAsync_Timeout() {
             var url = new Uri("http://primary.testlab.local/");
             var authScheme = "NTLM";
             var service = new HttpNtlmAuthenticationService(new HttpClientFactory(), null);
-            var httpResponseMessage = new HttpResponseMessage
-            {
+            var httpResponseMessage = new HttpResponseMessage {
                 StatusCode = HttpStatusCode.InternalServerError,
             };
             var mockAuthenticator = new Mock<NtlmAuthenticationHandler>(It.IsAny<string>(), null);
             mockAuthenticator.Setup(x =>
-                x.PerformNtlmAuthenticationAsync(It.IsAny<INtlmTransport>(), It.IsAny<CancellationToken>())).Returns(async () =>
-                {
+                x.PerformNtlmAuthenticationAsync(It.IsAny<INtlmTransport>(), It.IsAny<CancellationToken>())).Returns(async () => {
                     await Task.Delay(1000);
                     return httpResponseMessage;
                 });
-            
-            var ex = Assert.ThrowsAsync<TimeoutException>(async () => await TestPrivateMethod.InstanceMethod<Task>(service, 
+
+            var ex = Assert.ThrowsAsync<TimeoutException>(async () => await TestPrivateMethod.InstanceMethod<Task>(service,
                 "AuthWithBadChannelBindingsAsync",
-                new object[]
-                {
+                [
                     url, authScheme, TimeSpan.FromMilliseconds(1), mockAuthenticator.Object
-                }));
+                ]));
             Assert.Equal($"Timeout during NTLM authentication for {url} with {authScheme}", ex.Result.Message);
 
         }
-        
+
         [Fact]
-        public async Task HttpNtlmAuthenticationService_AuthWithChannelBindingAsync_Timeout()
-        {
+        public void HttpNtlmAuthenticationService_AuthWithChannelBindingAsync_Timeout() {
             var url = new Uri("http://primary.testlab.local/");
             var authScheme = "NTLM";
             var service = new HttpNtlmAuthenticationService(new HttpClientFactory(), null);
             var ex = Assert.ThrowsAsync<TimeoutException>(async () => await TestPrivateMethod.InstanceMethod<Task>(service,
                 "AuthWithChannelBindingAsync",
-                new object[] 
-                {
+                [
                     url, authScheme, TimeSpan.FromMilliseconds(1)
-                }));
+                ]));
             Assert.Equal($"Timeout during channel binding authentication for {url} with {authScheme}", ex.Result.Message);
 
         }
