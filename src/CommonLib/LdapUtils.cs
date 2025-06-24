@@ -780,10 +780,10 @@ namespace SharpHoundCommonLib {
             return (false, default);
         }
 
-        private static async Task<(bool, string)> RequestNETBIOSNameFromComputerWithTimeout(string server, string domain) {
+        private static async Task<(bool Success, string NetBiosName)> RequestNETBIOSNameFromComputerWithTimeout(string server, string domain) {
             var result = await Timeout.ExecuteWithTimeout(TimeSpan.FromMinutes(1), async (timeoutToken) => await RequestNETBIOSNameFromComputerAsync(server, domain, timeoutToken));
             if (result.IsSuccess)
-                return (result.Value.Item1, result.Value.Item2);
+                return (result.Value.Success, result.Value.NetBiosName);
             else
                 throw new TimeoutException();
         }
@@ -795,7 +795,7 @@ namespace SharpHoundCommonLib {
         /// <param name="domain"></param>
         /// <param name="netbios"></param>
         /// <returns></returns>
-        private static async Task<(bool, string)> RequestNETBIOSNameFromComputerAsync(string server, string domain, CancellationToken cancellationToken = default) {
+        private static async Task<(bool Success, string NetBiosName)> RequestNETBIOSNameFromComputerAsync(string server, string domain, CancellationToken cancellationToken = default) {
             var receiveBuffer = new byte[1024];
             var requestSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             try {
