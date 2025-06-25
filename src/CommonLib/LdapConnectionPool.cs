@@ -100,7 +100,7 @@ namespace SharpHoundCommonLib {
 
                 try {
                     _log.LogTrace("Sending ldap request - {Info}", queryParameters.GetQueryInfo());
-                    response = await SendRequestWithTimeout(connectionWrapper.Connection, searchRequest);
+                    response = (SearchResponse)await connectionWrapper.Connection.SendRequestAsync(searchRequest, TimeSpan.FromMinutes(2));
 
                     if (response != null) {
                         querySuccess = true;
@@ -255,7 +255,7 @@ namespace SharpHoundCommonLib {
                 SearchResponse response = null;
                 try {
                     _log.LogTrace("Sending paged ldap request - {Info}", queryParameters.GetQueryInfo());
-                    response = await SendRequestWithTimeout(connectionWrapper.Connection, searchRequest);
+                    response = (SearchResponse)await connectionWrapper.Connection.SendRequestAsync(searchRequest, TimeSpan.FromMinutes(2));
                     if (response != null) {
                         pageResponse = (PageResultResponseControl)response.Controls
                             .Where(x => x is PageResultResponseControl).DefaultIfEmpty(null).FirstOrDefault();
@@ -468,7 +468,7 @@ namespace SharpHoundCommonLib {
                 }
 
                 try {
-                    response = await SendRequestWithTimeout(connectionWrapper.Connection, searchRequest);
+                    response = (SearchResponse)await connectionWrapper.Connection.SendRequestAsync(searchRequest, TimeSpan.FromMinutes(2));
                 }
                 catch (LdapException le) when (le.ErrorCode == (int)ResultCode.Busy && busyRetryCount < MaxRetries) {
                     busyRetryCount++;
@@ -930,7 +930,7 @@ namespace SharpHoundCommonLib {
                 var searchRequest = CreateSearchRequest("", new LdapFilter().AddAllObjects().GetFilter(),
                     SearchScope.Base, null);
 
-                response = await SendRequestWithTimeout(connection, searchRequest);
+                response = (SearchResponse)await connection.SendRequestAsync(searchRequest, TimeSpan.FromMinutes(2));
             }
             catch (LdapException e) {
                 /*
@@ -986,10 +986,6 @@ namespace SharpHoundCommonLib {
                 searchScope, attributes);
             searchRequest.Controls.Add(new SearchOptionsControl(SearchOption.DomainScope));
             return searchRequest;
-        }
-
-        private async Task<SearchResponse> SendRequestWithTimeout(LdapConnection connection, SearchRequest request) {
-            return (SearchResponse)await connection.SendRequestAsync(request, TimeSpan.FromMinutes(2));
         }
     }
 }
