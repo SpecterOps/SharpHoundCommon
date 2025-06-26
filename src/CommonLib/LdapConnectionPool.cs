@@ -298,7 +298,7 @@ namespace SharpHoundCommonLib {
                         var backoffDelay = GetNextBackoff(retryCount);
                         await Task.Delay(backoffDelay, cancellationToken);
                         var (success, ldapConnectionWrapperNew, _) =
-                            GetConnectionForSpecificServerAsync(serverName, queryParameters.GlobalCatalog);
+                            await GetConnectionForSpecificServerActuallyAsync(serverName, queryParameters.GlobalCatalog);
 
                         if (success) {
                             _log.LogDebug("PagedQuery - Recovered from ServerDown successfully");
@@ -671,9 +671,20 @@ namespace SharpHoundCommonLib {
             return (true, connectionWrapper, null);
         }
 
+        /// <summary>
+        /// It's not async.  Use GetConnectionForSpecificServerActuallyAsync if looking for a Task.
+        /// </summary>
+        /// <param name="server"></param>
+        /// <param name="globalCatalog"></param>
+        /// <returns></returns>
         public (bool Success, LdapConnectionWrapper connectionWrapper, string Message)
             GetConnectionForSpecificServerAsync(string server, bool globalCatalog) {
             return CreateNewConnectionForServer(server, globalCatalog).GetAwaiter().GetResult();
+        }
+
+        public async Task<(bool Success, LdapConnectionWrapper connectionWrapper, string Message)>
+            GetConnectionForSpecificServerActuallyAsync(string server, bool globalCatalog) {
+            return await CreateNewConnectionForServer(server, globalCatalog);
         }
 
         public async Task<(bool Success, LdapConnectionWrapper ConnectionWrapper, string Message)>

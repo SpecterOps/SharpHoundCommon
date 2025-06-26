@@ -107,25 +107,31 @@ namespace SharpHoundCommonLib {
     
         public (bool Success, LdapConnectionWrapper connectionWrapper, string Message) GetLdapConnectionForServer(
             string identifier, string server, bool globalCatalog) {
+            
+            return GetLdapConnectionForServerAsync(identifier, server, globalCatalog).GetAwaiter().GetResult();
+        }
+        
+        public async Task<(bool Success, LdapConnectionWrapper connectionWrapper, string Message)> GetLdapConnectionForServerAsync(
+            string identifier, string server, bool globalCatalog) {
             var (getPoolSuccess, pool) = GetPool(identifier);
             if (!getPoolSuccess) {
                 return (false, default, $"Unable to resolve a pool for {identifier}");
             }
         
-            return pool.GetConnectionForSpecificServerAsync(server, globalCatalog);
+            return await pool.GetConnectionForSpecificServerActuallyAsync(server, globalCatalog);
         }
 
         private string ResolveIdentifier(string identifier) {
             if (_resolvedIdentifiers.TryGetValue(identifier, out var resolved)) {
                 return resolved;
             }
-            
+
             if (GetDomainSidFromDomainName(identifier) is (true, var sid)) {
                 _log.LogDebug("Resolved identifier {Identifier} to {Resolved}", identifier, sid);
                 _resolvedIdentifiers.TryAdd(identifier, sid);
                 return sid;
             }
-            
+
             return identifier;
         }
     
