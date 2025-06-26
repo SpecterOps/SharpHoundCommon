@@ -383,6 +383,8 @@ namespace SharpHoundCommonLib {
 
         private async Task<(bool Success, string DomainName)> ConvertDomainSidToDomainNameFromLdap(string domainSid) {
             if (!GetDomain(out var domain) || domain?.Name == null) {
+                // fix: BED-6026 adding the domainSid to _unresolvablePrincipals cache to prevent repeated resolving
+                _unresolvablePrincipals.Add(domainSid);
                 return (false, string.Empty);
             }
 
