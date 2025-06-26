@@ -85,7 +85,7 @@ namespace SharpHoundCommonLib {
         /// <summary>
         /// Attempts to retrieve the Domain object for the user's current domain
         /// </summary>
-        /// <param name="domain">The Domain object</param>
+        /// <param name="domain">The domain object</param>
         /// <returns>True if the domain was found, false if not</returns>
         bool GetDomain(out System.DirectoryServices.ActiveDirectory.Domain domain);
 

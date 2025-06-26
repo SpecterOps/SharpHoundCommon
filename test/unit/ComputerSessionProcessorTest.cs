@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 using CommonLibTest.Facades;
 using Moq;
@@ -8,7 +7,6 @@ using Newtonsoft.Json;
 using SharpHoundCommonLib;
 using SharpHoundCommonLib.OutputTypes;
 using SharpHoundCommonLib.Processors;
-using SharpHoundRPC;
 using SharpHoundRPC.NetAPINative;
 using Xunit;
 using Xunit.Abstractions;
@@ -228,7 +226,7 @@ namespace CommonLibTest {
             var processor = new ComputerSessionProcessor(new MockLdapUtils(), nativeMethods.Object, null,"");
             var receivedStatus = new List<CSVComputerStatus>();
             var machineDomainSid = $"{Consts.MockDomainSid}-1000";
-            processor.ComputerStatusEvent += async status => { receivedStatus.Add(status); };
+            processor.ComputerStatusEvent += status => { receivedStatus.Add(status); return Task.CompletedTask; };
             var results = await processor.ReadUserSessions("primary.testlab.local", machineDomainSid, "testlab.local",
                 TimeSpan.FromMilliseconds(1));
             Assert.Empty(results.Results);
@@ -247,7 +245,7 @@ namespace CommonLibTest {
             var processor = new ComputerSessionProcessor(new MockLdapUtils(), nativeMethods.Object, null,"");
             var receivedStatus = new List<CSVComputerStatus>();
             var machineDomainSid = $"{Consts.MockDomainSid}-1000";
-            processor.ComputerStatusEvent += async status => { receivedStatus.Add(status); };
+            processor.ComputerStatusEvent += status => { receivedStatus.Add(status); return Task.CompletedTask; };
 
             var results = await processor.ReadUserSessionsPrivileged("primary.testlab.local", machineDomainSid,
                 "testlab.local",
@@ -281,7 +279,7 @@ namespace CommonLibTest {
             };
 
             var processor = new ComputerSessionProcessor(new MockLdapUtils(), mockNativeMethods.Object,null, "dfm");
-            processor.ComputerStatusEvent += async status => { receivedStatus.Add(status); };
+            processor.ComputerStatusEvent += status => { receivedStatus.Add(status); return Task.CompletedTask; };
             var result = await processor.ReadUserSessions("win10", _computerSid, _computerDomain);
             Assert.True(result.Collected);
             Assert.Equal(expected, result.Results); 

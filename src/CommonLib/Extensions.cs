@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.DirectoryServices;
+using System.DirectoryServices.Protocols;
 using System.Linq;
 using System.Security.Principal;
 using System.Threading;
@@ -10,17 +11,14 @@ using SharpHoundCommonLib.Enums;
 
 namespace SharpHoundCommonLib
 {
-    public static class Extensions
-    {
+    public static class Extensions {
         private static readonly ILogger Log;
 
-        static Extensions()
-        {
+        static Extensions() {
             Log = Logging.LogProvider.CreateLogger("Extensions");
         }
-        
-        public static async Task<List<T>> ToListAsync<T>(this IAsyncEnumerable<T> items)
-        {
+
+        public static async Task<List<T>> ToListAsync<T>(this IAsyncEnumerable<T> items) {
             if (items == null) {
                 return new List<T>();
             }
@@ -30,9 +28,8 @@ namespace SharpHoundCommonLib
                 results.Add(item);
             return results;
         }
-        
-        public static async Task<T[]> ToArrayAsync<T>(this IAsyncEnumerable<T> items)
-        {
+
+        public static async Task<T[]> ToArrayAsync<T>(this IAsyncEnumerable<T> items) {
             if (items == null) {
                 return Array.Empty<T>();
             }
@@ -54,7 +51,7 @@ namespace SharpHoundCommonLib
                 return first;
             }
         }
-        
+
         public static async Task<T> FirstOrDefaultAsync<T>(this IAsyncEnumerable<T> source, T defaultValue,
             CancellationToken cancellationToken = default) {
             if (source == null) {
@@ -66,7 +63,7 @@ namespace SharpHoundCommonLib
                 return first;
             }
         }
-        
+
         public static IAsyncEnumerable<T> DefaultIfEmpty<T>(this IAsyncEnumerable<T> source,
             T defaultValue, CancellationToken cancellationToken = default) {
             return new DefaultIfEmptyAsyncEnumerable<T>(source, defaultValue);
@@ -89,12 +86,12 @@ namespace SharpHoundCommonLib
             private bool _enumeratorDisposed;
 
             private IAsyncEnumerator<T> _enumerator;
-            
+
             public DefaultIfEmptyAsyncEnumerator(IAsyncEnumerable<T> source, T defaultValue) {
                 _source = source;
                 _defaultValue = defaultValue;
             }
-            
+
             public async ValueTask DisposeAsync() {
                 _enumeratorDisposed = true;
                 if (_enumerator != null) {
@@ -121,7 +118,7 @@ namespace SharpHoundCommonLib
 
             public T Current => _current;
         }
-        
+
         internal static IAsyncEnumerable<T> ToAsyncEnumerable<T>(this IEnumerable<T> source) {
             return source switch {
                 ICollection<T> collection => new IAsyncEnumerableCollectionAdapter<T>(collection),
@@ -147,7 +144,7 @@ namespace SharpHoundCommonLib
             public IAsyncEnumeratorCollectionAdapter(ICollection<T> source) {
                 _source = source;
             }
-            
+
             public ValueTask DisposeAsync() {
                 _enumerator = null;
                 return new ValueTask(Task.CompletedTask);
@@ -164,8 +161,7 @@ namespace SharpHoundCommonLib
         }
 
 
-        public static string LdapValue(this SecurityIdentifier s)
-        {
+        public static string LdapValue(this SecurityIdentifier s) {
             var bytes = new byte[s.BinaryLength];
             s.GetBinaryForm(bytes, 0);
 
@@ -173,13 +169,12 @@ namespace SharpHoundCommonLib
             return output;
         }
 
-        public static string LdapValue(this Guid s)
-        {
+        public static string LdapValue(this Guid s) {
             var bytes = s.ToByteArray();
             var output = $"\\{BitConverter.ToString(bytes).Replace('-', '\\')}";
             return output;
         }
-        
+
         /// <summary>
         ///     Returns true if any computer collection methods are set
         /// </summary>
@@ -195,8 +190,7 @@ namespace SharpHoundCommonLib
         /// </summary>
         /// <param name="methods"></param>
         /// <returns></returns>
-        public static bool IsLocalGroupCollectionSet(this CollectionMethod methods)
-        {
+        public static bool IsLocalGroupCollectionSet(this CollectionMethod methods) {
             return (methods & CollectionMethod.LocalGroups) != 0;
         }
 
@@ -205,15 +199,35 @@ namespace SharpHoundCommonLib
         /// </summary>
         /// <param name="securityIdentifier"></param>
         /// <returns></returns>
-        public static int Rid(this SecurityIdentifier securityIdentifier)
-        {
+        public static int Rid(this SecurityIdentifier securityIdentifier) {
             var value = securityIdentifier.Value;
             var rid = int.Parse(value.Substring(value.LastIndexOf("-", StringComparison.Ordinal) + 1));
             return rid;
         }
-        
+
         public static IDirectoryObject ToDirectoryObject(this DirectoryEntry entry) {
             return new DirectoryEntryWrapper(entry);
+        }
+        
+        /// <summary>
+        /// Leverages the older Asynchronous Programming Model to create an async SendRequest.
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <param name="request"></param>
+        /// <param name="timeout"></param>
+        /// <returns></returns>
+        public static Task<DirectoryResponse> SendRequestAsync(
+            this LdapConnection connection,
+            DirectoryRequest request,
+            TimeSpan timeout) {
+            return Task<DirectoryResponse>.Factory.FromAsync(
+                connection.BeginSendRequest,
+                connection.EndSendRequest,
+                request,
+                timeout,
+                PartialResultProcessing.NoPartialResultSupport,
+                null
+            );
         }
     }
 }

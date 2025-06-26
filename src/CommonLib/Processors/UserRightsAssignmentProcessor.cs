@@ -53,7 +53,7 @@ namespace SharpHoundCommonLib.Processors {
                 timeout = TimeSpan.FromMinutes(2);
             }
 
-            var policyOpenResult = await Helpers.ExecuteRPCWithTimeout(timeout, (_) => OpenLSAPolicy(computerName));
+            var policyOpenResult = await Timeout.ExecuteRPCWithTimeout(timeout, (_) => OpenLSAPolicy(computerName));
             if (!policyOpenResult.IsSuccess) {
                 _log.LogDebug("LSAOpenPolicy failed on {ComputerName} with status {Status}", computerName,
                     policyOpenResult.Error);
@@ -71,7 +71,7 @@ namespace SharpHoundCommonLib.Processors {
             SecurityIdentifier machineSid;
             if (!Cache.GetMachineSid(computerObjectId, out var temp)) {
                 var getMachineSidResult =
-                    await Helpers.ExecuteRPCWithTimeout(timeout, (_) => server.GetLocalDomainInformation());
+                    await Timeout.ExecuteRPCWithTimeout(timeout, (_) => server.GetLocalDomainInformation());
                 if (getMachineSidResult.IsFailed) {
                     _log.LogWarning("Failed to get machine sid for {Server}: {Status}. Abandoning URA collection",
                         computerName, getMachineSidResult.SError);
@@ -98,7 +98,7 @@ namespace SharpHoundCommonLib.Processors {
                 };
 
                 //Ask for all principals with the specified privilege. 
-                var enumerateAccountsResult = await Helpers.ExecuteRPCWithTimeout(timeout, (_) => server.GetResolvedPrincipalsWithPrivilege(privilege));
+                var enumerateAccountsResult = await Timeout.ExecuteRPCWithTimeout(timeout, (_) => server.GetResolvedPrincipalsWithPrivilege(privilege));
                 if (enumerateAccountsResult.IsFailed) {
                     _log.LogDebug(
                         "LSAEnumerateAccountsWithUserRight failed on {ComputerName} with status {Status} for privilege {Privilege}",

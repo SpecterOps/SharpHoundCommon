@@ -31,7 +31,7 @@ namespace SharpHoundCommonLib.Processors {
                 timeout = TimeSpan.FromMinutes(2);
             }
 
-            var result = await Helpers.ExecuteRPCWithTimeout(timeout, (timeoutToken) => _smbScanner.ScanHost(host, 445, timeoutToken));
+            var result = await Timeout.ExecuteRPCWithTimeout(timeout, (timeoutToken) => _smbScanner.ScanHost(host, 445, timeoutToken));
 
             if (result.IsFailed) {
                 await SendComputerStatus(new CSVComputerStatus {

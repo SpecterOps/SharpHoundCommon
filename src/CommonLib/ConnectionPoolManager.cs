@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.DirectoryServices;
+using System.Runtime.CompilerServices;
 using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
@@ -28,7 +29,8 @@ namespace SharpHoundCommonLib {
             string attributeName, CancellationToken cancellationToken = new()) {
             var domain = Helpers.DistinguishedNameToDomain(distinguishedName);
 
-            if (!GetPool(domain, out var pool)) {
+            var (getPoolSuccess, pool) = GetPool(domain);
+            if (!getPoolSuccess) {
                 return new List<Result<string>> {Result<string>.Fail("Failed to resolve a connection pool")}.ToAsyncEnumerable();
             }
 
@@ -37,7 +39,8 @@ namespace SharpHoundCommonLib {
 
         public IAsyncEnumerable<LdapResult<IDirectoryObject>> PagedQuery(LdapQueryParameters queryParameters,
             CancellationToken cancellationToken = new()) {
-            if (!GetPool(queryParameters.DomainName, out var pool)) {
+            var (getPoolSuccess, pool) = GetPool(queryParameters.DomainName);
+            if (!getPoolSuccess) {
                 return new List<LdapResult<IDirectoryObject>> {LdapResult<IDirectoryObject>.Fail("Failed to resolve a connection pool", queryParameters)}.ToAsyncEnumerable();
             }
 
@@ -46,7 +49,8 @@ namespace SharpHoundCommonLib {
 
         public IAsyncEnumerable<LdapResult<IDirectoryObject>> Query(LdapQueryParameters queryParameters,
             CancellationToken cancellationToken = new()) {
-            if (!GetPool(queryParameters.DomainName, out var pool)) {
+            var (getPoolSuccess, pool) = GetPool(queryParameters.DomainName);
+            if (!getPoolSuccess) {
                 return new List<LdapResult<IDirectoryObject>> {LdapResult<IDirectoryObject>.Fail("Failed to resolve a connection pool", queryParameters)}.ToAsyncEnumerable();
             }
 
@@ -73,24 +77,24 @@ namespace SharpHoundCommonLib {
             return (success, message);
         }
 
-        private bool GetPool(string identifier, out LdapConnectionPool pool) {
+        private (bool, LdapConnectionPool) GetPool(string identifier) {
             if (string.IsNullOrWhiteSpace(identifier)) {
-                pool = default;
-                return false;
+                return (false, default);
             }
 
             var resolved = ResolveIdentifier(identifier);
-            if (!_pools.TryGetValue(resolved, out pool)) {
+            if (!_pools.TryGetValue(resolved, out var pool)) {
                 pool = new LdapConnectionPool(identifier, resolved, _ldapConfig, scanner: _portScanner);
                 _pools.TryAdd(resolved, pool);
             }
 
-            return true;
+            return (true, pool);
         }
 
         public async Task<(bool Success, LdapConnectionWrapper ConnectionWrapper, string Message)> GetLdapConnection(
             string identifier, bool globalCatalog) {
-            if (!GetPool(identifier, out var pool)) {
+            var (getPoolSuccess, pool) = GetPool(identifier);
+            if (!getPoolSuccess) {
                 return (false, default, $"Unable to resolve a pool for {identifier}");
             }
 
@@ -103,36 +107,42 @@ namespace SharpHoundCommonLib {
     
         public (bool Success, LdapConnectionWrapper connectionWrapper, string Message) GetLdapConnectionForServer(
             string identifier, string server, bool globalCatalog) {
-            if (!GetPool(identifier, out var pool)) {
+            
+            return GetLdapConnectionForServerAsync(identifier, server, globalCatalog).GetAwaiter().GetResult();
+        }
+        
+        public async Task<(bool Success, LdapConnectionWrapper connectionWrapper, string Message)> GetLdapConnectionForServerAsync(
+            string identifier, string server, bool globalCatalog) {
+            var (getPoolSuccess, pool) = GetPool(identifier);
+            if (!getPoolSuccess) {
                 return (false, default, $"Unable to resolve a pool for {identifier}");
             }
         
-            return pool.GetConnectionForSpecificServerAsync(server, globalCatalog);
+            return await pool.GetConnectionForSpecificServerActuallyAsync(server, globalCatalog);
         }
 
         private string ResolveIdentifier(string identifier) {
             if (_resolvedIdentifiers.TryGetValue(identifier, out var resolved)) {
                 return resolved;
             }
-            
-            if (GetDomainSidFromDomainName(identifier, out var sid)) {
+
+            if (GetDomainSidFromDomainName(identifier) is (true, var sid)) {
                 _log.LogDebug("Resolved identifier {Identifier} to {Resolved}", identifier, sid);
                 _resolvedIdentifiers.TryAdd(identifier, sid);
                 return sid;
             }
-            
+
             return identifier;
         }
     
-        private bool GetDomainSidFromDomainName(string domainName, out string domainSid) {
-            if (Cache.GetDomainSidMapping(domainName, out domainSid)) return true;
+        private (bool, string) GetDomainSidFromDomainName(string domainName) {
+            if (Cache.GetDomainSidMapping(domainName, out var domainSid)) return (true, domainSid);
 
             try {
                 var entry = new DirectoryEntry($"LDAP://{domainName}").ToDirectoryObject();
                 if (entry.TryGetSecurityIdentifier(out var sid)) {
                     Cache.AddDomainSidMapping(domainName, sid);
-                    domainSid = sid;
-                    return true;
+                    return (true, sid);
                 }
             }
             catch {
@@ -141,9 +151,10 @@ namespace SharpHoundCommonLib {
 
             if (LdapUtils.GetDomain(domainName, _ldapConfig, out var domainObject))
                 try {
+                    // TODO: MC - Confirm GetDirectoryEntry is not a Blocking External Call
                     if (domainObject.GetDirectoryEntry().ToDirectoryObject().TryGetSecurityIdentifier(out domainSid)) {
                         Cache.AddDomainSidMapping(domainName, domainSid);
-                        return true;
+                        return (true, domainSid);
                     }
                 }
                 catch {
@@ -153,16 +164,18 @@ namespace SharpHoundCommonLib {
             foreach (var name in _translateNames)
                 try {
                     var account = new NTAccount(domainName, name);
+                    // Blocking External Call
+                    // Calls Win32.LsaOpenPolicy and either Win32NativeLsaLookupNames2 or Win32Native.LsaLookupNames
                     var sid = (SecurityIdentifier)account.Translate(typeof(SecurityIdentifier));
                     domainSid = sid.AccountDomainSid.ToString();
                     Cache.AddDomainSidMapping(domainName, domainSid);
-                    return true;
+                    return (true, domainSid);
                 }
                 catch {
                     //We expect this to fail if the username doesn't exist in the domain
                 }
 
-            return false;
+            return (false, null);
         }
 
         public void Dispose() {

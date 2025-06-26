@@ -24,6 +24,7 @@ namespace SharpHoundCommonLib.Processors {
         /// <param name="hostname"></param>
         /// <param name="port"></param>
         /// <param name="timeout">Timeout in milliseconds</param>
+        /// <param name="throwError">Used as a switch to control if this method should throw exceptions that  occur.</param>
         /// <returns>True if port is open, otherwise false</returns>
         public virtual async Task<bool> CheckPort(string hostname, int port = 445, int timeout = 10000,
             bool throwError = false) {
@@ -39,29 +40,24 @@ namespace SharpHoundCommonLib.Processors {
 
             try {
                 using var client = new TcpClient();
-                var ca = client.ConnectAsync(hostname, port);
-                if (await Task.WhenAny(ca, Task.Delay(timeout)) == ca) {
-                    if (ca.IsFaulted) {
-                        _log.LogDebug("PortScan faulted on {Hostname}:{Port} with error {Error}", hostname, port,
-                            ca.Exception);
-                        PortScanCache.TryAdd(key, false);
-                        return false;
+                // Blocking External Call
+                var ca = await Timeout.ExecuteWithTimeout(TimeSpan.FromMilliseconds(timeout), (_) => client.ConnectAsync(hostname, port));
+                if (!ca.IsSuccess) {
+                    _log.LogDebug("{HostName} did not respond to scan on port {Port} within {Timeout}ms", hostname, port,
+                        timeout);
+                    if (throwError) {
+                        throw new TimeoutException("Timed Out");
                     }
-                    _log.LogTrace("CheckPort Succeeded for {HostName}:{Port}", hostname, port);
-
-                    PortScanCache.TryAdd(key, true);
-                    return true;
+                    PortScanCache.TryAdd(key, false);
+                    return false;
                 }
 
-                _log.LogDebug("{HostName} did not respond to scan on port {Port} within {Timeout}ms", hostname, port,
-                    timeout);
-                if (throwError) {
-                    throw new TimeoutException("Timed Out");
-                }
-
-                PortScanCache.TryAdd(key, false);
-                return false;
-            } catch (Exception e) {
+                _log.LogTrace("CheckPort Succeeded for {HostName}:{Port}", hostname, port);
+                PortScanCache.TryAdd(key, true);
+                return true;
+            }
+            catch (Exception e) {
+                // task threw exception
                 _log.LogDebug(e, "Exception checking {Hostname}:{Port}", hostname, port);
                 if (throwError) {
                     throw;
