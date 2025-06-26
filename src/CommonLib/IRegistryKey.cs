@@ -39,7 +39,7 @@ namespace SharpHoundCommonLib {
             if (remoteKey.IsSuccess)
                 return new SHRegistryKey(remoteKey.Value);
             else
-                throw new TimeoutException("Timeout");
+                throw new TimeoutException($"Failed to connect to registry on {machineName}: {remoteKey.Error}");
         }
 
         public void Dispose() {

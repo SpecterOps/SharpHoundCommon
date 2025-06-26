@@ -17,7 +17,7 @@ public static class Timeout {
     public static async Task<Result<T>> ExecuteWithTimeout<T>(TimeSpan timeout, Func<CancellationToken, T> func, CancellationToken parentToken = default) {
         // cts will cancel its token if the parentToken is cancelled
         // a default parentToken will never cancel so should noop this CreateLinkedTokenSource
-        var cts = CancellationTokenSource.CreateLinkedTokenSource(parentToken);
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(parentToken);
         var task = Task.Factory.StartNew(() => func(cts.Token), cts.Token, TaskCreationOptions.None, TaskScheduler.Current);
         await Task.WhenAny(task, Task.Delay(timeout, cts.Token));
         cts.Cancel();
@@ -45,7 +45,7 @@ public static class Timeout {
     public static async Task<Result> ExecuteWithTimeout(TimeSpan timeout, Action<CancellationToken> func, CancellationToken parentToken = default) {
         // cts will cancel its token if the parentToken is cancelled
         // a default parentToken will never cancel so should noop this CreateLinkedTokenSource
-        var cts = CancellationTokenSource.CreateLinkedTokenSource(parentToken);
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(parentToken);
         var task = Task.Factory.StartNew(() => func(cts.Token), cts.Token, TaskCreationOptions.None, TaskScheduler.Current);
         await Task.WhenAny(task, Task.Delay(timeout, cts.Token));
         cts.Cancel();
@@ -82,7 +82,7 @@ public static class Timeout {
     public static async Task<Result<T>> ExecuteWithTimeout<T>(TimeSpan timeout, Func<CancellationToken, Task<T>> func, CancellationToken parentToken = default) {
         // cts will cancel its token if the parentToken is cancelled
         // a default parentToken will never cancel so should noop this CreateLinkedTokenSource
-        var cts = CancellationTokenSource.CreateLinkedTokenSource(parentToken);
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(parentToken);
         var task = func.Invoke(cts.Token);
         await Task.WhenAny(task, Task.Delay(timeout, cts.Token));
         cts.Cancel();
@@ -110,7 +110,7 @@ public static class Timeout {
     public static async Task<Result> ExecuteWithTimeout(TimeSpan timeout, Func<CancellationToken, Task> func, CancellationToken parentToken = default) {
         // cts will cancel its token if the parentToken is cancelled
         // a default parentToken will never cancel so should noop this CreateLinkedTokenSource
-        var cts = CancellationTokenSource.CreateLinkedTokenSource(parentToken);
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(parentToken);
         var task = func.Invoke(cts.Token);
         await Task.WhenAny(task, Task.Delay(timeout, cts.Token));
         cts.Cancel();
