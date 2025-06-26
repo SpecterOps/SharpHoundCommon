@@ -225,15 +225,15 @@ var assemblies = [
     "name": "SharpHoundCommonLib",
     "classes": [
       { "name": "Impersonate.Impersonator", "rp": "SharpHoundCommonLib_Impersonator.html", "cl": 0, "ucl": 45, "cal": 45, "tl": 176, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 10, "lch": [], "bch": [], "hc": [] },
-      { "name": "SharpHoundCommonLib.ActiveDirectoryRuleDescriptor", "rp": "SharpHoundCommonLib_ActiveDirectoryRuleDescriptor.html", "cl": 32, "ucl": 1, "cal": 33, "tl": 108, "ct": "LineCoverage", "mc": "-", "cb": 10, "tb": 10, "lch": [], "bch": [], "hc": [] },
-      { "name": "SharpHoundCommonLib.ActiveDirectorySecurityDescriptor", "rp": "SharpHoundCommonLib_ActiveDirectorySecurityDescriptor.html", "cl": 16, "ucl": 6, "cal": 22, "tl": 108, "ct": "LineCoverage", "mc": "-", "cb": 2, "tb": 2, "lch": [], "bch": [], "hc": [] },
+      { "name": "SharpHoundCommonLib.ActiveDirectoryRuleDescriptor", "rp": "SharpHoundCommonLib_ActiveDirectoryRuleDescriptor.html", "cl": 32, "ucl": 1, "cal": 33, "tl": 115, "ct": "LineCoverage", "mc": "-", "cb": 10, "tb": 10, "lch": [], "bch": [], "hc": [] },
+      { "name": "SharpHoundCommonLib.ActiveDirectorySecurityDescriptor", "rp": "SharpHoundCommonLib_ActiveDirectorySecurityDescriptor.html", "cl": 16, "ucl": 6, "cal": 22, "tl": 115, "ct": "LineCoverage", "mc": "-", "cb": 2, "tb": 2, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.AsyncEnumerable", "rp": "SharpHoundCommonLib_AsyncEnumerable.html", "cl": 8, "ucl": 1, "cal": 9, "tl": 23, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.Cache", "rp": "SharpHoundCommonLib_Cache.html", "cl": 49, "ucl": 46, "cal": 95, "tl": 193, "ct": "LineCoverage", "mc": "-", "cb": 7, "tb": 36, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.CommonLib", "rp": "SharpHoundCommonLib_CommonLib.html", "cl": 0, "ucl": 20, "cal": 20, "tl": 47, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 8, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.ConcurrentHashSet", "rp": "SharpHoundCommonLib_ConcurrentHashSet.html", "cl": 15, "ucl": 7, "cal": 22, "tl": 60, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
-      { "name": "SharpHoundCommonLib.ConnectionPoolManager", "rp": "SharpHoundCommonLib_ConnectionPoolManager.html", "cl": 55, "ucl": 52, "cal": 107, "tl": 177, "ct": "LineCoverage", "mc": "-", "cb": 19, "tb": 46, "lch": [], "bch": [], "hc": [] },
+      { "name": "SharpHoundCommonLib.ConnectionPoolManager", "rp": "SharpHoundCommonLib_ConnectionPoolManager.html", "cl": 57, "ucl": 56, "cal": 113, "tl": 190, "ct": "LineCoverage", "mc": "-", "cb": 20, "tb": 50, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.CSVComputerStatus", "rp": "SharpHoundCommonLib_CSVComputerStatus.html", "cl": 3, "ucl": 20, "cal": 23, "tl": 47, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 14, "lch": [], "bch": [], "hc": [] },
-      { "name": "SharpHoundCommonLib.DirectoryEntryWrapper", "rp": "SharpHoundCommonLib_DirectoryEntryWrapper.html", "cl": 14, "ucl": 112, "cal": 126, "tl": 188, "ct": "LineCoverage", "mc": "-", "cb": 1, "tb": 44, "lch": [], "bch": [], "hc": [] },
+      { "name": "SharpHoundCommonLib.DirectoryEntryWrapper", "rp": "SharpHoundCommonLib_DirectoryEntryWrapper.html", "cl": 14, "ucl": 112, "cal": 126, "tl": 199, "ct": "LineCoverage", "mc": "-", "cb": 1, "tb": 44, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.DirectoryObjects.DirectoryObjectExtensions", "rp": "SharpHoundCommonLib_DirectoryObjectExtensions.html", "cl": 42, "ucl": 0, "cal": 42, "tl": 71, "ct": "LineCoverage", "mc": "-", "cb": 22, "tb": 24, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.Enums.CommonOids", "rp": "SharpHoundCommonLib_CommonOids.html", "cl": 6, "ucl": 0, "cal": 6, "tl": 13, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.Enums.EventIds", "rp": "SharpHoundCommonLib_EventIds.html", "cl": 0, "ucl": 2, "cal": 2, "tl": 6, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
@@ -241,11 +241,11 @@ var assemblies = [
       { "name": "SharpHoundCommonLib.Exceptions.LdapAuthenticationException", "rp": "SharpHoundCommonLib_LdapAuthenticationException.html", "cl": 0, "ucl": 4, "cal": 4, "tl": 14, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.Exceptions.LdapConnectionException", "rp": "SharpHoundCommonLib_LdapConnectionException.html", "cl": 0, "ucl": 5, "cal": 5, "tl": 14, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.Exceptions.NoLdapDataException", "rp": "SharpHoundCommonLib_NoLdapDataException.html", "cl": 0, "ucl": 3, "cal": 3, "tl": 11, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
-      { "name": "SharpHoundCommonLib.Extensions", "rp": "SharpHoundCommonLib_Extensions.html", "cl": 63, "ucl": 55, "cal": 118, "tl": 219, "ct": "LineCoverage", "mc": "-", "cb": 25, "tb": 52, "lch": [], "bch": [], "hc": [] },
+      { "name": "SharpHoundCommonLib.Extensions", "rp": "SharpHoundCommonLib_Extensions.html", "cl": 63, "ucl": 65, "cal": 128, "tl": 233, "ct": "LineCoverage", "mc": "-", "cb": 25, "tb": 52, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.GeneratedLdapParameters", "rp": "SharpHoundCommonLib_GeneratedLdapParameters.html", "cl": 0, "ucl": 2, "cal": 2, "tl": 155, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
-      { "name": "SharpHoundCommonLib.Helpers", "rp": "SharpHoundCommonLib_Helpers.html", "cl": 125, "ucl": 47, "cal": 172, "tl": 319, "ct": "LineCoverage", "mc": "-", "cb": 51, "tb": 62, "lch": [], "bch": [], "hc": [] },
+      { "name": "SharpHoundCommonLib.Helpers", "rp": "SharpHoundCommonLib_Helpers.html", "cl": 127, "ucl": 50, "cal": 177, "tl": 326, "ct": "LineCoverage", "mc": "-", "cb": 51, "tb": 62, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.LdapConfig", "rp": "SharpHoundCommonLib_LdapConfig.html", "cl": 18, "ucl": 19, "cal": 37, "tl": 56, "ct": "LineCoverage", "mc": "-", "cb": 10, "tb": 16, "lch": [], "bch": [], "hc": [] },
-      { "name": "SharpHoundCommonLib.LdapConnectionPool", "rp": "SharpHoundCommonLib_LdapConnectionPool.html", "cl": 115, "ucl": 533, "cal": 648, "tl": 953, "ct": "LineCoverage", "mc": "-", "cb": 44, "tb": 368, "lch": [], "bch": [], "hc": [] },
+      { "name": "SharpHoundCommonLib.LdapConnectionPool", "rp": "SharpHoundCommonLib_LdapConnectionPool.html", "cl": 115, "ucl": 570, "cal": 685, "tl": 1002, "ct": "LineCoverage", "mc": "-", "cb": 50, "tb": 423, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.LdapConnectionWrapper", "rp": "SharpHoundCommonLib_LdapConnectionWrapper.html", "cl": 0, "ucl": 62, "cal": 62, "tl": 97, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 26, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.LdapProducerQueryGenerator", "rp": "SharpHoundCommonLib_LdapProducerQueryGenerator.html", "cl": 0, "ucl": 108, "cal": 108, "tl": 155, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 60, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.LDAPQueries.CommonFilters", "rp": "SharpHoundCommonLib_CommonFilters.html", "cl": 1, "ucl": 13, "cal": 14, "tl": 29, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
@@ -255,24 +255,24 @@ var assemblies = [
       { "name": "SharpHoundCommonLib.LdapQueryParameters", "rp": "SharpHoundCommonLib_LdapQueryParameters.html", "cl": 21, "ucl": 5, "cal": 26, "tl": 48, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.LdapQuerySetupResult", "rp": "SharpHoundCommonLib_LdapQuerySetupResult.html", "cl": 2, "ucl": 3, "cal": 5, "tl": 12, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.LdapResult<T>", "rp": "SharpHoundCommonLib_LdapResult_1.html", "cl": 12, "ucl": 6, "cal": 18, "tl": 30, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
-      { "name": "SharpHoundCommonLib.LdapUtils", "rp": "SharpHoundCommonLib_LdapUtils.html", "cl": 257, "ucl": 660, "cal": 917, "tl": 1324, "ct": "LineCoverage", "mc": "-", "cb": 162, "tb": 616, "lch": [], "bch": [], "hc": [] },
+      { "name": "SharpHoundCommonLib.LdapUtils", "rp": "SharpHoundCommonLib_LdapUtils.html", "cl": 264, "ucl": 704, "cal": 968, "tl": 1404, "ct": "LineCoverage", "mc": "-", "cb": 162, "tb": 628, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.Logging", "rp": "SharpHoundCommonLib_Logging.html", "cl": 2, "ucl": 3, "cal": 5, "tl": 36, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.LogProvider", "rp": "SharpHoundCommonLib_LogProvider.html", "cl": 4, "ucl": 3, "cal": 7, "tl": 36, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
-      { "name": "SharpHoundCommonLib.MockRegistryKey", "rp": "SharpHoundCommonLib_MockRegistryKey.html", "cl": 0, "ucl": 3, "cal": 3, "tl": 34, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
+      { "name": "SharpHoundCommonLib.MockRegistryKey", "rp": "SharpHoundCommonLib_MockRegistryKey.html", "cl": 0, "ucl": 5, "cal": 5, "tl": 60, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.NoOpLogger", "rp": "SharpHoundCommonLib_NoOpLogger.html", "cl": 2, "ucl": 6, "cal": 8, "tl": 26, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
-      { "name": "SharpHoundCommonLib.Ntlm.AuthNotRequiredException", "rp": "SharpHoundCommonLib_AuthNotRequiredException.html", "cl": 2, "ucl": 2, "cal": 4, "tl": 191, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
-      { "name": "SharpHoundCommonLib.Ntlm.ExtendedProtectionMisconfiguredException", "rp": "SharpHoundCommonLib_ExtendedProtectionMisconfiguredException.html", "cl": 0, "ucl": 4, "cal": 4, "tl": 191, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
-      { "name": "SharpHoundCommonLib.Ntlm.HttpClientFactory", "rp": "SharpHoundCommonLib_HttpClientFactory.html", "cl": 0, "ucl": 19, "cal": 19, "tl": 35, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
-      { "name": "SharpHoundCommonLib.Ntlm.HttpForbiddenException", "rp": "SharpHoundCommonLib_HttpForbiddenException.html", "cl": 2, "ucl": 2, "cal": 4, "tl": 191, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
-      { "name": "SharpHoundCommonLib.Ntlm.HttpNtlmAuthenticationService", "rp": "SharpHoundCommonLib_HttpNtlmAuthenticationService.html", "cl": 23, "ucl": 61, "cal": 84, "tl": 191, "ct": "LineCoverage", "mc": "-", "cb": 13, "tb": 52, "lch": [], "bch": [], "hc": [] },
-      { "name": "SharpHoundCommonLib.Ntlm.HttpServerErrorException", "rp": "SharpHoundCommonLib_HttpServerErrorException.html", "cl": 2, "ucl": 2, "cal": 4, "tl": 191, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
-      { "name": "SharpHoundCommonLib.Ntlm.HttpTransport", "rp": "SharpHoundCommonLib_HttpTransport.html", "cl": 0, "ucl": 29, "cal": 29, "tl": 63, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 12, "lch": [], "bch": [], "hc": [] },
-      { "name": "SharpHoundCommonLib.Ntlm.HttpUnauthorizedException", "rp": "SharpHoundCommonLib_HttpUnauthorizedException.html", "cl": 0, "ucl": 4, "cal": 4, "tl": 191, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
+      { "name": "SharpHoundCommonLib.Ntlm.AuthNotRequiredException", "rp": "SharpHoundCommonLib_AuthNotRequiredException.html", "cl": 2, "ucl": 2, "cal": 4, "tl": 217, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
+      { "name": "SharpHoundCommonLib.Ntlm.ExtendedProtectionMisconfiguredException", "rp": "SharpHoundCommonLib_ExtendedProtectionMisconfiguredException.html", "cl": 0, "ucl": 4, "cal": 4, "tl": 217, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
+      { "name": "SharpHoundCommonLib.Ntlm.HttpClientFactory", "rp": "SharpHoundCommonLib_HttpClientFactory.html", "cl": 6, "ucl": 13, "cal": 19, "tl": 35, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
+      { "name": "SharpHoundCommonLib.Ntlm.HttpForbiddenException", "rp": "SharpHoundCommonLib_HttpForbiddenException.html", "cl": 2, "ucl": 2, "cal": 4, "tl": 217, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
+      { "name": "SharpHoundCommonLib.Ntlm.HttpNtlmAuthenticationService", "rp": "SharpHoundCommonLib_HttpNtlmAuthenticationService.html", "cl": 43, "ucl": 60, "cal": 103, "tl": 217, "ct": "LineCoverage", "mc": "-", "cb": 28, "tb": 66, "lch": [], "bch": [], "hc": [] },
+      { "name": "SharpHoundCommonLib.Ntlm.HttpServerErrorException", "rp": "SharpHoundCommonLib_HttpServerErrorException.html", "cl": 2, "ucl": 2, "cal": 4, "tl": 217, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
+      { "name": "SharpHoundCommonLib.Ntlm.HttpTransport", "rp": "SharpHoundCommonLib_HttpTransport.html", "cl": 6, "ucl": 23, "cal": 29, "tl": 63, "ct": "LineCoverage", "mc": "-", "cb": 1, "tb": 12, "lch": [], "bch": [], "hc": [] },
+      { "name": "SharpHoundCommonLib.Ntlm.HttpUnauthorizedException", "rp": "SharpHoundCommonLib_HttpUnauthorizedException.html", "cl": 0, "ucl": 4, "cal": 4, "tl": 217, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.Ntlm.LdapConnection", "rp": "SharpHoundCommonLib_LdapConnection.html", "cl": 0, "ucl": 149, "cal": 149, "tl": 306, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 40, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.Ntlm.LdapNativeException", "rp": "SharpHoundCommonLib_LdapNativeException.html", "cl": 7, "ucl": 0, "cal": 7, "tl": 15, "ct": "LineCoverage", "mc": "-", "cb": 2, "tb": 2, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.Ntlm.LdapTransport", "rp": "SharpHoundCommonLib_LdapTransport.html", "cl": 1, "ucl": 52, "cal": 53, "tl": 88, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 14, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.Ntlm.MissingChallengeException", "rp": "SharpHoundCommonLib_MissingChallengeException.html", "cl": 0, "ucl": 2, "cal": 2, "tl": 63, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
-      { "name": "SharpHoundCommonLib.Ntlm.NtlmAuthenticationHandler", "rp": "SharpHoundCommonLib_NtlmAuthenticationHandler.html", "cl": 9, "ucl": 16, "cal": 25, "tl": 56, "ct": "LineCoverage", "mc": "-", "cb": 2, "tb": 6, "lch": [], "bch": [], "hc": [] },
+      { "name": "SharpHoundCommonLib.Ntlm.NtlmAuthenticationHandler", "rp": "SharpHoundCommonLib_NtlmAuthenticationHandler.html", "cl": 9, "ucl": 18, "cal": 27, "tl": 60, "ct": "LineCoverage", "mc": "-", "cb": 2, "tb": 6, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.Ntlm.SafeLdapHandle", "rp": "SharpHoundCommonLib_SafeLdapHandle.html", "cl": 0, "ucl": 9, "cal": 9, "tl": 306, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 2, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.OutputTypes.ACE", "rp": "SharpHoundCommonLib_ACE.html", "cl": 8, "ucl": 18, "cal": 26, "tl": 37, "ct": "LineCoverage", "mc": "-", "cb": 1, "tb": 18, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.OutputTypes.AceRegistryAPIResult", "rp": "SharpHoundCommonLib_AceRegistryAPIResult.html", "cl": 0, "ucl": 1, "cal": 1, "tl": 9, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
@@ -315,43 +315,43 @@ var assemblies = [
       { "name": "SharpHoundCommonLib.OutputTypes.TypedPrincipal", "rp": "SharpHoundCommonLib_TypedPrincipal.html", "cl": 26, "ucl": 0, "cal": 26, "tl": 46, "ct": "LineCoverage", "mc": "-", "cb": 5, "tb": 10, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.OutputTypes.User", "rp": "SharpHoundCommonLib_User.html", "cl": 0, "ucl": 6, "cal": 6, "tl": 14, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.OutputTypes.UserRightsAssignmentAPIResult", "rp": "SharpHoundCommonLib_UserRightsAssignmentAPIResult.html", "cl": 3, "ucl": 8, "cal": 11, "tl": 24, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 4, "lch": [], "bch": [], "hc": [] },
-      { "name": "SharpHoundCommonLib.ParsedGPLink", "rp": "SharpHoundCommonLib_ParsedGPLink.html", "cl": 2, "ucl": 0, "cal": 2, "tl": 319, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
+      { "name": "SharpHoundCommonLib.ParsedGPLink", "rp": "SharpHoundCommonLib_ParsedGPLink.html", "cl": 2, "ucl": 0, "cal": 2, "tl": 326, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.PassThroughLogger", "rp": "SharpHoundCommonLib_PassThroughLogger.html", "cl": 11, "ucl": 6, "cal": 17, "tl": 41, "ct": "LineCoverage", "mc": "-", "cb": 2, "tb": 2, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.Processors.ACLProcessor", "rp": "SharpHoundCommonLib_ACLProcessor.html", "cl": 494, "ucl": 70, "cal": 564, "tl": 773, "ct": "LineCoverage", "mc": "-", "cb": 261, "tb": 303, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.Processors.CachedLocalItem", "rp": "SharpHoundCommonLib_CachedLocalItem.html", "cl": 7, "ucl": 0, "cal": 7, "tl": 16, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.Processors.CAEnrollmentProcessor", "rp": "SharpHoundCommonLib_CAEnrollmentProcessor.html", "cl": 0, "ucl": 132, "cal": 132, "tl": 210, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 48, "lch": [], "bch": [], "hc": [] },
-      { "name": "SharpHoundCommonLib.Processors.CertAbuseProcessor", "rp": "SharpHoundCommonLib_CertAbuseProcessor.html", "cl": 0, "ucl": 242, "cal": 242, "tl": 479, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 124, "lch": [], "bch": [], "hc": [] },
+      { "name": "SharpHoundCommonLib.Processors.CertAbuseProcessor", "rp": "SharpHoundCommonLib_CertAbuseProcessor.html", "cl": 0, "ucl": 242, "cal": 242, "tl": 479, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 126, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.Processors.CertRegistryResult", "rp": "SharpHoundCommonLib_CertRegistryResult.html", "cl": 0, "ucl": 3, "cal": 3, "tl": 479, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.Processors.ComputerAvailability", "rp": "SharpHoundCommonLib_ComputerAvailability.html", "cl": 77, "ucl": 11, "cal": 88, "tl": 149, "ct": "LineCoverage", "mc": "-", "cb": 22, "tb": 34, "lch": [], "bch": [], "hc": [] },
-      { "name": "SharpHoundCommonLib.Processors.ComputerProperties", "rp": "SharpHoundCommonLib_ComputerProperties.html", "cl": 6, "ucl": 0, "cal": 6, "tl": 986, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
-      { "name": "SharpHoundCommonLib.Processors.ComputerSessionProcessor", "rp": "SharpHoundCommonLib_ComputerSessionProcessor.html", "cl": 146, "ucl": 75, "cal": 221, "tl": 338, "ct": "LineCoverage", "mc": "-", "cb": 79, "tb": 122, "lch": [], "bch": [], "hc": [] },
+      { "name": "SharpHoundCommonLib.Processors.ComputerProperties", "rp": "SharpHoundCommonLib_ComputerProperties.html", "cl": 6, "ucl": 0, "cal": 6, "tl": 1006, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
+      { "name": "SharpHoundCommonLib.Processors.ComputerSessionProcessor", "rp": "SharpHoundCommonLib_ComputerSessionProcessor.html", "cl": 163, "ucl": 61, "cal": 224, "tl": 338, "ct": "LineCoverage", "mc": "-", "cb": 81, "tb": 124, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.Processors.ContainerProcessor", "rp": "SharpHoundCommonLib_ContainerProcessor.html", "cl": 64, "ucl": 20, "cal": 84, "tl": 178, "ct": "LineCoverage", "mc": "-", "cb": 53, "tb": 78, "lch": [], "bch": [], "hc": [] },
-      { "name": "SharpHoundCommonLib.Processors.DCLdapProcessor", "rp": "SharpHoundCommonLib_DCLdapProcessor.html", "cl": 133, "ucl": 3, "cal": 136, "tl": 230, "ct": "LineCoverage", "mc": "-", "cb": 39, "tb": 52, "lch": [], "bch": [], "hc": [] },
+      { "name": "SharpHoundCommonLib.Processors.DCLdapProcessor", "rp": "SharpHoundCommonLib_DCLdapProcessor.html", "cl": 133, "ucl": 3, "cal": 136, "tl": 230, "ct": "LineCoverage", "mc": "-", "cb": 41, "tb": 52, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.Processors.DCRegistryProcessor", "rp": "SharpHoundCommonLib_DCRegistryProcessor.html", "cl": 0, "ucl": 5, "cal": 5, "tl": 85, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 2, "lch": [], "bch": [], "hc": [] },
-      { "name": "SharpHoundCommonLib.Processors.DomainTrustProcessor", "rp": "SharpHoundCommonLib_DomainTrustProcessor.html", "cl": 64, "ucl": 13, "cal": 77, "tl": 133, "ct": "LineCoverage", "mc": "-", "cb": 34, "tb": 53, "lch": [], "bch": [], "hc": [] },
+      { "name": "SharpHoundCommonLib.Processors.DomainTrustProcessor", "rp": "SharpHoundCommonLib_DomainTrustProcessor.html", "cl": 61, "ucl": 16, "cal": 77, "tl": 132, "ct": "LineCoverage", "mc": "-", "cb": 35, "tb": 55, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.Processors.EnrollmentAgentRestriction", "rp": "SharpHoundCommonLib_EnrollmentAgentRestriction.html", "cl": 0, "ucl": 5, "cal": 5, "tl": 479, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.Processors.EventLogProcessor", "rp": "SharpHoundCommonLib_EventLogProcessor.html", "cl": 0, "ucl": 148, "cal": 148, "tl": 296, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 32, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.Processors.GPOLocalGroupProcessor", "rp": "SharpHoundCommonLib_GPOLocalGroupProcessor.html", "cl": 304, "ucl": 46, "cal": 350, "tl": 577, "ct": "LineCoverage", "mc": "-", "cb": 197, "tb": 259, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.Processors.GroupProcessor", "rp": "SharpHoundCommonLib_GroupProcessor.html", "cl": 46, "ucl": 6, "cal": 52, "tl": 95, "ct": "LineCoverage", "mc": "-", "cb": 50, "tb": 68, "lch": [], "bch": [], "hc": [] },
-      { "name": "SharpHoundCommonLib.Processors.IssuancePolicyProperties", "rp": "SharpHoundCommonLib_IssuancePolicyProperties.html", "cl": 2, "ucl": 0, "cal": 2, "tl": 986, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
+      { "name": "SharpHoundCommonLib.Processors.IssuancePolicyProperties", "rp": "SharpHoundCommonLib_IssuancePolicyProperties.html", "cl": 2, "ucl": 0, "cal": 2, "tl": 1006, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.Processors.LdapAuthOptions", "rp": "SharpHoundCommonLib_LdapAuthOptions.html", "cl": 2, "ucl": 0, "cal": 2, "tl": 230, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
-      { "name": "SharpHoundCommonLib.Processors.LdapPropertyProcessor", "rp": "SharpHoundCommonLib_LdapPropertyProcessor.html", "cl": 505, "ucl": 72, "cal": 577, "tl": 986, "ct": "LineCoverage", "mc": "-", "cb": 200, "tb": 280, "lch": [], "bch": [], "hc": [] },
-      { "name": "SharpHoundCommonLib.Processors.LocalGroupProcessor", "rp": "SharpHoundCommonLib_LocalGroupProcessor.html", "cl": 227, "ucl": 21, "cal": 248, "tl": 375, "ct": "LineCoverage", "mc": "-", "cb": 171, "tb": 213, "lch": [], "bch": [], "hc": [] },
-      { "name": "SharpHoundCommonLib.Processors.ParsedCertificate", "rp": "SharpHoundCommonLib_ParsedCertificate.html", "cl": 21, "ucl": 12, "cal": 33, "tl": 986, "ct": "LineCoverage", "mc": "-", "cb": 4, "tb": 8, "lch": [], "bch": [], "hc": [] },
-      { "name": "SharpHoundCommonLib.Processors.PortScanner", "rp": "SharpHoundCommonLib_PortScanner.html", "cl": 3, "ucl": 54, "cal": 57, "tl": 100, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 22, "lch": [], "bch": [], "hc": [] },
+      { "name": "SharpHoundCommonLib.Processors.LdapPropertyProcessor", "rp": "SharpHoundCommonLib_LdapPropertyProcessor.html", "cl": 522, "ucl": 72, "cal": 594, "tl": 1006, "ct": "LineCoverage", "mc": "-", "cb": 205, "tb": 288, "lch": [], "bch": [], "hc": [] },
+      { "name": "SharpHoundCommonLib.Processors.LocalGroupProcessor", "rp": "SharpHoundCommonLib_LocalGroupProcessor.html", "cl": 227, "ucl": 24, "cal": 251, "tl": 378, "ct": "LineCoverage", "mc": "-", "cb": 184, "tb": 228, "lch": [], "bch": [], "hc": [] },
+      { "name": "SharpHoundCommonLib.Processors.ParsedCertificate", "rp": "SharpHoundCommonLib_ParsedCertificate.html", "cl": 21, "ucl": 12, "cal": 33, "tl": 1006, "ct": "LineCoverage", "mc": "-", "cb": 4, "tb": 8, "lch": [], "bch": [], "hc": [] },
+      { "name": "SharpHoundCommonLib.Processors.PortScanner", "rp": "SharpHoundCommonLib_PortScanner.html", "cl": 3, "ucl": 50, "cal": 53, "tl": 97, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 20, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.Processors.RegistryProcessor", "rp": "SharpHoundCommonLib_RegistryProcessor.html", "cl": 0, "ucl": 74, "cal": 74, "tl": 114, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 54, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.Processors.RegistryResult", "rp": "SharpHoundCommonLib_RegistryResult.html", "cl": 0, "ucl": 1, "cal": 1, "tl": 7, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
-      { "name": "SharpHoundCommonLib.Processors.SmbProcessor", "rp": "SharpHoundCommonLib_SmbProcessor.html", "cl": 21, "ucl": 21, "cal": 42, "tl": 93, "ct": "LineCoverage", "mc": "-", "cb": 11, "tb": 26, "lch": [], "bch": [], "hc": [] },
-      { "name": "SharpHoundCommonLib.Processors.SmbScanInfo", "rp": "SharpHoundCommonLib_SmbScanInfo.html", "cl": 0, "ucl": 5, "cal": 5, "tl": 93, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
-      { "name": "SharpHoundCommonLib.Processors.SPNProcessors", "rp": "SharpHoundCommonLib_SPNProcessors.html", "cl": 31, "ucl": 5, "cal": 36, "tl": 65, "ct": "LineCoverage", "mc": "-", "cb": 25, "tb": 32, "lch": [], "bch": [], "hc": [] },
-      { "name": "SharpHoundCommonLib.Processors.UserProperties", "rp": "SharpHoundCommonLib_UserProperties.html", "cl": 4, "ucl": 0, "cal": 4, "tl": 986, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
-      { "name": "SharpHoundCommonLib.Processors.UserRightsAssignmentProcessor", "rp": "SharpHoundCommonLib_UserRightsAssignmentProcessor.html", "cl": 117, "ucl": 20, "cal": 137, "tl": 214, "ct": "LineCoverage", "mc": "-", "cb": 70, "tb": 105, "lch": [], "bch": [], "hc": [] },
+      { "name": "SharpHoundCommonLib.Processors.SmbProcessor", "rp": "SharpHoundCommonLib_SmbProcessor.html", "cl": 21, "ucl": 21, "cal": 42, "tl": 91, "ct": "LineCoverage", "mc": "-", "cb": 11, "tb": 26, "lch": [], "bch": [], "hc": [] },
+      { "name": "SharpHoundCommonLib.Processors.SmbScanInfo", "rp": "SharpHoundCommonLib_SmbScanInfo.html", "cl": 0, "ucl": 5, "cal": 5, "tl": 91, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
+      { "name": "SharpHoundCommonLib.Processors.SPNProcessors", "rp": "SharpHoundCommonLib_SPNProcessors.html", "cl": 39, "ucl": 5, "cal": 44, "tl": 77, "ct": "LineCoverage", "mc": "-", "cb": 29, "tb": 39, "lch": [], "bch": [], "hc": [] },
+      { "name": "SharpHoundCommonLib.Processors.UserProperties", "rp": "SharpHoundCommonLib_UserProperties.html", "cl": 4, "ucl": 0, "cal": 4, "tl": 1006, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
+      { "name": "SharpHoundCommonLib.Processors.UserRightsAssignmentProcessor", "rp": "SharpHoundCommonLib_UserRightsAssignmentProcessor.html", "cl": 116, "ucl": 20, "cal": 136, "tl": 213, "ct": "LineCoverage", "mc": "-", "cb": 70, "tb": 105, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.Processors.WebClientServiceProcessor", "rp": "SharpHoundCommonLib_WebClientServiceProcessor.html", "cl": 27, "ucl": 7, "cal": 34, "tl": 92, "ct": "LineCoverage", "mc": "-", "cb": 9, "tb": 16, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.ResolvedSearchResult", "rp": "SharpHoundCommonLib_ResolvedSearchResult.html", "cl": 9, "ucl": 3, "cal": 12, "tl": 35, "ct": "LineCoverage", "mc": "-", "cb": 1, "tb": 2, "lch": [], "bch": [], "hc": [] },
-      { "name": "SharpHoundCommonLib.Result", "rp": "SharpHoundCommonLib_Result.html", "cl": 7, "ucl": 6, "cal": 13, "tl": 41, "ct": "LineCoverage", "mc": "-", "cb": 1, "tb": 2, "lch": [], "bch": [], "hc": [] },
-      { "name": "SharpHoundCommonLib.Result<T>", "rp": "SharpHoundCommonLib_Result_1.html", "cl": 10, "ucl": 3, "cal": 13, "tl": 41, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
+      { "name": "SharpHoundCommonLib.Result", "rp": "SharpHoundCommonLib_Result.html", "cl": 13, "ucl": 0, "cal": 13, "tl": 41, "ct": "LineCoverage", "mc": "-", "cb": 2, "tb": 2, "lch": [], "bch": [], "hc": [] },
+      { "name": "SharpHoundCommonLib.Result<T>", "rp": "SharpHoundCommonLib_Result_1.html", "cl": 13, "ucl": 0, "cal": 13, "tl": 41, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.SearchResultEntryWrapper", "rp": "SharpHoundCommonLib_SearchResultEntryWrapper.html", "cl": 0, "ucl": 136, "cal": 136, "tl": 204, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 68, "lch": [], "bch": [], "hc": [] },
-      { "name": "SharpHoundCommonLib.SHRegistryKey", "rp": "SharpHoundCommonLib_SHRegistryKey.html", "cl": 0, "ucl": 9, "cal": 9, "tl": 34, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 2, "lch": [], "bch": [], "hc": [] },
+      { "name": "SharpHoundCommonLib.SHRegistryKey", "rp": "SharpHoundCommonLib_SHRegistryKey.html", "cl": 0, "ucl": 17, "cal": 17, "tl": 60, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 6, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.SMB.NetBIOS.NetBIOSHeader", "rp": "SharpHoundCommonLib_NetBIOSHeader.html", "cl": 11, "ucl": 11, "cal": 22, "tl": 75, "ct": "LineCoverage", "mc": "-", "cb": 3, "tb": 6, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.SMB.NetBIOS.NetBIOSSessionType", "rp": "SharpHoundCommonLib_NetBIOSSessionType.html", "cl": 20, "ucl": 9, "cal": 29, "tl": 129, "ct": "LineCoverage", "mc": "-", "cb": 5, "tb": 14, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.SMB.SMB1.SMB1Command", "rp": "SharpHoundCommonLib_SMB1Command.html", "cl": 1, "ucl": 0, "cal": 1, "tl": 27, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
@@ -366,7 +366,7 @@ var assemblies = [
       { "name": "SharpHoundCommonLib.SMB.SMB2.SMB2PreauthIntegrityCapabilities", "rp": "SharpHoundCommonLib_SMB2PreauthIntegrityCapabilities.html", "cl": 0, "ucl": 25, "cal": 25, "tl": 288, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 2, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.SMB.SMB2.SMB2RdmaTransformCapabilities", "rp": "SharpHoundCommonLib_SMB2RdmaTransformCapabilities.html", "cl": 0, "ucl": 26, "cal": 26, "tl": 288, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 2, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.SMB.SMB2.SMB2SigningCapabilities", "rp": "SharpHoundCommonLib_SMB2SigningCapabilities.html", "cl": 0, "ucl": 25, "cal": 25, "tl": 288, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 2, "lch": [], "bch": [], "hc": [] },
-      { "name": "SharpHoundCommonLib.SMB.SmbScanner", "rp": "SharpHoundCommonLib_SmbScanner.html", "cl": 48, "ucl": 124, "cal": 172, "tl": 399, "ct": "LineCoverage", "mc": "-", "cb": 16, "tb": 72, "lch": [], "bch": [], "hc": [] },
+      { "name": "SharpHoundCommonLib.SMB.SmbScanner", "rp": "SharpHoundCommonLib_SmbScanner.html", "cl": 46, "ucl": 102, "cal": 148, "tl": 348, "ct": "LineCoverage", "mc": "-", "cb": 16, "tb": 68, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.ThirdParty.PSOpenAD.AuthenticationProvider", "rp": "SharpHoundCommonLib_AuthenticationProvider.html", "cl": 0, "ucl": 14, "cal": 14, "tl": 404, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.ThirdParty.PSOpenAD.ChannelBindings", "rp": "SharpHoundCommonLib_ChannelBindings.html", "cl": 1, "ucl": 4, "cal": 5, "tl": 404, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.ThirdParty.PSOpenAD.ExternalContext", "rp": "SharpHoundCommonLib_ExternalContext.html", "cl": 0, "ucl": 9, "cal": 9, "tl": 404, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
@@ -379,12 +379,13 @@ var assemblies = [
       { "name": "SharpHoundCommonLib.ThirdParty.PSOpenAD.SspiException", "rp": "SharpHoundCommonLib_SspiException.html", "cl": 0, "ucl": 14, "cal": 14, "tl": 680, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 2, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.ThirdParty.PSOpenAD.SspiSecContext", "rp": "SharpHoundCommonLib_SspiSecContext.html", "cl": 0, "ucl": 14, "cal": 14, "tl": 680, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundCommonLib.ThirdParty.PSOpenAD.WinNTAuthIdentity", "rp": "SharpHoundCommonLib_WinNTAuthIdentity.html", "cl": 0, "ucl": 9, "cal": 9, "tl": 680, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
-      { "name": "SharpHoundCommonLib.WellKnownPrincipal", "rp": "SharpHoundCommonLib_WellKnownPrincipal.html", "cl": 71, "ucl": 3, "cal": 74, "tl": 91, "ct": "LineCoverage", "mc": "-", "cb": 321, "tb": 330, "lch": [], "bch": [], "hc": [] },
+      { "name": "SharpHoundCommonLib.Timeout", "rp": "SharpHoundCommonLib_Timeout.html", "cl": 68, "ucl": 8, "cal": 76, "tl": 179, "ct": "LineCoverage", "mc": "-", "cb": 40, "tb": 44, "lch": [], "bch": [], "hc": [] },
+      { "name": "SharpHoundCommonLib.WellKnownPrincipal", "rp": "SharpHoundCommonLib_WellKnownPrincipal.html", "cl": 71, "ucl": 20, "cal": 91, "tl": 108, "ct": "LineCoverage", "mc": "-", "cb": 348, "tb": 398, "lch": [], "bch": [], "hc": [] },
     ]},
   {
     "name": "SharpHoundRPC",
     "classes": [
-      { "name": "SharpHoundRPC.Extensions", "rp": "SharpHoundRPC_Extensions.html", "cl": 24, "ucl": 11, "cal": 35, "tl": 70, "ct": "LineCoverage", "mc": "-", "cb": 10, "tb": 20, "lch": [], "bch": [], "hc": [] },
+      { "name": "SharpHoundRPC.Extensions", "rp": "SharpHoundRPC_Extensions.html", "cl": 5, "ucl": 11, "cal": 16, "tl": 39, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 8, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundRPC.Handles.BasePointer", "rp": "SharpHoundRPC_BasePointer.html", "cl": 3, "ucl": 36, "cal": 39, "tl": 68, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 14, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundRPC.Handles.LSAHandle", "rp": "SharpHoundRPC_LSAHandle.html", "cl": 0, "ucl": 17, "cal": 17, "tl": 33, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 2, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundRPC.Handles.LSAPointer", "rp": "SharpHoundRPC_LSAPointer.html", "cl": 0, "ucl": 13, "cal": 13, "tl": 26, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 2, "lch": [], "bch": [], "hc": [] },
@@ -418,7 +419,7 @@ var assemblies = [
       { "name": "SharpHoundRPC.Wrappers.SAMAlias", "rp": "SharpHoundRPC_SAMAlias.html", "cl": 0, "ucl": 12, "cal": 12, "tl": 30, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 2, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundRPC.Wrappers.SAMBase", "rp": "SharpHoundRPC_SAMBase.html", "cl": 0, "ucl": 15, "cal": 15, "tl": 33, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 4, "lch": [], "bch": [], "hc": [] },
       { "name": "SharpHoundRPC.Wrappers.SAMDomain", "rp": "SharpHoundRPC_SAMDomain.html", "cl": 0, "ucl": 32, "cal": 32, "tl": 63, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 12, "lch": [], "bch": [], "hc": [] },
-      { "name": "SharpHoundRPC.Wrappers.SAMServer", "rp": "SharpHoundRPC_SAMServer.html", "cl": 0, "ucl": 77, "cal": 77, "tl": 137, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 34, "lch": [], "bch": [], "hc": [] },
+      { "name": "SharpHoundRPC.Wrappers.SAMServer", "rp": "SharpHoundRPC_SAMServer.html", "cl": 0, "ucl": 84, "cal": 84, "tl": 152, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 34, "lch": [], "bch": [], "hc": [] },
     ]},
 ];
 
@@ -433,7 +434,7 @@ var riskHotspots = [
   {
     "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.WellKnownPrincipal", "reportPath": "SharpHoundCommonLib_WellKnownPrincipal.html", "methodName": "System.Boolean SharpHoundCommonLib.WellKnownPrincipal::GetWellKnownPrincipal(System.String,SharpHoundCommonLib.OutputTypes.TypedPrincipal&)", "methodShortName": "GetWellKnownPrincipal(...)", "fileIndex": 0, "line": 15,
     "metrics": [
-      { "value": 330, "exceeded": true },
+      { "value": 398, "exceeded": true },
       { "value": 0, "exceeded": false },
     ]},
   {
@@ -443,9 +444,9 @@ var riskHotspots = [
       { "value": 0, "exceeded": false },
     ]},
   {
-    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.Processors.LocalGroupProcessor", "reportPath": "SharpHoundCommonLib_LocalGroupProcessor.html", "methodName": "GetLocalGroups()", "methodShortName": "GetLocalGroups()", "fileIndex": 0, "line": 56,
+    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.Processors.LocalGroupProcessor", "reportPath": "SharpHoundCommonLib_LocalGroupProcessor.html", "methodName": "GetLocalGroups()", "methodShortName": "GetLocalGroups()", "fileIndex": 0, "line": 59,
     "metrics": [
-      { "value": 183, "exceeded": true },
+      { "value": 196, "exceeded": true },
       { "value": 0, "exceeded": false },
     ]},
   {
@@ -461,15 +462,15 @@ var riskHotspots = [
       { "value": 0, "exceeded": false },
     ]},
   {
-    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.LdapConnectionPool", "reportPath": "SharpHoundCommonLib_LdapConnectionPool.html", "methodName": "RangedRetrieval()", "methodShortName": "RangedRetrieval()", "fileIndex": 0, "line": 406,
+    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.LdapConnectionPool", "reportPath": "SharpHoundCommonLib_LdapConnectionPool.html", "methodName": "PagedQuery()", "methodShortName": "PagedQuery()", "fileIndex": 0, "line": 221,
     "metrics": [
-      { "value": 77, "exceeded": true },
+      { "value": 85, "exceeded": true },
       { "value": 0, "exceeded": false },
     ]},
   {
-    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.LdapConnectionPool", "reportPath": "SharpHoundCommonLib_LdapConnectionPool.html", "methodName": "PagedQuery()", "methodShortName": "PagedQuery()", "fileIndex": 0, "line": 213,
+    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.LdapConnectionPool", "reportPath": "SharpHoundCommonLib_LdapConnectionPool.html", "methodName": "RangedRetrieval()", "methodShortName": "RangedRetrieval()", "fileIndex": 0, "line": 423,
     "metrics": [
-      { "value": 74, "exceeded": true },
+      { "value": 81, "exceeded": true },
       { "value": 0, "exceeded": false },
     ]},
   {
@@ -481,7 +482,7 @@ var riskHotspots = [
   {
     "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.LdapConnectionPool", "reportPath": "SharpHoundCommonLib_LdapConnectionPool.html", "methodName": "Query()", "methodShortName": "Query()", "fileIndex": 0, "line": 69,
     "metrics": [
-      { "value": 67, "exceeded": true },
+      { "value": 71, "exceeded": true },
       { "value": 0, "exceeded": false },
     ]},
   {
@@ -491,7 +492,13 @@ var riskHotspots = [
       { "value": 0, "exceeded": false },
     ]},
   {
-    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.LdapUtils", "reportPath": "SharpHoundCommonLib_LdapUtils.html", "methodName": "ResolveHostToSid()", "methodShortName": "ResolveHostToSid()", "fileIndex": 0, "line": 579,
+    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.LdapUtils", "reportPath": "SharpHoundCommonLib_LdapUtils.html", "methodName": "ResolveHostToSid()", "methodShortName": "ResolveHostToSid()", "fileIndex": 0, "line": 605,
+    "metrics": [
+      { "value": 60, "exceeded": true },
+      { "value": 0, "exceeded": false },
+    ]},
+  {
+    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.Processors.ComputerSessionProcessor", "reportPath": "SharpHoundCommonLib_ComputerSessionProcessor.html", "methodName": "ReadUserSessions()", "methodShortName": "ReadUserSessions()", "fileIndex": 0, "line": 51,
     "metrics": [
       { "value": 58, "exceeded": true },
       { "value": 0, "exceeded": false },
@@ -503,43 +510,43 @@ var riskHotspots = [
       { "value": 0, "exceeded": false },
     ]},
   {
-    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.Processors.ComputerSessionProcessor", "reportPath": "SharpHoundCommonLib_ComputerSessionProcessor.html", "methodName": "ReadUserSessions()", "methodShortName": "ReadUserSessions()", "fileIndex": 0, "line": 52,
-    "metrics": [
-      { "value": 52, "exceeded": true },
-      { "value": 0, "exceeded": false },
-    ]},
-  {
     "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.Processors.RegistryProcessor", "reportPath": "SharpHoundCommonLib_RegistryProcessor.html", "methodName": "ReadRegistrySettings()", "methodShortName": "ReadRegistrySettings()", "fileIndex": 0, "line": 52,
     "metrics": [
       { "value": 52, "exceeded": true },
       { "value": 0, "exceeded": false },
     ]},
   {
-    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.LdapUtils", "reportPath": "SharpHoundCommonLib_LdapUtils.html", "methodName": "System.String SharpHoundCommonLib.LdapUtils::ComputeDisplayName(SharpHoundCommonLib.IDirectoryObject,System.String,SharpHoundCommonLib.Enums.Label,System.String)", "methodShortName": "ComputeDisplayName(...)", "fileIndex": 0, "line": 1231,
+    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.LdapConnectionPool", "reportPath": "SharpHoundCommonLib_LdapConnectionPool.html", "methodName": "CreateNewConnection()", "methodShortName": "CreateNewConnection()", "fileIndex": 0, "line": 730,
     "metrics": [
       { "value": 48, "exceeded": true },
       { "value": 0, "exceeded": false },
     ]},
   {
-    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.LdapUtils", "reportPath": "SharpHoundCommonLib_LdapUtils.html", "methodName": "System.Boolean SharpHoundCommonLib.LdapUtils::ResolveLabel(System.String,System.String,System.String,System.String[],System.Int32,SharpHoundCommonLib.Enums.Label&)", "methodShortName": "ResolveLabel(...)", "fileIndex": 0, "line": 1083,
+    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.LdapUtils", "reportPath": "SharpHoundCommonLib_LdapUtils.html", "methodName": "System.String SharpHoundCommonLib.LdapUtils::ComputeDisplayName(SharpHoundCommonLib.IDirectoryObject,System.String,SharpHoundCommonLib.Enums.Label,System.String)", "methodShortName": "ComputeDisplayName(...)", "fileIndex": 0, "line": 1297,
+    "metrics": [
+      { "value": 48, "exceeded": true },
+      { "value": 0, "exceeded": false },
+    ]},
+  {
+    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.Processors.LdapPropertyProcessor", "reportPath": "SharpHoundCommonLib_LdapPropertyProcessor.html", "methodName": "ReadComputerProperties()", "methodShortName": "ReadComputerProperties()", "fileIndex": 0, "line": 346,
+    "metrics": [
+      { "value": 48, "exceeded": true },
+      { "value": 0, "exceeded": false },
+    ]},
+  {
+    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.LdapUtils", "reportPath": "SharpHoundCommonLib_LdapUtils.html", "methodName": "System.Boolean SharpHoundCommonLib.LdapUtils::ResolveLabel(System.String,System.String,System.String,System.String[],System.Int32,SharpHoundCommonLib.Enums.Label&)", "methodShortName": "ResolveLabel(...)", "fileIndex": 0, "line": 1144,
     "metrics": [
       { "value": 46, "exceeded": true },
       { "value": 0, "exceeded": false },
     ]},
   {
-    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.LdapUtils", "reportPath": "SharpHoundCommonLib_LdapUtils.html", "methodName": "GetEnterpriseDCGroups()", "methodShortName": "GetEnterpriseDCGroups()", "fileIndex": 0, "line": 965,
+    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.LdapUtils", "reportPath": "SharpHoundCommonLib_LdapUtils.html", "methodName": "GetEnterpriseDCGroups()", "methodShortName": "GetEnterpriseDCGroups()", "fileIndex": 0, "line": 1024,
     "metrics": [
       { "value": 46, "exceeded": true },
       { "value": 0, "exceeded": false },
     ]},
   {
-    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.LdapUtils", "reportPath": "SharpHoundCommonLib_LdapUtils.html", "methodName": "GetWellKnownPrincipalOutput()", "methodShortName": "GetWellKnownPrincipalOutput()", "fileIndex": 0, "line": 935,
-    "metrics": [
-      { "value": 46, "exceeded": true },
-      { "value": 0, "exceeded": false },
-    ]},
-  {
-    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.Processors.LdapPropertyProcessor", "reportPath": "SharpHoundCommonLib_LdapPropertyProcessor.html", "methodName": "ReadComputerProperties()", "methodShortName": "ReadComputerProperties()", "fileIndex": 0, "line": 337,
+    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.LdapUtils", "reportPath": "SharpHoundCommonLib_LdapUtils.html", "methodName": "GetWellKnownPrincipalOutput()", "methodShortName": "GetWellKnownPrincipalOutput()", "fileIndex": 0, "line": 994,
     "metrics": [
       { "value": 46, "exceeded": true },
       { "value": 0, "exceeded": false },
@@ -547,7 +554,7 @@ var riskHotspots = [
   {
     "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.Processors.DomainTrustProcessor", "reportPath": "SharpHoundCommonLib_DomainTrustProcessor.html", "methodName": "EnumerateDomainTrusts()", "methodShortName": "EnumerateDomainTrusts()", "fileIndex": 0, "line": 29,
     "metrics": [
-      { "value": 43, "exceeded": true },
+      { "value": 45, "exceeded": true },
       { "value": 0, "exceeded": false },
     ]},
   {
@@ -557,7 +564,7 @@ var riskHotspots = [
       { "value": 0, "exceeded": false },
     ]},
   {
-    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.Processors.LdapPropertyProcessor", "reportPath": "SharpHoundCommonLib_LdapPropertyProcessor.html", "methodName": "ReadDomainProperties()", "methodShortName": "ReadDomainProperties()", "fileIndex": 0, "line": 60,
+    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.Processors.LdapPropertyProcessor", "reportPath": "SharpHoundCommonLib_LdapPropertyProcessor.html", "methodName": "ReadDomainProperties()", "methodShortName": "ReadDomainProperties()", "fileIndex": 0, "line": 62,
     "metrics": [
       { "value": 40, "exceeded": true },
       { "value": 0, "exceeded": false },
@@ -569,7 +576,7 @@ var riskHotspots = [
       { "value": 0, "exceeded": false },
     ]},
   {
-    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.LdapUtils", "reportPath": "SharpHoundCommonLib_LdapUtils.html", "methodName": "ResolveSearchResult()", "methodShortName": "ResolveSearchResult()", "fileIndex": 0, "line": 1148,
+    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.LdapUtils", "reportPath": "SharpHoundCommonLib_LdapUtils.html", "methodName": "ResolveSearchResult()", "methodShortName": "ResolveSearchResult()", "fileIndex": 0, "line": 1210,
     "metrics": [
       { "value": 36, "exceeded": true },
       { "value": 0, "exceeded": false },
@@ -581,15 +588,21 @@ var riskHotspots = [
       { "value": 0, "exceeded": false },
     ]},
   {
-    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.Processors.LdapPropertyProcessor", "reportPath": "SharpHoundCommonLib_LdapPropertyProcessor.html", "methodName": "System.String SharpHoundCommonLib.Processors.LdapPropertyProcessor::ConvertPKIPeriod(System.Byte[])", "methodShortName": "ConvertPKIPeriod(...)", "fileIndex": 0, "line": 821,
+    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.Processors.LdapPropertyProcessor", "reportPath": "SharpHoundCommonLib_LdapPropertyProcessor.html", "methodName": "System.String SharpHoundCommonLib.Processors.LdapPropertyProcessor::ConvertPKIPeriod(System.Byte[])", "methodShortName": "ConvertPKIPeriod(...)", "fileIndex": 0, "line": 837,
     "metrics": [
       { "value": 34, "exceeded": true },
       { "value": 0, "exceeded": false },
     ]},
   {
-    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.LdapConnectionPool", "reportPath": "SharpHoundCommonLib_LdapConnectionPool.html", "methodName": "CreateNewConnection()", "methodShortName": "CreateNewConnection()", "fileIndex": 0, "line": 689,
+    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.Processors.LdapPropertyProcessor", "reportPath": "SharpHoundCommonLib_LdapPropertyProcessor.html", "methodName": "ReadUserProperties()", "methodShortName": "ReadUserProperties()", "fileIndex": 0, "line": 217,
     "metrics": [
       { "value": 32, "exceeded": true },
+      { "value": 0, "exceeded": false },
+    ]},
+  {
+    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.Processors.SPNProcessors", "reportPath": "SharpHoundCommonLib_SPNProcessors.html", "methodName": "ReadSPNTargets()", "methodShortName": "ReadSPNTargets()", "fileIndex": 0, "line": 31,
+    "metrics": [
+      { "value": 31, "exceeded": true },
       { "value": 0, "exceeded": false },
     ]},
 ];

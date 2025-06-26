@@ -3179,6 +3179,19 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.Extensions.Rid
   nameWithType: Extensions.Rid
+- uid: SharpHoundCommonLib.Extensions.SendRequestAsync(System.DirectoryServices.Protocols.LdapConnection,System.DirectoryServices.Protocols.DirectoryRequest,System.TimeSpan)
+  name: SendRequestAsync(LdapConnection, DirectoryRequest, TimeSpan)
+  href: api/SharpHoundCommonLib.Extensions.html#SharpHoundCommonLib_Extensions_SendRequestAsync_System_DirectoryServices_Protocols_LdapConnection_System_DirectoryServices_Protocols_DirectoryRequest_System_TimeSpan_
+  commentId: M:SharpHoundCommonLib.Extensions.SendRequestAsync(System.DirectoryServices.Protocols.LdapConnection,System.DirectoryServices.Protocols.DirectoryRequest,System.TimeSpan)
+  fullName: SharpHoundCommonLib.Extensions.SendRequestAsync(System.DirectoryServices.Protocols.LdapConnection, System.DirectoryServices.Protocols.DirectoryRequest, System.TimeSpan)
+  nameWithType: Extensions.SendRequestAsync(LdapConnection, DirectoryRequest, TimeSpan)
+- uid: SharpHoundCommonLib.Extensions.SendRequestAsync*
+  name: SendRequestAsync
+  href: api/SharpHoundCommonLib.Extensions.html#SharpHoundCommonLib_Extensions_SendRequestAsync_
+  commentId: Overload:SharpHoundCommonLib.Extensions.SendRequestAsync
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Extensions.SendRequestAsync
+  nameWithType: Extensions.SendRequestAsync
 - uid: SharpHoundCommonLib.Extensions.ToArrayAsync*
   name: ToArrayAsync
   href: api/SharpHoundCommonLib.Extensions.html#SharpHoundCommonLib_Extensions_ToArrayAsync_
@@ -4026,6 +4039,19 @@ references:
   commentId: T:SharpHoundCommonLib.IRegistryKey
   fullName: SharpHoundCommonLib.IRegistryKey
   nameWithType: IRegistryKey
+- uid: SharpHoundCommonLib.IRegistryKey.GetSubKeyNames
+  name: GetSubKeyNames()
+  href: api/SharpHoundCommonLib.IRegistryKey.html#SharpHoundCommonLib_IRegistryKey_GetSubKeyNames
+  commentId: M:SharpHoundCommonLib.IRegistryKey.GetSubKeyNames
+  fullName: SharpHoundCommonLib.IRegistryKey.GetSubKeyNames()
+  nameWithType: IRegistryKey.GetSubKeyNames()
+- uid: SharpHoundCommonLib.IRegistryKey.GetSubKeyNames*
+  name: GetSubKeyNames
+  href: api/SharpHoundCommonLib.IRegistryKey.html#SharpHoundCommonLib_IRegistryKey_GetSubKeyNames_
+  commentId: Overload:SharpHoundCommonLib.IRegistryKey.GetSubKeyNames
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.IRegistryKey.GetSubKeyNames
+  nameWithType: IRegistryKey.GetSubKeyNames
 - uid: SharpHoundCommonLib.IRegistryKey.GetValue(System.String,System.String)
   name: GetValue(String, String)
   href: api/SharpHoundCommonLib.IRegistryKey.html#SharpHoundCommonLib_IRegistryKey_GetValue_System_String_System_String_
@@ -6223,6 +6249,19 @@ references:
   commentId: T:SharpHoundCommonLib.MockRegistryKey
   fullName: SharpHoundCommonLib.MockRegistryKey
   nameWithType: MockRegistryKey
+- uid: SharpHoundCommonLib.MockRegistryKey.GetSubKeyNames
+  name: GetSubKeyNames()
+  href: api/SharpHoundCommonLib.MockRegistryKey.html#SharpHoundCommonLib_MockRegistryKey_GetSubKeyNames
+  commentId: M:SharpHoundCommonLib.MockRegistryKey.GetSubKeyNames
+  fullName: SharpHoundCommonLib.MockRegistryKey.GetSubKeyNames()
+  nameWithType: MockRegistryKey.GetSubKeyNames()
+- uid: SharpHoundCommonLib.MockRegistryKey.GetSubKeyNames*
+  name: GetSubKeyNames
+  href: api/SharpHoundCommonLib.MockRegistryKey.html#SharpHoundCommonLib_MockRegistryKey_GetSubKeyNames_
+  commentId: Overload:SharpHoundCommonLib.MockRegistryKey.GetSubKeyNames
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.MockRegistryKey.GetSubKeyNames
+  nameWithType: MockRegistryKey.GetSubKeyNames
 - uid: SharpHoundCommonLib.MockRegistryKey.GetValue(System.String,System.String)
   name: GetValue(String, String)
   href: api/SharpHoundCommonLib.MockRegistryKey.html#SharpHoundCommonLib_MockRegistryKey_GetValue_System_String_System_String_
@@ -6439,15 +6478,15 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.Ntlm.HttpNtlmAuthenticationService.HttpNtlmAuthenticationService
   nameWithType: HttpNtlmAuthenticationService.HttpNtlmAuthenticationService
-- uid: SharpHoundCommonLib.Ntlm.HttpNtlmAuthenticationService.EnsureRequiresAuth(System.Uri,System.Nullable{System.Boolean})
-  name: EnsureRequiresAuth(Uri, Nullable<Boolean>)
-  href: api/SharpHoundCommonLib.Ntlm.HttpNtlmAuthenticationService.html#SharpHoundCommonLib_Ntlm_HttpNtlmAuthenticationService_EnsureRequiresAuth_System_Uri_System_Nullable_System_Boolean__
-  commentId: M:SharpHoundCommonLib.Ntlm.HttpNtlmAuthenticationService.EnsureRequiresAuth(System.Uri,System.Nullable{System.Boolean})
-  name.vb: EnsureRequiresAuth(Uri, Nullable(Of Boolean))
-  fullName: SharpHoundCommonLib.Ntlm.HttpNtlmAuthenticationService.EnsureRequiresAuth(System.Uri, System.Nullable<System.Boolean>)
-  fullName.vb: SharpHoundCommonLib.Ntlm.HttpNtlmAuthenticationService.EnsureRequiresAuth(System.Uri, System.Nullable(Of System.Boolean))
-  nameWithType: HttpNtlmAuthenticationService.EnsureRequiresAuth(Uri, Nullable<Boolean>)
-  nameWithType.vb: HttpNtlmAuthenticationService.EnsureRequiresAuth(Uri, Nullable(Of Boolean))
+- uid: SharpHoundCommonLib.Ntlm.HttpNtlmAuthenticationService.EnsureRequiresAuth(System.Uri,System.Nullable{System.Boolean},System.TimeSpan)
+  name: EnsureRequiresAuth(Uri, Nullable<Boolean>, TimeSpan)
+  href: api/SharpHoundCommonLib.Ntlm.HttpNtlmAuthenticationService.html#SharpHoundCommonLib_Ntlm_HttpNtlmAuthenticationService_EnsureRequiresAuth_System_Uri_System_Nullable_System_Boolean__System_TimeSpan_
+  commentId: M:SharpHoundCommonLib.Ntlm.HttpNtlmAuthenticationService.EnsureRequiresAuth(System.Uri,System.Nullable{System.Boolean},System.TimeSpan)
+  name.vb: EnsureRequiresAuth(Uri, Nullable(Of Boolean), TimeSpan)
+  fullName: SharpHoundCommonLib.Ntlm.HttpNtlmAuthenticationService.EnsureRequiresAuth(System.Uri, System.Nullable<System.Boolean>, System.TimeSpan)
+  fullName.vb: SharpHoundCommonLib.Ntlm.HttpNtlmAuthenticationService.EnsureRequiresAuth(System.Uri, System.Nullable(Of System.Boolean), System.TimeSpan)
+  nameWithType: HttpNtlmAuthenticationService.EnsureRequiresAuth(Uri, Nullable<Boolean>, TimeSpan)
+  nameWithType.vb: HttpNtlmAuthenticationService.EnsureRequiresAuth(Uri, Nullable(Of Boolean), TimeSpan)
 - uid: SharpHoundCommonLib.Ntlm.HttpNtlmAuthenticationService.EnsureRequiresAuth*
   name: EnsureRequiresAuth
   href: api/SharpHoundCommonLib.Ntlm.HttpNtlmAuthenticationService.html#SharpHoundCommonLib_Ntlm_HttpNtlmAuthenticationService_EnsureRequiresAuth_
@@ -6928,12 +6967,12 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.Ntlm.NtlmAuthenticationHandler.Options
   nameWithType: NtlmAuthenticationHandler.Options
-- uid: SharpHoundCommonLib.Ntlm.NtlmAuthenticationHandler.PerformNtlmAuthenticationAsync(SharpHoundCommonLib.Ntlm.INtlmTransport)
-  name: PerformNtlmAuthenticationAsync(INtlmTransport)
-  href: api/SharpHoundCommonLib.Ntlm.NtlmAuthenticationHandler.html#SharpHoundCommonLib_Ntlm_NtlmAuthenticationHandler_PerformNtlmAuthenticationAsync_SharpHoundCommonLib_Ntlm_INtlmTransport_
-  commentId: M:SharpHoundCommonLib.Ntlm.NtlmAuthenticationHandler.PerformNtlmAuthenticationAsync(SharpHoundCommonLib.Ntlm.INtlmTransport)
-  fullName: SharpHoundCommonLib.Ntlm.NtlmAuthenticationHandler.PerformNtlmAuthenticationAsync(SharpHoundCommonLib.Ntlm.INtlmTransport)
-  nameWithType: NtlmAuthenticationHandler.PerformNtlmAuthenticationAsync(INtlmTransport)
+- uid: SharpHoundCommonLib.Ntlm.NtlmAuthenticationHandler.PerformNtlmAuthenticationAsync(SharpHoundCommonLib.Ntlm.INtlmTransport,System.Threading.CancellationToken)
+  name: PerformNtlmAuthenticationAsync(INtlmTransport, CancellationToken)
+  href: api/SharpHoundCommonLib.Ntlm.NtlmAuthenticationHandler.html#SharpHoundCommonLib_Ntlm_NtlmAuthenticationHandler_PerformNtlmAuthenticationAsync_SharpHoundCommonLib_Ntlm_INtlmTransport_System_Threading_CancellationToken_
+  commentId: M:SharpHoundCommonLib.Ntlm.NtlmAuthenticationHandler.PerformNtlmAuthenticationAsync(SharpHoundCommonLib.Ntlm.INtlmTransport,System.Threading.CancellationToken)
+  fullName: SharpHoundCommonLib.Ntlm.NtlmAuthenticationHandler.PerformNtlmAuthenticationAsync(SharpHoundCommonLib.Ntlm.INtlmTransport, System.Threading.CancellationToken)
+  nameWithType: NtlmAuthenticationHandler.PerformNtlmAuthenticationAsync(INtlmTransport, CancellationToken)
 - uid: SharpHoundCommonLib.Ntlm.NtlmAuthenticationHandler.PerformNtlmAuthenticationAsync*
   name: PerformNtlmAuthenticationAsync
   href: api/SharpHoundCommonLib.Ntlm.NtlmAuthenticationHandler.html#SharpHoundCommonLib_Ntlm_NtlmAuthenticationHandler_PerformNtlmAuthenticationAsync_
@@ -10016,12 +10055,12 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.Processors.DCLdapProcessor.DCLdapProcessor
   nameWithType: DCLdapProcessor.DCLdapProcessor
-- uid: SharpHoundCommonLib.Processors.DCLdapProcessor.Authenticate(System.Uri,SharpHoundCommonLib.Processors.LdapAuthOptions,SharpHoundCommonLib.Ntlm.NtlmAuthenticationHandler,SharpHoundCommonLib.Ntlm.LdapTransport)
-  name: Authenticate(Uri, LdapAuthOptions, NtlmAuthenticationHandler, LdapTransport)
-  href: api/SharpHoundCommonLib.Processors.DCLdapProcessor.html#SharpHoundCommonLib_Processors_DCLdapProcessor_Authenticate_System_Uri_SharpHoundCommonLib_Processors_LdapAuthOptions_SharpHoundCommonLib_Ntlm_NtlmAuthenticationHandler_SharpHoundCommonLib_Ntlm_LdapTransport_
-  commentId: M:SharpHoundCommonLib.Processors.DCLdapProcessor.Authenticate(System.Uri,SharpHoundCommonLib.Processors.LdapAuthOptions,SharpHoundCommonLib.Ntlm.NtlmAuthenticationHandler,SharpHoundCommonLib.Ntlm.LdapTransport)
-  fullName: SharpHoundCommonLib.Processors.DCLdapProcessor.Authenticate(System.Uri, SharpHoundCommonLib.Processors.LdapAuthOptions, SharpHoundCommonLib.Ntlm.NtlmAuthenticationHandler, SharpHoundCommonLib.Ntlm.LdapTransport)
-  nameWithType: DCLdapProcessor.Authenticate(Uri, LdapAuthOptions, NtlmAuthenticationHandler, LdapTransport)
+- uid: SharpHoundCommonLib.Processors.DCLdapProcessor.Authenticate(System.Uri,SharpHoundCommonLib.Processors.LdapAuthOptions,SharpHoundCommonLib.Ntlm.NtlmAuthenticationHandler,SharpHoundCommonLib.Ntlm.LdapTransport,System.Threading.CancellationToken)
+  name: Authenticate(Uri, LdapAuthOptions, NtlmAuthenticationHandler, LdapTransport, CancellationToken)
+  href: api/SharpHoundCommonLib.Processors.DCLdapProcessor.html#SharpHoundCommonLib_Processors_DCLdapProcessor_Authenticate_System_Uri_SharpHoundCommonLib_Processors_LdapAuthOptions_SharpHoundCommonLib_Ntlm_NtlmAuthenticationHandler_SharpHoundCommonLib_Ntlm_LdapTransport_System_Threading_CancellationToken_
+  commentId: M:SharpHoundCommonLib.Processors.DCLdapProcessor.Authenticate(System.Uri,SharpHoundCommonLib.Processors.LdapAuthOptions,SharpHoundCommonLib.Ntlm.NtlmAuthenticationHandler,SharpHoundCommonLib.Ntlm.LdapTransport,System.Threading.CancellationToken)
+  fullName: SharpHoundCommonLib.Processors.DCLdapProcessor.Authenticate(System.Uri, SharpHoundCommonLib.Processors.LdapAuthOptions, SharpHoundCommonLib.Ntlm.NtlmAuthenticationHandler, SharpHoundCommonLib.Ntlm.LdapTransport, System.Threading.CancellationToken)
+  nameWithType: DCLdapProcessor.Authenticate(Uri, LdapAuthOptions, NtlmAuthenticationHandler, LdapTransport, CancellationToken)
 - uid: SharpHoundCommonLib.Processors.DCLdapProcessor.Authenticate*
   name: Authenticate
   href: api/SharpHoundCommonLib.Processors.DCLdapProcessor.html#SharpHoundCommonLib_Processors_DCLdapProcessor_Authenticate_
@@ -10029,12 +10068,12 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.Processors.DCLdapProcessor.Authenticate
   nameWithType: DCLdapProcessor.Authenticate
-- uid: SharpHoundCommonLib.Processors.DCLdapProcessor.CheckIsChannelBindingDisabled
-  name: CheckIsChannelBindingDisabled()
-  href: api/SharpHoundCommonLib.Processors.DCLdapProcessor.html#SharpHoundCommonLib_Processors_DCLdapProcessor_CheckIsChannelBindingDisabled
-  commentId: M:SharpHoundCommonLib.Processors.DCLdapProcessor.CheckIsChannelBindingDisabled
-  fullName: SharpHoundCommonLib.Processors.DCLdapProcessor.CheckIsChannelBindingDisabled()
-  nameWithType: DCLdapProcessor.CheckIsChannelBindingDisabled()
+- uid: SharpHoundCommonLib.Processors.DCLdapProcessor.CheckIsChannelBindingDisabled(System.Threading.CancellationToken)
+  name: CheckIsChannelBindingDisabled(CancellationToken)
+  href: api/SharpHoundCommonLib.Processors.DCLdapProcessor.html#SharpHoundCommonLib_Processors_DCLdapProcessor_CheckIsChannelBindingDisabled_System_Threading_CancellationToken_
+  commentId: M:SharpHoundCommonLib.Processors.DCLdapProcessor.CheckIsChannelBindingDisabled(System.Threading.CancellationToken)
+  fullName: SharpHoundCommonLib.Processors.DCLdapProcessor.CheckIsChannelBindingDisabled(System.Threading.CancellationToken)
+  nameWithType: DCLdapProcessor.CheckIsChannelBindingDisabled(CancellationToken)
 - uid: SharpHoundCommonLib.Processors.DCLdapProcessor.CheckIsChannelBindingDisabled*
   name: CheckIsChannelBindingDisabled
   href: api/SharpHoundCommonLib.Processors.DCLdapProcessor.html#SharpHoundCommonLib_Processors_DCLdapProcessor_CheckIsChannelBindingDisabled_
@@ -10042,12 +10081,12 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.Processors.DCLdapProcessor.CheckIsChannelBindingDisabled
   nameWithType: DCLdapProcessor.CheckIsChannelBindingDisabled
-- uid: SharpHoundCommonLib.Processors.DCLdapProcessor.CheckIsNtlmSigningRequired
-  name: CheckIsNtlmSigningRequired()
-  href: api/SharpHoundCommonLib.Processors.DCLdapProcessor.html#SharpHoundCommonLib_Processors_DCLdapProcessor_CheckIsNtlmSigningRequired
-  commentId: M:SharpHoundCommonLib.Processors.DCLdapProcessor.CheckIsNtlmSigningRequired
-  fullName: SharpHoundCommonLib.Processors.DCLdapProcessor.CheckIsNtlmSigningRequired()
-  nameWithType: DCLdapProcessor.CheckIsNtlmSigningRequired()
+- uid: SharpHoundCommonLib.Processors.DCLdapProcessor.CheckIsNtlmSigningRequired(System.Threading.CancellationToken)
+  name: CheckIsNtlmSigningRequired(CancellationToken)
+  href: api/SharpHoundCommonLib.Processors.DCLdapProcessor.html#SharpHoundCommonLib_Processors_DCLdapProcessor_CheckIsNtlmSigningRequired_System_Threading_CancellationToken_
+  commentId: M:SharpHoundCommonLib.Processors.DCLdapProcessor.CheckIsNtlmSigningRequired(System.Threading.CancellationToken)
+  fullName: SharpHoundCommonLib.Processors.DCLdapProcessor.CheckIsNtlmSigningRequired(System.Threading.CancellationToken)
+  nameWithType: DCLdapProcessor.CheckIsNtlmSigningRequired(CancellationToken)
 - uid: SharpHoundCommonLib.Processors.DCLdapProcessor.CheckIsNtlmSigningRequired*
   name: CheckIsNtlmSigningRequired
   href: api/SharpHoundCommonLib.Processors.DCLdapProcessor.html#SharpHoundCommonLib_Processors_DCLdapProcessor_CheckIsNtlmSigningRequired_
@@ -10502,6 +10541,18 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.Processors.LdapPropertyProcessor.LdapPropertyProcessor
   nameWithType: LdapPropertyProcessor.LdapPropertyProcessor
+- uid: SharpHoundCommonLib.Processors.LdapPropertyProcessor.ComputerStatusDelegate
+  name: LdapPropertyProcessor.ComputerStatusDelegate
+  href: api/SharpHoundCommonLib.Processors.LdapPropertyProcessor.ComputerStatusDelegate.html
+  commentId: T:SharpHoundCommonLib.Processors.LdapPropertyProcessor.ComputerStatusDelegate
+  fullName: SharpHoundCommonLib.Processors.LdapPropertyProcessor.ComputerStatusDelegate
+  nameWithType: LdapPropertyProcessor.ComputerStatusDelegate
+- uid: SharpHoundCommonLib.Processors.LdapPropertyProcessor.ComputerStatusEvent
+  name: ComputerStatusEvent
+  href: api/SharpHoundCommonLib.Processors.LdapPropertyProcessor.html#SharpHoundCommonLib_Processors_LdapPropertyProcessor_ComputerStatusEvent
+  commentId: E:SharpHoundCommonLib.Processors.LdapPropertyProcessor.ComputerStatusEvent
+  fullName: SharpHoundCommonLib.Processors.LdapPropertyProcessor.ComputerStatusEvent
+  nameWithType: LdapPropertyProcessor.ComputerStatusEvent
 - uid: SharpHoundCommonLib.Processors.LdapPropertyProcessor.FunctionalLevelToString(System.Int32)
   name: FunctionalLevelToString(Int32)
   href: api/SharpHoundCommonLib.Processors.LdapPropertyProcessor.html#SharpHoundCommonLib_Processors_LdapPropertyProcessor_FunctionalLevelToString_System_Int32_
@@ -10759,12 +10810,12 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.Processors.LocalGroupProcessor.GetLocalGroups
   nameWithType: LocalGroupProcessor.GetLocalGroups
-- uid: SharpHoundCommonLib.Processors.LocalGroupProcessor.OpenSamServer(System.String)
-  name: OpenSamServer(String)
-  href: api/SharpHoundCommonLib.Processors.LocalGroupProcessor.html#SharpHoundCommonLib_Processors_LocalGroupProcessor_OpenSamServer_System_String_
-  commentId: M:SharpHoundCommonLib.Processors.LocalGroupProcessor.OpenSamServer(System.String)
-  fullName: SharpHoundCommonLib.Processors.LocalGroupProcessor.OpenSamServer(System.String)
-  nameWithType: LocalGroupProcessor.OpenSamServer(String)
+- uid: SharpHoundCommonLib.Processors.LocalGroupProcessor.OpenSamServer(System.String,System.TimeSpan)
+  name: OpenSamServer(String, TimeSpan)
+  href: api/SharpHoundCommonLib.Processors.LocalGroupProcessor.html#SharpHoundCommonLib_Processors_LocalGroupProcessor_OpenSamServer_System_String_System_TimeSpan_
+  commentId: M:SharpHoundCommonLib.Processors.LocalGroupProcessor.OpenSamServer(System.String,System.TimeSpan)
+  fullName: SharpHoundCommonLib.Processors.LocalGroupProcessor.OpenSamServer(System.String, System.TimeSpan)
+  nameWithType: LocalGroupProcessor.OpenSamServer(String, TimeSpan)
 - uid: SharpHoundCommonLib.Processors.LocalGroupProcessor.OpenSamServer*
   name: OpenSamServer
   href: api/SharpHoundCommonLib.Processors.LocalGroupProcessor.html#SharpHoundCommonLib_Processors_LocalGroupProcessor_OpenSamServer_
@@ -11093,6 +11144,18 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.Processors.SPNProcessors.SPNProcessors
   nameWithType: SPNProcessors.SPNProcessors
+- uid: SharpHoundCommonLib.Processors.SPNProcessors.ComputerStatusDelegate
+  name: SPNProcessors.ComputerStatusDelegate
+  href: api/SharpHoundCommonLib.Processors.SPNProcessors.ComputerStatusDelegate.html
+  commentId: T:SharpHoundCommonLib.Processors.SPNProcessors.ComputerStatusDelegate
+  fullName: SharpHoundCommonLib.Processors.SPNProcessors.ComputerStatusDelegate
+  nameWithType: SPNProcessors.ComputerStatusDelegate
+- uid: SharpHoundCommonLib.Processors.SPNProcessors.ComputerStatusEvent
+  name: ComputerStatusEvent
+  href: api/SharpHoundCommonLib.Processors.SPNProcessors.html#SharpHoundCommonLib_Processors_SPNProcessors_ComputerStatusEvent
+  commentId: E:SharpHoundCommonLib.Processors.SPNProcessors.ComputerStatusEvent
+  fullName: SharpHoundCommonLib.Processors.SPNProcessors.ComputerStatusEvent
+  nameWithType: SPNProcessors.ComputerStatusEvent
 - uid: SharpHoundCommonLib.Processors.SPNProcessors.ReadSPNTargets(SharpHoundCommonLib.ResolvedSearchResult,SharpHoundCommonLib.IDirectoryObject)
   name: ReadSPNTargets(ResolvedSearchResult, IDirectoryObject)
   href: api/SharpHoundCommonLib.Processors.SPNProcessors.html#SharpHoundCommonLib_Processors_SPNProcessors_ReadSPNTargets_SharpHoundCommonLib_ResolvedSearchResult_SharpHoundCommonLib_IDirectoryObject_
@@ -11735,19 +11798,45 @@ references:
   commentId: T:SharpHoundCommonLib.SHRegistryKey
   fullName: SharpHoundCommonLib.SHRegistryKey
   nameWithType: SHRegistryKey
-- uid: SharpHoundCommonLib.SHRegistryKey.#ctor(Microsoft.Win32.RegistryHive,System.String)
-  name: SHRegistryKey(RegistryHive, String)
-  href: api/SharpHoundCommonLib.SHRegistryKey.html#SharpHoundCommonLib_SHRegistryKey__ctor_Microsoft_Win32_RegistryHive_System_String_
-  commentId: M:SharpHoundCommonLib.SHRegistryKey.#ctor(Microsoft.Win32.RegistryHive,System.String)
-  fullName: SharpHoundCommonLib.SHRegistryKey.SHRegistryKey(Microsoft.Win32.RegistryHive, System.String)
-  nameWithType: SHRegistryKey.SHRegistryKey(RegistryHive, String)
-- uid: SharpHoundCommonLib.SHRegistryKey.#ctor*
-  name: SHRegistryKey
-  href: api/SharpHoundCommonLib.SHRegistryKey.html#SharpHoundCommonLib_SHRegistryKey__ctor_
-  commentId: Overload:SharpHoundCommonLib.SHRegistryKey.#ctor
+- uid: SharpHoundCommonLib.SHRegistryKey.Connect(Microsoft.Win32.RegistryHive,System.String)
+  name: Connect(RegistryHive, String)
+  href: api/SharpHoundCommonLib.SHRegistryKey.html#SharpHoundCommonLib_SHRegistryKey_Connect_Microsoft_Win32_RegistryHive_System_String_
+  commentId: M:SharpHoundCommonLib.SHRegistryKey.Connect(Microsoft.Win32.RegistryHive,System.String)
+  fullName: SharpHoundCommonLib.SHRegistryKey.Connect(Microsoft.Win32.RegistryHive, System.String)
+  nameWithType: SHRegistryKey.Connect(RegistryHive, String)
+- uid: SharpHoundCommonLib.SHRegistryKey.Connect*
+  name: Connect
+  href: api/SharpHoundCommonLib.SHRegistryKey.html#SharpHoundCommonLib_SHRegistryKey_Connect_
+  commentId: Overload:SharpHoundCommonLib.SHRegistryKey.Connect
   isSpec: "True"
-  fullName: SharpHoundCommonLib.SHRegistryKey.SHRegistryKey
-  nameWithType: SHRegistryKey.SHRegistryKey
+  fullName: SharpHoundCommonLib.SHRegistryKey.Connect
+  nameWithType: SHRegistryKey.Connect
+- uid: SharpHoundCommonLib.SHRegistryKey.Dispose
+  name: Dispose()
+  href: api/SharpHoundCommonLib.SHRegistryKey.html#SharpHoundCommonLib_SHRegistryKey_Dispose
+  commentId: M:SharpHoundCommonLib.SHRegistryKey.Dispose
+  fullName: SharpHoundCommonLib.SHRegistryKey.Dispose()
+  nameWithType: SHRegistryKey.Dispose()
+- uid: SharpHoundCommonLib.SHRegistryKey.Dispose*
+  name: Dispose
+  href: api/SharpHoundCommonLib.SHRegistryKey.html#SharpHoundCommonLib_SHRegistryKey_Dispose_
+  commentId: Overload:SharpHoundCommonLib.SHRegistryKey.Dispose
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.SHRegistryKey.Dispose
+  nameWithType: SHRegistryKey.Dispose
+- uid: SharpHoundCommonLib.SHRegistryKey.GetSubKeyNames
+  name: GetSubKeyNames()
+  href: api/SharpHoundCommonLib.SHRegistryKey.html#SharpHoundCommonLib_SHRegistryKey_GetSubKeyNames
+  commentId: M:SharpHoundCommonLib.SHRegistryKey.GetSubKeyNames
+  fullName: SharpHoundCommonLib.SHRegistryKey.GetSubKeyNames()
+  nameWithType: SHRegistryKey.GetSubKeyNames()
+- uid: SharpHoundCommonLib.SHRegistryKey.GetSubKeyNames*
+  name: GetSubKeyNames
+  href: api/SharpHoundCommonLib.SHRegistryKey.html#SharpHoundCommonLib_SHRegistryKey_GetSubKeyNames_
+  commentId: Overload:SharpHoundCommonLib.SHRegistryKey.GetSubKeyNames
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.SHRegistryKey.GetSubKeyNames
+  nameWithType: SHRegistryKey.GetSubKeyNames
 - uid: SharpHoundCommonLib.SHRegistryKey.GetValue(System.String,System.String)
   name: GetValue(String, String)
   href: api/SharpHoundCommonLib.SHRegistryKey.html#SharpHoundCommonLib_SHRegistryKey_GetValue_System_String_System_String_
@@ -11773,12 +11862,12 @@ references:
   commentId: T:SharpHoundCommonLib.SMB.ISmbScanner
   fullName: SharpHoundCommonLib.SMB.ISmbScanner
   nameWithType: ISmbScanner
-- uid: SharpHoundCommonLib.SMB.ISmbScanner.ScanHost(System.String,System.Int32)
-  name: ScanHost(String, Int32)
-  href: api/SharpHoundCommonLib.SMB.ISmbScanner.html#SharpHoundCommonLib_SMB_ISmbScanner_ScanHost_System_String_System_Int32_
-  commentId: M:SharpHoundCommonLib.SMB.ISmbScanner.ScanHost(System.String,System.Int32)
-  fullName: SharpHoundCommonLib.SMB.ISmbScanner.ScanHost(System.String, System.Int32)
-  nameWithType: ISmbScanner.ScanHost(String, Int32)
+- uid: SharpHoundCommonLib.SMB.ISmbScanner.ScanHost(System.String,System.Int32,System.Threading.CancellationToken)
+  name: ScanHost(String, Int32, CancellationToken)
+  href: api/SharpHoundCommonLib.SMB.ISmbScanner.html#SharpHoundCommonLib_SMB_ISmbScanner_ScanHost_System_String_System_Int32_System_Threading_CancellationToken_
+  commentId: M:SharpHoundCommonLib.SMB.ISmbScanner.ScanHost(System.String,System.Int32,System.Threading.CancellationToken)
+  fullName: SharpHoundCommonLib.SMB.ISmbScanner.ScanHost(System.String, System.Int32, System.Threading.CancellationToken)
+  nameWithType: ISmbScanner.ScanHost(String, Int32, CancellationToken)
 - uid: SharpHoundCommonLib.SMB.ISmbScanner.ScanHost*
   name: ScanHost
   href: api/SharpHoundCommonLib.SMB.ISmbScanner.html#SharpHoundCommonLib_SMB_ISmbScanner_ScanHost_
@@ -13760,12 +13849,12 @@ references:
   commentId: F:SharpHoundCommonLib.SMB.SmbScanner._log
   fullName: SharpHoundCommonLib.SMB.SmbScanner._log
   nameWithType: SmbScanner._log
-- uid: SharpHoundCommonLib.SMB.SmbScanner.ScanHost(System.String,System.Int32)
-  name: ScanHost(String, Int32)
-  href: api/SharpHoundCommonLib.SMB.SmbScanner.html#SharpHoundCommonLib_SMB_SmbScanner_ScanHost_System_String_System_Int32_
-  commentId: M:SharpHoundCommonLib.SMB.SmbScanner.ScanHost(System.String,System.Int32)
-  fullName: SharpHoundCommonLib.SMB.SmbScanner.ScanHost(System.String, System.Int32)
-  nameWithType: SmbScanner.ScanHost(String, Int32)
+- uid: SharpHoundCommonLib.SMB.SmbScanner.ScanHost(System.String,System.Int32,System.Threading.CancellationToken)
+  name: ScanHost(String, Int32, CancellationToken)
+  href: api/SharpHoundCommonLib.SMB.SmbScanner.html#SharpHoundCommonLib_SMB_SmbScanner_ScanHost_System_String_System_Int32_System_Threading_CancellationToken_
+  commentId: M:SharpHoundCommonLib.SMB.SmbScanner.ScanHost(System.String,System.Int32,System.Threading.CancellationToken)
+  fullName: SharpHoundCommonLib.SMB.SmbScanner.ScanHost(System.String, System.Int32, System.Threading.CancellationToken)
+  nameWithType: SmbScanner.ScanHost(String, Int32, CancellationToken)
 - uid: SharpHoundCommonLib.SMB.SmbScanner.ScanHost*
   name: ScanHost
   href: api/SharpHoundCommonLib.SMB.SmbScanner.html#SharpHoundCommonLib_SMB_SmbScanner_ScanHost_
@@ -14045,6 +14134,96 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.ThirdParty.PSOpenAD.SspiException.ErrorCode
   nameWithType: SspiException.ErrorCode
+- uid: SharpHoundCommonLib.Timeout
+  name: Timeout
+  href: api/SharpHoundCommonLib.Timeout.html
+  commentId: T:SharpHoundCommonLib.Timeout
+  fullName: SharpHoundCommonLib.Timeout
+  nameWithType: Timeout
+- uid: SharpHoundCommonLib.Timeout.ExecuteNetAPIWithTimeout*
+  name: ExecuteNetAPIWithTimeout
+  href: api/SharpHoundCommonLib.Timeout.html#SharpHoundCommonLib_Timeout_ExecuteNetAPIWithTimeout_
+  commentId: Overload:SharpHoundCommonLib.Timeout.ExecuteNetAPIWithTimeout
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Timeout.ExecuteNetAPIWithTimeout
+  nameWithType: Timeout.ExecuteNetAPIWithTimeout
+- uid: SharpHoundCommonLib.Timeout.ExecuteNetAPIWithTimeout``1(System.TimeSpan,System.Func{System.Threading.CancellationToken,SharpHoundRPC.NetAPINative.NetAPIResult{``0}})
+  name: ExecuteNetAPIWithTimeout<T>(TimeSpan, Func<CancellationToken, NetAPIResult<T>>)
+  href: api/SharpHoundCommonLib.Timeout.html#SharpHoundCommonLib_Timeout_ExecuteNetAPIWithTimeout__1_System_TimeSpan_System_Func_System_Threading_CancellationToken_SharpHoundRPC_NetAPINative_NetAPIResult___0___
+  commentId: M:SharpHoundCommonLib.Timeout.ExecuteNetAPIWithTimeout``1(System.TimeSpan,System.Func{System.Threading.CancellationToken,SharpHoundRPC.NetAPINative.NetAPIResult{``0}})
+  name.vb: ExecuteNetAPIWithTimeout(Of T)(TimeSpan, Func(Of CancellationToken, NetAPIResult(Of T)))
+  fullName: SharpHoundCommonLib.Timeout.ExecuteNetAPIWithTimeout<T>(System.TimeSpan, System.Func<System.Threading.CancellationToken, SharpHoundRPC.NetAPINative.NetAPIResult<T>>)
+  fullName.vb: SharpHoundCommonLib.Timeout.ExecuteNetAPIWithTimeout(Of T)(System.TimeSpan, System.Func(Of System.Threading.CancellationToken, SharpHoundRPC.NetAPINative.NetAPIResult(Of T)))
+  nameWithType: Timeout.ExecuteNetAPIWithTimeout<T>(TimeSpan, Func<CancellationToken, NetAPIResult<T>>)
+  nameWithType.vb: Timeout.ExecuteNetAPIWithTimeout(Of T)(TimeSpan, Func(Of CancellationToken, NetAPIResult(Of T)))
+- uid: SharpHoundCommonLib.Timeout.ExecuteRPCWithTimeout*
+  name: ExecuteRPCWithTimeout
+  href: api/SharpHoundCommonLib.Timeout.html#SharpHoundCommonLib_Timeout_ExecuteRPCWithTimeout_
+  commentId: Overload:SharpHoundCommonLib.Timeout.ExecuteRPCWithTimeout
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Timeout.ExecuteRPCWithTimeout
+  nameWithType: Timeout.ExecuteRPCWithTimeout
+- uid: SharpHoundCommonLib.Timeout.ExecuteRPCWithTimeout``1(System.TimeSpan,System.Func{System.Threading.CancellationToken,SharpHoundRPC.Result{``0}})
+  name: ExecuteRPCWithTimeout<T>(TimeSpan, Func<CancellationToken, Result<T>>)
+  href: api/SharpHoundCommonLib.Timeout.html#SharpHoundCommonLib_Timeout_ExecuteRPCWithTimeout__1_System_TimeSpan_System_Func_System_Threading_CancellationToken_SharpHoundRPC_Result___0___
+  commentId: M:SharpHoundCommonLib.Timeout.ExecuteRPCWithTimeout``1(System.TimeSpan,System.Func{System.Threading.CancellationToken,SharpHoundRPC.Result{``0}})
+  name.vb: ExecuteRPCWithTimeout(Of T)(TimeSpan, Func(Of CancellationToken, Result(Of T)))
+  fullName: SharpHoundCommonLib.Timeout.ExecuteRPCWithTimeout<T>(System.TimeSpan, System.Func<System.Threading.CancellationToken, SharpHoundRPC.Result<T>>)
+  fullName.vb: SharpHoundCommonLib.Timeout.ExecuteRPCWithTimeout(Of T)(System.TimeSpan, System.Func(Of System.Threading.CancellationToken, SharpHoundRPC.Result(Of T)))
+  nameWithType: Timeout.ExecuteRPCWithTimeout<T>(TimeSpan, Func<CancellationToken, Result<T>>)
+  nameWithType.vb: Timeout.ExecuteRPCWithTimeout(Of T)(TimeSpan, Func(Of CancellationToken, Result(Of T)))
+- uid: SharpHoundCommonLib.Timeout.ExecuteRPCWithTimeout``1(System.TimeSpan,System.Func{System.Threading.CancellationToken,System.Threading.Tasks.Task{SharpHoundRPC.Result{``0}}})
+  name: ExecuteRPCWithTimeout<T>(TimeSpan, Func<CancellationToken, Task<Result<T>>>)
+  href: api/SharpHoundCommonLib.Timeout.html#SharpHoundCommonLib_Timeout_ExecuteRPCWithTimeout__1_System_TimeSpan_System_Func_System_Threading_CancellationToken_System_Threading_Tasks_Task_SharpHoundRPC_Result___0____
+  commentId: M:SharpHoundCommonLib.Timeout.ExecuteRPCWithTimeout``1(System.TimeSpan,System.Func{System.Threading.CancellationToken,System.Threading.Tasks.Task{SharpHoundRPC.Result{``0}}})
+  name.vb: ExecuteRPCWithTimeout(Of T)(TimeSpan, Func(Of CancellationToken, Task(Of Result(Of T))))
+  fullName: SharpHoundCommonLib.Timeout.ExecuteRPCWithTimeout<T>(System.TimeSpan, System.Func<System.Threading.CancellationToken, System.Threading.Tasks.Task<SharpHoundRPC.Result<T>>>)
+  fullName.vb: SharpHoundCommonLib.Timeout.ExecuteRPCWithTimeout(Of T)(System.TimeSpan, System.Func(Of System.Threading.CancellationToken, System.Threading.Tasks.Task(Of SharpHoundRPC.Result(Of T))))
+  nameWithType: Timeout.ExecuteRPCWithTimeout<T>(TimeSpan, Func<CancellationToken, Task<Result<T>>>)
+  nameWithType.vb: Timeout.ExecuteRPCWithTimeout(Of T)(TimeSpan, Func(Of CancellationToken, Task(Of Result(Of T))))
+- uid: SharpHoundCommonLib.Timeout.ExecuteWithTimeout(System.TimeSpan,System.Action{System.Threading.CancellationToken},System.Threading.CancellationToken)
+  name: ExecuteWithTimeout(TimeSpan, Action<CancellationToken>, CancellationToken)
+  href: api/SharpHoundCommonLib.Timeout.html#SharpHoundCommonLib_Timeout_ExecuteWithTimeout_System_TimeSpan_System_Action_System_Threading_CancellationToken__System_Threading_CancellationToken_
+  commentId: M:SharpHoundCommonLib.Timeout.ExecuteWithTimeout(System.TimeSpan,System.Action{System.Threading.CancellationToken},System.Threading.CancellationToken)
+  name.vb: ExecuteWithTimeout(TimeSpan, Action(Of CancellationToken), CancellationToken)
+  fullName: SharpHoundCommonLib.Timeout.ExecuteWithTimeout(System.TimeSpan, System.Action<System.Threading.CancellationToken>, System.Threading.CancellationToken)
+  fullName.vb: SharpHoundCommonLib.Timeout.ExecuteWithTimeout(System.TimeSpan, System.Action(Of System.Threading.CancellationToken), System.Threading.CancellationToken)
+  nameWithType: Timeout.ExecuteWithTimeout(TimeSpan, Action<CancellationToken>, CancellationToken)
+  nameWithType.vb: Timeout.ExecuteWithTimeout(TimeSpan, Action(Of CancellationToken), CancellationToken)
+- uid: SharpHoundCommonLib.Timeout.ExecuteWithTimeout(System.TimeSpan,System.Func{System.Threading.CancellationToken,System.Threading.Tasks.Task},System.Threading.CancellationToken)
+  name: ExecuteWithTimeout(TimeSpan, Func<CancellationToken, Task>, CancellationToken)
+  href: api/SharpHoundCommonLib.Timeout.html#SharpHoundCommonLib_Timeout_ExecuteWithTimeout_System_TimeSpan_System_Func_System_Threading_CancellationToken_System_Threading_Tasks_Task__System_Threading_CancellationToken_
+  commentId: M:SharpHoundCommonLib.Timeout.ExecuteWithTimeout(System.TimeSpan,System.Func{System.Threading.CancellationToken,System.Threading.Tasks.Task},System.Threading.CancellationToken)
+  name.vb: ExecuteWithTimeout(TimeSpan, Func(Of CancellationToken, Task), CancellationToken)
+  fullName: SharpHoundCommonLib.Timeout.ExecuteWithTimeout(System.TimeSpan, System.Func<System.Threading.CancellationToken, System.Threading.Tasks.Task>, System.Threading.CancellationToken)
+  fullName.vb: SharpHoundCommonLib.Timeout.ExecuteWithTimeout(System.TimeSpan, System.Func(Of System.Threading.CancellationToken, System.Threading.Tasks.Task), System.Threading.CancellationToken)
+  nameWithType: Timeout.ExecuteWithTimeout(TimeSpan, Func<CancellationToken, Task>, CancellationToken)
+  nameWithType.vb: Timeout.ExecuteWithTimeout(TimeSpan, Func(Of CancellationToken, Task), CancellationToken)
+- uid: SharpHoundCommonLib.Timeout.ExecuteWithTimeout*
+  name: ExecuteWithTimeout
+  href: api/SharpHoundCommonLib.Timeout.html#SharpHoundCommonLib_Timeout_ExecuteWithTimeout_
+  commentId: Overload:SharpHoundCommonLib.Timeout.ExecuteWithTimeout
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Timeout.ExecuteWithTimeout
+  nameWithType: Timeout.ExecuteWithTimeout
+- uid: SharpHoundCommonLib.Timeout.ExecuteWithTimeout``1(System.TimeSpan,System.Func{System.Threading.CancellationToken,``0},System.Threading.CancellationToken)
+  name: ExecuteWithTimeout<T>(TimeSpan, Func<CancellationToken, T>, CancellationToken)
+  href: api/SharpHoundCommonLib.Timeout.html#SharpHoundCommonLib_Timeout_ExecuteWithTimeout__1_System_TimeSpan_System_Func_System_Threading_CancellationToken___0__System_Threading_CancellationToken_
+  commentId: M:SharpHoundCommonLib.Timeout.ExecuteWithTimeout``1(System.TimeSpan,System.Func{System.Threading.CancellationToken,``0},System.Threading.CancellationToken)
+  name.vb: ExecuteWithTimeout(Of T)(TimeSpan, Func(Of CancellationToken, T), CancellationToken)
+  fullName: SharpHoundCommonLib.Timeout.ExecuteWithTimeout<T>(System.TimeSpan, System.Func<System.Threading.CancellationToken, T>, System.Threading.CancellationToken)
+  fullName.vb: SharpHoundCommonLib.Timeout.ExecuteWithTimeout(Of T)(System.TimeSpan, System.Func(Of System.Threading.CancellationToken, T), System.Threading.CancellationToken)
+  nameWithType: Timeout.ExecuteWithTimeout<T>(TimeSpan, Func<CancellationToken, T>, CancellationToken)
+  nameWithType.vb: Timeout.ExecuteWithTimeout(Of T)(TimeSpan, Func(Of CancellationToken, T), CancellationToken)
+- uid: SharpHoundCommonLib.Timeout.ExecuteWithTimeout``1(System.TimeSpan,System.Func{System.Threading.CancellationToken,System.Threading.Tasks.Task{``0}},System.Threading.CancellationToken)
+  name: ExecuteWithTimeout<T>(TimeSpan, Func<CancellationToken, Task<T>>, CancellationToken)
+  href: api/SharpHoundCommonLib.Timeout.html#SharpHoundCommonLib_Timeout_ExecuteWithTimeout__1_System_TimeSpan_System_Func_System_Threading_CancellationToken_System_Threading_Tasks_Task___0___System_Threading_CancellationToken_
+  commentId: M:SharpHoundCommonLib.Timeout.ExecuteWithTimeout``1(System.TimeSpan,System.Func{System.Threading.CancellationToken,System.Threading.Tasks.Task{``0}},System.Threading.CancellationToken)
+  name.vb: ExecuteWithTimeout(Of T)(TimeSpan, Func(Of CancellationToken, Task(Of T)), CancellationToken)
+  fullName: SharpHoundCommonLib.Timeout.ExecuteWithTimeout<T>(System.TimeSpan, System.Func<System.Threading.CancellationToken, System.Threading.Tasks.Task<T>>, System.Threading.CancellationToken)
+  fullName.vb: SharpHoundCommonLib.Timeout.ExecuteWithTimeout(Of T)(System.TimeSpan, System.Func(Of System.Threading.CancellationToken, System.Threading.Tasks.Task(Of T)), System.Threading.CancellationToken)
+  nameWithType: Timeout.ExecuteWithTimeout<T>(TimeSpan, Func<CancellationToken, Task<T>>, CancellationToken)
+  nameWithType.vb: Timeout.ExecuteWithTimeout(Of T)(TimeSpan, Func(Of CancellationToken, Task(Of T)), CancellationToken)
 - uid: SharpHoundCommonLib.WellKnownPrincipal
   name: WellKnownPrincipal
   href: api/SharpHoundCommonLib.WellKnownPrincipal.html
@@ -14118,31 +14297,6 @@ references:
   isSpec: "True"
   fullName: SharpHoundRPC.Extensions.Rid
   nameWithType: Extensions.Rid
-- uid: SharpHoundRPC.Extensions.TimeoutAfter*
-  name: TimeoutAfter
-  href: api/SharpHoundRPC.Extensions.html#SharpHoundRPC_Extensions_TimeoutAfter_
-  commentId: Overload:SharpHoundRPC.Extensions.TimeoutAfter
-  isSpec: "True"
-  fullName: SharpHoundRPC.Extensions.TimeoutAfter
-  nameWithType: Extensions.TimeoutAfter
-- uid: SharpHoundRPC.Extensions.TimeoutAfter``1(System.Threading.Tasks.Task{SharpHoundRPC.NetAPINative.NetAPIResult{``0}},System.TimeSpan)
-  name: TimeoutAfter<T>(Task<NetAPIResult<T>>, TimeSpan)
-  href: api/SharpHoundRPC.Extensions.html#SharpHoundRPC_Extensions_TimeoutAfter__1_System_Threading_Tasks_Task_SharpHoundRPC_NetAPINative_NetAPIResult___0___System_TimeSpan_
-  commentId: M:SharpHoundRPC.Extensions.TimeoutAfter``1(System.Threading.Tasks.Task{SharpHoundRPC.NetAPINative.NetAPIResult{``0}},System.TimeSpan)
-  name.vb: TimeoutAfter(Of T)(Task(Of NetAPIResult(Of T)), TimeSpan)
-  fullName: SharpHoundRPC.Extensions.TimeoutAfter<T>(System.Threading.Tasks.Task<SharpHoundRPC.NetAPINative.NetAPIResult<T>>, System.TimeSpan)
-  fullName.vb: SharpHoundRPC.Extensions.TimeoutAfter(Of T)(System.Threading.Tasks.Task(Of SharpHoundRPC.NetAPINative.NetAPIResult(Of T)), System.TimeSpan)
-  nameWithType: Extensions.TimeoutAfter<T>(Task<NetAPIResult<T>>, TimeSpan)
-  nameWithType.vb: Extensions.TimeoutAfter(Of T)(Task(Of NetAPIResult(Of T)), TimeSpan)
-- uid: SharpHoundRPC.Extensions.TimeoutAfter``1(System.Threading.Tasks.Task{SharpHoundRPC.Result{``0}},System.TimeSpan)
-  name: TimeoutAfter<T>(Task<Result<T>>, TimeSpan)
-  href: api/SharpHoundRPC.Extensions.html#SharpHoundRPC_Extensions_TimeoutAfter__1_System_Threading_Tasks_Task_SharpHoundRPC_Result___0___System_TimeSpan_
-  commentId: M:SharpHoundRPC.Extensions.TimeoutAfter``1(System.Threading.Tasks.Task{SharpHoundRPC.Result{``0}},System.TimeSpan)
-  name.vb: TimeoutAfter(Of T)(Task(Of Result(Of T)), TimeSpan)
-  fullName: SharpHoundRPC.Extensions.TimeoutAfter<T>(System.Threading.Tasks.Task<SharpHoundRPC.Result<T>>, System.TimeSpan)
-  fullName.vb: SharpHoundRPC.Extensions.TimeoutAfter(Of T)(System.Threading.Tasks.Task(Of SharpHoundRPC.Result(Of T)), System.TimeSpan)
-  nameWithType: Extensions.TimeoutAfter<T>(Task<Result<T>>, TimeSpan)
-  nameWithType.vb: Extensions.TimeoutAfter(Of T)(Task(Of Result(Of T)), TimeSpan)
 - uid: SharpHoundRPC.Handles
   name: SharpHoundRPC.Handles
   href: api/SharpHoundRPC.Handles.html
@@ -17545,12 +17699,12 @@ references:
   isSpec: "True"
   fullName: SharpHoundRPC.Wrappers.ISAMServer.GetDomains
   nameWithType: ISAMServer.GetDomains
-- uid: SharpHoundRPC.Wrappers.ISAMServer.GetMachineSid(System.String)
-  name: GetMachineSid(String)
-  href: api/SharpHoundRPC.Wrappers.ISAMServer.html#SharpHoundRPC_Wrappers_ISAMServer_GetMachineSid_System_String_
-  commentId: M:SharpHoundRPC.Wrappers.ISAMServer.GetMachineSid(System.String)
-  fullName: SharpHoundRPC.Wrappers.ISAMServer.GetMachineSid(System.String)
-  nameWithType: ISAMServer.GetMachineSid(String)
+- uid: SharpHoundRPC.Wrappers.ISAMServer.GetMachineSid(System.String,System.Threading.CancellationToken)
+  name: GetMachineSid(String, CancellationToken)
+  href: api/SharpHoundRPC.Wrappers.ISAMServer.html#SharpHoundRPC_Wrappers_ISAMServer_GetMachineSid_System_String_System_Threading_CancellationToken_
+  commentId: M:SharpHoundRPC.Wrappers.ISAMServer.GetMachineSid(System.String,System.Threading.CancellationToken)
+  fullName: SharpHoundRPC.Wrappers.ISAMServer.GetMachineSid(System.String, System.Threading.CancellationToken)
+  nameWithType: ISAMServer.GetMachineSid(String, CancellationToken)
 - uid: SharpHoundRPC.Wrappers.ISAMServer.GetMachineSid*
   name: GetMachineSid
   href: api/SharpHoundRPC.Wrappers.ISAMServer.html#SharpHoundRPC_Wrappers_ISAMServer_GetMachineSid_
@@ -17571,12 +17725,12 @@ references:
   isSpec: "True"
   fullName: SharpHoundRPC.Wrappers.ISAMServer.LookupDomain
   nameWithType: ISAMServer.LookupDomain
-- uid: SharpHoundRPC.Wrappers.ISAMServer.LookupPrincipalBySid(System.Security.Principal.SecurityIdentifier)
-  name: LookupPrincipalBySid(SecurityIdentifier)
-  href: api/SharpHoundRPC.Wrappers.ISAMServer.html#SharpHoundRPC_Wrappers_ISAMServer_LookupPrincipalBySid_System_Security_Principal_SecurityIdentifier_
-  commentId: M:SharpHoundRPC.Wrappers.ISAMServer.LookupPrincipalBySid(System.Security.Principal.SecurityIdentifier)
-  fullName: SharpHoundRPC.Wrappers.ISAMServer.LookupPrincipalBySid(System.Security.Principal.SecurityIdentifier)
-  nameWithType: ISAMServer.LookupPrincipalBySid(SecurityIdentifier)
+- uid: SharpHoundRPC.Wrappers.ISAMServer.LookupPrincipalBySid(System.Security.Principal.SecurityIdentifier,System.Threading.CancellationToken)
+  name: LookupPrincipalBySid(SecurityIdentifier, CancellationToken)
+  href: api/SharpHoundRPC.Wrappers.ISAMServer.html#SharpHoundRPC_Wrappers_ISAMServer_LookupPrincipalBySid_System_Security_Principal_SecurityIdentifier_System_Threading_CancellationToken_
+  commentId: M:SharpHoundRPC.Wrappers.ISAMServer.LookupPrincipalBySid(System.Security.Principal.SecurityIdentifier,System.Threading.CancellationToken)
+  fullName: SharpHoundRPC.Wrappers.ISAMServer.LookupPrincipalBySid(System.Security.Principal.SecurityIdentifier, System.Threading.CancellationToken)
+  nameWithType: ISAMServer.LookupPrincipalBySid(SecurityIdentifier, CancellationToken)
 - uid: SharpHoundRPC.Wrappers.ISAMServer.LookupPrincipalBySid*
   name: LookupPrincipalBySid
   href: api/SharpHoundRPC.Wrappers.ISAMServer.html#SharpHoundRPC_Wrappers_ISAMServer_LookupPrincipalBySid_
@@ -17590,12 +17744,12 @@ references:
   commentId: M:SharpHoundRPC.Wrappers.ISAMServer.OpenDomain(System.Security.Principal.SecurityIdentifier,SharpHoundRPC.SAMRPCNative.SAMEnums.DomainAccessMask)
   fullName: SharpHoundRPC.Wrappers.ISAMServer.OpenDomain(System.Security.Principal.SecurityIdentifier, SharpHoundRPC.SAMRPCNative.SAMEnums.DomainAccessMask)
   nameWithType: ISAMServer.OpenDomain(SecurityIdentifier, SAMEnums.DomainAccessMask)
-- uid: SharpHoundRPC.Wrappers.ISAMServer.OpenDomain(System.String,SharpHoundRPC.SAMRPCNative.SAMEnums.DomainAccessMask)
-  name: OpenDomain(String, SAMEnums.DomainAccessMask)
-  href: api/SharpHoundRPC.Wrappers.ISAMServer.html#SharpHoundRPC_Wrappers_ISAMServer_OpenDomain_System_String_SharpHoundRPC_SAMRPCNative_SAMEnums_DomainAccessMask_
-  commentId: M:SharpHoundRPC.Wrappers.ISAMServer.OpenDomain(System.String,SharpHoundRPC.SAMRPCNative.SAMEnums.DomainAccessMask)
-  fullName: SharpHoundRPC.Wrappers.ISAMServer.OpenDomain(System.String, SharpHoundRPC.SAMRPCNative.SAMEnums.DomainAccessMask)
-  nameWithType: ISAMServer.OpenDomain(String, SAMEnums.DomainAccessMask)
+- uid: SharpHoundRPC.Wrappers.ISAMServer.OpenDomain(System.String,SharpHoundRPC.SAMRPCNative.SAMEnums.DomainAccessMask,System.Threading.CancellationToken)
+  name: OpenDomain(String, SAMEnums.DomainAccessMask, CancellationToken)
+  href: api/SharpHoundRPC.Wrappers.ISAMServer.html#SharpHoundRPC_Wrappers_ISAMServer_OpenDomain_System_String_SharpHoundRPC_SAMRPCNative_SAMEnums_DomainAccessMask_System_Threading_CancellationToken_
+  commentId: M:SharpHoundRPC.Wrappers.ISAMServer.OpenDomain(System.String,SharpHoundRPC.SAMRPCNative.SAMEnums.DomainAccessMask,System.Threading.CancellationToken)
+  fullName: SharpHoundRPC.Wrappers.ISAMServer.OpenDomain(System.String, SharpHoundRPC.SAMRPCNative.SAMEnums.DomainAccessMask, System.Threading.CancellationToken)
+  nameWithType: ISAMServer.OpenDomain(String, SAMEnums.DomainAccessMask, CancellationToken)
 - uid: SharpHoundRPC.Wrappers.ISAMServer.OpenDomain*
   name: OpenDomain
   href: api/SharpHoundRPC.Wrappers.ISAMServer.html#SharpHoundRPC_Wrappers_ISAMServer_OpenDomain_
@@ -17955,12 +18109,12 @@ references:
   isSpec: "True"
   fullName: SharpHoundRPC.Wrappers.SAMServer.GetDomains
   nameWithType: SAMServer.GetDomains
-- uid: SharpHoundRPC.Wrappers.SAMServer.GetMachineSid(System.String)
-  name: GetMachineSid(String)
-  href: api/SharpHoundRPC.Wrappers.SAMServer.html#SharpHoundRPC_Wrappers_SAMServer_GetMachineSid_System_String_
-  commentId: M:SharpHoundRPC.Wrappers.SAMServer.GetMachineSid(System.String)
-  fullName: SharpHoundRPC.Wrappers.SAMServer.GetMachineSid(System.String)
-  nameWithType: SAMServer.GetMachineSid(String)
+- uid: SharpHoundRPC.Wrappers.SAMServer.GetMachineSid(System.String,System.Threading.CancellationToken)
+  name: GetMachineSid(String, CancellationToken)
+  href: api/SharpHoundRPC.Wrappers.SAMServer.html#SharpHoundRPC_Wrappers_SAMServer_GetMachineSid_System_String_System_Threading_CancellationToken_
+  commentId: M:SharpHoundRPC.Wrappers.SAMServer.GetMachineSid(System.String,System.Threading.CancellationToken)
+  fullName: SharpHoundRPC.Wrappers.SAMServer.GetMachineSid(System.String, System.Threading.CancellationToken)
+  nameWithType: SAMServer.GetMachineSid(String, CancellationToken)
 - uid: SharpHoundRPC.Wrappers.SAMServer.GetMachineSid*
   name: GetMachineSid
   href: api/SharpHoundRPC.Wrappers.SAMServer.html#SharpHoundRPC_Wrappers_SAMServer_GetMachineSid_
@@ -17981,12 +18135,12 @@ references:
   isSpec: "True"
   fullName: SharpHoundRPC.Wrappers.SAMServer.LookupDomain
   nameWithType: SAMServer.LookupDomain
-- uid: SharpHoundRPC.Wrappers.SAMServer.LookupPrincipalBySid(System.Security.Principal.SecurityIdentifier)
-  name: LookupPrincipalBySid(SecurityIdentifier)
-  href: api/SharpHoundRPC.Wrappers.SAMServer.html#SharpHoundRPC_Wrappers_SAMServer_LookupPrincipalBySid_System_Security_Principal_SecurityIdentifier_
-  commentId: M:SharpHoundRPC.Wrappers.SAMServer.LookupPrincipalBySid(System.Security.Principal.SecurityIdentifier)
-  fullName: SharpHoundRPC.Wrappers.SAMServer.LookupPrincipalBySid(System.Security.Principal.SecurityIdentifier)
-  nameWithType: SAMServer.LookupPrincipalBySid(SecurityIdentifier)
+- uid: SharpHoundRPC.Wrappers.SAMServer.LookupPrincipalBySid(System.Security.Principal.SecurityIdentifier,System.Threading.CancellationToken)
+  name: LookupPrincipalBySid(SecurityIdentifier, CancellationToken)
+  href: api/SharpHoundRPC.Wrappers.SAMServer.html#SharpHoundRPC_Wrappers_SAMServer_LookupPrincipalBySid_System_Security_Principal_SecurityIdentifier_System_Threading_CancellationToken_
+  commentId: M:SharpHoundRPC.Wrappers.SAMServer.LookupPrincipalBySid(System.Security.Principal.SecurityIdentifier,System.Threading.CancellationToken)
+  fullName: SharpHoundRPC.Wrappers.SAMServer.LookupPrincipalBySid(System.Security.Principal.SecurityIdentifier, System.Threading.CancellationToken)
+  nameWithType: SAMServer.LookupPrincipalBySid(SecurityIdentifier, CancellationToken)
 - uid: SharpHoundRPC.Wrappers.SAMServer.LookupPrincipalBySid*
   name: LookupPrincipalBySid
   href: api/SharpHoundRPC.Wrappers.SAMServer.html#SharpHoundRPC_Wrappers_SAMServer_LookupPrincipalBySid_
@@ -18000,12 +18154,12 @@ references:
   commentId: M:SharpHoundRPC.Wrappers.SAMServer.OpenDomain(System.Security.Principal.SecurityIdentifier,SharpHoundRPC.SAMRPCNative.SAMEnums.DomainAccessMask)
   fullName: SharpHoundRPC.Wrappers.SAMServer.OpenDomain(System.Security.Principal.SecurityIdentifier, SharpHoundRPC.SAMRPCNative.SAMEnums.DomainAccessMask)
   nameWithType: SAMServer.OpenDomain(SecurityIdentifier, SAMEnums.DomainAccessMask)
-- uid: SharpHoundRPC.Wrappers.SAMServer.OpenDomain(System.String,SharpHoundRPC.SAMRPCNative.SAMEnums.DomainAccessMask)
-  name: OpenDomain(String, SAMEnums.DomainAccessMask)
-  href: api/SharpHoundRPC.Wrappers.SAMServer.html#SharpHoundRPC_Wrappers_SAMServer_OpenDomain_System_String_SharpHoundRPC_SAMRPCNative_SAMEnums_DomainAccessMask_
-  commentId: M:SharpHoundRPC.Wrappers.SAMServer.OpenDomain(System.String,SharpHoundRPC.SAMRPCNative.SAMEnums.DomainAccessMask)
-  fullName: SharpHoundRPC.Wrappers.SAMServer.OpenDomain(System.String, SharpHoundRPC.SAMRPCNative.SAMEnums.DomainAccessMask)
-  nameWithType: SAMServer.OpenDomain(String, SAMEnums.DomainAccessMask)
+- uid: SharpHoundRPC.Wrappers.SAMServer.OpenDomain(System.String,SharpHoundRPC.SAMRPCNative.SAMEnums.DomainAccessMask,System.Threading.CancellationToken)
+  name: OpenDomain(String, SAMEnums.DomainAccessMask, CancellationToken)
+  href: api/SharpHoundRPC.Wrappers.SAMServer.html#SharpHoundRPC_Wrappers_SAMServer_OpenDomain_System_String_SharpHoundRPC_SAMRPCNative_SAMEnums_DomainAccessMask_System_Threading_CancellationToken_
+  commentId: M:SharpHoundRPC.Wrappers.SAMServer.OpenDomain(System.String,SharpHoundRPC.SAMRPCNative.SAMEnums.DomainAccessMask,System.Threading.CancellationToken)
+  fullName: SharpHoundRPC.Wrappers.SAMServer.OpenDomain(System.String, SharpHoundRPC.SAMRPCNative.SAMEnums.DomainAccessMask, System.Threading.CancellationToken)
+  nameWithType: SAMServer.OpenDomain(String, SAMEnums.DomainAccessMask, CancellationToken)
 - uid: SharpHoundRPC.Wrappers.SAMServer.OpenDomain*
   name: OpenDomain
   href: api/SharpHoundRPC.Wrappers.SAMServer.html#SharpHoundRPC_Wrappers_SAMServer_OpenDomain_
