@@ -271,6 +271,7 @@ namespace SharpHoundCommonLib.Processors {
                 _log.LogWarning(
                     "Security descriptor on object {Name} exceeds maximum allowable length. Unable to process",
                     objectName);
+                yield break;
             }
 
             _log.LogDebug("Processing ACL for {ObjectName}", objectName);
