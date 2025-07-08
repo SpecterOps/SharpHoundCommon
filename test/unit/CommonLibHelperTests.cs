@@ -231,23 +231,23 @@ namespace CommonLibTest {
                 @"DC=..Deleted-_msdcs.testlab.local\0ADEL:af1f072f-28d7-4b86-9b87-a408bfc9cb0d,CN=Deleted Objects,DC=testlab,DC=local");
             Assert.Equal("TESTLAB.LOCAL", result);
         }
-        
+
         [Fact]
         public void ConvertTimestampToUnixEpoch_ValidTimestamp() {
             var d = DateTime.Parse("2025-04-07T00:00:00.0000000-07:00");
             var result =
-                Helpers.ConvertTimestampToUnixEpoch(d.ToString("yyyyMMddHHmmss.0K")); 
-            var dateTimeOffset = DateTimeOffset.FromUnixTimeSeconds(result); 
+                Helpers.ConvertTimestampToUnixEpoch(d.ToString("yyyyMMddHHmmss.0K"));
+            var dateTimeOffset = DateTimeOffset.FromUnixTimeSeconds(result);
 
             Assert.Equal(d.ToUniversalTime(), dateTimeOffset.DateTime);
         }
-        
+
         [Fact]
         public void ConvertTimestampToUnixEpoch_InvalidTimestamp() {
             var result =
-                Helpers.ConvertTimestampToUnixEpoch("-201adsfasf12180244"); 
+                Helpers.ConvertTimestampToUnixEpoch("-201adsfasf12180244");
 
-            Assert.Equal(result, 0);
+            Assert.Equal(0, result);
         }
     }
 }

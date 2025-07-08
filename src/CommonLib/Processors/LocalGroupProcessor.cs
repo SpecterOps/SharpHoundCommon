@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using SharpHoundCommonLib.Enums;
 using SharpHoundCommonLib.OutputTypes;
-using SharpHoundRPC;
 using SharpHoundRPC.Shared;
 using SharpHoundRPC.Wrappers;
 
@@ -26,9 +25,13 @@ namespace SharpHoundCommonLib.Processors
 
         public event ComputerStatusDelegate ComputerStatusEvent;
 
-        public virtual SharpHoundRPC.Result<ISAMServer> OpenSamServer(string computerName)
+        public virtual SharpHoundRPC.Result<ISAMServer> OpenSamServer(string computerName, TimeSpan timeout = default)
         {
-            var result = SAMServer.OpenServer(computerName);
+            if (timeout == default) {
+                timeout = TimeSpan.FromMinutes(2);
+            }
+
+            var result = Timeout.ExecuteRPCWithTimeout(timeout, (_) => SAMServer.OpenServer(computerName)).GetAwaiter().GetResult();
             if (result.IsFailed)
             {
                 return SharpHoundRPC.Result<ISAMServer>.Fail(result.SError);
@@ -57,9 +60,9 @@ namespace SharpHoundCommonLib.Processors
             if (timeout == default) {
                 timeout = TimeSpan.FromMinutes(2);
             }
-            
+
             //Open a handle to the server
-            var openServerResult = await Task.Run(() => OpenSamServer(computerName)).TimeoutAfter(timeout);
+            var openServerResult = OpenSamServer(computerName, timeout);
             if (openServerResult.IsFailed)
             {
                 _log.LogTrace("OpenServer failed on {ComputerName}: {Error}", computerName, openServerResult.SError);
@@ -78,7 +81,7 @@ namespace SharpHoundCommonLib.Processors
             //Try to get the machine sid for the computer if its not already cached
             SecurityIdentifier machineSid;
             if (!Cache.GetMachineSid(computerObjectId, out var tempMachineSid)) {
-                var getMachineSidResult = await Task.Run(() => server.GetMachineSid()).TimeoutAfter(timeout);
+                var getMachineSidResult = await Timeout.ExecuteRPCWithTimeout(timeout, (timeoutToken) => server.GetMachineSid(cancellationToken: timeoutToken));
                 if (getMachineSidResult.IsFailed)
                 {
                     _log.LogTrace("GetMachineSid failed on {ComputerName}: {Error}", computerName, getMachineSidResult.SError);
@@ -102,7 +105,7 @@ namespace SharpHoundCommonLib.Processors
             }
 
             //Get all available domains in the server
-            var getDomainsResult = await Task.Run(() => server.GetDomains()).TimeoutAfter(timeout);
+            var getDomainsResult = await Timeout.ExecuteRPCWithTimeout(timeout, (_) => server.GetDomains());
             if (getDomainsResult.IsFailed)
             {
                 _log.LogTrace("GetDomains failed on {ComputerName}: {Error}", computerName, getDomainsResult.SError);
@@ -121,9 +124,9 @@ namespace SharpHoundCommonLib.Processors
                 //Skip non-builtin domains on domain controllers
                 if (isDomainController && !domainResult.Name.Equals("builtin", StringComparison.OrdinalIgnoreCase))
                     continue;
-                
+
                 //Open a handle to the domain
-                var openDomainResult = await Task.Run(() => server.OpenDomain(domainResult.Name)).TimeoutAfter(timeout);
+                var openDomainResult = await Timeout.ExecuteRPCWithTimeout(timeout, (timeoutToken) => server.OpenDomain(domainResult.Name, cancellationToken: timeoutToken));
                 if (openDomainResult.IsFailed)
                 {
                     _log.LogTrace("Failed to open domain {Domain} on {ComputerName}: {Error}", domainResult.Name, computerName, openDomainResult.SError);
@@ -142,7 +145,7 @@ namespace SharpHoundCommonLib.Processors
                 var domain = openDomainResult.Value;
 
                 //Open a handle to the available aliases
-                var getAliasesResult = await Task.Run(() => domain.GetAliases()).TimeoutAfter(timeout);
+                var getAliasesResult = await Timeout.ExecuteRPCWithTimeout(timeout, (_) => domain.GetAliases());
 
                 if (getAliasesResult.IsFailed)
                 {
@@ -175,7 +178,7 @@ namespace SharpHoundCommonLib.Processors
                     };
 
                     //Open a handle to the alias
-                    var openAliasResult = await Task.Run(() => domain.OpenAlias(alias.Rid)).TimeoutAfter(timeout);
+                    var openAliasResult = await Timeout.ExecuteRPCWithTimeout(timeout, (_) => domain.OpenAlias(alias.Rid));
                     if (openAliasResult.IsFailed)
                     {
                         _log.LogTrace("Failed to open alias {Alias} with RID {Rid} in domain {Domain} on computer {ComputerName}: {Error}", alias.Name, alias.Rid, domainResult.Name, computerName, openAliasResult.Error);
@@ -196,7 +199,7 @@ namespace SharpHoundCommonLib.Processors
                     
                     var localGroup = openAliasResult.Value;
                     //Call GetMembersInAlias to get raw group members
-                    var getMembersResult = await Task.Run(() => localGroup.GetMembers()).TimeoutAfter(timeout);
+                    var getMembersResult = await Timeout.ExecuteRPCWithTimeout(timeout, (_) => localGroup.GetMembers());
                     if (getMembersResult.IsFailed)
                     {
                         _log.LogTrace("Failed to get members in alias {Alias} with RID {Rid} in domain {Domain} on computer {ComputerName}: {Error}", alias.Name, alias.Rid, domainResult.Name, computerName, openAliasResult.Error);
@@ -271,7 +274,7 @@ namespace SharpHoundCommonLib.Processors
                             }
                             
                             //Attempt to lookup the principal in the server directly
-                            var lookupUserResult = server.LookupPrincipalBySid(securityIdentifier);
+                            var lookupUserResult = await Timeout.ExecuteRPCWithTimeout(timeout, timeoutToken => server.LookupPrincipalBySid(securityIdentifier, timeoutToken));
                             if (lookupUserResult.IsFailed)
                             {
                                 _log.LogTrace("Unable to resolve local sid {SID}: {Error}", sidValue, lookupUserResult.SError);

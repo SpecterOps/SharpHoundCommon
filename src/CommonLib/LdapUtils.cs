@@ -7,6 +7,7 @@ using System.DirectoryServices.ActiveDirectory;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Security.Cryptography;
 using System.Security.Principal;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -165,14 +166,17 @@ namespace SharpHoundCommonLib {
                     Cache.AddType(sid, type);
                     return (true, type);
                 }
-            } catch {
+            }
+            catch {
                 //pass
             }
 
             try {
                 using (var ctx = new PrincipalContext(ContextType.Domain)) {
+                    // Blocking External Call
                     var principal = Principal.FindByIdentity(ctx, IdentityType.Sid, sid);
                     if (principal != null) {
+                        // Blocking External Call
                         var entry = ((DirectoryEntry)principal.GetUnderlyingObject()).ToDirectoryObject();
                         if (entry.GetLabel(out type)) {
                             Cache.AddType(sid, type);
@@ -180,7 +184,8 @@ namespace SharpHoundCommonLib {
                         }
                     }
                 }
-            } catch {
+            }
+            catch {
                 //pass
             }
 
@@ -210,14 +215,17 @@ namespace SharpHoundCommonLib {
                     Cache.AddType(guid, type);
                     return (true, type);
                 }
-            } catch {
+            }
+            catch {
                 //pass
             }
 
             try {
                 using (var ctx = new PrincipalContext(ContextType.Domain)) {
+                    // Blocking External Call
                     var principal = Principal.FindByIdentity(ctx, IdentityType.Guid, guid);
                     if (principal != null) {
+                        // Blocking External Call
                         var entry = ((DirectoryEntry)principal.GetUnderlyingObject()).ToDirectoryObject();
                         if (entry.GetLabel(out type)) {
                             Cache.AddType(guid, type);
@@ -225,7 +233,8 @@ namespace SharpHoundCommonLib {
                         }
                     }
                 }
-            } catch {
+            }
+            catch {
                 //pass
             }
 
@@ -284,7 +293,8 @@ namespace SharpHoundCommonLib {
                     var forestName = domainObject.Forest.Name.ToUpper();
                     DomainToForestCache.TryAdd(domain, forestName);
                     return (true, forestName);
-                } catch {
+                }
+                catch {
                     //pass
                 }
             }
@@ -320,7 +330,8 @@ namespace SharpHoundCommonLib {
             string domainSid;
             try {
                 domainSid = new SecurityIdentifier(sid).AccountDomainSid?.Value.ToUpper();
-            } catch {
+            }
+            catch {
                 var match = SIDRegex.Match(sid);
                 domainSid = match.Success ? match.Groups[1].Value : null;
             }
@@ -339,7 +350,8 @@ namespace SharpHoundCommonLib {
                     Cache.AddDomainSidMapping(domainSid, Helpers.DistinguishedNameToDomain(dn));
                     return (true, Helpers.DistinguishedNameToDomain(dn));
                 }
-            } catch {
+            }
+            catch {
                 //pass
             }
 
@@ -350,6 +362,7 @@ namespace SharpHoundCommonLib {
 
             try {
                 using (var ctx = new PrincipalContext(ContextType.Domain)) {
+                    // Blocking External Call
                     var principal = Principal.FindByIdentity(ctx, IdentityType.Sid, sid);
                     if (principal != null) {
                         var dn = principal.DistinguishedName;
@@ -359,7 +372,8 @@ namespace SharpHoundCommonLib {
                         }
                     }
                 }
-            } catch {
+            }
+            catch {
                 //pass
             }
 
@@ -420,7 +434,8 @@ namespace SharpHoundCommonLib {
                     domainSid = sid;
                     return (true, domainSid);
                 }
-            } catch {
+            }
+            catch {
                 //we expect this to fail sometimes
             }
 
@@ -431,7 +446,8 @@ namespace SharpHoundCommonLib {
                         Cache.AddDomainSidMapping(domainName, domainSid);
                         return (true, domainSid);
                     }
-                } catch {
+                }
+                catch {
                     //we expect this to fail sometimes (not sure why, but better safe than sorry)
                 }
 
@@ -442,7 +458,8 @@ namespace SharpHoundCommonLib {
                     domainSid = sid.AccountDomainSid.ToString().ToUpper();
                     Cache.AddDomainSidMapping(domainName, domainSid);
                     return (true, domainSid);
-                } catch {
+                }
+                catch {
                     //We expect this to fail if the username doesn't exist in the domain
                 }
 
@@ -485,12 +502,15 @@ namespace SharpHoundCommonLib {
                         ? new DirectoryContext(DirectoryContextType.Domain, domainName)
                         : new DirectoryContext(DirectoryContextType.Domain);
 
+                // Blocking External Call
                 domain = Domain.GetDomain(context);
                 if (domain == null) return false;
                 _domainCache.TryAdd(cacheKey, domain);
                 return true;
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                 _log.LogDebug(e, "GetDomain call failed for domain name {Name}", domainName);
+                domain = null;
                 return false;
             }
         }
@@ -511,13 +531,16 @@ namespace SharpHoundCommonLib {
                         ? new DirectoryContext(DirectoryContextType.Domain, domainName)
                         : new DirectoryContext(DirectoryContextType.Domain);
 
+                // Blocking External Call
                 domain = Domain.GetDomain(context);
                 if (domain == null) return false;
                 _domainCache.TryAdd(domainName, domain);
                 return true;
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                 Logging.Logger.LogDebug("Static GetDomain call failed for domain {DomainName}: {Error}", domainName,
                     e.Message);
+                domain = null;
                 return false;
             }
         }
@@ -538,11 +561,14 @@ namespace SharpHoundCommonLib {
                         _ldapConfig.Password)
                     : new DirectoryContext(DirectoryContextType.Domain);
 
+                // Blocking External Call
                 domain = Domain.GetDomain(context);
                 _domainCache.TryAdd(_nullCacheKey, domain);
                 return true;
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                 _log.LogDebug(e, "GetDomain call failed for blank domain");
+                domain = null;
                 return false;
             }
         }
@@ -589,6 +615,7 @@ namespace SharpHoundCommonLib {
             if (await GetWorkstationInfo(strippedHost) is (true, var workstationInfo)) {
                 var tempName = workstationInfo.ComputerName;
                 var tempDomain = workstationInfo.LanGroup;
+                _log.LogTrace("Get workstation info for {HostName} succeeded. Workstation {ComputerName} found.", host, tempName);
 
                 if (string.IsNullOrWhiteSpace(tempDomain)) {
                     tempDomain = domain;
@@ -604,14 +631,19 @@ namespace SharpHoundCommonLib {
             }
 
             //Try some socket magic to get the NETBIOS name
-            if (RequestNETBIOSNameFromComputer(strippedHost, domain, out var netBiosName)) {
-                if (!string.IsNullOrWhiteSpace(netBiosName)) {
-                    var result = await ResolveAccountName($"{netBiosName}$", domain);
-                    if (result.Success) {
-                        _hostResolutionMap.TryAdd(strippedHost, result.Principal.ObjectIdentifier);
-                        return (true, result.Principal.ObjectIdentifier);
+            try {
+                var (requestNetBiosNameSuccess, netBiosName) = await RequestNETBIOSNameFromComputerWithTimeout(strippedHost, domain);
+                if (requestNetBiosNameSuccess) {
+                    if (!string.IsNullOrWhiteSpace(netBiosName)) {
+                        var result = await ResolveAccountName($"{netBiosName}$", domain);
+                        if (result.Success) {
+                            _hostResolutionMap.TryAdd(strippedHost, result.Principal.ObjectIdentifier);
+                            return (true, result.Principal.ObjectIdentifier);
+                        }
                     }
                 }
+            } catch (TimeoutException) {
+                _log.LogDebug("RequestNETBIOSNameFromComputer timeout on host {Host}, domain {Domain}.", strippedHost, domain);
             }
 
             //Start by handling non-IP address names
@@ -632,7 +664,8 @@ namespace SharpHoundCommonLib {
                         _hostResolutionMap.TryAdd(strippedHost, result.Principal.ObjectIdentifier);
                         return (true, result.Principal.ObjectIdentifier);
                     }
-                } else {
+                }
+                else {
                     //Format: WIN10 (probably a netbios name)
                     var result = await ResolveAccountName($"{strippedHost}$", domain);
                     if (result.Success) {
@@ -643,6 +676,7 @@ namespace SharpHoundCommonLib {
             }
 
             try {
+                // Blocking External Call
                 var resolvedHostname = (await Dns.GetHostEntryAsync(strippedHost)).HostName;
                 var split = resolvedHostname.Split('.');
                 var name = split[0];
@@ -658,7 +692,8 @@ namespace SharpHoundCommonLib {
                     _hostResolutionMap.TryAdd(strippedHost, result.Principal.ObjectIdentifier);
                     return (true, result.Principal.ObjectIdentifier);
                 }
-            } catch {
+            }
+            catch {
                 //pass
             }
 
@@ -672,11 +707,18 @@ namespace SharpHoundCommonLib {
         /// <param name="hostname"></param>
         /// <returns></returns>
         private async Task<(bool Success, NetAPIStructs.WorkstationInfo100 Info)> GetWorkstationInfo(string hostname) {
-            if (!await _portScanner.CheckPort(hostname))
+            if (!await _portScanner.CheckPort(hostname)) {
+                _log.LogTrace("CheckPort returned false for {HostName}.", hostname);
                 return (false, default);
+            }
+            
+            // Blocking External Call
+            var result = await Timeout.ExecuteNetAPIWithTimeout(TimeSpan.FromMinutes(2), (_) => _nativeMethods.CallNetWkstaGetInfo(hostname));
 
-            var result = _nativeMethods.CallNetWkstaGetInfo(hostname);
-            if (result.IsSuccess) return (true, result.Value);
+            if (result.IsSuccess)
+                return (true, result.Value);
+            else
+                _log.LogError(result.Error);
 
             return (false, default);
         }
@@ -689,18 +731,20 @@ namespace SharpHoundCommonLib {
             var sids = new List<string>();
 
             await foreach (var result in Query(new LdapQueryParameters {
-                               DomainName = domain,
-                               Attributes = new[] { LDAPProperties.ObjectSID },
-                               GlobalCatalog = true,
-                               LDAPFilter = new LdapFilter().AddUsers($"(samaccountname={name})").GetFilter()
-                           })) {
+                DomainName = domain,
+                Attributes = new[] { LDAPProperties.ObjectSID },
+                GlobalCatalog = true,
+                LDAPFilter = new LdapFilter().AddUsers($"(samaccountname={name})").GetFilter()
+            })) {
                 if (result.IsSuccess && result.Value.TryGetSecurityIdentifier(out var sid)) {
                     if (await GetWellKnownPrincipal(sid, domain) is (true, var principal)) {
                         sids.Add(principal.ObjectIdentifier);
-                    } else {
+                    }
+                    else {
                         sids.Add(sid);
                     }
-                } else {
+                }
+                else {
                     return (false, Array.Empty<string>());
                 }
             }
@@ -736,6 +780,14 @@ namespace SharpHoundCommonLib {
             return (false, default);
         }
 
+        private static async Task<(bool Success, string NetBiosName)> RequestNETBIOSNameFromComputerWithTimeout(string server, string domain) {
+            var result = await Timeout.ExecuteWithTimeout(TimeSpan.FromMinutes(1), async (timeoutToken) => await RequestNETBIOSNameFromComputerAsync(server, domain, timeoutToken));
+            if (result.IsSuccess)
+                return (result.Value.Success, result.Value.NetBiosName);
+            else
+                throw new TimeoutException();
+        }
+
         /// <summary>
         ///     Uses a socket and a set of bytes to request the NETBIOS name from a remote computer
         /// </summary>
@@ -743,7 +795,7 @@ namespace SharpHoundCommonLib {
         /// <param name="domain"></param>
         /// <param name="netbios"></param>
         /// <returns></returns>
-        private static bool RequestNETBIOSNameFromComputer(string server, string domain, out string netbios) {
+        private static async Task<(bool Success, string NetBiosName)> RequestNETBIOSNameFromComputerAsync(string server, string domain, CancellationToken cancellationToken = default) {
             var receiveBuffer = new byte[1024];
             var requestSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             try {
@@ -759,41 +811,45 @@ namespace SharpHoundCommonLib {
                     try {
                         IPAddress address;
                         if (server.Contains("."))
-                            address = Dns
-                                .GetHostAddresses(server).First(x => x.AddressFamily == AddressFamily.InterNetwork);
+                            address = (await Dns
+                                .GetHostAddressesAsync(server)).First(x => x.AddressFamily == AddressFamily.InterNetwork);
                         else
-                            address = Dns.GetHostAddresses($"{server}.{domain}")[0];
+                            address = (await Dns.GetHostAddressesAsync($"{server}.{domain}"))[0];
 
                         if (address == null) {
-                            netbios = null;
-                            return false;
+                            return (false, null);
                         }
 
                         remoteEndpoint = new IPEndPoint(address, 137);
-                    } catch {
+                    }
+                    catch {
                         //Failed to resolve an IP, so return null
-                        netbios = null;
-                        return false;
+                        return (false, null);
                     }
 
                 var originEndpoint = new IPEndPoint(IPAddress.Any, 0);
+                cancellationToken.ThrowIfCancellationRequested();
+                // Blocking External Call
                 requestSocket.Bind(originEndpoint);
 
                 try {
+                    // Blocking External Call
                     requestSocket.SendTo(NameRequest, remoteEndpoint);
+                    cancellationToken.ThrowIfCancellationRequested();
+                    // Blocking External Call
                     var receivedByteCount = requestSocket.ReceiveFrom(receiveBuffer, ref remoteEndpoint);
                     if (receivedByteCount >= 90) {
-                        netbios = new ASCIIEncoding().GetString(receiveBuffer, 57, 16).Trim('\0', ' ');
-                        return true;
+                        var netbios = new ASCIIEncoding().GetString(receiveBuffer, 57, 16).Trim('\0', ' ');
+                        return (true, netbios);
                     }
 
-                    netbios = null;
-                    return false;
-                } catch (SocketException) {
-                    netbios = null;
-                    return false;
+                    return (false, null);
                 }
-            } finally {
+                catch (SocketException) {
+                    return (false, null);
+                }
+            }
+            finally {
                 //Make sure we close the socket if its open
                 requestSocket.Close();
             }
@@ -883,9 +939,11 @@ namespace SharpHoundCommonLib {
 
             try {
                 using (var ctx = new PrincipalContext(ContextType.Domain)) {
+                    // Blocking External Call
                     var lookupPrincipal =
                         Principal.FindByIdentity(ctx, IdentityType.DistinguishedName, distinguishedName);
                     if (lookupPrincipal != null) {
+                        // Blocking External Call
                         var entry = ((DirectoryEntry)lookupPrincipal.GetUnderlyingObject()).ToDirectoryObject();
                         if (entry.GetObjectIdentifier(out var identifier) && entry.GetLabel(out var label)) {
                             if (await GetWellKnownPrincipal(identifier, domain) is (true, var wellKnownPrincipal)) {
@@ -901,7 +959,8 @@ namespace SharpHoundCommonLib {
 
                     return (false, default);
                 }
-            } catch {
+            }
+            catch {
                 _unresolvablePrincipals.Add(distinguishedName);
                 return (false, default);
             }
@@ -1027,7 +1086,8 @@ namespace SharpHoundCommonLib {
                 if (entry.TryGetProperty(property, out var searchBase)) {
                     return (true, searchBase);
                 }
-            } catch {
+            }
+            catch {
                 //pass
             }
 
@@ -1037,7 +1097,8 @@ namespace SharpHoundCommonLib {
                     if (entry.TryGetProperty(property, out var searchBase)) {
                         return (true, searchBase);
                     }
-                } catch {
+                }
+                catch {
                     //pass
                 }
 
@@ -1132,7 +1193,8 @@ namespace SharpHoundCommonLib {
                 if (distinguishedName.IndexOf(DirectoryPaths.NTAuthStoreLocation, StringComparison.OrdinalIgnoreCase) >=
                     0)
                     type = Label.NTAuthStore;
-            } else if (objectClasses.Contains(ObjectClass.OIDContainerClass, StringComparer.OrdinalIgnoreCase)) {
+            }
+            else if (objectClasses.Contains(ObjectClass.OIDContainerClass, StringComparer.OrdinalIgnoreCase)) {
                 if (distinguishedName.StartsWith(DirectoryPaths.OIDContainerLocation,
                         StringComparison.OrdinalIgnoreCase))
                     type = Label.Container;
@@ -1172,11 +1234,13 @@ namespace SharpHoundCommonLib {
 
             if (directoryObject.TryGetDistinguishedName(out var distinguishedName)) {
                 domain = Helpers.DistinguishedNameToDomain(distinguishedName);
-            } else {
+            }
+            else {
                 if (objectIdentifier.StartsWith("S-1-5") &&
                     await utils.GetDomainNameFromSid(objectIdentifier) is (true, var domainName)) {
                     domain = domainName;
-                } else {
+                }
+                else {
                     return (false, default);
                 }
             }
@@ -1185,9 +1249,11 @@ namespace SharpHoundCommonLib {
             var match = SIDRegex.Match(objectIdentifier);
             if (match.Success) {
                 domainSid = match.Groups[1].Value;
-            } else if (await utils.GetDomainSidFromDomainName(domain) is (true, var sid)) {
+            }
+            else if (await utils.GetDomainSidFromDomainName(domain) is (true, var sid)) {
                 domainSid = sid;
-            } else {
+            }
+            else {
                 Logging.Logger.LogWarning("Failed to resolve domain sid for object {Identifier}", objectIdentifier);
                 domainSid = null;
             }
@@ -1235,85 +1301,99 @@ namespace SharpHoundCommonLib {
                 case Label.Group:
                 case Label.Base:
                     if (!string.IsNullOrWhiteSpace(samAccountName)) {
-                        displayName = $"{samAccountName}@{domain}";    
-                    }else if (directoryObject.TryGetProperty(LDAPProperties.CanonicalName, out var canonicalName)) {
+                        displayName = $"{samAccountName}@{domain}";
+                    }
+                    else if (directoryObject.TryGetProperty(LDAPProperties.CanonicalName, out var canonicalName)) {
                         displayName = $"{canonicalName}@{domain}";
-                    }else if (directoryObject.TryGetProperty(LDAPProperties.Name, out var name)) {
+                    }
+                    else if (directoryObject.TryGetProperty(LDAPProperties.Name, out var name)) {
                         displayName = $"{name}@{domain}";
-                    } else {
+                    }
+                    else {
                         displayName = $"UNKNOWN@{domain}";
                     }
                     break;
                 case Label.Computer: {
-                    var shortName = samAccountName?.TrimEnd('$');
-                    if (directoryObject.TryGetProperty(LDAPProperties.DNSHostName, out var dns)) {
-                        displayName = dns;
-                    } else if (!string.IsNullOrWhiteSpace(shortName)) {
-                        displayName = $"{shortName}.{domain}";
-                    } else if (directoryObject.TryGetProperty(LDAPProperties.CanonicalName,
-                                   out var canonicalName)) {
-                        displayName = $"{canonicalName}.{domain}";
-                    } else if (directoryObject.TryGetProperty(LDAPProperties.Name, out var name)) {
-                        displayName = $"{name}.{domain}";
-                    } else {
-                        displayName = $"UNKNOWN.{domain}";
-                    }
+                        var shortName = samAccountName?.TrimEnd('$');
+                        if (directoryObject.TryGetProperty(LDAPProperties.DNSHostName, out var dns)) {
+                            displayName = dns;
+                        }
+                        else if (!string.IsNullOrWhiteSpace(shortName)) {
+                            displayName = $"{shortName}.{domain}";
+                        }
+                        else if (directoryObject.TryGetProperty(LDAPProperties.CanonicalName,
+                                       out var canonicalName)) {
+                            displayName = $"{canonicalName}.{domain}";
+                        }
+                        else if (directoryObject.TryGetProperty(LDAPProperties.Name, out var name)) {
+                            displayName = $"{name}.{domain}";
+                        }
+                        else {
+                            displayName = $"UNKNOWN.{domain}";
+                        }
 
-                    break;
-                }
+                        break;
+                    }
                 case Label.GPO:
                 case Label.IssuancePolicy: {
-                    if (directoryObject.TryGetProperty(LDAPProperties.DisplayName, out var ldapDisplayName)) {
-                        displayName = $"{ldapDisplayName}@{domain}";
-                    } else if (directoryObject.TryGetProperty(LDAPProperties.CanonicalName,
-                                   out var canonicalName)) {
-                        displayName = $"{canonicalName}@{domain}";
-                    } else {
-                        displayName = $"UNKNOWN@{domain}";
-                    }
+                        if (directoryObject.TryGetProperty(LDAPProperties.DisplayName, out var ldapDisplayName)) {
+                            displayName = $"{ldapDisplayName}@{domain}";
+                        }
+                        else if (directoryObject.TryGetProperty(LDAPProperties.CanonicalName,
+                                       out var canonicalName)) {
+                            displayName = $"{canonicalName}@{domain}";
+                        }
+                        else {
+                            displayName = $"UNKNOWN@{domain}";
+                        }
 
-                    break;
-                }
+                        break;
+                    }
                 case Label.Domain:
                     displayName = domain;
                     break;
                 case Label.OU: {
-                    if (directoryObject.TryGetProperty(LDAPProperties.Name, out var name)) {
-                        displayName = $"{name}@{domain}";
-                    } else if (directoryObject.TryGetProperty(LDAPProperties.OU, out var ou)) {
-                        displayName = $"{ou}@{domain}";
-                    } else {
-                        displayName = $"UNKNOWN@{domain}";
-                    }
+                        if (directoryObject.TryGetProperty(LDAPProperties.Name, out var name)) {
+                            displayName = $"{name}@{domain}";
+                        }
+                        else if (directoryObject.TryGetProperty(LDAPProperties.OU, out var ou)) {
+                            displayName = $"{ou}@{domain}";
+                        }
+                        else {
+                            displayName = $"UNKNOWN@{domain}";
+                        }
 
-                    break;
-                }
+                        break;
+                    }
                 case Label.Container: {
-                    if (directoryObject.TryGetProperty(LDAPProperties.Name, out var name)) {
-                        displayName = $"{name}@{domain}";
-                    } else if (directoryObject.TryGetProperty(LDAPProperties.CanonicalName,
-                                   out var canonicalName)) {
-                        displayName = $"{canonicalName}@{domain}";
-                    } else {
-                        displayName = $"UNKNOWN@{domain}";
-                    }
+                        if (directoryObject.TryGetProperty(LDAPProperties.Name, out var name)) {
+                            displayName = $"{name}@{domain}";
+                        }
+                        else if (directoryObject.TryGetProperty(LDAPProperties.CanonicalName,
+                                       out var canonicalName)) {
+                            displayName = $"{canonicalName}@{domain}";
+                        }
+                        else {
+                            displayName = $"UNKNOWN@{domain}";
+                        }
 
-                    break;
-                }
+                        break;
+                    }
                 case Label.Configuration:
                 case Label.RootCA:
                 case Label.AIACA:
                 case Label.NTAuthStore:
                 case Label.EnterpriseCA:
                 case Label.CertTemplate: {
-                    if (directoryObject.TryGetProperty(LDAPProperties.Name, out var name)) {
-                        displayName = $"{name}@{domain}";
-                    } else {
-                        displayName = $"UNKNOWN@{domain}";
-                    }
+                        if (directoryObject.TryGetProperty(LDAPProperties.Name, out var name)) {
+                            displayName = $"{name}@{domain}";
+                        }
+                        else {
+                            displayName = $"UNKNOWN@{domain}";
+                        }
 
-                    break;
-                }
+                        break;
+                    }
                 default:
                     throw new ArgumentOutOfRangeException();
             }

@@ -100,18 +100,21 @@ namespace SharpHoundCommonLib {
 
                 try {
                     _log.LogTrace("Sending ldap request - {Info}", queryParameters.GetQueryInfo());
-                    response = (SearchResponse)connectionWrapper.Connection.SendRequest(searchRequest);
+                    response = (SearchResponse)await connectionWrapper.Connection.SendRequestAsync(searchRequest, TimeSpan.FromMinutes(2));
 
                     if (response != null) {
                         querySuccess = true;
-                    } else if (queryRetryCount == MaxRetries) {
+                    }
+                    else if (queryRetryCount == MaxRetries) {
                         tempResult =
                             LdapResult<IDirectoryObject>.Fail($"Failed to get a response after {MaxRetries} attempts",
                                 queryParameters);
-                    } else {
+                    }
+                    else {
                         queryRetryCount++;
                     }
-                } catch (LdapException le) when (le.ErrorCode == (int)LdapErrorCodes.ServerDown &&
+                }
+                catch (LdapException le) when (le.ErrorCode == (int)LdapErrorCodes.ServerDown &&
                                                  queryRetryCount < MaxRetries) {
                     /*
                      * A ServerDown exception indicates that our connection is no longer valid for one of many reasons.
@@ -150,7 +153,8 @@ namespace SharpHoundCommonLib {
                                     "Query - Failed to get a new connection after ServerDown.", queryParameters);
                         }
                     }
-                } catch (LdapException le) when (le.ErrorCode == (int)ResultCode.Busy && busyRetryCount < MaxRetries) {
+                }
+                catch (LdapException le) when (le.ErrorCode == (int)ResultCode.Busy && busyRetryCount < MaxRetries) {
                     /*
                      * If we get a busy error, we want to do an exponential backoff, but maintain the current connection
                      * The expectation is that given enough time, the server should stop being busy and service our query appropriately
@@ -160,21 +164,24 @@ namespace SharpHoundCommonLib {
                         queryParameters.GetQueryInfo(), busyRetryCount);
                     var backoffDelay = GetNextBackoff(busyRetryCount);
                     await Task.Delay(backoffDelay, cancellationToken);
-                } catch (LdapException le) {
+                }
+                catch (LdapException le) {
                     /*
                      * This is our fallback catch. If our retry counts have been exhausted this will trigger and break us out of our loop
                      */
                     tempResult = LdapResult<IDirectoryObject>.Fail(
                         $"Query - Caught unrecoverable ldap exception: {le.Message} (ServerMessage: {le.ServerErrorMessage}) (ErrorCode: {le.ErrorCode})",
                         queryParameters);
-                } catch (Exception e) {
+                }
+                catch (Exception e) {
                     /*
                      * Generic exception handling for unforeseen circumstances
                      */
                     tempResult =
                         LdapResult<IDirectoryObject>.Fail($"Query - Caught unrecoverable exception: {e.Message}",
                             queryParameters);
-                } finally {
+                }
+                finally {
                     // Always release our semaphore to prevent deadlocks
                     if (_semaphore != null) {
                         _log.LogTrace("Query releasing semaphore with {Count} remaining for query {Info}",
@@ -189,7 +196,8 @@ namespace SharpHoundCommonLib {
                 if (tempResult != null) {
                     if (tempResult.ErrorCode == (int)LdapErrorCodes.ServerDown) {
                         ReleaseConnection(connectionWrapper, true);
-                    } else {
+                    }
+                    else {
                         ReleaseConnection(connectionWrapper);
                     }
 
@@ -247,19 +255,22 @@ namespace SharpHoundCommonLib {
                 SearchResponse response = null;
                 try {
                     _log.LogTrace("Sending paged ldap request - {Info}", queryParameters.GetQueryInfo());
-                    response = (SearchResponse)connectionWrapper.Connection.SendRequest(searchRequest);
+                    response = (SearchResponse)await connectionWrapper.Connection.SendRequestAsync(searchRequest, TimeSpan.FromMinutes(2));
                     if (response != null) {
                         pageResponse = (PageResultResponseControl)response.Controls
                             .Where(x => x is PageResultResponseControl).DefaultIfEmpty(null).FirstOrDefault();
                         queryRetryCount = 0;
-                    } else if (queryRetryCount == MaxRetries) {
+                    }
+                    else if (queryRetryCount == MaxRetries) {
                         tempResult = LdapResult<IDirectoryObject>.Fail(
                             $"PagedQuery - Failed to get a response after {MaxRetries} attempts",
                             queryParameters);
-                    } else {
+                    }
+                    else {
                         queryRetryCount++;
                     }
-                } catch (LdapException le) when (le.ErrorCode == (int)LdapErrorCodes.ServerDown) {
+                }
+                catch (LdapException le) when (le.ErrorCode == (int)LdapErrorCodes.ServerDown) {
                     /*
                      * A ServerDown exception indicates that our connection is no longer valid for one of many reasons.
                      * We'll want to release our connection back to the pool, but dispose it. We need a new connection,
@@ -287,7 +298,7 @@ namespace SharpHoundCommonLib {
                         var backoffDelay = GetNextBackoff(retryCount);
                         await Task.Delay(backoffDelay, cancellationToken);
                         var (success, ldapConnectionWrapperNew, _) =
-                            GetConnectionForSpecificServerAsync(serverName, queryParameters.GlobalCatalog);
+                            await GetConnectionForSpecificServerActuallyAsync(serverName, queryParameters.GlobalCatalog);
 
                         if (success) {
                             _log.LogDebug("PagedQuery - Recovered from ServerDown successfully");
@@ -303,7 +314,8 @@ namespace SharpHoundCommonLib {
                                     queryParameters, le.ErrorCode);
                         }
                     }
-                } catch (LdapException le) when (le.ErrorCode == (int)ResultCode.Busy && busyRetryCount < MaxRetries) {
+                }
+                catch (LdapException le) when (le.ErrorCode == (int)ResultCode.Busy && busyRetryCount < MaxRetries) {
                     /*
                      * If we get a busy error, we want to do an exponential backoff, but maintain the current connection
                      * The expectation is that given enough time, the server should stop being busy and service our query appropriately
@@ -313,15 +325,18 @@ namespace SharpHoundCommonLib {
                         queryParameters.GetQueryInfo(), busyRetryCount);
                     var backoffDelay = GetNextBackoff(busyRetryCount);
                     await Task.Delay(backoffDelay, cancellationToken);
-                } catch (LdapException le) {
+                }
+                catch (LdapException le) {
                     tempResult = LdapResult<IDirectoryObject>.Fail(
                         $"PagedQuery - Caught unrecoverable ldap exception: {le.Message} (ServerMessage: {le.ServerErrorMessage}) (ErrorCode: {le.ErrorCode})",
                         queryParameters, le.ErrorCode);
-                } catch (Exception e) {
+                }
+                catch (Exception e) {
                     tempResult =
                         LdapResult<IDirectoryObject>.Fail($"PagedQuery - Caught unrecoverable exception: {e.Message}",
                             queryParameters);
-                } finally {
+                }
+                finally {
                     if (_semaphore != null) {
                         _log.LogTrace("PagedQuery releasing semaphore with {Count} remaining for query {Info}",
                             _semaphore.CurrentCount, queryParameters.GetQueryInfo());
@@ -334,7 +349,8 @@ namespace SharpHoundCommonLib {
                 if (tempResult != null) {
                     if (tempResult.ErrorCode == (int)LdapErrorCodes.ServerDown) {
                         ReleaseConnection(connectionWrapper, true);
-                    } else {
+                    }
+                    else {
                         ReleaseConnection(connectionWrapper);
                     }
 
@@ -388,7 +404,8 @@ namespace SharpHoundCommonLib {
                 return result;
             }
 
-            if (!CreateSearchRequest(queryParameters, connectionWrapper, out var searchRequest)) {
+            var (searchRequestSuccess, searchRequest) = CreateSearchRequest(queryParameters, connectionWrapper);
+            if (!searchRequestSuccess) {
                 result.Success = false;
                 result.Message = "Failed to create search request";
                 ReleaseConnection(connectionWrapper);
@@ -428,7 +445,8 @@ namespace SharpHoundCommonLib {
             };
             var connectionWrapper = connectionResult.ConnectionWrapper;
 
-            if (!CreateSearchRequest(queryParameters, connectionWrapper, out var searchRequest)) {
+            var (searchRequestSuccess, searchRequest) = CreateSearchRequest(queryParameters, connectionWrapper);
+            if (!searchRequestSuccess) {
                 ReleaseConnection(connectionWrapper);
                 yield return Result<string>.Fail("Failed to create search request");
                 yield break;
@@ -450,14 +468,16 @@ namespace SharpHoundCommonLib {
                 }
 
                 try {
-                    response = (SearchResponse)connectionWrapper.Connection.SendRequest(searchRequest);
-                } catch (LdapException le) when (le.ErrorCode == (int)ResultCode.Busy && busyRetryCount < MaxRetries) {
+                    response = (SearchResponse)await connectionWrapper.Connection.SendRequestAsync(searchRequest, TimeSpan.FromMinutes(2));
+                }
+                catch (LdapException le) when (le.ErrorCode == (int)ResultCode.Busy && busyRetryCount < MaxRetries) {
                     busyRetryCount++;
                     _log.LogDebug("RangedRetrieval - Executing busy backoff for query {Info} (Attempt {Count})",
                         queryParameters.GetQueryInfo(), busyRetryCount);
                     var backoffDelay = GetNextBackoff(busyRetryCount);
                     await Task.Delay(backoffDelay, cancellationToken);
-                } catch (LdapException le) when (le.ErrorCode == (int)LdapErrorCodes.ServerDown &&
+                }
+                catch (LdapException le) when (le.ErrorCode == (int)LdapErrorCodes.ServerDown &&
                                                  queryRetryCount < MaxRetries) {
                     queryRetryCount++;
                     _log.LogDebug(
@@ -488,14 +508,17 @@ namespace SharpHoundCommonLib {
                                     queryParameters, le.ErrorCode);
                         }
                     }
-                } catch (LdapException le) {
+                }
+                catch (LdapException le) {
                     tempResult = LdapResult<string>.Fail(
                         $"Caught unrecoverable ldap exception: {le.Message} (ServerMessage: {le.ServerErrorMessage}) (ErrorCode: {le.ErrorCode})",
                         queryParameters, le.ErrorCode);
-                } catch (Exception e) {
+                }
+                catch (Exception e) {
                     tempResult =
                         LdapResult<string>.Fail($"Caught unrecoverable exception: {e.Message}", queryParameters);
-                } finally {
+                }
+                finally {
                     if (_semaphore != null) {
                         _log.LogTrace("RangedRetrieval releasing semaphore with {Count} remaining for query {Info}",
                             _semaphore.CurrentCount, queryParameters.GetQueryInfo());
@@ -510,7 +533,8 @@ namespace SharpHoundCommonLib {
                 if (tempResult != null) {
                     if (tempResult.ErrorCode == (int)LdapErrorCodes.ServerDown) {
                         ReleaseConnection(connectionWrapper, true);
-                    } else {
+                    }
+                    else {
                         ReleaseConnection(connectionWrapper);
                     }
 
@@ -544,7 +568,8 @@ namespace SharpHoundCommonLib {
                     currentRange = $"{attributeName};range={index}-{index + step}";
                     searchRequest.Attributes.Clear();
                     searchRequest.Attributes.Add(currentRange);
-                } else {
+                }
+                else {
                     //I dont know what can cause a RR to have multiple entries, but its nothing good. Break out
                     ReleaseConnection(connectionWrapper);
                     yield break;
@@ -560,21 +585,23 @@ namespace SharpHoundCommonLib {
                 MaxBackoffDelay.TotalSeconds));
         }
 
-        private bool CreateSearchRequest(LdapQueryParameters queryParameters,
-            LdapConnectionWrapper connectionWrapper, out SearchRequest searchRequest) {
+        private (bool, SearchRequest) CreateSearchRequest(LdapQueryParameters queryParameters,
+            LdapConnectionWrapper connectionWrapper) {
             string basePath;
             if (!string.IsNullOrWhiteSpace(queryParameters.SearchBase)) {
                 basePath = queryParameters.SearchBase;
-            } else if (!connectionWrapper.GetSearchBase(queryParameters.NamingContext, out basePath)) {
+            }
+            else if (!connectionWrapper.GetSearchBase(queryParameters.NamingContext, out basePath)) {
                 string tempPath;
                 if (CallDsGetDcName(queryParameters.DomainName, out var info) && info != null) {
                     tempPath = Helpers.DomainNameToDistinguishedName(info.Value.DomainName);
                     connectionWrapper.SaveContext(queryParameters.NamingContext, basePath);
-                } else if (LdapUtils.GetDomain(queryParameters.DomainName, _ldapConfig, out var domainObject)) {
+                }
+                else if (LdapUtils.GetDomain(queryParameters.DomainName, _ldapConfig, out var domainObject)) {
                     tempPath = Helpers.DomainNameToDistinguishedName(domainObject.Name);
-                } else {
-                    searchRequest = null;
-                    return false;
+                }
+                else {
+                    return (false, null);
                 }
 
                 basePath = queryParameters.NamingContext switch {
@@ -592,7 +619,7 @@ namespace SharpHoundCommonLib {
                 basePath = $"{queryParameters.RelativeSearchBase},{basePath}";
             }
 
-            searchRequest = new SearchRequest(basePath, queryParameters.LDAPFilter, queryParameters.SearchScope,
+            var searchRequest = new SearchRequest(basePath, queryParameters.LDAPFilter, queryParameters.SearchScope,
                 queryParameters.Attributes);
             searchRequest.Controls.Add(new SearchOptionsControl(SearchOption.DomainScope));
             if (queryParameters.IncludeDeleted) {
@@ -605,12 +632,13 @@ namespace SharpHoundCommonLib {
                 });
             }
 
-            return true;
+            return (true, searchRequest);
         }
 
         private bool CallDsGetDcName(string domainName, out NetAPIStructs.DomainControllerInfo? info) {
             if (DCInfoCache.TryGetValue(domainName.ToUpper().Trim(), out info)) return info != null;
 
+            // Blocking External Call
             var apiResult = _nativeMethods.CallDsGetDcName(null, domainName,
                 (uint)(NetAPIEnums.DSGETDCNAME_FLAGS.DS_FORCE_REDISCOVERY |
                        NetAPIEnums.DSGETDCNAME_FLAGS.DS_RETURN_DNS_NAME |
@@ -643,9 +671,20 @@ namespace SharpHoundCommonLib {
             return (true, connectionWrapper, null);
         }
 
+        /// <summary>
+        /// It's not async.  Use GetConnectionForSpecificServerActuallyAsync if looking for a Task.
+        /// </summary>
+        /// <param name="server"></param>
+        /// <param name="globalCatalog"></param>
+        /// <returns></returns>
         public (bool Success, LdapConnectionWrapper connectionWrapper, string Message)
             GetConnectionForSpecificServerAsync(string server, bool globalCatalog) {
-            return CreateNewConnectionForServer(server, globalCatalog);
+            return CreateNewConnectionForServer(server, globalCatalog).GetAwaiter().GetResult();
+        }
+
+        public async Task<(bool Success, LdapConnectionWrapper connectionWrapper, string Message)>
+            GetConnectionForSpecificServerActuallyAsync(string server, bool globalCatalog) {
+            return await CreateNewConnectionForServer(server, globalCatalog);
         }
 
         public async Task<(bool Success, LdapConnectionWrapper ConnectionWrapper, string Message)>
@@ -671,10 +710,12 @@ namespace SharpHoundCommonLib {
             if (!connectionFaulted) {
                 if (connectionWrapper.GlobalCatalog) {
                     _globalCatalogConnection.Add(connectionWrapper);
-                } else {
+                }
+                else {
                     _connections.Add(connectionWrapper);
                 }
-            } else {
+            }
+            else {
                 connectionWrapper.Connection.Dispose();
             }
         }
@@ -689,18 +730,19 @@ namespace SharpHoundCommonLib {
             bool globalCatalog = false) {
             try {
                 if (!string.IsNullOrWhiteSpace(_ldapConfig.Server)) {
-                    return CreateNewConnectionForServer(_ldapConfig.Server, globalCatalog);
+                    return await CreateNewConnectionForServer(_ldapConfig.Server, globalCatalog);
                 }
 
-                if (CreateLdapConnection(_identifier.ToUpper().Trim(), globalCatalog, out var connectionWrapper)) {
+                if (await CreateLdapConnection(_identifier.ToUpper().Trim(), globalCatalog) is (true, var connectionWrapper1)) {
                     _log.LogDebug(
                         "Successfully created ldap connection for domain: {Domain} using strategy 1. SSL: {SSl}",
-                        _identifier, connectionWrapper.Connection.SessionOptions.SecureSocketLayer);
-                    return (true, connectionWrapper, "");
+                        _identifier, connectionWrapper1.Connection.SessionOptions.SecureSocketLayer);
+                    return (true, connectionWrapper1, "");
                 }
 
                 string tempDomainName;
-
+                
+                // Blocking External Call
                 var dsGetDcNameResult = _nativeMethods.CallDsGetDcName(null, _identifier,
                     (uint)(NetAPIEnums.DSGETDCNAME_FLAGS.DS_FORCE_REDISCOVERY |
                            NetAPIEnums.DSGETDCNAME_FLAGS.DS_RETURN_DNS_NAME |
@@ -709,11 +751,11 @@ namespace SharpHoundCommonLib {
                     tempDomainName = dsGetDcNameResult.Value.DomainName;
 
                     if (!tempDomainName.Equals(_identifier, StringComparison.OrdinalIgnoreCase) &&
-                        CreateLdapConnection(tempDomainName, globalCatalog, out connectionWrapper)) {
+                        await CreateLdapConnection(tempDomainName, globalCatalog) is (true, var connectionWrapper2)) {
                         _log.LogDebug(
                             "Successfully created ldap connection for domain: {Domain} using strategy 2 with name {NewName}",
                             _identifier, tempDomainName);
-                        return (true, connectionWrapper, "");
+                        return (true, connectionWrapper2, "");
                     }
 
                     var server = dsGetDcNameResult.Value.DomainControllerName.TrimStart('\\');
@@ -728,7 +770,7 @@ namespace SharpHoundCommonLib {
                     }
                 }
 
-                if (!LdapUtils.GetDomain(_identifier, _ldapConfig, out var domainObject) || domainObject.Name == null) {
+                if (!LdapUtils.GetDomain(_identifier, _ldapConfig, out var domainObject) || domainObject?.Name == null) {
                     //If we don't get a result here, we effectively have no other ways to resolve this domain, so we'll just have to exit out
                     _log.LogDebug(
                         "Could not get domain object from GetDomain, unable to create ldap connection for domain {Domain}",
@@ -740,11 +782,11 @@ namespace SharpHoundCommonLib {
                 tempDomainName = domainObject.Name.ToUpper().Trim();
 
                 if (!tempDomainName.Equals(_identifier, StringComparison.OrdinalIgnoreCase) &&
-                    CreateLdapConnection(tempDomainName, globalCatalog, out connectionWrapper)) {
+                    await CreateLdapConnection(tempDomainName, globalCatalog) is (true, var connectionWrapper4)) {
                     _log.LogDebug(
                         "Successfully created ldap connection for domain: {Domain} using strategy 4 with name {NewName}",
                         _identifier, tempDomainName);
-                    return (true, connectionWrapper, "");
+                    return (true, connectionWrapper4, "");
                 }
 
                 var primaryDomainController = domainObject.PdcRoleOwner.Name;
@@ -757,6 +799,7 @@ namespace SharpHoundCommonLib {
                     return (true, portConnectionResult.connection, "");
                 }
 
+                // Blocking External Call - Possible on domainObject.DomainControllers as it calls DsGetDcNameWrapper
                 foreach (DomainController dc in domainObject.DomainControllers) {
                     portConnectionResult =
                         await CreateLDAPConnectionWithPortCheck(dc.Name, globalCatalog);
@@ -767,7 +810,8 @@ namespace SharpHoundCommonLib {
                         return (true, portConnectionResult.connection, "");
                     }
                 }
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                 _log.LogInformation(e, "We will not be able to connect to domain {Domain} by any strategy, leaving it.",
                     _identifier);
                 _excludedDomains.Add(_identifier);
@@ -776,50 +820,49 @@ namespace SharpHoundCommonLib {
             return (false, null, "All attempted connections failed");
         }
 
-        private (bool Success, LdapConnectionWrapper Connection, string Message ) CreateNewConnectionForServer(
+        private async Task<(bool Success, LdapConnectionWrapper Connection, string Message)> CreateNewConnectionForServer(
             string identifier, bool globalCatalog = false) {
-            if (CreateLdapConnection(identifier, globalCatalog, out var serverConnection)) {
+            if (await CreateLdapConnection(identifier, globalCatalog) is (true, var serverConnection)) {
                 return (true, serverConnection, "");
             }
 
             return (false, null, $"Failed to create ldap connection for {identifier}");
         }
 
-        private bool CreateLdapConnection(string target, bool globalCatalog,
-            out LdapConnectionWrapper connection) {
+        private async Task<(bool, LdapConnectionWrapper)> CreateLdapConnection(string target, bool globalCatalog) {
             var baseConnection = CreateBaseConnection(target, true, globalCatalog);
-            if (TestLdapConnection(baseConnection, out var result)) {
-                connection = new LdapConnectionWrapper(baseConnection, result.SearchResultEntry, globalCatalog,
+            if (await TestLdapConnection(baseConnection) is (true, var result)) {
+                var connection = new LdapConnectionWrapper(baseConnection, result.SearchResultEntry, globalCatalog,
                     _poolIdentifier);
-                return true;
+                return (true, connection);
             }
 
             try {
                 baseConnection.Dispose();
-            } catch {
+            }
+            catch {
                 //this is just in case
             }
 
             if (_ldapConfig.ForceSSL) {
-                connection = null;
-                return false;
+                return (false, null);
             }
 
             baseConnection = CreateBaseConnection(target, false, globalCatalog);
-            if (TestLdapConnection(baseConnection, out result)) {
-                connection = new LdapConnectionWrapper(baseConnection, result.SearchResultEntry, globalCatalog,
+            if (await TestLdapConnection(baseConnection) is (true, var resultNoSSL)) {
+                var connection = new LdapConnectionWrapper(baseConnection, resultNoSSL.SearchResultEntry, globalCatalog,
                     _poolIdentifier);
-                return true;
+                return (true, connection);
             }
 
             try {
                 baseConnection.Dispose();
-            } catch {
+            }
+            catch {
                 //this is just in case
             }
 
-            connection = null;
-            return false;
+            return (false, null);
         }
 
         private LdapConnection CreateBaseConnection(string directoryIdentifier, bool ssl,
@@ -838,7 +881,8 @@ namespace SharpHoundCommonLib {
             if (_ldapConfig.DisableSigning || ssl) {
                 connection.SessionOptions.Signing = false;
                 connection.SessionOptions.Sealing = false;
-            } else {
+            }
+            else {
                 connection.SessionOptions.Signing = true;
                 connection.SessionOptions.Sealing = true;
             }
@@ -867,12 +911,14 @@ namespace SharpHoundCommonLib {
         ///     A connection "succeeded" but no data was returned. This can be related to
         ///     kerberos auth across trusts or just simply lack of permissions
         /// </exception>
-        private bool TestLdapConnection(LdapConnection connection, out LdapConnectionTestResult testResult) {
-            testResult = new LdapConnectionTestResult();
+        private async Task<(bool, LdapConnectionTestResult)> TestLdapConnection(LdapConnection connection) {
+            var testResult = new LdapConnectionTestResult();
             try {
                 //Attempt an initial bind. If this fails, likely auth is invalid, or its not a valid target
+                // Blocking External Call
                 connection.Bind();
-            } catch (LdapException e) {
+            }
+            catch (LdapException e) {
                 if (e.ErrorCode is (int)LdapErrorCodes.InvalidCredentials
                     or (int)ResultCode.InappropriateAuthentication) {
                     connection.Dispose();
@@ -881,10 +927,11 @@ namespace SharpHoundCommonLib {
 
                 testResult.Message = e.Message;
                 testResult.ErrorCode = e.ErrorCode;
-                return false;
-            } catch (Exception e) {
+                return (false, testResult);
+            }
+            catch (Exception e) {
                 testResult.Message = e.Message;
-                return false;
+                return (false, testResult);
             }
 
             SearchResponse response;
@@ -894,14 +941,15 @@ namespace SharpHoundCommonLib {
                 var searchRequest = CreateSearchRequest("", new LdapFilter().AddAllObjects().GetFilter(),
                     SearchScope.Base, null);
 
-                response = (SearchResponse)connection.SendRequest(searchRequest);
-            } catch (LdapException e) {
+                response = (SearchResponse)await connection.SendRequestAsync(searchRequest, TimeSpan.FromMinutes(2));
+            }
+            catch (LdapException e) {
                 /*
                  * If we can't send the initial search request, its unlikely any other search requests will work so we will immediately return false
                  */
                 testResult.Message = e.Message;
                 testResult.ErrorCode = e.ErrorCode;
-                return false;
+                return (false, testResult);
             }
 
             if (response?.Entries == null || response.Entries.Count == 0) {
@@ -917,7 +965,7 @@ namespace SharpHoundCommonLib {
 
             testResult.SearchResultEntry = new SearchResultEntryWrapper(response.Entries[0]);
             testResult.Message = "";
-            return true;
+            return (true, testResult);
         }
 
         private class LdapConnectionTestResult {
@@ -931,11 +979,12 @@ namespace SharpHoundCommonLib {
             if (globalCatalog) {
                 if (await _portScanner.CheckPort(target, _ldapConfig.GetGCPort(true)) || (!_ldapConfig.ForceSSL &&
                         await _portScanner.CheckPort(target, _ldapConfig.GetGCPort(false))))
-                    return (CreateLdapConnection(target, true, out var connection), connection);
-            } else {
+                    return await CreateLdapConnection(target, true);
+            }
+            else {
                 if (await _portScanner.CheckPort(target, _ldapConfig.GetPort(true)) || (!_ldapConfig.ForceSSL &&
                         await _portScanner.CheckPort(target, _ldapConfig.GetPort(false))))
-                    return (CreateLdapConnection(target, true, out var connection), connection);
+                    return await CreateLdapConnection(target, true);
             }
 
             return (false, null);

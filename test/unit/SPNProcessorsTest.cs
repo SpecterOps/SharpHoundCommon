@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using CommonLibTest.Facades;
 using SharpHoundCommonLib;
@@ -102,6 +103,33 @@ namespace CommonLibTest
             const string distinguishedName = "CN=Jeff Smith,OU=Sales,DC=Fabrikam,DC=COM";
             await foreach (var spn in processor.ReadSPNTargets(servicePrincipalNames, distinguishedName))
                 Assert.Null(spn);
+        }
+        
+        [Fact]
+        public async void ReadSPNTargets_SendComputerStatus()
+        {
+            var processor = new SPNProcessors(new MockLdapUtils());
+            string[] servicePrincipalNames = {"MSSQLSvc/PRIMARY.TESTLAB.LOCAL:2345"};
+            const string distinguishedName = "cn=policies,cn=system,DC=testlab,DC=local";
+            var receivedStatus = new List<CSVComputerStatus>();
+            processor.ComputerStatusEvent += async status => { receivedStatus.Add(status); };
+
+            var expected = new SPNPrivilege
+            {
+                ComputerSID = "S-1-5-21-3130019616-2776909439-2417379446-1001", Port = 2345,
+                Service = EdgeNames.SQLAdmin
+            };
+
+            var count = 0;
+            await foreach (var actual in processor.ReadSPNTargets(servicePrincipalNames, distinguishedName))
+            {
+                Assert.Equal(expected.ComputerSID, actual.ComputerSID);
+                Assert.Equal(expected.Port, actual.Port);
+                Assert.Equal(expected.Service, actual.Service);
+                count += 1;
+            }
+            Assert.NotEmpty(receivedStatus);
+            Assert.Equal(count, receivedStatus.Count);
         }
     }
 }

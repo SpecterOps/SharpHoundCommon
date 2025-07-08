@@ -11,6 +11,7 @@ using System.IO;
 using System.Security;
 using SharpHoundCommonLib.Processors;
 using Microsoft.Win32;
+using System.Threading.Tasks;
 
 namespace SharpHoundCommonLib {
     public static class Helpers {
@@ -135,7 +136,8 @@ namespace SharpHoundCommonLib {
             int idx;
             if (distinguishedName.ToUpper().Contains("DELETED OBJECTS")) {
                 idx = distinguishedName.IndexOf("DC=", 3, StringComparison.Ordinal);
-            } else {
+            }
+            else {
                 idx = distinguishedName.IndexOf("DC=",
                     StringComparison.CurrentCultureIgnoreCase);
             }
@@ -193,7 +195,8 @@ namespace SharpHoundCommonLib {
 
             try {
                 toReturn = (long)Math.Floor(DateTime.FromFileTimeUtc(time).Subtract(EpochDiff).TotalSeconds);
-            } catch {
+            }
+            catch {
                 toReturn = -1;
             }
 
@@ -209,7 +212,8 @@ namespace SharpHoundCommonLib {
             try {
                 var dt = DateTime.ParseExact(ldapTime, "yyyyMMddHHmmss.0K", CultureInfo.CurrentCulture).ToUniversalTime();
                 return (long)dt.Subtract(EpochDiff).TotalSeconds;
-            } catch {
+            }
+            catch {
                 return 0;
             }
         }
@@ -263,19 +267,23 @@ namespace SharpHoundCommonLib {
                 data.Value = value;
 
                 data.Collected = true;
-            } catch (IOException e) {
+            }
+            catch (IOException e) {
                 log.LogDebug(e, "Error getting data from registry for {Target}: {RegSubKey}:{RegValue}",
                     target, subkey, subvalue);
                 data.FailureReason = "Target machine was not found or not connectable";
-            } catch (SecurityException e) {
+            }
+            catch (SecurityException e) {
                 log.LogDebug(e, "Error getting data from registry for {Target}: {RegSubKey}:{RegValue}",
                     target, subkey, subvalue);
                 data.FailureReason = "User does not have the proper permissions to perform this operation";
-            } catch (UnauthorizedAccessException e) {
+            }
+            catch (UnauthorizedAccessException e) {
                 log.LogDebug(e, "Error getting data from registry for {Target}: {RegSubKey}:{RegValue}",
                     target, subkey, subvalue);
                 data.FailureReason = "User does not have the necessary registry rights";
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                 log.LogDebug(e, "Error getting data from registry for {Target}: {RegSubKey}:{RegValue}",
                     target, subkey, subvalue);
                 data.FailureReason = e.Message;
@@ -285,8 +293,7 @@ namespace SharpHoundCommonLib {
         }
 
         public static IRegistryKey OpenRemoteRegistry(string target) {
-            var key = new SHRegistryKey(RegistryHive.LocalMachine, target);
-            return key;
+            return SHRegistryKey.Connect(RegistryHive.LocalMachine, target).GetAwaiter().GetResult();
         }
 
         public static string[] AuthenticationOIDs = new string[] {
@@ -300,7 +307,7 @@ namespace SharpHoundCommonLib {
             CommonOids.ClientAuthentication,
             CommonOids.AnyPurpose
         };
-        
+
         public static string DumpDirectoryObject(this IDirectoryObject directoryObject) {
             var builder = new StringBuilder();
             builder.AppendLine("PropertyName : PropertyValue");

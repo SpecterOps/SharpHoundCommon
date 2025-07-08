@@ -84,6 +84,7 @@ namespace SharpHoundCommonLib
             Type targetType)
         {
             var result = new List<ActiveDirectoryRuleDescriptor>();
+            // Blocking External Call
             foreach (ActiveDirectoryAccessRule ace in _sd.GetAccessRules(includeExplicit, includeInherited, targetType))
                 result.Add(new ActiveDirectoryRuleDescriptor(ace));
 
@@ -92,16 +93,22 @@ namespace SharpHoundCommonLib
 
         public virtual void SetSecurityDescriptorBinaryForm(byte[] binaryForm)
         {
+            // Blocking External Call -- Possible blocking through locks, and UpdateWithNewSecurityDescriptor
+            // see https://github.com/dotnet/runtime/blob/9d5a6a9aa463d6d10b0b0ba6d5982cc82f363dc3/src/libraries/System.Security.AccessControl/src/System/Security/AccessControl/ObjectSecurity.cs#L614
             _sd.SetSecurityDescriptorBinaryForm(binaryForm);
         }
 
         public virtual void SetSecurityDescriptorBinaryForm(byte[] binaryForm, AccessControlSections type)
         {
+            // Blocking External Call -- Possible blocking through locks, and UpdateWithNewSecurityDescriptor
+            // see https://github.com/dotnet/runtime/blob/9d5a6a9aa463d6d10b0b0ba6d5982cc82f363dc3/src/libraries/System.Security.AccessControl/src/System/Security/AccessControl/ObjectSecurity.cs#L614
             _sd.SetSecurityDescriptorBinaryForm(binaryForm, type);
         }
 
         public virtual string GetOwner(Type targetType)
         {
+            // Blocking External Call -- Possible blocking through locks, and Translate call
+            // see https://github.com/dotnet/runtime/blob/9d5a6a9aa463d6d10b0b0ba6d5982cc82f363dc3/src/libraries/System.Security.AccessControl/src/System/Security/AccessControl/ObjectSecurity.cs#L336
             return _sd.GetOwner(targetType).Value;
         }
     }
