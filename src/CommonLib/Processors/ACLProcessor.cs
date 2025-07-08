@@ -342,8 +342,9 @@ namespace SharpHoundCommonLib.Processors {
                     }
                 }
 
-                _log.LogTrace("Processing ACE with rights {Rights} and guid {GUID} on object {Name}", aceRights,
-                    aceType, objectName);
+                //// This log is exceptionally noisy, disabling
+                // _log.LogTrace("Processing ACE with rights {Rights} and guid {GUID} on object {Name}", aceRights,
+                //     aceType, objectName);
 
                 //GenericAll, WriteDacl, and WriteOwner apply to every object
                 //All three require ObjectType (aceType) is "AllGuid" or not set (see: https://github.com/SpecterOps/BloodHound/issues/613)
