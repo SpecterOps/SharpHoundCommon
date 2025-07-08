@@ -254,7 +254,7 @@ namespace SharpHoundCommonLib.Processors
             var activePolicy = "CertificateAuthority_MicrosoftDefault.Policy";
             var subKey =
                 $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{caName}\\PolicyModules";
-            const string subValue = "EditFlags";
+            const string subValue = "Active";
             var data = Helpers.GetRegistryKeyData(target, subKey, subValue, _log);
 
             ret.Collected = data.Collected;
@@ -264,7 +264,7 @@ namespace SharpHoundCommonLib.Processors
                 return ret;
             }
 
-            if (data.Value == null)
+            if (data.Value != null)
             {
                 activePolicy = (string)data.Value;
             }
@@ -286,7 +286,7 @@ namespace SharpHoundCommonLib.Processors
                 return ret;
             }
 
-            var editFlags = (int)data.Value;
+            var editFlags = (int)data2.Value;
             ret.Value = (editFlags & 0x00040000) == 0x00040000;
 
             return ret;
