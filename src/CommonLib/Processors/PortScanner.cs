@@ -9,13 +9,16 @@ namespace SharpHoundCommonLib.Processors {
     public class PortScanner : IPortScanner {
         private static readonly ConcurrentDictionary<PingCacheKey, bool> PortScanCache = new();
         private readonly ILogger _log;
+        private readonly AdaptiveTimeout _adaptiveTimeout;
 
         public PortScanner() {
             _log = Logging.LogProvider.CreateLogger("PortScanner");
+            _adaptiveTimeout = new AdaptiveTimeout(TimeSpan.FromSeconds(10), _log, 100, 1000, 30);
         }
 
         public PortScanner(ILogger log = null) {
             _log = log ?? Logging.LogProvider.CreateLogger("PortScanner");
+            _adaptiveTimeout = new AdaptiveTimeout(TimeSpan.FromSeconds(10), _log, 100, 1000, 30);
         }
 
         /// <summary>
@@ -40,8 +43,7 @@ namespace SharpHoundCommonLib.Processors {
 
             try {
                 using var client = new TcpClient();
-                // Blocking External Call
-                var ca = await Timeout.ExecuteWithTimeout(TimeSpan.FromMilliseconds(timeout), (_) => client.ConnectAsync(hostname, port));
+                var ca = await _adaptiveTimeout.ExecuteWithTimeout((_) => client.ConnectAsync(hostname, port));
                 if (!ca.IsSuccess) {
                     _log.LogDebug("{HostName} did not respond to scan on port {Port} within {Timeout}ms", hostname, port,
                         timeout);

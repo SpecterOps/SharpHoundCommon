@@ -137,8 +137,8 @@ public static class Timeout {
     /// <param name="timeout"></param>
     /// <param name="func"></param>
     /// <returns></returns>
-    public static async Task<NetAPIResult<T>> ExecuteNetAPIWithTimeout<T>(TimeSpan timeout, Func<CancellationToken, NetAPIResult<T>> func) {
-        var result = await ExecuteWithTimeout(timeout, func);
+    public static async Task<NetAPIResult<T>> ExecuteNetAPIWithTimeout<T>(TimeSpan timeout, Func<CancellationToken, NetAPIResult<T>> func, CancellationToken parentToken = default) {
+        var result = await ExecuteWithTimeout(timeout, func, parentToken);
         if (result.IsSuccess)
             return result.Value;
         else
@@ -153,8 +153,8 @@ public static class Timeout {
     /// <param name="timeout"></param>
     /// <param name="func"></param>
     /// <returns></returns>
-    public static async Task<SharpHoundRPC.Result<T>> ExecuteRPCWithTimeout<T>(TimeSpan timeout, Func<CancellationToken, SharpHoundRPC.Result<T>> func) {
-        var result = await ExecuteWithTimeout(timeout, func);
+    public static async Task<SharpHoundRPC.Result<T>> ExecuteRPCWithTimeout<T>(TimeSpan timeout, Func<CancellationToken, SharpHoundRPC.Result<T>> func, CancellationToken parentToken = default) {
+        var result = await ExecuteWithTimeout(timeout, func, parentToken);
         if (result.IsSuccess)
             return result.Value;
         else
@@ -169,8 +169,8 @@ public static class Timeout {
     /// <param name="timeout"></param>
     /// <param name="func"></param>
     /// <returns></returns>
-    public static async Task<SharpHoundRPC.Result<T>> ExecuteRPCWithTimeout<T>(TimeSpan timeout, Func<CancellationToken, Task<SharpHoundRPC.Result<T>>> func) {
-        var result = await ExecuteWithTimeout(timeout, func);
+    public static async Task<SharpHoundRPC.Result<T>> ExecuteRPCWithTimeout<T>(TimeSpan timeout, Func<CancellationToken, Task<SharpHoundRPC.Result<T>>> func, CancellationToken parentToken = default) {
+        var result = await ExecuteWithTimeout(timeout, func, parentToken);
         if (result.IsSuccess)
             return result.Value;
         else
