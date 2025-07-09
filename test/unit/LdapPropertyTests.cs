@@ -120,7 +120,7 @@ namespace CommonLibTest
         }
 
         [Fact]
-        public void LDAPPropertyProcessor_ReadGroupProperties_TestGoodData()
+        public async Task LDAPPropertyProcessor_ReadGroupProperties_TestGoodData()
         {
             var mock = new MockDirectoryObject("CN\u003dDomain Admins,CN\u003dUsers,DC\u003dtestlab,DC\u003dlocal",
                 new Dictionary<string, object>
@@ -128,8 +128,10 @@ namespace CommonLibTest
                     {"description", "Test"},
                     {"admincount", "1"}
                 }, "S-1-5-21-3130019616-2776909439-2417379446-512","");
+            var processor = new LdapPropertyProcessor(new MockLdapUtils());
 
-            var test = LdapPropertyProcessor.ReadGroupProperties(mock);
+            var groupProperties = await processor.ReadGroupProperties(mock, "domain");
+            var test = groupProperties.Props;
             Assert.Contains("description", test.Keys);
             Assert.Equal("Test", test["description"] as string);
             Assert.Contains("admincount", test.Keys);
@@ -137,7 +139,7 @@ namespace CommonLibTest
         }
 
         [Fact]
-        public void LDAPPropertyProcessor_ReadGroupProperties_TestGoodData_FalseAdminCount()
+        public async Task LDAPPropertyProcessor_ReadGroupProperties_TestGoodData_FalseAdminCount()
         {
             var mock = new MockDirectoryObject("CN\u003dDomain Admins,CN\u003dUsers,DC\u003dtestlab,DC\u003dlocal",
                 new Dictionary<string, object>
@@ -145,8 +147,10 @@ namespace CommonLibTest
                     {"description", "Test"},
                     {"admincount", "0"}
                 }, "S-1-5-21-3130019616-2776909439-2417379446-512","");
+            var processor = new LdapPropertyProcessor(new MockLdapUtils());
 
-            var test = LdapPropertyProcessor.ReadGroupProperties(mock);
+            var groupProperties = await processor.ReadGroupProperties(mock, "domain");
+            var test = groupProperties.Props;
             Assert.Contains("description", test.Keys);
             Assert.Equal("Test", test["description"] as string);
             Assert.Contains("admincount", test.Keys);
@@ -154,15 +158,17 @@ namespace CommonLibTest
         }
 
         [Fact]
-        public void LDAPPropertyProcessor_ReadGroupProperties_NullAdminCount()
+        public async Task LDAPPropertyProcessor_ReadGroupProperties_NullAdminCount()
         {
             var mock = new MockDirectoryObject("CN\u003dDomain Admins,CN\u003dUsers,DC\u003dtestlab,DC\u003dlocal",
                 new Dictionary<string, object>
                 {
                     {"description", "Test"}
                 }, "S-1-5-21-3130019616-2776909439-2417379446-512","");
+            var processor = new LdapPropertyProcessor(new MockLdapUtils());
 
-            var test = LdapPropertyProcessor.ReadGroupProperties(mock);
+            var groupProperties = await processor.ReadGroupProperties(mock, "domain");
+            var test = groupProperties.Props;
             Assert.Contains("description", test.Keys);
             Assert.Equal("Test", test["description"] as string);
             Assert.Contains("admincount", test.Keys);

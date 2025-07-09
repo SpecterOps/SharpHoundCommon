@@ -177,20 +177,47 @@ namespace SharpHoundCommonLib.Processors {
             var props = GetCommonProps(entry);
             return props;
         }
+        
+        public Task<GroupProperties> ReadGroupProperties(IDirectoryObject entry,
+            ResolvedSearchResult searchResult) {
+            return ReadGroupProperties(entry, searchResult.Domain);
+        }
 
         /// <summary>
         ///     Reads specific LDAP properties related to Groups
         /// </summary>
         /// <param name="entry"></param>
+        /// <param name="domain"></param>
         /// <returns></returns>
-        public static Dictionary<string, object> ReadGroupProperties(IDirectoryObject entry) {
+        public async Task<GroupProperties> ReadGroupProperties(IDirectoryObject entry, string domain)
+        {
+            var groupProperties = new GroupProperties();
             var props = GetCommonProps(entry);
             entry.TryGetLongProperty(LDAPProperties.AdminCount, out var ac);
             props.Add("admincount", ac != 0);
             entry.TryGetLongProperty(LDAPProperties.GroupType, out var groupType);
             props.Add("groupscope", GetGroupScope(groupType));
+            entry.TryGetByteArrayProperty(LDAPProperties.SIDHistory, out var sh);
+            var sidHistoryList = new List<string>();
+            var sidHistoryPrincipals = new List<TypedPrincipal>();
+            foreach (var sid in sh) {
+                string sSid;
+                try {
+                    sSid = new SecurityIdentifier(sid, 0).Value;
+                } catch {
+                    continue;
+                }
 
-            return props;
+                sidHistoryList.Add(sSid);
+
+                if (await _utils.ResolveIDAndType(sSid, domain) is (true, var res))
+                    sidHistoryPrincipals.Add(res);
+            }
+            groupProperties.SidHistory = sidHistoryPrincipals.Distinct().ToArray();
+            props.Add("sidhistory", sidHistoryList.ToArray());
+            groupProperties.Props = props;
+
+            return groupProperties;
         }
 
         /// <summary>
@@ -981,6 +1008,12 @@ namespace SharpHoundCommonLib.Processors {
                 }
             }
         }
+    }
+
+    public class GroupProperties
+    {
+        public Dictionary<string, object> Props { get; set; } = new();
+        public TypedPrincipal[] SidHistory { get; set; } = Array.Empty<TypedPrincipal>();
     }
 
     public class UserProperties {
