@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.DirectoryServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -173,6 +172,26 @@ namespace CommonLibTest
             Assert.Equal("Test", test["description"] as string);
             Assert.Contains("admincount", test.Keys);
             Assert.False((bool)test["admincount"]);
+        }
+
+        [WindowsOnlyFact]
+        public async Task LDAPPropertyProcessor_ReadGroupProperties_Returns_HasSIDHistory()
+        {
+            var sid = new SecurityIdentifier("S-1-5-21-3130019616-2776909439-2417379446-519");
+            byte[] bytes = new byte[sid.BinaryLength];
+            sid.GetBinaryForm(bytes, 0);
+            var mock = new MockDirectoryObject("CN\u003dDomain Admins,CN\u003dUsers,DC\u003dtestlab,DC\u003dlocal",
+                new Dictionary<string, object>
+                {
+                    {"description", "Test"},
+                    {LDAPProperties.SIDHistory, new byte[][] { bytes }},
+                }, "S-1-5-21-3130019616-2776909439-2417379446-512","");
+            var processor = new LdapPropertyProcessor(new MockLdapUtils());
+
+            var groupProperties = await processor.ReadGroupProperties(mock, "domain");
+            Assert.NotEmpty(groupProperties.SidHistory);
+            Assert.Equal("S-1-5-21-3130019616-2776909439-2417379446-519", groupProperties.SidHistory[0].ObjectIdentifier);
+            Assert.Equal(Label.Group, groupProperties.SidHistory[0].ObjectType);
         }
 
         [Fact]
