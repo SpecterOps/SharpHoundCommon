@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
 
 namespace SharpHoundCommonLib {
@@ -10,6 +11,7 @@ namespace SharpHoundCommonLib {
 
     public class SHRegistryKey : IRegistryKey, IDisposable {
         private readonly RegistryKey _currentKey;
+        private static readonly AdaptiveTimeout _adaptiveTimeout = new AdaptiveTimeout(defaultTimeout: TimeSpan.FromSeconds(10), Logging.LogProvider.CreateLogger(nameof(SHRegistryKey)), sampleCount: 100, logFrequency: 1000, minSamplesForAdaptiveTimeout: 30);
 
         private SHRegistryKey(RegistryKey registryKey) {
             _currentKey = registryKey;
@@ -35,7 +37,7 @@ namespace SharpHoundCommonLib {
         /// <exception cref="System.Security.SecurityException"></exception>
         /// <exception cref="UnauthorizedAccessException"></exception>
         public static async Task<SHRegistryKey> Connect(RegistryHive hive, string machineName) {
-            var remoteKey = await Timeout.ExecuteWithTimeout(TimeSpan.FromSeconds(10), (_) => RegistryKey.OpenRemoteBaseKey(hive, machineName));
+            var remoteKey = await _adaptiveTimeout.ExecuteWithTimeout((_) => RegistryKey.OpenRemoteBaseKey(hive, machineName));
             if (remoteKey.IsSuccess)
                 return new SHRegistryKey(remoteKey.Value);
             else

@@ -13,12 +13,12 @@ namespace SharpHoundCommonLib.Processors {
 
         public PortScanner() {
             _log = Logging.LogProvider.CreateLogger("PortScanner");
-            _adaptiveTimeout = new AdaptiveTimeout(TimeSpan.FromSeconds(10), _log, 100, 1000, 30);
+            _adaptiveTimeout = new AdaptiveTimeout(defaultTimeout: TimeSpan.FromSeconds(10), _log, sampleCount: 100, logFrequency: 1000, minSamplesForAdaptiveTimeout: 30);
         }
 
         public PortScanner(ILogger log = null) {
             _log = log ?? Logging.LogProvider.CreateLogger("PortScanner");
-            _adaptiveTimeout = new AdaptiveTimeout(TimeSpan.FromSeconds(10), _log, 100, 1000, 30);
+            _adaptiveTimeout = new AdaptiveTimeout(defaultTimeout: TimeSpan.FromSeconds(10), _log, sampleCount: 100, logFrequency: 1000, minSamplesForAdaptiveTimeout: 30);
         }
 
         /// <summary>

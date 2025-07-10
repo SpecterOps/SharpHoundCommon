@@ -7,6 +7,9 @@ using Microsoft.Extensions.Logging;
 
 namespace SharpHoundCommonLib;
 
+/// <summary>
+/// Holds a rolling sample of execution times on a function, providing and logging data aggregates.
+/// </summary>
 public class ExecutionTimeSampler : IDisposable {
     private readonly ILogger _log;
     private readonly int _sampleCount;
@@ -25,6 +28,7 @@ public class ExecutionTimeSampler : IDisposable {
     }
 
     public void ClearSamples() {
+        Log(flush: true);
         _samples = new ConcurrentQueue<double>();
     }
 
