@@ -198,23 +198,9 @@ namespace SharpHoundCommonLib.Processors {
             entry.TryGetLongProperty(LDAPProperties.GroupType, out var groupType);
             props.Add("groupscope", GetGroupScope(groupType));
             entry.TryGetByteArrayProperty(LDAPProperties.SIDHistory, out var sh);
-            var sidHistoryList = new List<string>();
-            var sidHistoryPrincipals = new List<TypedPrincipal>();
-            foreach (var sid in sh) {
-                string sSid;
-                try {
-                    sSid = new SecurityIdentifier(sid, 0).Value;
-                } catch {
-                    continue;
-                }
-
-                sidHistoryList.Add(sSid);
-
-                if (await _utils.ResolveIDAndType(sSid, domain) is (true, var res))
-                    sidHistoryPrincipals.Add(res);
-            }
-            groupProperties.SidHistory = sidHistoryPrincipals.Distinct().ToArray();
-            props.Add("sidhistory", sidHistoryList.ToArray());
+            var (sidHistoryStrings, sidHistoryPrincipals) = await ProcessSidHistory(sh, domain);
+            groupProperties.SidHistory = sidHistoryPrincipals;
+            props.Add("sidhistory", sidHistoryStrings);
             groupProperties.Props = props;
 
             return groupProperties;
@@ -334,25 +320,9 @@ namespace SharpHoundCommonLib.Processors {
             props.Add("supportedencryptiontypes", encryptionTypes);
 
             entry.TryGetByteArrayProperty(LDAPProperties.SIDHistory, out var sh);
-            var sidHistoryList = new List<string>();
-            var sidHistoryPrincipals = new List<TypedPrincipal>();
-            foreach (var sid in sh) {
-                string sSid;
-                try {
-                    sSid = new SecurityIdentifier(sid, 0).Value;
-                } catch {
-                    continue;
-                }
-
-                sidHistoryList.Add(sSid);
-
-                if (await _utils.ResolveIDAndType(sSid, domain) is (true, var res))
-                    sidHistoryPrincipals.Add(res);
-            }
-
-            userProps.SidHistory = sidHistoryPrincipals.Distinct().ToArray();
-
-            props.Add("sidhistory", sidHistoryList.ToArray());
+            var (sidHistoryStrings, sidHistoryPrincipals) = await ProcessSidHistory(sh, domain);
+            userProps.SidHistory = sidHistoryPrincipals;
+            props.Add("sidhistory", sidHistoryStrings);
 
             userProps.Props = props;
 
@@ -450,25 +420,9 @@ namespace SharpHoundCommonLib.Processors {
             props.Add("operatingsystem", os);
 
             entry.TryGetByteArrayProperty(LDAPProperties.SIDHistory, out var sh);
-            var sidHistoryList = new List<string>();
-            var sidHistoryPrincipals = new List<TypedPrincipal>();
-            foreach (var sid in sh) {
-                string sSid;
-                try {
-                    sSid = new SecurityIdentifier(sid, 0).Value;
-                } catch {
-                    continue;
-                }
-
-                sidHistoryList.Add(sSid);
-
-                if (await _utils.ResolveIDAndType(sSid, domain) is (true, var res))
-                    sidHistoryPrincipals.Add(res);
-            }
-
-            compProps.SidHistory = sidHistoryPrincipals.ToArray();
-
-            props.Add("sidhistory", sidHistoryList.ToArray());
+            var (sidHistoryStrings, sidHistoryPrincipals) = await ProcessSidHistory(sh, domain);
+            compProps.SidHistory = sidHistoryPrincipals;
+            props.Add("sidhistory", sidHistoryStrings);
 
             var smsaPrincipals = new List<TypedPrincipal>();
             if (entry.TryGetArrayProperty(LDAPProperties.HostServiceAccount, out var hsa)) {
@@ -814,6 +768,30 @@ namespace SharpHoundCommonLib.Processors {
             }
 
             return supportedEncryptionTypes;
+        }
+        
+        private async Task<(string[] sidHistoryStrings, TypedPrincipal[] sidHistoryPrincipals)> 
+            ProcessSidHistory(byte[][] sidHistory, string domain) {
+            var sidHistoryList = new List<string>();
+            var sidHistoryPrincipals = new List<TypedPrincipal>();
+                
+            if (sidHistory == null) return ([], []);
+                
+            foreach (var sid in sidHistory) {
+                string sSid;
+                try { 
+                    sSid = new SecurityIdentifier(sid, 0).Value;
+                } catch {
+                    continue;
+                }
+                        
+                sidHistoryList.Add(sSid);
+                        
+                if (await _utils.ResolveIDAndType(sSid, domain) is (true, var res))
+                    sidHistoryPrincipals.Add(res);
+            }
+                
+            return (sidHistoryList.ToArray(), sidHistoryPrincipals.Distinct().ToArray());
         }
 
         private static string ConvertNanoDuration(long duration) {
