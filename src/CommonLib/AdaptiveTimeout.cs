@@ -13,10 +13,23 @@ public sealed class AdaptiveTimeout : IDisposable {
     private readonly bool _useAdaptiveTimeout;
     private readonly int _minSamplesForAdaptiveTimeout;
     private int _clearSamplesDecay;
+    private const int TimeSpikePenalty = 2;
+    private const int TimeSpikeForgiveness = 1;
     private const int ClearSamplesThreshold = 5;
-    private const int StdDevMultipier = 5;
+    private const int StdDevMultiplier = 5;
 
     public AdaptiveTimeout(TimeSpan maxTimeout, ILogger log, int sampleCount, int logFrequency, int minSamplesForAdaptiveTimeout, bool useAdaptiveTimeout = true) {
+        if (maxTimeout <= TimeSpan.Zero)
+            throw new ArgumentException("maxTimeout must be positive", nameof(maxTimeout));
+        if (sampleCount <= 0)
+            throw new ArgumentException("sampleCount must be positive", nameof(sampleCount));
+        if (logFrequency <= 0)
+            throw new ArgumentException("logFrequency must be positive", nameof(logFrequency));
+        if (minSamplesForAdaptiveTimeout <= 0)
+            throw new ArgumentException("minSamplesForAdaptiveTimeout must be positive", nameof(minSamplesForAdaptiveTimeout));
+        if (log == null)
+            throw new ArgumentNullException(nameof(log));
+
         _sampler = new ExecutionTimeSampler(log, sampleCount, logFrequency);
         _log = log;
         _maxTimeout = maxTimeout;
@@ -169,7 +182,7 @@ public sealed class AdaptiveTimeout : IDisposable {
             return _maxTimeout;
 
         var stdDev = _sampler.StandardDeviation();
-        var adaptiveTimeoutMs = _sampler.Average() + (stdDev * StdDevMultipier);
+        var adaptiveTimeoutMs = _sampler.Average() + (stdDev * StdDevMultiplier);
         var cappedTimeoutMS = Math.Min(adaptiveTimeoutMs, _maxTimeout.TotalMilliseconds);
         return TimeSpan.FromMilliseconds(cappedTimeoutMS);
     }
@@ -180,10 +193,12 @@ public sealed class AdaptiveTimeout : IDisposable {
     // this is fine (if it fits in our max timeout budget), and we shouldn't block
     // so we should create a safety valve in case this happens to reset our data samples
     private void TimeSpikeSafetyValve(bool isSuccess) {
-        if (isSuccess)
-            _clearSamplesDecay = Math.Max(0, --_clearSamplesDecay);
+        if (isSuccess) {
+            _clearSamplesDecay -= TimeSpikeForgiveness;
+            _clearSamplesDecay = Math.Max(0, _clearSamplesDecay);
+        }
         else
-            _clearSamplesDecay += 2;
+            _clearSamplesDecay += TimeSpikePenalty;
 
         if (_clearSamplesDecay >= ClearSamplesThreshold) {
             ClearSamples();

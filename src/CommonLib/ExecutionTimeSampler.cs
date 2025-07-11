@@ -90,8 +90,14 @@ public class ExecutionTimeSampler : IDisposable {
     }
 
     private void Log(bool flush = false) {
-        if (flush || _samplesSinceLastLog >= _logFrequency) {
-            _log.LogInformation("Execution time Average: {Average}ms, StdDiv: {StandardDeviation}ms", _samples.Average(), StandardDeviation());
+        if ((flush || _samplesSinceLastLog >= _logFrequency) && _samples.Count > 0) {
+            try {
+                _log.LogInformation("Execution time Average: {Average}ms, StdDiv: {StandardDeviation}ms", _samples.Average(), StandardDeviation());
+            }
+            catch (Exception ex) {
+                _log.LogWarning("Failed to calculate execution time statistics: {Error}", ex.Message);
+            }
+
             _samplesSinceLastLog = 0;
         }
     }

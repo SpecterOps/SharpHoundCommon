@@ -33,10 +33,10 @@ public class DCLdapProcessor {
     private readonly string SEC_E_BAD_BINDINGS = "80090346";
 
 
-    public DCLdapProcessor(int portScanTimeout, string dcHostname, ILogger log = null) {
+    public DCLdapProcessor(int ldapConnectionTimeoutMs, string dcHostname, ILogger log = null) {
         _log = log ?? Logging.LogProvider.CreateLogger("DCLdapProcessor");
         _scanner = new PortScanner();
-        _ldapTimeout = portScanTimeout / 1000;
+        _ldapTimeout = ldapConnectionTimeoutMs / 1000;
         _ldapEndpoint = new Uri($"ldap://{dcHostname}:389");
         _ldapSslEndpoint = new Uri($"ldaps://{dcHostname}:636");
         _checkIsNtlmSigningRequiredAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(1), Logging.LogProvider.CreateLogger(nameof(CheckIsNtlmSigningRequired)), sampleCount: 100, logFrequency: 1000, minSamplesForAdaptiveTimeout: 30);
