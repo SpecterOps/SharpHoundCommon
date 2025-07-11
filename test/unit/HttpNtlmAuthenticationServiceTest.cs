@@ -82,7 +82,7 @@ namespace CommonLibTest {
             var url = new Uri("http://primary.testlab.local/");
             var service = new HttpNtlmAuthenticationService(new HttpClientFactory(), null);
             var ex = Assert.ThrowsAsync<TimeoutException>(() =>
-                service.EnsureRequiresAuth(url, true, TimeSpan.FromMilliseconds(1)));
+                service.EnsureRequiresAuth(url, true));
             Assert.Equal($"Timeout getting supported NTLM auth schemes for {url}", ex.Result.Message);
 
         }

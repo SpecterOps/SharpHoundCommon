@@ -11,14 +11,9 @@ namespace SharpHoundCommonLib.Processors {
         private readonly ILogger _log;
         private readonly AdaptiveTimeout _adaptiveTimeout;
 
-        public PortScanner() {
-            _log = Logging.LogProvider.CreateLogger("PortScanner");
-            _adaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromSeconds(10), _log, sampleCount: 100, logFrequency: 1000, minSamplesForAdaptiveTimeout: 30);
-        }
-
-        public PortScanner(ILogger log = null) {
+        public PortScanner(ILogger log = null, int maxTimeout = 10000) {
             _log = log ?? Logging.LogProvider.CreateLogger("PortScanner");
-            _adaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromSeconds(10), _log, sampleCount: 100, logFrequency: 1000, minSamplesForAdaptiveTimeout: 30);
+            _adaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMilliseconds(maxTimeout), _log, sampleCount: 100, logFrequency: 1000, minSamplesForAdaptiveTimeout: 30);
         }
 
         /// <summary>
@@ -29,7 +24,7 @@ namespace SharpHoundCommonLib.Processors {
         /// <param name="timeout">Timeout in milliseconds</param>
         /// <param name="throwError">Used as a switch to control if this method should throw exceptions that  occur.</param>
         /// <returns>True if port is open, otherwise false</returns>
-        public virtual async Task<bool> CheckPort(string hostname, int port = 445, int timeout = 10000,
+        public virtual async Task<bool> CheckPort(string hostname, int port = 445,
             bool throwError = false) {
             var key = new PingCacheKey {
                 Port = port,
@@ -45,8 +40,7 @@ namespace SharpHoundCommonLib.Processors {
                 using var client = new TcpClient();
                 var ca = await _adaptiveTimeout.ExecuteWithTimeout((_) => client.ConnectAsync(hostname, port));
                 if (!ca.IsSuccess) {
-                    _log.LogDebug("{HostName} did not respond to scan on port {Port} within {Timeout}ms", hostname, port,
-                        timeout);
+                    _log.LogDebug("{HostName} did not respond to scan on port {Port} within {Timeout}ms", hostname, port, _adaptiveTimeout.GetAdaptiveTimeout());
                     if (throwError) {
                         throw new TimeoutException("Timed Out");
                     }

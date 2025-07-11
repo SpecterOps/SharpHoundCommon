@@ -52,12 +52,7 @@ namespace SharpHoundCommonLib.Processors {
         /// <param name="timeout"></param>
         /// <returns></returns>
         public async IAsyncEnumerable<UserRightsAssignmentAPIResult> GetUserRightsAssignments(string computerName,
-            string computerObjectId, string computerDomain, bool isDomainController, string[] desiredPrivileges = null,
-            TimeSpan timeout = default) {
-            if (timeout == default) {
-                timeout = TimeSpan.FromMinutes(2);
-            }
-
+            string computerObjectId, string computerDomain, bool isDomainController, string[] desiredPrivileges = null) {
             var policyOpenResult = await _openLSAPolicyAdaptiveTimeout.ExecuteRPCWithTimeout((_) => OpenLSAPolicy(computerName));
             if (!policyOpenResult.IsSuccess) {
                 _log.LogDebug("LSAOpenPolicy failed on {ComputerName} with status {Status}", computerName,

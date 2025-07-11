@@ -40,12 +40,8 @@ namespace SharpHoundCommonLib.Processors
 
         public event ComputerStatusDelegate ComputerStatusEvent;
 
-        public virtual SharpHoundRPC.Result<ISAMServer> OpenSamServer(string computerName, TimeSpan timeout = default)
+        public virtual SharpHoundRPC.Result<ISAMServer> OpenSamServer(string computerName)
         {
-            if (timeout == default) {
-                timeout = TimeSpan.FromMinutes(2);
-            }
-
             var result = _openSamServerAdaptiveTimeout.ExecuteRPCWithTimeout((_) => SAMServer.OpenServer(computerName)).GetAwaiter().GetResult();
             if (result.IsFailed)
             {
@@ -70,14 +66,10 @@ namespace SharpHoundCommonLib.Processors
         /// <param name="timeout"></param>
         /// <returns></returns>
         public async IAsyncEnumerable<LocalGroupAPIResult> GetLocalGroups(string computerName, string computerObjectId,
-            string computerDomain, bool isDomainController, TimeSpan timeout = default)
+            string computerDomain, bool isDomainController)
         {
-            if (timeout == default) {
-                timeout = TimeSpan.FromMinutes(2);
-            }
-
             //Open a handle to the server
-            var openServerResult = OpenSamServer(computerName, timeout);
+            var openServerResult = OpenSamServer(computerName);
             if (openServerResult.IsFailed)
             {
                 _log.LogTrace("OpenServer failed on {ComputerName}: {Error}", computerName, openServerResult.SError);

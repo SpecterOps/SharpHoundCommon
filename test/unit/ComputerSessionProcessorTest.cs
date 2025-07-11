@@ -227,8 +227,7 @@ namespace CommonLibTest {
             var receivedStatus = new List<CSVComputerStatus>();
             var machineDomainSid = $"{Consts.MockDomainSid}-1000";
             processor.ComputerStatusEvent += status => { receivedStatus.Add(status); return Task.CompletedTask; };
-            var results = await processor.ReadUserSessions("primary.testlab.local", machineDomainSid, "testlab.local",
-                TimeSpan.FromMilliseconds(1));
+            var results = await processor.ReadUserSessions("primary.testlab.local", machineDomainSid, "testlab.local");
             Assert.Empty(results.Results);
             Assert.Single(receivedStatus);
             var status = receivedStatus[0];
@@ -248,8 +247,7 @@ namespace CommonLibTest {
             processor.ComputerStatusEvent += status => { receivedStatus.Add(status); return Task.CompletedTask; };
 
             var results = await processor.ReadUserSessionsPrivileged("primary.testlab.local", machineDomainSid,
-                "testlab.local",
-                TimeSpan.FromMilliseconds(1));
+                "testlab.local");
             Assert.Empty(results.Results);
             Assert.Single(receivedStatus);
             var status = receivedStatus[0];

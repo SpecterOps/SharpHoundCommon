@@ -52,11 +52,7 @@ namespace SharpHoundCommonLib.Processors {
         /// <param name="timeout"></param>
         /// <returns></returns>
         public async Task<SessionAPIResult> ReadUserSessions(string computerName, string computerSid,
-            string computerDomain, TimeSpan timeout = default) {
-            if (timeout == default) {
-                timeout = TimeSpan.FromMinutes(2);
-            }
-
+            string computerDomain) {
             var ret = new SessionAPIResult();
 
             _log.LogDebug("Running NetSessionEnum for {ObjectName}", computerName);
@@ -194,12 +190,8 @@ namespace SharpHoundCommonLib.Processors {
         /// <param name="timeout"></param>
         /// <returns></returns>
         public async Task<SessionAPIResult> ReadUserSessionsPrivileged(string computerName,
-            string computerSamAccountName, string computerSid, TimeSpan timeout = default) {
+            string computerSamAccountName, string computerSid) {
             var ret = new SessionAPIResult();
-            if (timeout == default) {
-                timeout = TimeSpan.FromMinutes(2);
-            }
-
             _log.LogDebug("Running NetWkstaUserEnum for {ObjectName}", computerName);
 
             var result = await _readUserSessionsPriviledgedAdaptiveTimeout.ExecuteNetAPIWithTimeout((timeoutToken) => {

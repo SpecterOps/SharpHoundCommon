@@ -28,29 +28,25 @@ public class HttpNtlmAuthenticationService {
         _authWithChannelBindingAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(AuthWithBadChannelBindingsAsync)), sampleCount: 100, logFrequency: 1000, minSamplesForAdaptiveTimeout: 30);
     }
 
-    public async Task EnsureRequiresAuth(Uri url, bool? useBadChannelBindings, TimeSpan timeout = default) {
-        if (timeout == default) {
-            timeout = TimeSpan.FromMinutes(2);
-        }
-
+    public async Task EnsureRequiresAuth(Uri url, bool? useBadChannelBindings) {
         if (url == null)
             throw new ArgumentException("Url property is null");
 
         if (useBadChannelBindings == null && url.Scheme == "https")
             throw new ArgumentException("When using HTTPS, useBadChannelBindings must be set");
 
-        var supportedAuthSchemes = await GetSupportedNtlmAuthSchemesAsync(url, timeout);
+        var supportedAuthSchemes = await GetSupportedNtlmAuthSchemesAsync(url);
 
         _logger.LogDebug($"Supported NTLM auth schemes for {url}: " + string.Join(",", supportedAuthSchemes));
 
         foreach (var authScheme in supportedAuthSchemes) {
             if (useBadChannelBindings == null) {
-                await AuthWithBadChannelBindingsAsync(url, authScheme, timeout);
+                await AuthWithBadChannelBindingsAsync(url, authScheme);
             } else {
                 if ((bool)useBadChannelBindings) {
-                    await AuthWithBadChannelBindingsAsync(url, authScheme, timeout);
+                    await AuthWithBadChannelBindingsAsync(url, authScheme);
                 } else {
-                    await AuthWithChannelBindingAsync(url, authScheme, timeout);
+                    await AuthWithChannelBindingAsync(url, authScheme);
                 }
             }
 
@@ -59,7 +55,7 @@ public class HttpNtlmAuthenticationService {
         }
     }
 
-    private async Task<string[]> GetSupportedNtlmAuthSchemesAsync(Uri url, TimeSpan timeout) {
+    private async Task<string[]> GetSupportedNtlmAuthSchemesAsync(Uri url) {
         var httpClient = _httpClientFactory.CreateUnauthenticatedClient();
         using var getRequest = new HttpRequestMessage(HttpMethod.Get, url);
 
@@ -107,7 +103,7 @@ public class HttpNtlmAuthenticationService {
         return schemes;
     }
 
-    private async Task AuthWithBadChannelBindingsAsync(Uri url, string authScheme, TimeSpan timeout, NtlmAuthenticationHandler ntlmAuth = null) {
+    private async Task AuthWithBadChannelBindingsAsync(Uri url, string authScheme, NtlmAuthenticationHandler ntlmAuth = null) {
         var httpClient = _httpClientFactory.CreateUnauthenticatedClient();
         var transport = new HttpTransport(httpClient, url, authScheme, _logger);
         var ntlmAuthHandler = ntlmAuth ?? new NtlmAuthenticationHandler($"HTTP/{url.Host}");
@@ -145,7 +141,7 @@ public class HttpNtlmAuthenticationService {
         response.EnsureSuccessStatusCode();
     }
 
-    private async Task<bool> AuthWithChannelBindingAsync(Uri url, string authScheme, TimeSpan timeout) {
+    private async Task<bool> AuthWithChannelBindingAsync(Uri url, string authScheme) {
         var handler = new HttpClientHandler {
             ServerCertificateCustomValidationCallback = (httpRequestMessage, cert, cetChain, policyErrors) => true,
         };

@@ -27,14 +27,14 @@ namespace SharpHoundCommonLib.SMB {
         /// <summary>
         /// Timeout value used when connecting to hosts or waiting for a response.
         /// </summary>
-        public int TimeoutMs { get; set; } = 2000;
+        public int MaxTimeoutMs { get; set; } = 2000;
         public readonly AdaptiveTimeout _adaptiveTimeout;
 
         public ILogger _log;
 
         public SmbScanner(ILogger log) {
-            _log = log ?? Logging.LogProvider.CreateLogger("SmbScanner"); ;
-            _adaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMilliseconds(TimeoutMs), Logging.LogProvider.CreateLogger(nameof(TrySMBNegotiate)), sampleCount: 100, logFrequency: 1000, minSamplesForAdaptiveTimeout: 30);
+            _log = log ?? Logging.LogProvider.CreateLogger("SmbScanner");
+            _adaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMilliseconds(MaxTimeoutMs), Logging.LogProvider.CreateLogger(nameof(TrySMBNegotiate)), sampleCount: 100, logFrequency: 1000, minSamplesForAdaptiveTimeout: 30);
         }
 
 

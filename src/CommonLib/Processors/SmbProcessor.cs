@@ -16,22 +16,16 @@ namespace SharpHoundCommonLib.Processors {
         public delegate Task ComputerStatusDelegate(CSVComputerStatus status);
         private readonly ILogger _log;
         private readonly ISmbScanner _smbScanner;
-        private readonly int _timeoutMs;
         private readonly AdaptiveTimeout _scanHostAdaptiveTimeout;
 
         public SmbProcessor(int timeoutMs, ISmbScanner smbScanner = null, ILogger log = null) {
-            _timeoutMs = timeoutMs;
             _log = log ?? Logging.LogProvider.CreateLogger("SmbProcessor");
-            _smbScanner = smbScanner ?? new SmbScanner(_log) { TimeoutMs = _timeoutMs };
+            _smbScanner = smbScanner ?? new SmbScanner(_log) { MaxTimeoutMs = timeoutMs };
             _scanHostAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMilliseconds(timeoutMs), Logging.LogProvider.CreateLogger(nameof(ISmbScanner.ScanHost)), sampleCount: 100, logFrequency: 1000, minSamplesForAdaptiveTimeout: 30);
         }
 
         public event ComputerStatusDelegate ComputerStatusEvent;
-        public virtual async Task<APIResult<SmbInfo>> Scan(string host, TimeSpan timeout = default) {
-            if (timeout == default) {
-                timeout = TimeSpan.FromMinutes(2);
-            }
-
+        public virtual async Task<APIResult<SmbInfo>> Scan(string host) {
             var result = await _scanHostAdaptiveTimeout.ExecuteRPCWithTimeout((timeoutToken) => _smbScanner.ScanHost(host, 445, timeoutToken));
 
             if (result.IsFailed) {

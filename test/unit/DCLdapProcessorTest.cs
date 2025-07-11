@@ -39,10 +39,11 @@ namespace CommonLibTest {
 
             var processor = mockProcessor.Object;
             var receivedStatus = new List<CSVComputerStatus>();
-            processor.ComputerStatusEvent += async status => {
+            processor.ComputerStatusEvent += status => {
                 receivedStatus.Add(status);
+                return Task.CompletedTask;
             };
-            var results = await processor.Scan("primary.testlab.local", TimeSpan.FromMinutes(2));
+            var results = await processor.Scan("primary.testlab.local");
 
             Assert.Equal(2, receivedStatus.Count);
             var status = receivedStatus[0];
@@ -66,10 +67,11 @@ namespace CommonLibTest {
 
             var processor = mockProcessor.Object;
             var receivedStatus = new List<CSVComputerStatus>();
-            processor.ComputerStatusEvent += async status => {
+            processor.ComputerStatusEvent += status => {
                 receivedStatus.Add(status);
+                return Task.CompletedTask;
             };
-            var results = await processor.Scan("primary.testlab.local", TimeSpan.FromMinutes(2));
+            var results = await processor.Scan("primary.testlab.local");
 
             Assert.Equal(2, receivedStatus.Count);
             var status = receivedStatus[0];
@@ -102,7 +104,7 @@ namespace CommonLibTest {
                 receivedStatus.Add(status);
                 return Task.CompletedTask;
             };
-            var results = await processor.Scan("primary.testlab.local", TimeSpan.FromMilliseconds(1));
+            var results = await processor.Scan("primary.testlab.local");
 
             Assert.Equal(2, receivedStatus.Count);
             var status = receivedStatus[0];

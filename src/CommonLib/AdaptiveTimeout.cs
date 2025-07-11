@@ -164,7 +164,7 @@ public sealed class AdaptiveTimeout : IDisposable {
     // But we'll cap at configured timeout
     // https://modelassist.epixanalytics.com/space/EA/26574957/Tchebysheffs+Rule
     // https://en.wikipedia.org/wiki/Independent_and_identically_distributed_random_variables
-    private TimeSpan GetAdaptiveTimeout() {
+    public TimeSpan GetAdaptiveTimeout() {
         if (!_useAdaptiveTimeout || _sampler.Count < _minSamplesForAdaptiveTimeout)
             return _maxTimeout;
 
