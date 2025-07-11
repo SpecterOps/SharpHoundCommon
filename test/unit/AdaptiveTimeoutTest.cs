@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using SharpHoundCommonLib;
 using Xunit;
@@ -53,14 +54,14 @@ public class AdaptiveTimeoutTest {
     [Fact]
     public async Task AdaptiveTimeout_GetAdaptiveTimeout_TimeSpikeSafetyValve() {
         var maxTimeout = TimeSpan.FromSeconds(1);
-        var numSamples = 30;
+        var numSamples = 100;
         var adaptiveTimeout = new AdaptiveTimeout(maxTimeout, new TestLogger(_testOutputHelper, Microsoft.Extensions.Logging.LogLevel.Trace), numSamples, 1000, 10);
 
         for (int i = 0; i < numSamples; i++)
-            await adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(10));
+            await adaptiveTimeout.ExecuteWithTimeout((_) => Thread.Sleep(10));
 
         for (int i = 0; i < 6; i++)
-            await adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(100));
+            await adaptiveTimeout.ExecuteWithTimeout((_) => Thread.Sleep(200));
 
         var adaptiveTimeoutResult = adaptiveTimeout.GetAdaptiveTimeout();
         Assert.Equal(maxTimeout, adaptiveTimeoutResult);
