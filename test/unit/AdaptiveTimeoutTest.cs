@@ -59,9 +59,8 @@ public class AdaptiveTimeoutTest {
         for (int i = 0; i < numSamples; i++)
             await adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(10));
 
-        await adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(100));
-        await adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(100));
-        await adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(100));
+        for (int i = 0; i < 6; i++)
+            await adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(100));
 
         var adaptiveTimeoutResult = adaptiveTimeout.GetAdaptiveTimeout();
         Assert.Equal(maxTimeout, adaptiveTimeoutResult);
