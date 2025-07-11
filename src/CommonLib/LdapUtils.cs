@@ -7,7 +7,6 @@ using System.DirectoryServices.ActiveDirectory;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Security.Cryptography;
 using System.Security.Principal;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -38,7 +37,9 @@ namespace SharpHoundCommonLib {
         private static readonly ConcurrentDictionary<string, ResolvedWellKnownPrincipal>
             SeenWellKnownPrincipals = new();
 
-        private static readonly AdaptiveTimeout _requestNetBiosNameAdaptiveTimeout = new AdaptiveTimeout(defaultTimeout: TimeSpan.FromMinutes(1), Logging.LogProvider.CreateLogger(nameof(RequestNETBIOSNameFromComputerAsync)), sampleCount: 100, logFrequency: 1000, minSamplesForAdaptiveTimeout: 30);
+        private static readonly AdaptiveTimeout _requestNetBiosNameAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(1), Logging.LogProvider.CreateLogger(nameof(RequestNETBIOSNameFromComputerAsync)), sampleCount: 100, logFrequency: 1000, minSamplesForAdaptiveTimeout: 30);
+
+        private static readonly AdaptiveTimeout _callNetWkstaGetInfoAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(NativeMethods.CallNetWkstaGetInfo)), sampleCount: 100, logFrequency: 1000, minSamplesForAdaptiveTimeout: 30);
 
         private readonly ConcurrentDictionary<string, string>
             _hostResolutionMap = new(StringComparer.OrdinalIgnoreCase);
@@ -715,7 +716,7 @@ namespace SharpHoundCommonLib {
             }
             
             // Blocking External Call
-            var result = await Timeout.ExecuteNetAPIWithTimeout(TimeSpan.FromMinutes(2), (_) => _nativeMethods.CallNetWkstaGetInfo(hostname));
+            var result = await _callNetWkstaGetInfoAdaptiveTimeout.ExecuteNetAPIWithTimeout((_) => _nativeMethods.CallNetWkstaGetInfo(hostname));
 
             if (result.IsSuccess)
                 return (true, result.Value);

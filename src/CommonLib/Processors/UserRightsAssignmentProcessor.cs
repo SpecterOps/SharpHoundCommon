@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using SharpHoundCommonLib.Enums;
 using SharpHoundCommonLib.OutputTypes;
-using SharpHoundRPC;
 using SharpHoundRPC.Shared;
 using SharpHoundRPC.Wrappers;
 
@@ -15,10 +14,16 @@ namespace SharpHoundCommonLib.Processors {
 
         private readonly ILogger _log;
         private readonly ILdapUtils _utils;
+        private readonly AdaptiveTimeout _openLSAPolicyAdaptiveTimeout;
+        private readonly AdaptiveTimeout _getLocalDomainInfoAdaptiveTimeout;
+        private readonly AdaptiveTimeout _getResolvedPrincipalWithPriviledgeAdaptiveTimeout;
 
         public UserRightsAssignmentProcessor(ILdapUtils utils, ILogger log = null) {
             _utils = utils;
             _log = log ?? Logging.LogProvider.CreateLogger("UserRightsAssignmentProcessor");
+            _openLSAPolicyAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(OpenLSAPolicy)), sampleCount: 100, logFrequency: 1000, minSamplesForAdaptiveTimeout: 30);
+            _getLocalDomainInfoAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ILSAPolicy.GetLocalDomainInformation)), sampleCount: 100, logFrequency: 1000, minSamplesForAdaptiveTimeout: 30);
+            _getResolvedPrincipalWithPriviledgeAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ILSAPolicy.GetResolvedPrincipalsWithPrivilege)), sampleCount: 100, logFrequency: 1000, minSamplesForAdaptiveTimeout: 30);
         }
 
         public event ComputerStatusDelegate ComputerStatusEvent;
@@ -53,7 +58,7 @@ namespace SharpHoundCommonLib.Processors {
                 timeout = TimeSpan.FromMinutes(2);
             }
 
-            var policyOpenResult = await Timeout.ExecuteRPCWithTimeout(timeout, (_) => OpenLSAPolicy(computerName));
+            var policyOpenResult = await _openLSAPolicyAdaptiveTimeout.ExecuteRPCWithTimeout((_) => OpenLSAPolicy(computerName));
             if (!policyOpenResult.IsSuccess) {
                 _log.LogDebug("LSAOpenPolicy failed on {ComputerName} with status {Status}", computerName,
                     policyOpenResult.Error);
@@ -71,7 +76,7 @@ namespace SharpHoundCommonLib.Processors {
             SecurityIdentifier machineSid;
             if (!Cache.GetMachineSid(computerObjectId, out var temp)) {
                 var getMachineSidResult =
-                    await Timeout.ExecuteRPCWithTimeout(timeout, (_) => server.GetLocalDomainInformation());
+                    await _getLocalDomainInfoAdaptiveTimeout.ExecuteRPCWithTimeout((_) => server.GetLocalDomainInformation());
                 if (getMachineSidResult.IsFailed) {
                     _log.LogWarning("Failed to get machine sid for {Server}: {Status}. Abandoning URA collection",
                         computerName, getMachineSidResult.SError);
@@ -98,7 +103,7 @@ namespace SharpHoundCommonLib.Processors {
                 };
 
                 //Ask for all principals with the specified privilege. 
-                var enumerateAccountsResult = await Timeout.ExecuteRPCWithTimeout(timeout, (_) => server.GetResolvedPrincipalsWithPrivilege(privilege));
+                var enumerateAccountsResult = await _getResolvedPrincipalWithPriviledgeAdaptiveTimeout.ExecuteRPCWithTimeout((_) => server.GetResolvedPrincipalsWithPrivilege(privilege));
                 if (enumerateAccountsResult.IsFailed) {
                     _log.LogDebug(
                         "LSAEnumerateAccountsWithUserRight failed on {ComputerName} with status {Status} for privilege {Privilege}",

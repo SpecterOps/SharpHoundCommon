@@ -16,11 +16,26 @@ namespace SharpHoundCommonLib.Processors
         public delegate Task ComputerStatusDelegate(CSVComputerStatus status);
         private readonly ILogger _log;
         private readonly ILdapUtils _utils;
+        private readonly AdaptiveTimeout _getMachineSidAdaptiveTimeout;
+        private readonly AdaptiveTimeout _openSamServerAdaptiveTimeout;
+        private readonly AdaptiveTimeout _getDomainsAdaptiveTimeout;
+        private readonly AdaptiveTimeout _openDomainAdaptiveTimeout;
+        private readonly AdaptiveTimeout _getAliasesAdaptiveTimeout;
+        private readonly AdaptiveTimeout _openAliasAdaptiveTimeout;
+        private readonly AdaptiveTimeout _getMembersAdaptiveTimeout;
+        private readonly AdaptiveTimeout _lookupPrincipalBySidAdaptiveTimeout;
 
-        public LocalGroupProcessor(ILdapUtils utils, ILogger log = null)
-        {
+        public LocalGroupProcessor(ILdapUtils utils, ILogger log = null) {
             _utils = utils;
             _log = log ?? Logging.LogProvider.CreateLogger("LocalGroupProcessor");
+            _getMachineSidAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ISAMServer.GetMachineSid)), sampleCount: 100, logFrequency: 1000, minSamplesForAdaptiveTimeout: 30);
+            _openSamServerAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(SAMServer.OpenServer)), sampleCount: 100, logFrequency: 1000, minSamplesForAdaptiveTimeout: 30);
+            _getDomainsAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ISAMServer.GetDomains)), sampleCount: 100, logFrequency: 1000, minSamplesForAdaptiveTimeout: 30);
+            _openDomainAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ISAMServer.OpenDomain)), sampleCount: 100, logFrequency: 1000, minSamplesForAdaptiveTimeout: 30);
+            _getAliasesAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ISAMDomain.GetAliases)), sampleCount: 100, logFrequency: 1000, minSamplesForAdaptiveTimeout: 30);
+            _openAliasAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ISAMDomain.OpenAlias)), sampleCount: 100, logFrequency: 1000, minSamplesForAdaptiveTimeout: 30);
+            _getMembersAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ISAMAlias.GetMembers)), sampleCount: 100, logFrequency: 1000, minSamplesForAdaptiveTimeout: 30);
+            _lookupPrincipalBySidAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ISAMServer.LookupPrincipalBySid)), sampleCount: 100, logFrequency: 1000, minSamplesForAdaptiveTimeout: 30);
         }
 
         public event ComputerStatusDelegate ComputerStatusEvent;
@@ -31,7 +46,7 @@ namespace SharpHoundCommonLib.Processors
                 timeout = TimeSpan.FromMinutes(2);
             }
 
-            var result = Timeout.ExecuteRPCWithTimeout(timeout, (_) => SAMServer.OpenServer(computerName)).GetAwaiter().GetResult();
+            var result = _openSamServerAdaptiveTimeout.ExecuteRPCWithTimeout((_) => SAMServer.OpenServer(computerName)).GetAwaiter().GetResult();
             if (result.IsFailed)
             {
                 return SharpHoundRPC.Result<ISAMServer>.Fail(result.SError);
@@ -81,7 +96,7 @@ namespace SharpHoundCommonLib.Processors
             //Try to get the machine sid for the computer if its not already cached
             SecurityIdentifier machineSid;
             if (!Cache.GetMachineSid(computerObjectId, out var tempMachineSid)) {
-                var getMachineSidResult = await Timeout.ExecuteRPCWithTimeout(timeout, (timeoutToken) => server.GetMachineSid(cancellationToken: timeoutToken));
+                var getMachineSidResult = await _getMachineSidAdaptiveTimeout.ExecuteRPCWithTimeout((timeoutToken) => server.GetMachineSid(cancellationToken: timeoutToken));
                 if (getMachineSidResult.IsFailed)
                 {
                     _log.LogTrace("GetMachineSid failed on {ComputerName}: {Error}", computerName, getMachineSidResult.SError);
@@ -105,7 +120,7 @@ namespace SharpHoundCommonLib.Processors
             }
 
             //Get all available domains in the server
-            var getDomainsResult = await Timeout.ExecuteRPCWithTimeout(timeout, (_) => server.GetDomains());
+            var getDomainsResult = await _getDomainsAdaptiveTimeout.ExecuteRPCWithTimeout((_) => server.GetDomains());
             if (getDomainsResult.IsFailed)
             {
                 _log.LogTrace("GetDomains failed on {ComputerName}: {Error}", computerName, getDomainsResult.SError);
@@ -126,7 +141,7 @@ namespace SharpHoundCommonLib.Processors
                     continue;
 
                 //Open a handle to the domain
-                var openDomainResult = await Timeout.ExecuteRPCWithTimeout(timeout, (timeoutToken) => server.OpenDomain(domainResult.Name, cancellationToken: timeoutToken));
+                var openDomainResult = await _openDomainAdaptiveTimeout.ExecuteRPCWithTimeout((timeoutToken) => server.OpenDomain(domainResult.Name, cancellationToken: timeoutToken));
                 if (openDomainResult.IsFailed)
                 {
                     _log.LogTrace("Failed to open domain {Domain} on {ComputerName}: {Error}", domainResult.Name, computerName, openDomainResult.SError);
@@ -145,7 +160,7 @@ namespace SharpHoundCommonLib.Processors
                 var domain = openDomainResult.Value;
 
                 //Open a handle to the available aliases
-                var getAliasesResult = await Timeout.ExecuteRPCWithTimeout(timeout, (_) => domain.GetAliases());
+                var getAliasesResult = await _getAliasesAdaptiveTimeout.ExecuteRPCWithTimeout((_) => domain.GetAliases());
 
                 if (getAliasesResult.IsFailed)
                 {
@@ -178,7 +193,7 @@ namespace SharpHoundCommonLib.Processors
                     };
 
                     //Open a handle to the alias
-                    var openAliasResult = await Timeout.ExecuteRPCWithTimeout(timeout, (_) => domain.OpenAlias(alias.Rid));
+                    var openAliasResult = await _openAliasAdaptiveTimeout.ExecuteRPCWithTimeout((_) => domain.OpenAlias(alias.Rid));
                     if (openAliasResult.IsFailed)
                     {
                         _log.LogTrace("Failed to open alias {Alias} with RID {Rid} in domain {Domain} on computer {ComputerName}: {Error}", alias.Name, alias.Rid, domainResult.Name, computerName, openAliasResult.Error);
@@ -199,7 +214,7 @@ namespace SharpHoundCommonLib.Processors
                     
                     var localGroup = openAliasResult.Value;
                     //Call GetMembersInAlias to get raw group members
-                    var getMembersResult = await Timeout.ExecuteRPCWithTimeout(timeout, (_) => localGroup.GetMembers());
+                    var getMembersResult = await _getMembersAdaptiveTimeout.ExecuteRPCWithTimeout((_) => localGroup.GetMembers());
                     if (getMembersResult.IsFailed)
                     {
                         _log.LogTrace("Failed to get members in alias {Alias} with RID {Rid} in domain {Domain} on computer {ComputerName}: {Error}", alias.Name, alias.Rid, domainResult.Name, computerName, openAliasResult.Error);
@@ -274,7 +289,7 @@ namespace SharpHoundCommonLib.Processors
                             }
                             
                             //Attempt to lookup the principal in the server directly
-                            var lookupUserResult = await Timeout.ExecuteRPCWithTimeout(timeout, timeoutToken => server.LookupPrincipalBySid(securityIdentifier, timeoutToken));
+                            var lookupUserResult = await _lookupPrincipalBySidAdaptiveTimeout.ExecuteRPCWithTimeout(timeoutToken => server.LookupPrincipalBySid(securityIdentifier, timeoutToken));
                             if (lookupUserResult.IsFailed)
                             {
                                 _log.LogTrace("Unable to resolve local sid {SID}: {Error}", sidValue, lookupUserResult.SError);

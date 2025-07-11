@@ -11,7 +11,7 @@ namespace SharpHoundCommonLib {
 
     public class SHRegistryKey : IRegistryKey, IDisposable {
         private readonly RegistryKey _currentKey;
-        private static readonly AdaptiveTimeout _adaptiveTimeout = new AdaptiveTimeout(defaultTimeout: TimeSpan.FromSeconds(10), Logging.LogProvider.CreateLogger(nameof(SHRegistryKey)), sampleCount: 100, logFrequency: 1000, minSamplesForAdaptiveTimeout: 30);
+        private static readonly AdaptiveTimeout _adaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromSeconds(10), Logging.LogProvider.CreateLogger(nameof(SHRegistryKey)), sampleCount: 100, logFrequency: 1000, minSamplesForAdaptiveTimeout: 30);
 
         private SHRegistryKey(RegistryKey registryKey) {
             _currentKey = registryKey;

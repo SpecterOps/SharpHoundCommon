@@ -8,15 +8,18 @@ namespace SharpHoundCommonLib;
 
 public sealed class AdaptiveTimeout : IDisposable {
     private readonly ExecutionTimeSampler _sampler;
-    private readonly TimeSpan _defaultTimeout;
+    private readonly ILogger _log;
+    private readonly TimeSpan _maxTimeout;
     private readonly bool _useAdaptiveTimeout;
     private readonly int _minSamplesForAdaptiveTimeout;
     private int _clearSamplesDecay;
-    private const int ClearSamplesThreshold = 8;
+    private const int ClearSamplesThreshold = 5;
+    private const int StdDevMultipier = 5;
 
-    public AdaptiveTimeout(TimeSpan defaultTimeout, ILogger log, int sampleCount, int logFrequency, int minSamplesForAdaptiveTimeout, bool useAdaptiveTimeout = true) {
+    public AdaptiveTimeout(TimeSpan maxTimeout, ILogger log, int sampleCount, int logFrequency, int minSamplesForAdaptiveTimeout, bool useAdaptiveTimeout = true) {
         _sampler = new ExecutionTimeSampler(log, sampleCount, logFrequency);
-        _defaultTimeout = defaultTimeout;
+        _log = log;
+        _maxTimeout = maxTimeout;
         _useAdaptiveTimeout = useAdaptiveTimeout;
         _minSamplesForAdaptiveTimeout = minSamplesForAdaptiveTimeout;
     }
@@ -31,7 +34,7 @@ public sealed class AdaptiveTimeout : IDisposable {
     /// Logs aggregate execution time data.
     /// Manages its own timeout.
     /// A cancellation token is passed to the executing function so it may exit cleanly if timeout is reached.
-    /// DO NOT wrap a cached function in this timeout if adaptive timeouts enabled - it demands an approximately normal distribution of execution time.
+    /// Please don't wrap a cached function in this timeout if adaptive timeouts enabled, normal distributions are better.
     /// DO NOT use a single AdaptiveTimeout for multiple functions.
     /// </summary>
     /// <typeparam name="T"></typeparam>
@@ -49,7 +52,7 @@ public sealed class AdaptiveTimeout : IDisposable {
     /// Logs aggregate execution time data.
     /// Manages its own timeout.
     /// A cancellation token is passed to the executing function so it may exit cleanly if timeout is reached.
-    /// DO NOT wrap a cached function in this timeout if adaptive timeouts enabled - it demands an approximately normal distribution of execution time.
+    /// Please don't wrap a cached function in this timeout if adaptive timeouts enabled, normal distributions are better.
     /// DO NOT use a single AdaptiveTimeout for multiple functions.
     /// </summary>
     /// <param name="func"></param>
@@ -66,7 +69,7 @@ public sealed class AdaptiveTimeout : IDisposable {
     /// Logs aggregate execution time data.
     /// Manages its own timeout.
     /// A cancellation token is passed to the executing function so it may exit cleanly if timeout is reached.
-    /// DO NOT wrap a cached function in this timeout if adaptive timeouts enabled - it demands an approximately normal distribution of execution time.
+    /// Please don't wrap a cached function in this timeout if adaptive timeouts enabled, normal distributions are better.
     /// DO NOT use a single AdaptiveTimeout for multiple functions.
     /// </summary>
     /// <typeparam name="T"></typeparam>
@@ -84,7 +87,7 @@ public sealed class AdaptiveTimeout : IDisposable {
     /// Logs aggregate execution time data.
     /// Manages its own timeout.
     /// A cancellation token is passed to the executing function so it may exit cleanly if timeout is reached.
-    /// DO NOT wrap a cached function in this timeout if adaptive timeouts enabled - it demands an approximately normal distribution of execution time.
+    /// Please don't wrap a cached function in this timeout if adaptive timeouts enabled, normal distributions are better.
     /// DO NOT use a single AdaptiveTimeout for multiple functions.
     /// </summary>
     /// <param name="func"></param>
@@ -101,7 +104,7 @@ public sealed class AdaptiveTimeout : IDisposable {
     /// Logs aggregate execution time data.
     /// Manages its own timeout.
     /// A cancellation token is passed to the executing function so it may exit cleanly if timeout is reached.
-    /// DO NOT wrap a cached function in this timeout if adaptive timeouts enabled - it demands an approximately normal distribution of execution time.
+    /// Please don't wrap a cached function in this timeout if adaptive timeouts enabled, normal distributions are better.
     /// DO NOT use a single AdaptiveTimeout for multiple functions.
     /// </summary>
     /// <typeparam name="T"></typeparam>
@@ -119,7 +122,7 @@ public sealed class AdaptiveTimeout : IDisposable {
     /// Logs aggregate execution time data.
     /// Manages its own timeout.
     /// A cancellation token is passed to the executing function so it may exit cleanly if timeout is reached.
-    /// DO NOT wrap a cached function in this timeout if adaptive timeouts enabled - it demands an approximately normal distribution of execution time.
+    /// Please don't wrap a cached function in this timeout if adaptive timeouts enabled, normal distributions are better.
     /// DO NOT use a single AdaptiveTimeout for multiple functions.
     /// </summary>
     /// <typeparam name="T"></typeparam>
@@ -137,7 +140,7 @@ public sealed class AdaptiveTimeout : IDisposable {
     /// Logs aggregate execution time data.
     /// Manages its own timeout.
     /// A cancellation token is passed to the executing function so it may exit cleanly if timeout is reached.
-    /// DO NOT wrap a cached function in this timeout if adaptive timeouts enabled - it demands an approximately normal distribution of execution time.
+    /// Please don't wrap a cached function in this timeout if adaptive timeouts enabled, normal distributions are better.
     /// DO NOT use a single AdaptiveTimeout for multiple functions.
     /// </summary>
     /// <typeparam name="T"></typeparam>
@@ -154,23 +157,27 @@ public sealed class AdaptiveTimeout : IDisposable {
         _sampler.Dispose();
     }
 
+    // Within 5 standard deviations will have a conservative lower bound of catching 98% of executions (1 - 1/(k^2 / 2)),
+    // regardless of sample shape
+    // so long as those samples are independent and identically distributed
+    // (and if they're not, our TimeSpikeSafetyValve should provide us with some adaptability)
+    // But we'll cap at configured timeout
+    // https://modelassist.epixanalytics.com/space/EA/26574957/Tchebysheffs+Rule
+    // https://en.wikipedia.org/wiki/Independent_and_identically_distributed_random_variables
     private TimeSpan GetAdaptiveTimeout() {
-        // Within 3 standard deviations should be about 99.9% of executions
-        // But cap at configured timeout
-        // https://en.wikipedia.org/wiki/68%E2%80%9395%E2%80%9399.7_rule
         if (!_useAdaptiveTimeout || _sampler.Count < _minSamplesForAdaptiveTimeout)
-            return _defaultTimeout;
+            return _maxTimeout;
 
-        var stdDiv = _sampler.StandardDeviation();
-        var adaptiveTimeoutMs = _sampler.Average() + (stdDiv * 3);
-        var cappedTimeoutMS = Math.Min(adaptiveTimeoutMs, _defaultTimeout.TotalMilliseconds);
+        var stdDev = _sampler.StandardDeviation();
+        var adaptiveTimeoutMs = _sampler.Average() + (stdDev * StdDevMultipier);
+        var cappedTimeoutMS = Math.Min(adaptiveTimeoutMs, _maxTimeout.TotalMilliseconds);
         return TimeSpan.FromMilliseconds(cappedTimeoutMS);
     }
 
     // AdaptiveTimeout will not respond well to rapid spikes in execution time
     // imagine the wrapped function very regularly executes in 10ms
     // then suddenly starts taking a regular 100ms
-    // this is fine (if it fits in our timeout budget), and we shouldn't block
+    // this is fine (if it fits in our max timeout budget), and we shouldn't block
     // so we should create a safety valve in case this happens to reset our data samples
     private void TimeSpikeSafetyValve(bool isSuccess) {
         if (isSuccess)
@@ -178,7 +185,9 @@ public sealed class AdaptiveTimeout : IDisposable {
         else
             _clearSamplesDecay += 2;
 
-        if (_clearSamplesDecay >= ClearSamplesThreshold)
+        if (_clearSamplesDecay >= ClearSamplesThreshold) {
             ClearSamples();
+            _log.LogTrace("Time spike safety valve event.");
+        }
     }
 }

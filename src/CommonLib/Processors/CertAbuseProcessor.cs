@@ -18,14 +18,17 @@ namespace SharpHoundCommonLib.Processors
     {
         private readonly ILogger _log;
         private readonly ILdapUtils _utils;
+        private readonly AdaptiveTimeout _getMachineSidAdaptiveTimeout;
+        private readonly AdaptiveTimeout _openSamServerAdaptiveTimeout;
         public delegate Task ComputerStatusDelegate(CSVComputerStatus status);
         public event ComputerStatusDelegate ComputerStatusEvent;
 
-        
-        public CertAbuseProcessor(ILdapUtils utils, ILogger log = null)
-        {
+
+        public CertAbuseProcessor(ILdapUtils utils, ILogger log = null) {
             _utils = utils;
             _log = log ?? Logging.LogProvider.CreateLogger("CAProc");
+            _getMachineSidAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ISAMServer.GetMachineSid)), sampleCount: 100, logFrequency: 1000, minSamplesForAdaptiveTimeout: 30);
+            _openSamServerAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(SAMServer.OpenServer)), sampleCount: 100, logFrequency: 1000, minSamplesForAdaptiveTimeout: 30);
         }
 
         /// <summary>
@@ -365,7 +368,7 @@ namespace SharpHoundCommonLib.Processors
                 }
 
                 var server = openServerResult.Value;
-                var getMachineSidResult = await Timeout.ExecuteRPCWithTimeout(TimeSpan.FromMinutes(2), (timeoutToken) => server.GetMachineSid(cancellationToken: timeoutToken));
+                var getMachineSidResult = await _getMachineSidAdaptiveTimeout.ExecuteRPCWithTimeout((timeoutToken) => server.GetMachineSid(cancellationToken: timeoutToken));
                 if (getMachineSidResult.IsFailed)
                 {
                     _log.LogTrace("GetMachineSid failed on {ComputerName}: {Error}", computerName, getMachineSidResult.SError);
@@ -445,7 +448,7 @@ namespace SharpHoundCommonLib.Processors
 
         public virtual SharpHoundRPC.Result<ISAMServer> OpenSamServer(string computerName)
         {
-            var result = Timeout.ExecuteRPCWithTimeout(TimeSpan.FromMinutes(2), (_) => SAMServer.OpenServer(computerName)).GetAwaiter().GetResult();
+            var result = _openSamServerAdaptiveTimeout.ExecuteRPCWithTimeout((_) => SAMServer.OpenServer(computerName)).GetAwaiter().GetResult();
             if (result.IsFailed)
             {
                 return SharpHoundRPC.Result<ISAMServer>.Fail(result.SError);

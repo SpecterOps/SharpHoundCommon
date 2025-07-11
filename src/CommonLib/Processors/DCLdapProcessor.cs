@@ -26,6 +26,8 @@ public class DCLdapProcessor {
     private readonly int _ldapTimeout;
     private readonly Uri _ldapEndpoint;
     private readonly Uri _ldapSslEndpoint;
+    private readonly AdaptiveTimeout _checkIsNtlmSigningRequiredAdaptiveTimeout;
+    private readonly AdaptiveTimeout _checkIsChannelBindingDisabledAdaptiveTimeout;
     public delegate Task ComputerStatusDelegate(CSVComputerStatus status);
 
     private readonly string SEC_E_UNSUPPORTED_FUNCTION = "80090302";
@@ -39,6 +41,8 @@ public class DCLdapProcessor {
         _ldapTimeout = portScanTimeout / 1000;
         _ldapEndpoint = new Uri($"ldap://{dcHostname}:389");
         _ldapSslEndpoint = new Uri($"ldaps://{dcHostname}:636");
+        _checkIsNtlmSigningRequiredAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(CheckIsNtlmSigningRequired)), sampleCount: 100, logFrequency: 1000, minSamplesForAdaptiveTimeout: 30);
+        _checkIsChannelBindingDisabledAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(CheckIsChannelBindingDisabled)), sampleCount: 100, logFrequency: 1000, minSamplesForAdaptiveTimeout: 30);
     }
     
     public event ComputerStatusDelegate ComputerStatusEvent;
@@ -54,11 +58,11 @@ public class DCLdapProcessor {
             isChannelBindingDisabled = new();
 
         if (hasLdap) {
-            isSigningRequired = await Timeout.ExecuteRPCWithTimeout(timeout, CheckIsNtlmSigningRequired);
+            isSigningRequired = await _checkIsNtlmSigningRequiredAdaptiveTimeout.ExecuteRPCWithTimeout(CheckIsNtlmSigningRequired);
         }
 
         if (hasLdaps) {
-            isChannelBindingDisabled = await Timeout.ExecuteRPCWithTimeout(timeout, CheckIsChannelBindingDisabled);
+            isChannelBindingDisabled = await _checkIsChannelBindingDisabledAdaptiveTimeout.ExecuteRPCWithTimeout(CheckIsChannelBindingDisabled);
         }
 
         if (isSigningRequired.IsFailed) {

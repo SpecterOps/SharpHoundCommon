@@ -22,6 +22,8 @@ namespace SharpHoundCommonLib.Processors {
         private readonly bool _doLocalAdminSessionEnum;
         private readonly string _localAdminUsername;
         private readonly string _localAdminPassword;
+        private readonly AdaptiveTimeout _readUserSessionsAdaptiveTimeout;
+        private readonly AdaptiveTimeout _readUserSessionsPriviledgedAdaptiveTimeout;
 
         public ComputerSessionProcessor(ILdapUtils utils,
             NativeMethods nativeMethods = null, ILogger log = null, string currentUserName = null,
@@ -34,6 +36,8 @@ namespace SharpHoundCommonLib.Processors {
             _doLocalAdminSessionEnum = doLocalAdminSessionEnum;
             _localAdminUsername = localAdminUsername;
             _localAdminPassword = localAdminPassword;
+            _readUserSessionsAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ReadUserSessions)), sampleCount: 100, logFrequency: 1000, minSamplesForAdaptiveTimeout: 30);
+            _readUserSessionsPriviledgedAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ReadUserSessionsPrivileged)), sampleCount: 100, logFrequency: 1000, minSamplesForAdaptiveTimeout: 30);
         }
 
         public event ComputerStatusDelegate ComputerStatusEvent;
@@ -57,7 +61,7 @@ namespace SharpHoundCommonLib.Processors {
 
             _log.LogDebug("Running NetSessionEnum for {ObjectName}", computerName);
 
-            var result = await Timeout.ExecuteNetAPIWithTimeout(timeout, (timeoutToken) => {
+            var result = await _readUserSessionsAdaptiveTimeout.ExecuteNetAPIWithTimeout((timeoutToken) => {
                 NetAPIResult<IEnumerable<NetSessionEnumResults>> result;
                 if (_doLocalAdminSessionEnum) {
                     // If we are authenticating using a local admin, we need to impersonate for this
@@ -198,7 +202,7 @@ namespace SharpHoundCommonLib.Processors {
 
             _log.LogDebug("Running NetWkstaUserEnum for {ObjectName}", computerName);
 
-            var result = await Timeout.ExecuteNetAPIWithTimeout(timeout, (timeoutToken) => {
+            var result = await _readUserSessionsPriviledgedAdaptiveTimeout.ExecuteNetAPIWithTimeout((timeoutToken) => {
                 NetAPIResult<IEnumerable<NetWkstaUserEnumResults>>
                     result;
                 if (_doLocalAdminSessionEnum) {
