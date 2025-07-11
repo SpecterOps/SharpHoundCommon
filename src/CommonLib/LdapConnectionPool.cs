@@ -27,6 +27,10 @@ namespace SharpHoundCommonLib {
         private readonly ILogger _log;
         private readonly IPortScanner _portScanner;
         private readonly NativeMethods _nativeMethods;
+        private readonly AdaptiveTimeout _queryAdaptiveTimeout;
+        private readonly AdaptiveTimeout _pagedQueryAdaptiveTimeout;
+        private readonly AdaptiveTimeout _rangedRetrievalAdaptiveTimeout;
+        private readonly AdaptiveTimeout _testConnectionAdaptiveTimeout;
         private static readonly TimeSpan MinBackoffDelay = TimeSpan.FromSeconds(2);
         private static readonly TimeSpan MaxBackoffDelay = TimeSpan.FromSeconds(20);
         private const int BackoffDelayMultiplier = 2;
@@ -54,6 +58,10 @@ namespace SharpHoundCommonLib {
             _log = log ?? Logging.LogProvider.CreateLogger("LdapConnectionPool");
             _portScanner = scanner ?? new PortScanner();
             _nativeMethods = nativeMethods ?? new NativeMethods();
+            _queryAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger("LdapQuery"), sampleCount: 100, logFrequency: 1000, minSamplesForAdaptiveTimeout: 30);
+            _pagedQueryAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger("LdapPagedQuery"), sampleCount: 100, logFrequency: 1000, minSamplesForAdaptiveTimeout: 30);
+            _rangedRetrievalAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger("LdapRangedRetrieval"), sampleCount: 100, logFrequency: 1000, minSamplesForAdaptiveTimeout: 30);
+            _testConnectionAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger("TestLdapConnection"), sampleCount: 100, logFrequency: 1000, minSamplesForAdaptiveTimeout: 30);
         }
 
         private async Task<(bool Success, LdapConnectionWrapper ConnectionWrapper, string Message)> GetLdapConnection(
@@ -100,7 +108,7 @@ namespace SharpHoundCommonLib {
 
                 try {
                     _log.LogTrace("Sending ldap request - {Info}", queryParameters.GetQueryInfo());
-                    response = (SearchResponse)await connectionWrapper.Connection.SendRequestAsync(searchRequest, TimeSpan.FromMinutes(2));
+                    response = await SendRequestWithTimeout(connectionWrapper.Connection, searchRequest, _queryAdaptiveTimeout);
 
                     if (response != null) {
                         querySuccess = true;
@@ -161,6 +169,16 @@ namespace SharpHoundCommonLib {
                      */
                     busyRetryCount++;
                     _log.LogDebug("Query - Executing busy backoff for query {Info} (Attempt {Count})",
+                        queryParameters.GetQueryInfo(), busyRetryCount);
+                    var backoffDelay = GetNextBackoff(busyRetryCount);
+                    await Task.Delay(backoffDelay, cancellationToken);
+                }
+                catch (TimeoutException) when (busyRetryCount < MaxRetries) {
+                    /*
+                     * Treat a timeout as a busy error
+                     */
+                    busyRetryCount++;
+                    _log.LogDebug("Query - Timeout: Executing busy backoff for query {Info} (Attempt {Count})",
                         queryParameters.GetQueryInfo(), busyRetryCount);
                     var backoffDelay = GetNextBackoff(busyRetryCount);
                     await Task.Delay(backoffDelay, cancellationToken);
@@ -255,7 +273,7 @@ namespace SharpHoundCommonLib {
                 SearchResponse response = null;
                 try {
                     _log.LogTrace("Sending paged ldap request - {Info}", queryParameters.GetQueryInfo());
-                    response = (SearchResponse)await connectionWrapper.Connection.SendRequestAsync(searchRequest, TimeSpan.FromMinutes(2));
+                    response = await SendRequestWithTimeout(connectionWrapper.Connection, searchRequest, _pagedQueryAdaptiveTimeout);
                     if (response != null) {
                         pageResponse = (PageResultResponseControl)response.Controls
                             .Where(x => x is PageResultResponseControl).DefaultIfEmpty(null).FirstOrDefault();
@@ -322,6 +340,16 @@ namespace SharpHoundCommonLib {
                      */
                     busyRetryCount++;
                     _log.LogDebug("PagedQuery - Executing busy backoff for query {Info} (Attempt {Count})",
+                        queryParameters.GetQueryInfo(), busyRetryCount);
+                    var backoffDelay = GetNextBackoff(busyRetryCount);
+                    await Task.Delay(backoffDelay, cancellationToken);
+                }
+                catch (TimeoutException) when (busyRetryCount < MaxRetries) {
+                    /*
+                     * Treat a timeout as a busy error
+                     */
+                    busyRetryCount++;
+                    _log.LogDebug("PagedQuery - Timeout: Executing busy backoff for query {Info} (Attempt {Count})",
                         queryParameters.GetQueryInfo(), busyRetryCount);
                     var backoffDelay = GetNextBackoff(busyRetryCount);
                     await Task.Delay(backoffDelay, cancellationToken);
@@ -468,11 +496,21 @@ namespace SharpHoundCommonLib {
                 }
 
                 try {
-                    response = (SearchResponse)await connectionWrapper.Connection.SendRequestAsync(searchRequest, TimeSpan.FromMinutes(2));
+                    response = await SendRequestWithTimeout(connectionWrapper.Connection, searchRequest, _rangedRetrievalAdaptiveTimeout);
                 }
                 catch (LdapException le) when (le.ErrorCode == (int)ResultCode.Busy && busyRetryCount < MaxRetries) {
                     busyRetryCount++;
                     _log.LogDebug("RangedRetrieval - Executing busy backoff for query {Info} (Attempt {Count})",
+                        queryParameters.GetQueryInfo(), busyRetryCount);
+                    var backoffDelay = GetNextBackoff(busyRetryCount);
+                    await Task.Delay(backoffDelay, cancellationToken);
+                }
+                catch (TimeoutException) when (busyRetryCount < MaxRetries) {
+                    /*
+                     * Treat a timeout as a busy error
+                     */
+                    busyRetryCount++;
+                    _log.LogDebug("RangedRetrieval - Timeout: Executing busy backoff for query {Info} (Attempt {Count})",
                         queryParameters.GetQueryInfo(), busyRetryCount);
                     var backoffDelay = GetNextBackoff(busyRetryCount);
                     await Task.Delay(backoffDelay, cancellationToken);
@@ -741,7 +779,7 @@ namespace SharpHoundCommonLib {
                 }
 
                 string tempDomainName;
-                
+
                 // Blocking External Call
                 var dsGetDcNameResult = _nativeMethods.CallDsGetDcName(null, _identifier,
                     (uint)(NetAPIEnums.DSGETDCNAME_FLAGS.DS_FORCE_REDISCOVERY |
@@ -941,7 +979,7 @@ namespace SharpHoundCommonLib {
                 var searchRequest = CreateSearchRequest("", new LdapFilter().AddAllObjects().GetFilter(),
                     SearchScope.Base, null);
 
-                response = (SearchResponse)await connection.SendRequestAsync(searchRequest, TimeSpan.FromMinutes(2));
+                response = await SendRequestWithTimeout(connection, searchRequest, _testConnectionAdaptiveTimeout);
             }
             catch (LdapException e) {
                 /*
@@ -997,6 +1035,16 @@ namespace SharpHoundCommonLib {
                 searchScope, attributes);
             searchRequest.Controls.Add(new SearchOptionsControl(SearchOption.DomainScope));
             return searchRequest;
+        }
+
+        private async Task<SearchResponse> SendRequestWithTimeout(LdapConnection connection, SearchRequest request, AdaptiveTimeout adaptiveTimeout) {
+            // This is basically acting as our cancellation token passed to SendRequestAsync
+            var timeoutWithPadding = adaptiveTimeout.GetAdaptiveTimeout() + TimeSpan.FromSeconds(3);
+            var result = await adaptiveTimeout.ExecuteWithTimeout((_) => connection.SendRequestAsync(request, timeoutWithPadding));
+            if (result.IsSuccess)
+                return (SearchResponse)result.Value;
+            else
+                throw new TimeoutException("Ldap query timed out.");
         }
     }
 }
