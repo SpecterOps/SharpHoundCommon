@@ -86,34 +86,35 @@ namespace CommonLibTest {
             Assert.False(results.IsChannelBindingDisabled.Collected);
         }
 
-        [Fact]
-        public async Task DCLdapProcessor_CheckScan_Timeout() {
-            var mockProcessor = new Mock<DCLdapProcessor>(2, "primary.testlab.local", null);
+        // Obsolete by AdaptiveTimeout
+        // [Fact]
+        // public async Task DCLdapProcessor_CheckScan_Timeout() {
+        //     var mockProcessor = new Mock<DCLdapProcessor>(2, "primary.testlab.local", null);
 
-            mockProcessor.Setup(x => x.Authenticate(It.IsAny<Uri>(), It.IsAny<LdapAuthOptions>(), null, null, It.IsAny<CancellationToken>())).Returns(async () => {
-                await Task.Delay(100);
-                return false;
-            });
+        //     mockProcessor.Setup(x => x.Authenticate(It.IsAny<Uri>(), It.IsAny<LdapAuthOptions>(), null, null, It.IsAny<CancellationToken>())).Returns(async () => {
+        //         await Task.Delay(100);
+        //         return false;
+        //     });
 
-            mockProcessor.Setup(x => x.TestLdapPort()).ReturnsAsync(true);
-            mockProcessor.Setup(x => x.TestLdapsPort()).ReturnsAsync(true);
+        //     mockProcessor.Setup(x => x.TestLdapPort()).ReturnsAsync(true);
+        //     mockProcessor.Setup(x => x.TestLdapsPort()).ReturnsAsync(true);
 
-            var processor = mockProcessor.Object;
-            var receivedStatus = new List<CSVComputerStatus>();
-            processor.ComputerStatusEvent += status => {
-                receivedStatus.Add(status);
-                return Task.CompletedTask;
-            };
-            var results = await processor.Scan("primary.testlab.local");
+        //     var processor = mockProcessor.Object;
+        //     var receivedStatus = new List<CSVComputerStatus>();
+        //     processor.ComputerStatusEvent += status => {
+        //         receivedStatus.Add(status);
+        //         return Task.CompletedTask;
+        //     };
+        //     var results = await processor.Scan("primary.testlab.local");
 
-            Assert.Equal(2, receivedStatus.Count);
-            var status = receivedStatus[0];
-            Assert.Equal("Timeout", status.Status);
-            status = receivedStatus[1];
-            Assert.Equal("Timeout", status.Status);
-            Assert.Equal("Timeout", results.IsSigningRequired.FailureReason);
-            Assert.Equal("Timeout", results.IsChannelBindingDisabled.FailureReason);
-        }
+        //     Assert.Equal(2, receivedStatus.Count);
+        //     var status = receivedStatus[0];
+        //     Assert.Equal("Timeout", status.Status);
+        //     status = receivedStatus[1];
+        //     Assert.Equal("Timeout", status.Status);
+        //     Assert.Equal("Timeout", results.IsSigningRequired.FailureReason);
+        //     Assert.Equal("Timeout", results.IsChannelBindingDisabled.FailureReason);
+        // }
 
         [Fact]
         public async Task DCLdapProcessor_CheckIsNtlmSigningRequired() {

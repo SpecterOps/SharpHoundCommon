@@ -20,7 +20,7 @@ public class AdaptiveTimeoutTest {
 
         await adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(50));
 
-        var adaptiveTimeoutResult = TestPrivateMethod.InstanceMethod<TimeSpan>(adaptiveTimeout, "GetAdaptiveTimeout", []);
+        var adaptiveTimeoutResult = adaptiveTimeout.GetAdaptiveTimeout();
         Assert.Equal(maxTimeout, adaptiveTimeoutResult);
     }
 
@@ -33,7 +33,7 @@ public class AdaptiveTimeoutTest {
         await adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(50));
         await adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(50));
 
-        var adaptiveTimeoutResult = TestPrivateMethod.InstanceMethod<TimeSpan>(adaptiveTimeout, "GetAdaptiveTimeout", []);
+        var adaptiveTimeoutResult = adaptiveTimeout.GetAdaptiveTimeout();
         Assert.Equal(maxTimeout, adaptiveTimeoutResult);
     }
 
@@ -46,7 +46,7 @@ public class AdaptiveTimeoutTest {
         await adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(50));
         await adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(60));
 
-        var adaptiveTimeoutResult = TestPrivateMethod.InstanceMethod<TimeSpan>(adaptiveTimeout, "GetAdaptiveTimeout", []);
+        var adaptiveTimeoutResult = adaptiveTimeout.GetAdaptiveTimeout();
         Assert.True(adaptiveTimeoutResult < maxTimeout);
     }
 
@@ -63,7 +63,7 @@ public class AdaptiveTimeoutTest {
         await adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(100));
         await adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(100));
 
-        var adaptiveTimeoutResult = TestPrivateMethod.InstanceMethod<TimeSpan>(adaptiveTimeout, "GetAdaptiveTimeout", []);
+        var adaptiveTimeoutResult = adaptiveTimeout.GetAdaptiveTimeout();
         Assert.Equal(maxTimeout, adaptiveTimeoutResult);
     }
 }

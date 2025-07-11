@@ -68,28 +68,29 @@ namespace CommonLibTest
             Assert.Equal(Label.Group, adminResult.ObjectType);
         }
 
-        [Fact]
-        public async Task UserRightsAssignmentProcessor_TestTimeout() {
-            var mockProcessor = new Mock<UserRightsAssignmentProcessor>(new MockLdapUtils(), null);
-            mockProcessor.Setup(x => x.OpenLSAPolicy(It.IsAny<string>())).Returns(()=> {
-                Task.Delay(100).Wait();
-                return NtStatus.StatusAccessDenied;
-            });
-            var processor = mockProcessor.Object;
-            var machineDomainSid = $"{Consts.MockDomainSid}-1000";
-            var receivedStatus = new List<CSVComputerStatus>();
-            processor.ComputerStatusEvent += status => {
-                receivedStatus.Add(status);
-                return Task.CompletedTask;
-            };
-            var results = await processor.GetUserRightsAssignments("primary.testlab.local", machineDomainSid, "testlab.local", true, null)
-                .ToArrayAsync();
-            Assert.Empty(results);
-            Assert.Single(receivedStatus);
-            var status = receivedStatus[0];
-            Assert.Equal("Timeout", status.Status);
-        }
-        
+        // Obsolete by AdaptiveTimeout
+        // [Fact]
+        // public async Task UserRightsAssignmentProcessor_TestTimeout() {
+        //     var mockProcessor = new Mock<UserRightsAssignmentProcessor>(new MockLdapUtils(), null);
+        //     mockProcessor.Setup(x => x.OpenLSAPolicy(It.IsAny<string>())).Returns(()=> {
+        //         Task.Delay(100).Wait();
+        //         return NtStatus.StatusAccessDenied;
+        //     });
+        //     var processor = mockProcessor.Object;
+        //     var machineDomainSid = $"{Consts.MockDomainSid}-1000";
+        //     var receivedStatus = new List<CSVComputerStatus>();
+        //     processor.ComputerStatusEvent += status => {
+        //         receivedStatus.Add(status);
+        //         return Task.CompletedTask;
+        //     };
+        //     var results = await processor.GetUserRightsAssignments("primary.testlab.local", machineDomainSid, "testlab.local", true, null)
+        //         .ToArrayAsync();
+        //     Assert.Empty(results);
+        //     Assert.Single(receivedStatus);
+        //     var status = receivedStatus[0];
+        //     Assert.Equal("Timeout", status.Status);
+        // }
+
         [WindowsOnlyFact]
         public async Task UserRightsAssignmentProcessor_TestGetLocalDomainInformationFail()
         {

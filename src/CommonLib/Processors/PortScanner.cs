@@ -11,6 +11,10 @@ namespace SharpHoundCommonLib.Processors {
         private readonly ILogger _log;
         private readonly AdaptiveTimeout _adaptiveTimeout;
 
+        public PortScanner() : this(null) {
+            
+        }
+
         public PortScanner(ILogger log = null, int maxTimeout = 10000) {
             _log = log ?? Logging.LogProvider.CreateLogger("PortScanner");
             _adaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMilliseconds(maxTimeout), _log, sampleCount: 100, logFrequency: 1000, minSamplesForAdaptiveTimeout: 30);

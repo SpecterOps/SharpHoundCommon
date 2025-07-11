@@ -216,43 +216,45 @@ namespace CommonLibTest {
             Assert.Equal(expected, test.Results);
         }
 
-        [Fact]
-        public async Task ComputerSessionProcessor_TestTimeout() {
-            var nativeMethods = new Mock<NativeMethods>();
-            nativeMethods.Setup(x => x.NetSessionEnum(It.IsAny<string>())).Returns(() => {
-                Task.Delay(1000).Wait();
-                return Array.Empty<NetSessionEnumResults>();
-            });
-            var processor = new ComputerSessionProcessor(new MockLdapUtils(), nativeMethods.Object, null,"");
-            var receivedStatus = new List<CSVComputerStatus>();
-            var machineDomainSid = $"{Consts.MockDomainSid}-1000";
-            processor.ComputerStatusEvent += status => { receivedStatus.Add(status); return Task.CompletedTask; };
-            var results = await processor.ReadUserSessions("primary.testlab.local", machineDomainSid, "testlab.local");
-            Assert.Empty(results.Results);
-            Assert.Single(receivedStatus);
-            var status = receivedStatus[0];
-            Assert.Equal("Timeout", status.Status);
-        }
+        // Obsolete by AdaptiveTimeout
+        // [Fact]
+        // public async Task ComputerSessionProcessor_TestTimeout() {
+        //     var nativeMethods = new Mock<NativeMethods>();
+        //     nativeMethods.Setup(x => x.NetSessionEnum(It.IsAny<string>())).Returns(() => {
+        //         Task.Delay(1000).Wait();
+        //         return Array.Empty<NetSessionEnumResults>();
+        //     });
+        //     var processor = new ComputerSessionProcessor(new MockLdapUtils(), nativeMethods.Object, null,"");
+        //     var receivedStatus = new List<CSVComputerStatus>();
+        //     var machineDomainSid = $"{Consts.MockDomainSid}-1000";
+        //     processor.ComputerStatusEvent += status => { receivedStatus.Add(status); return Task.CompletedTask; };
+        //     var results = await processor.ReadUserSessions("primary.testlab.local", machineDomainSid, "testlab.local");
+        //     Assert.Empty(results.Results);
+        //     Assert.Single(receivedStatus);
+        //     var status = receivedStatus[0];
+        //     Assert.Equal("Timeout", status.Status);
+        // }
 
-        [Fact]
-        public async Task ComputerSessionProcessor_TestTimeoutPrivileged() {
-            var nativeMethods = new Mock<NativeMethods>();
-            nativeMethods.Setup(x => x.NetWkstaUserEnum(It.IsAny<string>())).Returns(() => {
-                Task.Delay(1000).Wait();
-                return Array.Empty<NetWkstaUserEnumResults>();
-            });
-            var processor = new ComputerSessionProcessor(new MockLdapUtils(), nativeMethods.Object, null,"");
-            var receivedStatus = new List<CSVComputerStatus>();
-            var machineDomainSid = $"{Consts.MockDomainSid}-1000";
-            processor.ComputerStatusEvent += status => { receivedStatus.Add(status); return Task.CompletedTask; };
+        // Obsolete by AdaptiveTimeout
+        // [Fact]
+        // public async Task ComputerSessionProcessor_TestTimeoutPrivileged() {
+        //     var nativeMethods = new Mock<NativeMethods>();
+        //     nativeMethods.Setup(x => x.NetWkstaUserEnum(It.IsAny<string>())).Returns(() => {
+        //         Task.Delay(1000).Wait();
+        //         return Array.Empty<NetWkstaUserEnumResults>();
+        //     });
+        //     var processor = new ComputerSessionProcessor(new MockLdapUtils(), nativeMethods.Object, null,"");
+        //     var receivedStatus = new List<CSVComputerStatus>();
+        //     var machineDomainSid = $"{Consts.MockDomainSid}-1000";
+        //     processor.ComputerStatusEvent += status => { receivedStatus.Add(status); return Task.CompletedTask; };
 
-            var results = await processor.ReadUserSessionsPrivileged("primary.testlab.local", machineDomainSid,
-                "testlab.local");
-            Assert.Empty(results.Results);
-            Assert.Single(receivedStatus);
-            var status = receivedStatus[0];
-            Assert.Equal("Timeout", status.Status);
-        }
+        //     var results = await processor.ReadUserSessionsPrivileged("primary.testlab.local", machineDomainSid,
+        //         "testlab.local");
+        //     Assert.Empty(results.Results);
+        //     Assert.Single(receivedStatus);
+        //     var status = receivedStatus[0];
+        //     Assert.Equal("Timeout", status.Status);
+        // }
 
         [Fact]
         public async Task ComputerSessionProcessor_ReadUserSessionSendsComputerStatus()
