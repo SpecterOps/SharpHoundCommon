@@ -34,7 +34,7 @@ namespace SharpHoundCommonLib.SMB {
 
         public SmbScanner(ILogger log) {
             _log = log ?? Logging.LogProvider.CreateLogger("SmbScanner");
-            _adaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMilliseconds(MaxTimeoutMs), Logging.LogProvider.CreateLogger(nameof(TrySMBNegotiate)), sampleCount: 100, logFrequency: 1000, minSamplesForAdaptiveTimeout: 30);
+            _adaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMilliseconds(MaxTimeoutMs), Logging.LogProvider.CreateLogger(nameof(TrySMBNegotiate)));
         }
 
 

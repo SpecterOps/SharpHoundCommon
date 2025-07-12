@@ -21,7 +21,7 @@ namespace SharpHoundCommonLib.Processors {
         public SmbProcessor(int timeoutMs, ISmbScanner smbScanner = null, ILogger log = null) {
             _log = log ?? Logging.LogProvider.CreateLogger("SmbProcessor");
             _smbScanner = smbScanner ?? new SmbScanner(_log) { MaxTimeoutMs = timeoutMs };
-            _scanHostAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMilliseconds(timeoutMs), Logging.LogProvider.CreateLogger(nameof(ISmbScanner.ScanHost)), sampleCount: 100, logFrequency: 1000, minSamplesForAdaptiveTimeout: 30);
+            _scanHostAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMilliseconds(timeoutMs), Logging.LogProvider.CreateLogger(nameof(ISmbScanner.ScanHost)));
         }
 
         public event ComputerStatusDelegate ComputerStatusEvent;

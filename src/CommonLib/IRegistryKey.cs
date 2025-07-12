@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
 
 namespace SharpHoundCommonLib {
@@ -11,7 +10,7 @@ namespace SharpHoundCommonLib {
 
     public class SHRegistryKey : IRegistryKey, IDisposable {
         private readonly RegistryKey _currentKey;
-        private static readonly AdaptiveTimeout _adaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromSeconds(10), Logging.LogProvider.CreateLogger(nameof(SHRegistryKey)), sampleCount: 100, logFrequency: 1000, minSamplesForAdaptiveTimeout: 30);
+        private static readonly AdaptiveTimeout _adaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromSeconds(10), Logging.LogProvider.CreateLogger(nameof(SHRegistryKey)));
 
         private SHRegistryKey(RegistryKey registryKey) {
             _currentKey = registryKey;

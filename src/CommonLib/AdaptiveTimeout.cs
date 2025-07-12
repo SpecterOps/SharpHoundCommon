@@ -18,7 +18,7 @@ public sealed class AdaptiveTimeout : IDisposable {
     private const int ClearSamplesThreshold = 5;
     private const int StdDevMultiplier = 5;
 
-    public AdaptiveTimeout(TimeSpan maxTimeout, ILogger log, int sampleCount, int logFrequency, int minSamplesForAdaptiveTimeout, bool useAdaptiveTimeout = true) {
+    public AdaptiveTimeout(TimeSpan maxTimeout, ILogger log, int sampleCount = 100, int logFrequency = 1000, int minSamplesForAdaptiveTimeout = 30, bool useAdaptiveTimeout = true) {
         if (maxTimeout <= TimeSpan.Zero)
             throw new ArgumentException("maxTimeout must be positive", nameof(maxTimeout));
         if (sampleCount <= 0)
@@ -202,7 +202,7 @@ public sealed class AdaptiveTimeout : IDisposable {
 
         if (_clearSamplesDecay >= ClearSamplesThreshold) {
             ClearSamples();
-            _log.LogTrace("Time spike safety valve event.");
+            _log.LogTrace("Time spike safety valve event at timeout {CurrentTimeout}.", GetAdaptiveTimeout());
         }
     }
 }

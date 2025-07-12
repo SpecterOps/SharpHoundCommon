@@ -23,9 +23,9 @@ public class HttpNtlmAuthenticationService {
     public HttpNtlmAuthenticationService(IHttpClientFactory httpClientFactory, ILogger logger = null) {
         _logger = logger ?? Logging.LogProvider.CreateLogger(nameof(HttpNtlmAuthenticationService));
         _httpClientFactory = httpClientFactory;
-        _getSupportedNTLMAuthSchemesAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(GetSupportedNtlmAuthSchemesAsync)), sampleCount: 100, logFrequency: 1000, minSamplesForAdaptiveTimeout: 30);
-        _ntlmAuthAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(NtlmAuthenticationHandler.PerformNtlmAuthenticationAsync)), sampleCount: 100, logFrequency: 1000, minSamplesForAdaptiveTimeout: 30);
-        _authWithChannelBindingAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(AuthWithBadChannelBindingsAsync)), sampleCount: 100, logFrequency: 1000, minSamplesForAdaptiveTimeout: 30);
+        _getSupportedNTLMAuthSchemesAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(GetSupportedNtlmAuthSchemesAsync)));
+        _ntlmAuthAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(NtlmAuthenticationHandler.PerformNtlmAuthenticationAsync)));
+        _authWithChannelBindingAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(AuthWithBadChannelBindingsAsync)));
     }
 
     public async Task EnsureRequiresAuth(Uri url, bool? useBadChannelBindings) {
