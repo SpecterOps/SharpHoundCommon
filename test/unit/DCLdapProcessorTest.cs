@@ -30,7 +30,7 @@ namespace CommonLibTest {
 
         [Fact]
         public async Task DCLdapProcessor_Scan() {
-            var mockProcessor = new Mock<DCLdapProcessor>(It.Is<int>(x => x > 0), "primary.testlab.local", null);
+            var mockProcessor = new Mock<DCLdapProcessor>(10, "primary.testlab.local", null);
 
             mockProcessor.Setup(x => x.Authenticate(It.IsAny<Uri>(), It.IsAny<LdapAuthOptions>(), null, null, It.IsAny<CancellationToken>())).ReturnsAsync(false);
 
@@ -58,7 +58,7 @@ namespace CommonLibTest {
 
         [Fact]
         public async Task DCLdapProcessor_Scan_Failed() {
-            var mockProcessor = new Mock<DCLdapProcessor>(It.Is<int>(x => x > 0), "primary.testlab.local", null);
+            var mockProcessor = new Mock<DCLdapProcessor>(10, "primary.testlab.local", null);
 
             mockProcessor.Setup(x => x.Authenticate(It.IsAny<Uri>(), It.IsAny<LdapAuthOptions>(), null, null, It.IsAny<CancellationToken>())).Throws(new Exception("Error"));
 
@@ -118,7 +118,7 @@ namespace CommonLibTest {
 
         [Fact]
         public async Task DCLdapProcessor_CheckIsNtlmSigningRequired() {
-            var mockProcessor = new Mock<DCLdapProcessor>(It.Is<int>(x => x > 0), "primary.testlab.local", null);
+            var mockProcessor = new Mock<DCLdapProcessor>(10, "primary.testlab.local", null);
             mockProcessor.Setup(x => x.Authenticate(It.IsAny<Uri>(), It.IsAny<LdapAuthOptions>(), null, null, It.IsAny<CancellationToken>())).ReturnsAsync(false);
             var processor = mockProcessor.Object;
             var result = await processor.CheckIsNtlmSigningRequired();
@@ -128,7 +128,7 @@ namespace CommonLibTest {
 
         [Fact]
         public async Task DCLdapProcessor_CheckIsNtlmSigningRequired_Exception() {
-            var mockProcessor = new Mock<DCLdapProcessor>(It.Is<int>(x => x > 0), "primary.testlab.local", null);
+            var mockProcessor = new Mock<DCLdapProcessor>(10, "primary.testlab.local", null);
             mockProcessor.Setup(x => x.Authenticate(It.IsAny<Uri>(), It.IsAny<LdapAuthOptions>(), null, null, It.IsAny<CancellationToken>())).Throws(new Exception("Error"));
             var processor = mockProcessor.Object;
             var result = await processor.CheckIsNtlmSigningRequired();
@@ -145,7 +145,7 @@ namespace CommonLibTest {
             var mockLogger = new Mock<ILogger<DCLdapProcessor>>();
             var mockLdapTransport = new Mock<LdapTransport>(null, It.IsAny<Uri>());
             mockLdapTransport.Setup(x => x.InitializeConnectionAsync(It.IsAny<int>())).Throws(new LdapNativeException("Error", (int)LdapErrorCodes.InvalidCredentials, SEC_E_UNSUPPORTED_FUNCTION));
-            var processor = new DCLdapProcessor(It.Is<int>(x => x > 0), "primary.testlab.local", mockLogger.Object);
+            var processor = new DCLdapProcessor(10, "primary.testlab.local", mockLogger.Object);
             var result = await processor.Authenticate(new Uri(endpoint), It.IsAny<LdapAuthOptions>(), null, mockLdapTransport.Object);
             Assert.False(result);
             mockLogger.VerifyLogContains(LogLevel.Debug, expected);
@@ -160,7 +160,7 @@ namespace CommonLibTest {
             var mockLogger = new Mock<ILogger<DCLdapProcessor>>();
             var mockLdapTransport = new Mock<LdapTransport>(null, It.IsAny<Uri>());
             mockLdapTransport.Setup(x => x.InitializeConnectionAsync(It.IsAny<int>())).Throws(new LdapNativeException("Error", (int)LdapErrorCodes.InvalidCredentials, SEC_E_BAD_BINDINGS));
-            var processor = new DCLdapProcessor(It.Is<int>(x => x > 0), "primary.testlab.local", mockLogger.Object);
+            var processor = new DCLdapProcessor(10, "primary.testlab.local", mockLogger.Object);
             var result = await processor.Authenticate(new Uri(endpoint), It.IsAny<LdapAuthOptions>(), null, mockLdapTransport.Object);
             Assert.False(result);
             mockLogger.VerifyLogContains(LogLevel.Debug, expected);
@@ -175,7 +175,7 @@ namespace CommonLibTest {
             var mockLogger = new Mock<ILogger<DCLdapProcessor>>();
             var mockLdapTransport = new Mock<LdapTransport>(null, It.IsAny<Uri>());
             mockLdapTransport.Setup(x => x.InitializeConnectionAsync(It.IsAny<int>())).Throws(new LdapNativeException(exception, (int)LdapErrorCodes.InvalidCredentials, "80090347"));
-            var processor = new DCLdapProcessor(It.Is<int>(x => x > 0), "primary.testlab.local", mockLogger.Object);
+            var processor = new DCLdapProcessor(10, "primary.testlab.local", mockLogger.Object);
             var result = await processor.Authenticate(new Uri(endpoint), It.IsAny<LdapAuthOptions>(), null, mockLdapTransport.Object);
             Assert.False(result);
             mockLogger.VerifyLogContains(LogLevel.Error, expected);
@@ -190,7 +190,7 @@ namespace CommonLibTest {
             var mockLogger = new Mock<ILogger<DCLdapProcessor>>();
             var mockLdapTransport = new Mock<LdapTransport>(null, It.IsAny<Uri>());
             mockLdapTransport.Setup(x => x.InitializeConnectionAsync(It.IsAny<int>())).Throws(new LdapNativeException(exception, (int)LdapErrorCodes.StrongAuthRequired, null));
-            var processor = new DCLdapProcessor(It.Is<int>(x => x > 0), "primary.testlab.local", mockLogger.Object);
+            var processor = new DCLdapProcessor(10, "primary.testlab.local", mockLogger.Object);
             var result = await processor.Authenticate(new Uri(endpoint), It.IsAny<LdapAuthOptions>(), null, mockLdapTransport.Object);
             Assert.False(result);
             mockLogger.VerifyLog(LogLevel.Debug, expected);
@@ -205,7 +205,7 @@ namespace CommonLibTest {
             var mockLogger = new Mock<ILogger<DCLdapProcessor>>();
             var mockLdapTransport = new Mock<LdapTransport>(null, It.IsAny<Uri>());
             mockLdapTransport.Setup(x => x.InitializeConnectionAsync(It.IsAny<int>())).Throws(new LdapNativeException(exception, (int)LdapErrorCodes.ServerDown));
-            var processor = new DCLdapProcessor(It.Is<int>(x => x > 0), "primary.testlab.local", mockLogger.Object);
+            var processor = new DCLdapProcessor(10, "primary.testlab.local", mockLogger.Object);
             var result = await processor.Authenticate(new Uri(endpoint), It.IsAny<LdapAuthOptions>(), null, mockLdapTransport.Object);
             Assert.False(result);
             mockLogger.VerifyLog(LogLevel.Debug, expected);
@@ -220,7 +220,7 @@ namespace CommonLibTest {
             var mockLogger = new Mock<ILogger<DCLdapProcessor>>();
             var mockLdapTransport = new Mock<LdapTransport>(null, It.IsAny<Uri>());
             mockLdapTransport.Setup(x => x.InitializeConnectionAsync(It.IsAny<int>())).Throws(new LdapNativeException(exception, (int)LdapErrorCodes.LocalError));
-            var processor = new DCLdapProcessor(It.Is<int>(x => x > 0), "primary.testlab.local", mockLogger.Object);
+            var processor = new DCLdapProcessor(10, "primary.testlab.local", mockLogger.Object);
             var result = await processor.Authenticate(new Uri(endpoint), It.IsAny<LdapAuthOptions>(), null, mockLdapTransport.Object);
             Assert.False(result);
             mockLogger.VerifyLogContains(LogLevel.Error, expected);
@@ -238,7 +238,7 @@ namespace CommonLibTest {
             mockLdapTransport.Setup(x => x.InitializeConnectionAsync(It.IsAny<int>())).Verifiable();
             mockAuthenticator.Setup(x => x.PerformNtlmAuthenticationAsync(It.IsAny<INtlmTransport>(), It.IsAny<CancellationToken>()))
                 .Throws(new InvalidOperationException(exception));
-            var processor = new DCLdapProcessor(It.Is<int>(x => x > 0), "primary.testlab.local", mockLogger.Object);
+            var processor = new DCLdapProcessor(10, "primary.testlab.local", mockLogger.Object);
             var result = await processor.Authenticate(new Uri(endpoint), It.IsAny<LdapAuthOptions>(), mockAuthenticator.Object, mockLdapTransport.Object);
             Assert.False(result);
             mockLogger.VerifyLog(LogLevel.Debug, expected);
@@ -256,7 +256,7 @@ namespace CommonLibTest {
             mockLdapTransport.Setup(x => x.InitializeConnectionAsync(It.IsAny<int>())).Verifiable();
             mockAuthenticator.Setup(x => x.PerformNtlmAuthenticationAsync(It.IsAny<INtlmTransport>(), It.IsAny<CancellationToken>()))
                 .Throws(new Exception(exception));
-            var processor = new DCLdapProcessor(It.Is<int>(x => x > 0), "primary.testlab.local", mockLogger.Object);
+            var processor = new DCLdapProcessor(10, "primary.testlab.local", mockLogger.Object);
             var result = await processor.Authenticate(new Uri(endpoint), It.IsAny<LdapAuthOptions>(), mockAuthenticator.Object, mockLdapTransport.Object);
             Assert.False(result);
             mockLogger.VerifyLogContains(LogLevel.Error, expected);
