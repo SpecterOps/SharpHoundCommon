@@ -181,10 +181,16 @@ public sealed class AdaptiveTimeout : IDisposable {
         if (!_useAdaptiveTimeout || _sampler.Count < _minSamplesForAdaptiveTimeout)
             return _maxTimeout;
 
-        var stdDev = _sampler.StandardDeviation();
-        var adaptiveTimeoutMs = _sampler.Average() + (stdDev * StdDevMultiplier);
-        var cappedTimeoutMS = Math.Min(adaptiveTimeoutMs, _maxTimeout.TotalMilliseconds);
-        return TimeSpan.FromMilliseconds(cappedTimeoutMS);
+        try {
+            var stdDev = _sampler.StandardDeviation();
+            var adaptiveTimeoutMs = _sampler.Average() + (stdDev * StdDevMultiplier);
+            var cappedTimeoutMS = Math.Min(adaptiveTimeoutMs, _maxTimeout.TotalMilliseconds);
+            return TimeSpan.FromMilliseconds(cappedTimeoutMS);
+        }
+        catch (Exception ex) {
+            _log.LogError(ex, "Error calculating adaptive timeout, defaulting to max timeout.");
+            return _maxTimeout;
+        }
     }
 
     // AdaptiveTimeout will not respond well to rapid spikes in execution time

@@ -1038,13 +1038,15 @@ namespace SharpHoundCommonLib {
         }
 
         private async Task<SearchResponse> SendRequestWithTimeout(LdapConnection connection, SearchRequest request, AdaptiveTimeout adaptiveTimeout) {
-            // This is basically acting as our cancellation token passed to SendRequestAsync
-            var timeoutWithPadding = adaptiveTimeout.GetAdaptiveTimeout() + TimeSpan.FromSeconds(3);
+            // Add padding to account for network latency and processing overhead
+            const int TimeoutPaddingSeconds = 3;
+            var timeout = adaptiveTimeout.GetAdaptiveTimeout();
+            var timeoutWithPadding = timeout + TimeSpan.FromSeconds(TimeoutPaddingSeconds);
             var result = await adaptiveTimeout.ExecuteWithTimeout((_) => connection.SendRequestAsync(request, timeoutWithPadding));
             if (result.IsSuccess)
                 return (SearchResponse)result.Value;
             else
-                throw new TimeoutException("Ldap query timed out.");
+                throw new TimeoutException($"LDAP {request.Scope} query to '{request.DistinguishedName}' timed out after {timeout.TotalMilliseconds}ms.");
         }
     }
 }
