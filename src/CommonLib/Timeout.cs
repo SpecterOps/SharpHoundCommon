@@ -32,7 +32,7 @@ public static class Timeout {
         if (parentToken.IsCancellationRequested)
             return Result<T>.Fail("Cancellation requested");
         else
-            return Result<T>.Fail("Timeout");
+            return Result<T>.Fail($"Timeout after {timeout.TotalMilliseconds} ms");
     }
 
     /// <summary>
@@ -61,7 +61,7 @@ public static class Timeout {
         if (parentToken.IsCancellationRequested)
             return Result.Fail("Cancellation requested");
         else
-            return Result.Fail("Timeout");
+            return Result.Fail($"Timeout after {timeout.TotalMilliseconds} ms");
     }
 
     // These two ExecuteWithTimeout functions should perform equivalently -
@@ -97,7 +97,7 @@ public static class Timeout {
         if (parentToken.IsCancellationRequested)
             return Result<T>.Fail("Cancellation requested");
         else
-            return Result<T>.Fail("Timeout");
+            return Result<T>.Fail($"Timeout after {timeout.TotalMilliseconds} ms");
     }
 
     /// <summary>
@@ -126,7 +126,7 @@ public static class Timeout {
         if (parentToken.IsCancellationRequested)
             return Result.Fail("Cancellation requested");
         else
-            return Result.Fail("Timeout");
+            return Result.Fail($"Timeout after {timeout.TotalMilliseconds} ms");
     }
 
     /// <summary>
