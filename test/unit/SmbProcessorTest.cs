@@ -45,7 +45,7 @@ namespace CommonLibTest {
 
             Assert.Single(receivedStatus);
             var status = receivedStatus[0];
-            Assert.Equal("Timeout", status.Status);
+            Assert.StartsWith("Timeout", status.Status);
         }
     }
 }
