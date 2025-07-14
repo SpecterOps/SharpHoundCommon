@@ -207,8 +207,13 @@ public sealed class AdaptiveTimeout : IDisposable {
             _clearSamplesDecay += TimeSpikePenalty;
 
         if (_clearSamplesDecay >= ClearSamplesThreshold) {
-            ClearSamples();
-            _log.LogTrace("Time spike safety valve event at timeout {CurrentTimeout}.", GetAdaptiveTimeout());
+            if (_useAdaptiveTimeout && _sampler.Count >= _minSamplesForAdaptiveTimeout) {
+                ClearSamples();
+                _log.LogTrace("Time spike safety valve event at timeout {CurrentTimeout}.", GetAdaptiveTimeout());
+            }
+            else {
+                _log.LogWarning("This call is frequently running over the maximum allowed timeout of {MaxTimeout}.", _maxTimeout);
+            }
         }
     }
 }
