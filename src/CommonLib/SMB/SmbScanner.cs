@@ -27,12 +27,14 @@ namespace SharpHoundCommonLib.SMB {
         /// <summary>
         /// Timeout value used when connecting to hosts or waiting for a response.
         /// </summary>
-        public int TimeoutMs { get; set; } = 2000;
+        public int MaxTimeoutMs { get; set; } = 2000;
+        public readonly AdaptiveTimeout _adaptiveTimeout;
 
         public ILogger _log;
 
         public SmbScanner(ILogger log) {
-            _log = log ?? Logging.LogProvider.CreateLogger("SmbScanner"); ;
+            _log = log ?? Logging.LogProvider.CreateLogger("SmbScanner");
+            _adaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMilliseconds(MaxTimeoutMs), Logging.LogProvider.CreateLogger(nameof(TrySMBNegotiate)));
         }
 
 
@@ -125,7 +127,7 @@ namespace SharpHoundCommonLib.SMB {
                     negoReqBytes = negotiateRequest.ToBytes();
                 }
 
-                var negoResp = await Timeout.ExecuteWithTimeout(TimeSpan.FromMilliseconds(TimeoutMs), (timeoutToken) => SendAndReceiveData(host, port, negoReqBytes, timeoutToken));
+                var negoResp = await _adaptiveTimeout.ExecuteWithTimeout((timeoutToken) => SendAndReceiveData(host, port, negoReqBytes, timeoutToken));
                 if (!negoResp.IsSuccess)
                     throw new OperationCanceledException("Connection attempt timed out");
 
