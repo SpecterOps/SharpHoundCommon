@@ -138,20 +138,20 @@
   </h3>
   <span class="small pull-right mobile-hide">
     <span class="divider">|</span>
-    <a href="https://github.com/SpecterOps/SharpHoundCommon/new/5f46ce8cbd8e4975bc61aee408f4581124ace6dc/apiSpec/new?filename=SharpHoundCommonLib_Timeout_ExecuteNetAPIWithTimeout__1_System_TimeSpan_System_Func_System_Threading_CancellationToken_SharpHoundRPC_NetAPINative_NetAPIResult___0___.md&amp;value=---%0Auid%3A%20SharpHoundCommonLib.Timeout.ExecuteNetAPIWithTimeout%60%601(System.TimeSpan%2CSystem.Func%7BSystem.Threading.CancellationToken%2CSharpHoundRPC.NetAPINative.NetAPIResult%7B%60%600%7D%7D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+    <a href="https://github.com/SpecterOps/SharpHoundCommon/new/51b16b30b6edf13b6ee135cbc341bbf21b1a0517/apiSpec/new?filename=SharpHoundCommonLib_Timeout_ExecuteNetAPIWithTimeout__1_System_TimeSpan_System_Func_System_Threading_CancellationToken_SharpHoundRPC_NetAPINative_NetAPIResult___0___System_Threading_CancellationToken_.md&amp;value=---%0Auid%3A%20SharpHoundCommonLib.Timeout.ExecuteNetAPIWithTimeout%60%601(System.TimeSpan%2CSystem.Func%7BSystem.Threading.CancellationToken%2CSharpHoundRPC.NetAPINative.NetAPIResult%7B%60%600%7D%7D%2CSystem.Threading.CancellationToken)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
   </span>
   <span class="small pull-right mobile-hide">
-    <a href="https://github.com/SpecterOps/SharpHoundCommon/blob/5f46ce8cbd8e4975bc61aee408f4581124ace6dc/src/CommonLib/Timeout.cs/#L140">View Source</a>
+    <a href="https://github.com/SpecterOps/SharpHoundCommon/blob/51b16b30b6edf13b6ee135cbc341bbf21b1a0517/src/CommonLib/Timeout.cs/#L140">View Source</a>
   </span>
   <a id="SharpHoundCommonLib_Timeout_ExecuteNetAPIWithTimeout_" data-uid="SharpHoundCommonLib.Timeout.ExecuteNetAPIWithTimeout*"></a>
-  <h4 id="SharpHoundCommonLib_Timeout_ExecuteNetAPIWithTimeout__1_System_TimeSpan_System_Func_System_Threading_CancellationToken_SharpHoundRPC_NetAPINative_NetAPIResult___0___" data-uid="SharpHoundCommonLib.Timeout.ExecuteNetAPIWithTimeout``1(System.TimeSpan,System.Func{System.Threading.CancellationToken,SharpHoundRPC.NetAPINative.NetAPIResult{``0}})">ExecuteNetAPIWithTimeout&lt;T&gt;(TimeSpan, Func&lt;CancellationToken, NetAPIResult&lt;T&gt;&gt;)</h4>
+  <h4 id="SharpHoundCommonLib_Timeout_ExecuteNetAPIWithTimeout__1_System_TimeSpan_System_Func_System_Threading_CancellationToken_SharpHoundRPC_NetAPINative_NetAPIResult___0___System_Threading_CancellationToken_" data-uid="SharpHoundCommonLib.Timeout.ExecuteNetAPIWithTimeout``1(System.TimeSpan,System.Func{System.Threading.CancellationToken,SharpHoundRPC.NetAPINative.NetAPIResult{``0}},System.Threading.CancellationToken)">ExecuteNetAPIWithTimeout&lt;T&gt;(TimeSpan, Func&lt;CancellationToken, NetAPIResult&lt;T&gt;&gt;, CancellationToken)</h4>
   <div class="markdown level1 summary"><p>Returns a Fail result if a task runs longer than its budgeted time.
 A cancellation token is passed to the executing function so it may exit cleanly if timeout is reached.</p>
 </div>
   <div class="markdown level1 conceptual"></div>
   <h5 class="decalaration">Declaration</h5>
   <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">public static Task&lt;NetAPIResult&lt;T&gt;&gt; ExecuteNetAPIWithTimeout&lt;T&gt;(TimeSpan timeout, Func&lt;CancellationToken, NetAPIResult&lt;T&gt;&gt; func)</code></pre>
+    <pre><code class="lang-csharp hljs">public static Task&lt;NetAPIResult&lt;T&gt;&gt; ExecuteNetAPIWithTimeout&lt;T&gt;(TimeSpan timeout, Func&lt;CancellationToken, NetAPIResult&lt;T&gt;&gt; func, CancellationToken parentToken = default(CancellationToken))</code></pre>
   </div>
   <h5 class="parameters">Parameters</h5>
   <table class="table table-bordered table-striped table-condensed">
@@ -171,6 +171,11 @@ A cancellation token is passed to the executing function so it may exit cleanly 
       <tr>
         <td><span class="xref">System.Func</span>&lt;<span class="xref">System.Threading.CancellationToken</span>, <a class="xref" href="SharpHoundRPC.NetAPINative.NetAPIResult-1.html">NetAPIResult</a>&lt;T&gt;&gt;</td>
         <td><span class="parametername">func</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.Threading.CancellationToken</span></td>
+        <td><span class="parametername">parentToken</span></td>
         <td></td>
       </tr>
     </tbody>
@@ -207,20 +212,20 @@ A cancellation token is passed to the executing function so it may exit cleanly 
   </table>
   <span class="small pull-right mobile-hide">
     <span class="divider">|</span>
-    <a href="https://github.com/SpecterOps/SharpHoundCommon/new/5f46ce8cbd8e4975bc61aee408f4581124ace6dc/apiSpec/new?filename=SharpHoundCommonLib_Timeout_ExecuteRPCWithTimeout__1_System_TimeSpan_System_Func_System_Threading_CancellationToken_SharpHoundRPC_Result___0___.md&amp;value=---%0Auid%3A%20SharpHoundCommonLib.Timeout.ExecuteRPCWithTimeout%60%601(System.TimeSpan%2CSystem.Func%7BSystem.Threading.CancellationToken%2CSharpHoundRPC.Result%7B%60%600%7D%7D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+    <a href="https://github.com/SpecterOps/SharpHoundCommon/new/51b16b30b6edf13b6ee135cbc341bbf21b1a0517/apiSpec/new?filename=SharpHoundCommonLib_Timeout_ExecuteRPCWithTimeout__1_System_TimeSpan_System_Func_System_Threading_CancellationToken_SharpHoundRPC_Result___0___System_Threading_CancellationToken_.md&amp;value=---%0Auid%3A%20SharpHoundCommonLib.Timeout.ExecuteRPCWithTimeout%60%601(System.TimeSpan%2CSystem.Func%7BSystem.Threading.CancellationToken%2CSharpHoundRPC.Result%7B%60%600%7D%7D%2CSystem.Threading.CancellationToken)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
   </span>
   <span class="small pull-right mobile-hide">
-    <a href="https://github.com/SpecterOps/SharpHoundCommon/blob/5f46ce8cbd8e4975bc61aee408f4581124ace6dc/src/CommonLib/Timeout.cs/#L156">View Source</a>
+    <a href="https://github.com/SpecterOps/SharpHoundCommon/blob/51b16b30b6edf13b6ee135cbc341bbf21b1a0517/src/CommonLib/Timeout.cs/#L156">View Source</a>
   </span>
   <a id="SharpHoundCommonLib_Timeout_ExecuteRPCWithTimeout_" data-uid="SharpHoundCommonLib.Timeout.ExecuteRPCWithTimeout*"></a>
-  <h4 id="SharpHoundCommonLib_Timeout_ExecuteRPCWithTimeout__1_System_TimeSpan_System_Func_System_Threading_CancellationToken_SharpHoundRPC_Result___0___" data-uid="SharpHoundCommonLib.Timeout.ExecuteRPCWithTimeout``1(System.TimeSpan,System.Func{System.Threading.CancellationToken,SharpHoundRPC.Result{``0}})">ExecuteRPCWithTimeout&lt;T&gt;(TimeSpan, Func&lt;CancellationToken, Result&lt;T&gt;&gt;)</h4>
+  <h4 id="SharpHoundCommonLib_Timeout_ExecuteRPCWithTimeout__1_System_TimeSpan_System_Func_System_Threading_CancellationToken_SharpHoundRPC_Result___0___System_Threading_CancellationToken_" data-uid="SharpHoundCommonLib.Timeout.ExecuteRPCWithTimeout``1(System.TimeSpan,System.Func{System.Threading.CancellationToken,SharpHoundRPC.Result{``0}},System.Threading.CancellationToken)">ExecuteRPCWithTimeout&lt;T&gt;(TimeSpan, Func&lt;CancellationToken, Result&lt;T&gt;&gt;, CancellationToken)</h4>
   <div class="markdown level1 summary"><p>Returns a Fail result if a task runs longer than its budgeted time.
 A cancellation token is passed to the executing function so it may exit cleanly if timeout is reached.</p>
 </div>
   <div class="markdown level1 conceptual"></div>
   <h5 class="decalaration">Declaration</h5>
   <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">public static Task&lt;Result&lt;T&gt;&gt; ExecuteRPCWithTimeout&lt;T&gt;(TimeSpan timeout, Func&lt;CancellationToken, Result&lt;T&gt;&gt; func)</code></pre>
+    <pre><code class="lang-csharp hljs">public static Task&lt;Result&lt;T&gt;&gt; ExecuteRPCWithTimeout&lt;T&gt;(TimeSpan timeout, Func&lt;CancellationToken, Result&lt;T&gt;&gt; func, CancellationToken parentToken = default(CancellationToken))</code></pre>
   </div>
   <h5 class="parameters">Parameters</h5>
   <table class="table table-bordered table-striped table-condensed">
@@ -242,6 +247,11 @@ A cancellation token is passed to the executing function so it may exit cleanly 
         <td><span class="parametername">func</span></td>
         <td></td>
       </tr>
+      <tr>
+        <td><span class="xref">System.Threading.CancellationToken</span></td>
+        <td><span class="parametername">parentToken</span></td>
+        <td></td>
+      </tr>
     </tbody>
   </table>
   <h5 class="returns">Returns</h5>
@@ -276,20 +286,20 @@ A cancellation token is passed to the executing function so it may exit cleanly 
   </table>
   <span class="small pull-right mobile-hide">
     <span class="divider">|</span>
-    <a href="https://github.com/SpecterOps/SharpHoundCommon/new/5f46ce8cbd8e4975bc61aee408f4581124ace6dc/apiSpec/new?filename=SharpHoundCommonLib_Timeout_ExecuteRPCWithTimeout__1_System_TimeSpan_System_Func_System_Threading_CancellationToken_System_Threading_Tasks_Task_SharpHoundRPC_Result___0____.md&amp;value=---%0Auid%3A%20SharpHoundCommonLib.Timeout.ExecuteRPCWithTimeout%60%601(System.TimeSpan%2CSystem.Func%7BSystem.Threading.CancellationToken%2CSystem.Threading.Tasks.Task%7BSharpHoundRPC.Result%7B%60%600%7D%7D%7D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+    <a href="https://github.com/SpecterOps/SharpHoundCommon/new/51b16b30b6edf13b6ee135cbc341bbf21b1a0517/apiSpec/new?filename=SharpHoundCommonLib_Timeout_ExecuteRPCWithTimeout__1_System_TimeSpan_System_Func_System_Threading_CancellationToken_System_Threading_Tasks_Task_SharpHoundRPC_Result___0____System_Threading_CancellationToken_.md&amp;value=---%0Auid%3A%20SharpHoundCommonLib.Timeout.ExecuteRPCWithTimeout%60%601(System.TimeSpan%2CSystem.Func%7BSystem.Threading.CancellationToken%2CSystem.Threading.Tasks.Task%7BSharpHoundRPC.Result%7B%60%600%7D%7D%7D%2CSystem.Threading.CancellationToken)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
   </span>
   <span class="small pull-right mobile-hide">
-    <a href="https://github.com/SpecterOps/SharpHoundCommon/blob/5f46ce8cbd8e4975bc61aee408f4581124ace6dc/src/CommonLib/Timeout.cs/#L172">View Source</a>
+    <a href="https://github.com/SpecterOps/SharpHoundCommon/blob/51b16b30b6edf13b6ee135cbc341bbf21b1a0517/src/CommonLib/Timeout.cs/#L172">View Source</a>
   </span>
   <a id="SharpHoundCommonLib_Timeout_ExecuteRPCWithTimeout_" data-uid="SharpHoundCommonLib.Timeout.ExecuteRPCWithTimeout*"></a>
-  <h4 id="SharpHoundCommonLib_Timeout_ExecuteRPCWithTimeout__1_System_TimeSpan_System_Func_System_Threading_CancellationToken_System_Threading_Tasks_Task_SharpHoundRPC_Result___0____" data-uid="SharpHoundCommonLib.Timeout.ExecuteRPCWithTimeout``1(System.TimeSpan,System.Func{System.Threading.CancellationToken,System.Threading.Tasks.Task{SharpHoundRPC.Result{``0}}})">ExecuteRPCWithTimeout&lt;T&gt;(TimeSpan, Func&lt;CancellationToken, Task&lt;Result&lt;T&gt;&gt;&gt;)</h4>
+  <h4 id="SharpHoundCommonLib_Timeout_ExecuteRPCWithTimeout__1_System_TimeSpan_System_Func_System_Threading_CancellationToken_System_Threading_Tasks_Task_SharpHoundRPC_Result___0____System_Threading_CancellationToken_" data-uid="SharpHoundCommonLib.Timeout.ExecuteRPCWithTimeout``1(System.TimeSpan,System.Func{System.Threading.CancellationToken,System.Threading.Tasks.Task{SharpHoundRPC.Result{``0}}},System.Threading.CancellationToken)">ExecuteRPCWithTimeout&lt;T&gt;(TimeSpan, Func&lt;CancellationToken, Task&lt;Result&lt;T&gt;&gt;&gt;, CancellationToken)</h4>
   <div class="markdown level1 summary"><p>Returns a Fail result if a task runs longer than its budgeted time.
 A cancellation token is passed to the executing function so it may exit cleanly if timeout is reached.</p>
 </div>
   <div class="markdown level1 conceptual"></div>
   <h5 class="decalaration">Declaration</h5>
   <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">public static Task&lt;Result&lt;T&gt;&gt; ExecuteRPCWithTimeout&lt;T&gt;(TimeSpan timeout, Func&lt;CancellationToken, Task&lt;Result&lt;T&gt;&gt;&gt; func)</code></pre>
+    <pre><code class="lang-csharp hljs">public static Task&lt;Result&lt;T&gt;&gt; ExecuteRPCWithTimeout&lt;T&gt;(TimeSpan timeout, Func&lt;CancellationToken, Task&lt;Result&lt;T&gt;&gt;&gt; func, CancellationToken parentToken = default(CancellationToken))</code></pre>
   </div>
   <h5 class="parameters">Parameters</h5>
   <table class="table table-bordered table-striped table-condensed">
@@ -311,6 +321,11 @@ A cancellation token is passed to the executing function so it may exit cleanly 
         <td><span class="parametername">func</span></td>
         <td></td>
       </tr>
+      <tr>
+        <td><span class="xref">System.Threading.CancellationToken</span></td>
+        <td><span class="parametername">parentToken</span></td>
+        <td></td>
+      </tr>
     </tbody>
   </table>
   <h5 class="returns">Returns</h5>
@@ -345,10 +360,10 @@ A cancellation token is passed to the executing function so it may exit cleanly 
   </table>
   <span class="small pull-right mobile-hide">
     <span class="divider">|</span>
-    <a href="https://github.com/SpecterOps/SharpHoundCommon/new/5f46ce8cbd8e4975bc61aee408f4581124ace6dc/apiSpec/new?filename=SharpHoundCommonLib_Timeout_ExecuteWithTimeout_System_TimeSpan_System_Action_System_Threading_CancellationToken__System_Threading_CancellationToken_.md&amp;value=---%0Auid%3A%20SharpHoundCommonLib.Timeout.ExecuteWithTimeout(System.TimeSpan%2CSystem.Action%7BSystem.Threading.CancellationToken%7D%2CSystem.Threading.CancellationToken)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+    <a href="https://github.com/SpecterOps/SharpHoundCommon/new/51b16b30b6edf13b6ee135cbc341bbf21b1a0517/apiSpec/new?filename=SharpHoundCommonLib_Timeout_ExecuteWithTimeout_System_TimeSpan_System_Action_System_Threading_CancellationToken__System_Threading_CancellationToken_.md&amp;value=---%0Auid%3A%20SharpHoundCommonLib.Timeout.ExecuteWithTimeout(System.TimeSpan%2CSystem.Action%7BSystem.Threading.CancellationToken%7D%2CSystem.Threading.CancellationToken)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
   </span>
   <span class="small pull-right mobile-hide">
-    <a href="https://github.com/SpecterOps/SharpHoundCommon/blob/5f46ce8cbd8e4975bc61aee408f4581124ace6dc/src/CommonLib/Timeout.cs/#L45">View Source</a>
+    <a href="https://github.com/SpecterOps/SharpHoundCommon/blob/51b16b30b6edf13b6ee135cbc341bbf21b1a0517/src/CommonLib/Timeout.cs/#L45">View Source</a>
   </span>
   <a id="SharpHoundCommonLib_Timeout_ExecuteWithTimeout_" data-uid="SharpHoundCommonLib.Timeout.ExecuteWithTimeout*"></a>
   <h4 id="SharpHoundCommonLib_Timeout_ExecuteWithTimeout_System_TimeSpan_System_Action_System_Threading_CancellationToken__System_Threading_CancellationToken_" data-uid="SharpHoundCommonLib.Timeout.ExecuteWithTimeout(System.TimeSpan,System.Action{System.Threading.CancellationToken},System.Threading.CancellationToken)">ExecuteWithTimeout(TimeSpan, Action&lt;CancellationToken&gt;, CancellationToken)</h4>
@@ -404,10 +419,10 @@ A cancellation token is passed to the executing function so it may exit cleanly 
   </table>
   <span class="small pull-right mobile-hide">
     <span class="divider">|</span>
-    <a href="https://github.com/SpecterOps/SharpHoundCommon/new/5f46ce8cbd8e4975bc61aee408f4581124ace6dc/apiSpec/new?filename=SharpHoundCommonLib_Timeout_ExecuteWithTimeout_System_TimeSpan_System_Func_System_Threading_CancellationToken_System_Threading_Tasks_Task__System_Threading_CancellationToken_.md&amp;value=---%0Auid%3A%20SharpHoundCommonLib.Timeout.ExecuteWithTimeout(System.TimeSpan%2CSystem.Func%7BSystem.Threading.CancellationToken%2CSystem.Threading.Tasks.Task%7D%2CSystem.Threading.CancellationToken)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+    <a href="https://github.com/SpecterOps/SharpHoundCommon/new/51b16b30b6edf13b6ee135cbc341bbf21b1a0517/apiSpec/new?filename=SharpHoundCommonLib_Timeout_ExecuteWithTimeout_System_TimeSpan_System_Func_System_Threading_CancellationToken_System_Threading_Tasks_Task__System_Threading_CancellationToken_.md&amp;value=---%0Auid%3A%20SharpHoundCommonLib.Timeout.ExecuteWithTimeout(System.TimeSpan%2CSystem.Func%7BSystem.Threading.CancellationToken%2CSystem.Threading.Tasks.Task%7D%2CSystem.Threading.CancellationToken)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
   </span>
   <span class="small pull-right mobile-hide">
-    <a href="https://github.com/SpecterOps/SharpHoundCommon/blob/5f46ce8cbd8e4975bc61aee408f4581124ace6dc/src/CommonLib/Timeout.cs/#L110">View Source</a>
+    <a href="https://github.com/SpecterOps/SharpHoundCommon/blob/51b16b30b6edf13b6ee135cbc341bbf21b1a0517/src/CommonLib/Timeout.cs/#L110">View Source</a>
   </span>
   <a id="SharpHoundCommonLib_Timeout_ExecuteWithTimeout_" data-uid="SharpHoundCommonLib.Timeout.ExecuteWithTimeout*"></a>
   <h4 id="SharpHoundCommonLib_Timeout_ExecuteWithTimeout_System_TimeSpan_System_Func_System_Threading_CancellationToken_System_Threading_Tasks_Task__System_Threading_CancellationToken_" data-uid="SharpHoundCommonLib.Timeout.ExecuteWithTimeout(System.TimeSpan,System.Func{System.Threading.CancellationToken,System.Threading.Tasks.Task},System.Threading.CancellationToken)">ExecuteWithTimeout(TimeSpan, Func&lt;CancellationToken, Task&gt;, CancellationToken)</h4>
@@ -463,10 +478,10 @@ A cancellation token is passed to the executing function so it may exit cleanly 
   </table>
   <span class="small pull-right mobile-hide">
     <span class="divider">|</span>
-    <a href="https://github.com/SpecterOps/SharpHoundCommon/new/5f46ce8cbd8e4975bc61aee408f4581124ace6dc/apiSpec/new?filename=SharpHoundCommonLib_Timeout_ExecuteWithTimeout__1_System_TimeSpan_System_Func_System_Threading_CancellationToken___0__System_Threading_CancellationToken_.md&amp;value=---%0Auid%3A%20SharpHoundCommonLib.Timeout.ExecuteWithTimeout%60%601(System.TimeSpan%2CSystem.Func%7BSystem.Threading.CancellationToken%2C%60%600%7D%2CSystem.Threading.CancellationToken)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+    <a href="https://github.com/SpecterOps/SharpHoundCommon/new/51b16b30b6edf13b6ee135cbc341bbf21b1a0517/apiSpec/new?filename=SharpHoundCommonLib_Timeout_ExecuteWithTimeout__1_System_TimeSpan_System_Func_System_Threading_CancellationToken___0__System_Threading_CancellationToken_.md&amp;value=---%0Auid%3A%20SharpHoundCommonLib.Timeout.ExecuteWithTimeout%60%601(System.TimeSpan%2CSystem.Func%7BSystem.Threading.CancellationToken%2C%60%600%7D%2CSystem.Threading.CancellationToken)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
   </span>
   <span class="small pull-right mobile-hide">
-    <a href="https://github.com/SpecterOps/SharpHoundCommon/blob/5f46ce8cbd8e4975bc61aee408f4581124ace6dc/src/CommonLib/Timeout.cs/#L17">View Source</a>
+    <a href="https://github.com/SpecterOps/SharpHoundCommon/blob/51b16b30b6edf13b6ee135cbc341bbf21b1a0517/src/CommonLib/Timeout.cs/#L17">View Source</a>
   </span>
   <a id="SharpHoundCommonLib_Timeout_ExecuteWithTimeout_" data-uid="SharpHoundCommonLib.Timeout.ExecuteWithTimeout*"></a>
   <h4 id="SharpHoundCommonLib_Timeout_ExecuteWithTimeout__1_System_TimeSpan_System_Func_System_Threading_CancellationToken___0__System_Threading_CancellationToken_" data-uid="SharpHoundCommonLib.Timeout.ExecuteWithTimeout``1(System.TimeSpan,System.Func{System.Threading.CancellationToken,``0},System.Threading.CancellationToken)">ExecuteWithTimeout&lt;T&gt;(TimeSpan, Func&lt;CancellationToken, T&gt;, CancellationToken)</h4>
@@ -537,10 +552,10 @@ A cancellation token is passed to the executing function so it may exit cleanly 
   </table>
   <span class="small pull-right mobile-hide">
     <span class="divider">|</span>
-    <a href="https://github.com/SpecterOps/SharpHoundCommon/new/5f46ce8cbd8e4975bc61aee408f4581124ace6dc/apiSpec/new?filename=SharpHoundCommonLib_Timeout_ExecuteWithTimeout__1_System_TimeSpan_System_Func_System_Threading_CancellationToken_System_Threading_Tasks_Task___0___System_Threading_CancellationToken_.md&amp;value=---%0Auid%3A%20SharpHoundCommonLib.Timeout.ExecuteWithTimeout%60%601(System.TimeSpan%2CSystem.Func%7BSystem.Threading.CancellationToken%2CSystem.Threading.Tasks.Task%7B%60%600%7D%7D%2CSystem.Threading.CancellationToken)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+    <a href="https://github.com/SpecterOps/SharpHoundCommon/new/51b16b30b6edf13b6ee135cbc341bbf21b1a0517/apiSpec/new?filename=SharpHoundCommonLib_Timeout_ExecuteWithTimeout__1_System_TimeSpan_System_Func_System_Threading_CancellationToken_System_Threading_Tasks_Task___0___System_Threading_CancellationToken_.md&amp;value=---%0Auid%3A%20SharpHoundCommonLib.Timeout.ExecuteWithTimeout%60%601(System.TimeSpan%2CSystem.Func%7BSystem.Threading.CancellationToken%2CSystem.Threading.Tasks.Task%7B%60%600%7D%7D%2CSystem.Threading.CancellationToken)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
   </span>
   <span class="small pull-right mobile-hide">
-    <a href="https://github.com/SpecterOps/SharpHoundCommon/blob/5f46ce8cbd8e4975bc61aee408f4581124ace6dc/src/CommonLib/Timeout.cs/#L82">View Source</a>
+    <a href="https://github.com/SpecterOps/SharpHoundCommon/blob/51b16b30b6edf13b6ee135cbc341bbf21b1a0517/src/CommonLib/Timeout.cs/#L82">View Source</a>
   </span>
   <a id="SharpHoundCommonLib_Timeout_ExecuteWithTimeout_" data-uid="SharpHoundCommonLib.Timeout.ExecuteWithTimeout*"></a>
   <h4 id="SharpHoundCommonLib_Timeout_ExecuteWithTimeout__1_System_TimeSpan_System_Func_System_Threading_CancellationToken_System_Threading_Tasks_Task___0___System_Threading_CancellationToken_" data-uid="SharpHoundCommonLib.Timeout.ExecuteWithTimeout``1(System.TimeSpan,System.Func{System.Threading.CancellationToken,System.Threading.Tasks.Task{``0}},System.Threading.CancellationToken)">ExecuteWithTimeout&lt;T&gt;(TimeSpan, Func&lt;CancellationToken, Task&lt;T&gt;&gt;, CancellationToken)</h4>

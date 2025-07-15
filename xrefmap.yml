@@ -384,6 +384,148 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.ActiveDirectorySecurityDescriptor.SetSecurityDescriptorBinaryForm
   nameWithType: ActiveDirectorySecurityDescriptor.SetSecurityDescriptorBinaryForm
+- uid: SharpHoundCommonLib.AdaptiveTimeout
+  name: AdaptiveTimeout
+  href: api/SharpHoundCommonLib.AdaptiveTimeout.html
+  commentId: T:SharpHoundCommonLib.AdaptiveTimeout
+  fullName: SharpHoundCommonLib.AdaptiveTimeout
+  nameWithType: AdaptiveTimeout
+- uid: SharpHoundCommonLib.AdaptiveTimeout.#ctor(System.TimeSpan,ILogger,System.Int32,System.Int32,System.Int32,System.Boolean)
+  name: AdaptiveTimeout(TimeSpan, ILogger, Int32, Int32, Int32, Boolean)
+  href: api/SharpHoundCommonLib.AdaptiveTimeout.html#SharpHoundCommonLib_AdaptiveTimeout__ctor_System_TimeSpan_ILogger_System_Int32_System_Int32_System_Int32_System_Boolean_
+  commentId: M:SharpHoundCommonLib.AdaptiveTimeout.#ctor(System.TimeSpan,ILogger,System.Int32,System.Int32,System.Int32,System.Boolean)
+  fullName: SharpHoundCommonLib.AdaptiveTimeout.AdaptiveTimeout(System.TimeSpan, ILogger, System.Int32, System.Int32, System.Int32, System.Boolean)
+  nameWithType: AdaptiveTimeout.AdaptiveTimeout(TimeSpan, ILogger, Int32, Int32, Int32, Boolean)
+- uid: SharpHoundCommonLib.AdaptiveTimeout.#ctor*
+  name: AdaptiveTimeout
+  href: api/SharpHoundCommonLib.AdaptiveTimeout.html#SharpHoundCommonLib_AdaptiveTimeout__ctor_
+  commentId: Overload:SharpHoundCommonLib.AdaptiveTimeout.#ctor
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.AdaptiveTimeout.AdaptiveTimeout
+  nameWithType: AdaptiveTimeout.AdaptiveTimeout
+- uid: SharpHoundCommonLib.AdaptiveTimeout.ClearSamples
+  name: ClearSamples()
+  href: api/SharpHoundCommonLib.AdaptiveTimeout.html#SharpHoundCommonLib_AdaptiveTimeout_ClearSamples
+  commentId: M:SharpHoundCommonLib.AdaptiveTimeout.ClearSamples
+  fullName: SharpHoundCommonLib.AdaptiveTimeout.ClearSamples()
+  nameWithType: AdaptiveTimeout.ClearSamples()
+- uid: SharpHoundCommonLib.AdaptiveTimeout.ClearSamples*
+  name: ClearSamples
+  href: api/SharpHoundCommonLib.AdaptiveTimeout.html#SharpHoundCommonLib_AdaptiveTimeout_ClearSamples_
+  commentId: Overload:SharpHoundCommonLib.AdaptiveTimeout.ClearSamples
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.AdaptiveTimeout.ClearSamples
+  nameWithType: AdaptiveTimeout.ClearSamples
+- uid: SharpHoundCommonLib.AdaptiveTimeout.Dispose
+  name: Dispose()
+  href: api/SharpHoundCommonLib.AdaptiveTimeout.html#SharpHoundCommonLib_AdaptiveTimeout_Dispose
+  commentId: M:SharpHoundCommonLib.AdaptiveTimeout.Dispose
+  fullName: SharpHoundCommonLib.AdaptiveTimeout.Dispose()
+  nameWithType: AdaptiveTimeout.Dispose()
+- uid: SharpHoundCommonLib.AdaptiveTimeout.Dispose*
+  name: Dispose
+  href: api/SharpHoundCommonLib.AdaptiveTimeout.html#SharpHoundCommonLib_AdaptiveTimeout_Dispose_
+  commentId: Overload:SharpHoundCommonLib.AdaptiveTimeout.Dispose
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.AdaptiveTimeout.Dispose
+  nameWithType: AdaptiveTimeout.Dispose
+- uid: SharpHoundCommonLib.AdaptiveTimeout.ExecuteNetAPIWithTimeout*
+  name: ExecuteNetAPIWithTimeout
+  href: api/SharpHoundCommonLib.AdaptiveTimeout.html#SharpHoundCommonLib_AdaptiveTimeout_ExecuteNetAPIWithTimeout_
+  commentId: Overload:SharpHoundCommonLib.AdaptiveTimeout.ExecuteNetAPIWithTimeout
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.AdaptiveTimeout.ExecuteNetAPIWithTimeout
+  nameWithType: AdaptiveTimeout.ExecuteNetAPIWithTimeout
+- uid: SharpHoundCommonLib.AdaptiveTimeout.ExecuteNetAPIWithTimeout``1(System.Func{System.Threading.CancellationToken,SharpHoundRPC.NetAPINative.NetAPIResult{``0}},System.Threading.CancellationToken)
+  name: ExecuteNetAPIWithTimeout<T>(Func<CancellationToken, NetAPIResult<T>>, CancellationToken)
+  href: api/SharpHoundCommonLib.AdaptiveTimeout.html#SharpHoundCommonLib_AdaptiveTimeout_ExecuteNetAPIWithTimeout__1_System_Func_System_Threading_CancellationToken_SharpHoundRPC_NetAPINative_NetAPIResult___0___System_Threading_CancellationToken_
+  commentId: M:SharpHoundCommonLib.AdaptiveTimeout.ExecuteNetAPIWithTimeout``1(System.Func{System.Threading.CancellationToken,SharpHoundRPC.NetAPINative.NetAPIResult{``0}},System.Threading.CancellationToken)
+  name.vb: ExecuteNetAPIWithTimeout(Of T)(Func(Of CancellationToken, NetAPIResult(Of T)), CancellationToken)
+  fullName: SharpHoundCommonLib.AdaptiveTimeout.ExecuteNetAPIWithTimeout<T>(System.Func<System.Threading.CancellationToken, SharpHoundRPC.NetAPINative.NetAPIResult<T>>, System.Threading.CancellationToken)
+  fullName.vb: SharpHoundCommonLib.AdaptiveTimeout.ExecuteNetAPIWithTimeout(Of T)(System.Func(Of System.Threading.CancellationToken, SharpHoundRPC.NetAPINative.NetAPIResult(Of T)), System.Threading.CancellationToken)
+  nameWithType: AdaptiveTimeout.ExecuteNetAPIWithTimeout<T>(Func<CancellationToken, NetAPIResult<T>>, CancellationToken)
+  nameWithType.vb: AdaptiveTimeout.ExecuteNetAPIWithTimeout(Of T)(Func(Of CancellationToken, NetAPIResult(Of T)), CancellationToken)
+- uid: SharpHoundCommonLib.AdaptiveTimeout.ExecuteRPCWithTimeout*
+  name: ExecuteRPCWithTimeout
+  href: api/SharpHoundCommonLib.AdaptiveTimeout.html#SharpHoundCommonLib_AdaptiveTimeout_ExecuteRPCWithTimeout_
+  commentId: Overload:SharpHoundCommonLib.AdaptiveTimeout.ExecuteRPCWithTimeout
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.AdaptiveTimeout.ExecuteRPCWithTimeout
+  nameWithType: AdaptiveTimeout.ExecuteRPCWithTimeout
+- uid: SharpHoundCommonLib.AdaptiveTimeout.ExecuteRPCWithTimeout``1(System.Func{System.Threading.CancellationToken,SharpHoundRPC.Result{``0}},System.Threading.CancellationToken)
+  name: ExecuteRPCWithTimeout<T>(Func<CancellationToken, Result<T>>, CancellationToken)
+  href: api/SharpHoundCommonLib.AdaptiveTimeout.html#SharpHoundCommonLib_AdaptiveTimeout_ExecuteRPCWithTimeout__1_System_Func_System_Threading_CancellationToken_SharpHoundRPC_Result___0___System_Threading_CancellationToken_
+  commentId: M:SharpHoundCommonLib.AdaptiveTimeout.ExecuteRPCWithTimeout``1(System.Func{System.Threading.CancellationToken,SharpHoundRPC.Result{``0}},System.Threading.CancellationToken)
+  name.vb: ExecuteRPCWithTimeout(Of T)(Func(Of CancellationToken, Result(Of T)), CancellationToken)
+  fullName: SharpHoundCommonLib.AdaptiveTimeout.ExecuteRPCWithTimeout<T>(System.Func<System.Threading.CancellationToken, SharpHoundRPC.Result<T>>, System.Threading.CancellationToken)
+  fullName.vb: SharpHoundCommonLib.AdaptiveTimeout.ExecuteRPCWithTimeout(Of T)(System.Func(Of System.Threading.CancellationToken, SharpHoundRPC.Result(Of T)), System.Threading.CancellationToken)
+  nameWithType: AdaptiveTimeout.ExecuteRPCWithTimeout<T>(Func<CancellationToken, Result<T>>, CancellationToken)
+  nameWithType.vb: AdaptiveTimeout.ExecuteRPCWithTimeout(Of T)(Func(Of CancellationToken, Result(Of T)), CancellationToken)
+- uid: SharpHoundCommonLib.AdaptiveTimeout.ExecuteRPCWithTimeout``1(System.Func{System.Threading.CancellationToken,System.Threading.Tasks.Task{SharpHoundRPC.Result{``0}}},System.Threading.CancellationToken)
+  name: ExecuteRPCWithTimeout<T>(Func<CancellationToken, Task<Result<T>>>, CancellationToken)
+  href: api/SharpHoundCommonLib.AdaptiveTimeout.html#SharpHoundCommonLib_AdaptiveTimeout_ExecuteRPCWithTimeout__1_System_Func_System_Threading_CancellationToken_System_Threading_Tasks_Task_SharpHoundRPC_Result___0____System_Threading_CancellationToken_
+  commentId: M:SharpHoundCommonLib.AdaptiveTimeout.ExecuteRPCWithTimeout``1(System.Func{System.Threading.CancellationToken,System.Threading.Tasks.Task{SharpHoundRPC.Result{``0}}},System.Threading.CancellationToken)
+  name.vb: ExecuteRPCWithTimeout(Of T)(Func(Of CancellationToken, Task(Of Result(Of T))), CancellationToken)
+  fullName: SharpHoundCommonLib.AdaptiveTimeout.ExecuteRPCWithTimeout<T>(System.Func<System.Threading.CancellationToken, System.Threading.Tasks.Task<SharpHoundRPC.Result<T>>>, System.Threading.CancellationToken)
+  fullName.vb: SharpHoundCommonLib.AdaptiveTimeout.ExecuteRPCWithTimeout(Of T)(System.Func(Of System.Threading.CancellationToken, System.Threading.Tasks.Task(Of SharpHoundRPC.Result(Of T))), System.Threading.CancellationToken)
+  nameWithType: AdaptiveTimeout.ExecuteRPCWithTimeout<T>(Func<CancellationToken, Task<Result<T>>>, CancellationToken)
+  nameWithType.vb: AdaptiveTimeout.ExecuteRPCWithTimeout(Of T)(Func(Of CancellationToken, Task(Of Result(Of T))), CancellationToken)
+- uid: SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout(System.Action{System.Threading.CancellationToken},System.Threading.CancellationToken)
+  name: ExecuteWithTimeout(Action<CancellationToken>, CancellationToken)
+  href: api/SharpHoundCommonLib.AdaptiveTimeout.html#SharpHoundCommonLib_AdaptiveTimeout_ExecuteWithTimeout_System_Action_System_Threading_CancellationToken__System_Threading_CancellationToken_
+  commentId: M:SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout(System.Action{System.Threading.CancellationToken},System.Threading.CancellationToken)
+  name.vb: ExecuteWithTimeout(Action(Of CancellationToken), CancellationToken)
+  fullName: SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout(System.Action<System.Threading.CancellationToken>, System.Threading.CancellationToken)
+  fullName.vb: SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout(System.Action(Of System.Threading.CancellationToken), System.Threading.CancellationToken)
+  nameWithType: AdaptiveTimeout.ExecuteWithTimeout(Action<CancellationToken>, CancellationToken)
+  nameWithType.vb: AdaptiveTimeout.ExecuteWithTimeout(Action(Of CancellationToken), CancellationToken)
+- uid: SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout(System.Func{System.Threading.CancellationToken,System.Threading.Tasks.Task},System.Threading.CancellationToken)
+  name: ExecuteWithTimeout(Func<CancellationToken, Task>, CancellationToken)
+  href: api/SharpHoundCommonLib.AdaptiveTimeout.html#SharpHoundCommonLib_AdaptiveTimeout_ExecuteWithTimeout_System_Func_System_Threading_CancellationToken_System_Threading_Tasks_Task__System_Threading_CancellationToken_
+  commentId: M:SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout(System.Func{System.Threading.CancellationToken,System.Threading.Tasks.Task},System.Threading.CancellationToken)
+  name.vb: ExecuteWithTimeout(Func(Of CancellationToken, Task), CancellationToken)
+  fullName: SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout(System.Func<System.Threading.CancellationToken, System.Threading.Tasks.Task>, System.Threading.CancellationToken)
+  fullName.vb: SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout(System.Func(Of System.Threading.CancellationToken, System.Threading.Tasks.Task), System.Threading.CancellationToken)
+  nameWithType: AdaptiveTimeout.ExecuteWithTimeout(Func<CancellationToken, Task>, CancellationToken)
+  nameWithType.vb: AdaptiveTimeout.ExecuteWithTimeout(Func(Of CancellationToken, Task), CancellationToken)
+- uid: SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout*
+  name: ExecuteWithTimeout
+  href: api/SharpHoundCommonLib.AdaptiveTimeout.html#SharpHoundCommonLib_AdaptiveTimeout_ExecuteWithTimeout_
+  commentId: Overload:SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout
+  nameWithType: AdaptiveTimeout.ExecuteWithTimeout
+- uid: SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout``1(System.Func{System.Threading.CancellationToken,``0},System.Threading.CancellationToken)
+  name: ExecuteWithTimeout<T>(Func<CancellationToken, T>, CancellationToken)
+  href: api/SharpHoundCommonLib.AdaptiveTimeout.html#SharpHoundCommonLib_AdaptiveTimeout_ExecuteWithTimeout__1_System_Func_System_Threading_CancellationToken___0__System_Threading_CancellationToken_
+  commentId: M:SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout``1(System.Func{System.Threading.CancellationToken,``0},System.Threading.CancellationToken)
+  name.vb: ExecuteWithTimeout(Of T)(Func(Of CancellationToken, T), CancellationToken)
+  fullName: SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout<T>(System.Func<System.Threading.CancellationToken, T>, System.Threading.CancellationToken)
+  fullName.vb: SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout(Of T)(System.Func(Of System.Threading.CancellationToken, T), System.Threading.CancellationToken)
+  nameWithType: AdaptiveTimeout.ExecuteWithTimeout<T>(Func<CancellationToken, T>, CancellationToken)
+  nameWithType.vb: AdaptiveTimeout.ExecuteWithTimeout(Of T)(Func(Of CancellationToken, T), CancellationToken)
+- uid: SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout``1(System.Func{System.Threading.CancellationToken,System.Threading.Tasks.Task{``0}},System.Threading.CancellationToken)
+  name: ExecuteWithTimeout<T>(Func<CancellationToken, Task<T>>, CancellationToken)
+  href: api/SharpHoundCommonLib.AdaptiveTimeout.html#SharpHoundCommonLib_AdaptiveTimeout_ExecuteWithTimeout__1_System_Func_System_Threading_CancellationToken_System_Threading_Tasks_Task___0___System_Threading_CancellationToken_
+  commentId: M:SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout``1(System.Func{System.Threading.CancellationToken,System.Threading.Tasks.Task{``0}},System.Threading.CancellationToken)
+  name.vb: ExecuteWithTimeout(Of T)(Func(Of CancellationToken, Task(Of T)), CancellationToken)
+  fullName: SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout<T>(System.Func<System.Threading.CancellationToken, System.Threading.Tasks.Task<T>>, System.Threading.CancellationToken)
+  fullName.vb: SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout(Of T)(System.Func(Of System.Threading.CancellationToken, System.Threading.Tasks.Task(Of T)), System.Threading.CancellationToken)
+  nameWithType: AdaptiveTimeout.ExecuteWithTimeout<T>(Func<CancellationToken, Task<T>>, CancellationToken)
+  nameWithType.vb: AdaptiveTimeout.ExecuteWithTimeout(Of T)(Func(Of CancellationToken, Task(Of T)), CancellationToken)
+- uid: SharpHoundCommonLib.AdaptiveTimeout.GetAdaptiveTimeout
+  name: GetAdaptiveTimeout()
+  href: api/SharpHoundCommonLib.AdaptiveTimeout.html#SharpHoundCommonLib_AdaptiveTimeout_GetAdaptiveTimeout
+  commentId: M:SharpHoundCommonLib.AdaptiveTimeout.GetAdaptiveTimeout
+  fullName: SharpHoundCommonLib.AdaptiveTimeout.GetAdaptiveTimeout()
+  nameWithType: AdaptiveTimeout.GetAdaptiveTimeout()
+- uid: SharpHoundCommonLib.AdaptiveTimeout.GetAdaptiveTimeout*
+  name: GetAdaptiveTimeout
+  href: api/SharpHoundCommonLib.AdaptiveTimeout.html#SharpHoundCommonLib_AdaptiveTimeout_GetAdaptiveTimeout_
+  commentId: Overload:SharpHoundCommonLib.AdaptiveTimeout.GetAdaptiveTimeout
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.AdaptiveTimeout.GetAdaptiveTimeout
+  nameWithType: AdaptiveTimeout.GetAdaptiveTimeout
 - uid: SharpHoundCommonLib.AsyncEnumerable
   name: AsyncEnumerable
   href: api/SharpHoundCommonLib.AsyncEnumerable.html
@@ -3074,6 +3216,130 @@ references:
   commentId: F:SharpHoundCommonLib.Enums.UacFlags.WorkstationTrustAccount
   fullName: SharpHoundCommonLib.Enums.UacFlags.WorkstationTrustAccount
   nameWithType: UacFlags.WorkstationTrustAccount
+- uid: SharpHoundCommonLib.ExecutionTimeSampler
+  name: ExecutionTimeSampler
+  href: api/SharpHoundCommonLib.ExecutionTimeSampler.html
+  commentId: T:SharpHoundCommonLib.ExecutionTimeSampler
+  fullName: SharpHoundCommonLib.ExecutionTimeSampler
+  nameWithType: ExecutionTimeSampler
+- uid: SharpHoundCommonLib.ExecutionTimeSampler.#ctor(ILogger,System.Int32,System.Int32)
+  name: ExecutionTimeSampler(ILogger, Int32, Int32)
+  href: api/SharpHoundCommonLib.ExecutionTimeSampler.html#SharpHoundCommonLib_ExecutionTimeSampler__ctor_ILogger_System_Int32_System_Int32_
+  commentId: M:SharpHoundCommonLib.ExecutionTimeSampler.#ctor(ILogger,System.Int32,System.Int32)
+  fullName: SharpHoundCommonLib.ExecutionTimeSampler.ExecutionTimeSampler(ILogger, System.Int32, System.Int32)
+  nameWithType: ExecutionTimeSampler.ExecutionTimeSampler(ILogger, Int32, Int32)
+- uid: SharpHoundCommonLib.ExecutionTimeSampler.#ctor*
+  name: ExecutionTimeSampler
+  href: api/SharpHoundCommonLib.ExecutionTimeSampler.html#SharpHoundCommonLib_ExecutionTimeSampler__ctor_
+  commentId: Overload:SharpHoundCommonLib.ExecutionTimeSampler.#ctor
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.ExecutionTimeSampler.ExecutionTimeSampler
+  nameWithType: ExecutionTimeSampler.ExecutionTimeSampler
+- uid: SharpHoundCommonLib.ExecutionTimeSampler.Average
+  name: Average()
+  href: api/SharpHoundCommonLib.ExecutionTimeSampler.html#SharpHoundCommonLib_ExecutionTimeSampler_Average
+  commentId: M:SharpHoundCommonLib.ExecutionTimeSampler.Average
+  fullName: SharpHoundCommonLib.ExecutionTimeSampler.Average()
+  nameWithType: ExecutionTimeSampler.Average()
+- uid: SharpHoundCommonLib.ExecutionTimeSampler.Average*
+  name: Average
+  href: api/SharpHoundCommonLib.ExecutionTimeSampler.html#SharpHoundCommonLib_ExecutionTimeSampler_Average_
+  commentId: Overload:SharpHoundCommonLib.ExecutionTimeSampler.Average
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.ExecutionTimeSampler.Average
+  nameWithType: ExecutionTimeSampler.Average
+- uid: SharpHoundCommonLib.ExecutionTimeSampler.ClearSamples
+  name: ClearSamples()
+  href: api/SharpHoundCommonLib.ExecutionTimeSampler.html#SharpHoundCommonLib_ExecutionTimeSampler_ClearSamples
+  commentId: M:SharpHoundCommonLib.ExecutionTimeSampler.ClearSamples
+  fullName: SharpHoundCommonLib.ExecutionTimeSampler.ClearSamples()
+  nameWithType: ExecutionTimeSampler.ClearSamples()
+- uid: SharpHoundCommonLib.ExecutionTimeSampler.ClearSamples*
+  name: ClearSamples
+  href: api/SharpHoundCommonLib.ExecutionTimeSampler.html#SharpHoundCommonLib_ExecutionTimeSampler_ClearSamples_
+  commentId: Overload:SharpHoundCommonLib.ExecutionTimeSampler.ClearSamples
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.ExecutionTimeSampler.ClearSamples
+  nameWithType: ExecutionTimeSampler.ClearSamples
+- uid: SharpHoundCommonLib.ExecutionTimeSampler.Count
+  name: Count
+  href: api/SharpHoundCommonLib.ExecutionTimeSampler.html#SharpHoundCommonLib_ExecutionTimeSampler_Count
+  commentId: P:SharpHoundCommonLib.ExecutionTimeSampler.Count
+  fullName: SharpHoundCommonLib.ExecutionTimeSampler.Count
+  nameWithType: ExecutionTimeSampler.Count
+- uid: SharpHoundCommonLib.ExecutionTimeSampler.Count*
+  name: Count
+  href: api/SharpHoundCommonLib.ExecutionTimeSampler.html#SharpHoundCommonLib_ExecutionTimeSampler_Count_
+  commentId: Overload:SharpHoundCommonLib.ExecutionTimeSampler.Count
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.ExecutionTimeSampler.Count
+  nameWithType: ExecutionTimeSampler.Count
+- uid: SharpHoundCommonLib.ExecutionTimeSampler.Dispose
+  name: Dispose()
+  href: api/SharpHoundCommonLib.ExecutionTimeSampler.html#SharpHoundCommonLib_ExecutionTimeSampler_Dispose
+  commentId: M:SharpHoundCommonLib.ExecutionTimeSampler.Dispose
+  fullName: SharpHoundCommonLib.ExecutionTimeSampler.Dispose()
+  nameWithType: ExecutionTimeSampler.Dispose()
+- uid: SharpHoundCommonLib.ExecutionTimeSampler.Dispose*
+  name: Dispose
+  href: api/SharpHoundCommonLib.ExecutionTimeSampler.html#SharpHoundCommonLib_ExecutionTimeSampler_Dispose_
+  commentId: Overload:SharpHoundCommonLib.ExecutionTimeSampler.Dispose
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.ExecutionTimeSampler.Dispose
+  nameWithType: ExecutionTimeSampler.Dispose
+- uid: SharpHoundCommonLib.ExecutionTimeSampler.SampleExecutionTime(System.Action)
+  name: SampleExecutionTime(Action)
+  href: api/SharpHoundCommonLib.ExecutionTimeSampler.html#SharpHoundCommonLib_ExecutionTimeSampler_SampleExecutionTime_System_Action_
+  commentId: M:SharpHoundCommonLib.ExecutionTimeSampler.SampleExecutionTime(System.Action)
+  fullName: SharpHoundCommonLib.ExecutionTimeSampler.SampleExecutionTime(System.Action)
+  nameWithType: ExecutionTimeSampler.SampleExecutionTime(Action)
+- uid: SharpHoundCommonLib.ExecutionTimeSampler.SampleExecutionTime(System.Func{System.Threading.Tasks.Task})
+  name: SampleExecutionTime(Func<Task>)
+  href: api/SharpHoundCommonLib.ExecutionTimeSampler.html#SharpHoundCommonLib_ExecutionTimeSampler_SampleExecutionTime_System_Func_System_Threading_Tasks_Task__
+  commentId: M:SharpHoundCommonLib.ExecutionTimeSampler.SampleExecutionTime(System.Func{System.Threading.Tasks.Task})
+  name.vb: SampleExecutionTime(Func(Of Task))
+  fullName: SharpHoundCommonLib.ExecutionTimeSampler.SampleExecutionTime(System.Func<System.Threading.Tasks.Task>)
+  fullName.vb: SharpHoundCommonLib.ExecutionTimeSampler.SampleExecutionTime(System.Func(Of System.Threading.Tasks.Task))
+  nameWithType: ExecutionTimeSampler.SampleExecutionTime(Func<Task>)
+  nameWithType.vb: ExecutionTimeSampler.SampleExecutionTime(Func(Of Task))
+- uid: SharpHoundCommonLib.ExecutionTimeSampler.SampleExecutionTime*
+  name: SampleExecutionTime
+  href: api/SharpHoundCommonLib.ExecutionTimeSampler.html#SharpHoundCommonLib_ExecutionTimeSampler_SampleExecutionTime_
+  commentId: Overload:SharpHoundCommonLib.ExecutionTimeSampler.SampleExecutionTime
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.ExecutionTimeSampler.SampleExecutionTime
+  nameWithType: ExecutionTimeSampler.SampleExecutionTime
+- uid: SharpHoundCommonLib.ExecutionTimeSampler.SampleExecutionTime``1(System.Func{``0})
+  name: SampleExecutionTime<T>(Func<T>)
+  href: api/SharpHoundCommonLib.ExecutionTimeSampler.html#SharpHoundCommonLib_ExecutionTimeSampler_SampleExecutionTime__1_System_Func___0__
+  commentId: M:SharpHoundCommonLib.ExecutionTimeSampler.SampleExecutionTime``1(System.Func{``0})
+  name.vb: SampleExecutionTime(Of T)(Func(Of T))
+  fullName: SharpHoundCommonLib.ExecutionTimeSampler.SampleExecutionTime<T>(System.Func<T>)
+  fullName.vb: SharpHoundCommonLib.ExecutionTimeSampler.SampleExecutionTime(Of T)(System.Func(Of T))
+  nameWithType: ExecutionTimeSampler.SampleExecutionTime<T>(Func<T>)
+  nameWithType.vb: ExecutionTimeSampler.SampleExecutionTime(Of T)(Func(Of T))
+- uid: SharpHoundCommonLib.ExecutionTimeSampler.SampleExecutionTime``1(System.Func{System.Threading.Tasks.Task{``0}})
+  name: SampleExecutionTime<T>(Func<Task<T>>)
+  href: api/SharpHoundCommonLib.ExecutionTimeSampler.html#SharpHoundCommonLib_ExecutionTimeSampler_SampleExecutionTime__1_System_Func_System_Threading_Tasks_Task___0___
+  commentId: M:SharpHoundCommonLib.ExecutionTimeSampler.SampleExecutionTime``1(System.Func{System.Threading.Tasks.Task{``0}})
+  name.vb: SampleExecutionTime(Of T)(Func(Of Task(Of T)))
+  fullName: SharpHoundCommonLib.ExecutionTimeSampler.SampleExecutionTime<T>(System.Func<System.Threading.Tasks.Task<T>>)
+  fullName.vb: SharpHoundCommonLib.ExecutionTimeSampler.SampleExecutionTime(Of T)(System.Func(Of System.Threading.Tasks.Task(Of T)))
+  nameWithType: ExecutionTimeSampler.SampleExecutionTime<T>(Func<Task<T>>)
+  nameWithType.vb: ExecutionTimeSampler.SampleExecutionTime(Of T)(Func(Of Task(Of T)))
+- uid: SharpHoundCommonLib.ExecutionTimeSampler.StandardDeviation
+  name: StandardDeviation()
+  href: api/SharpHoundCommonLib.ExecutionTimeSampler.html#SharpHoundCommonLib_ExecutionTimeSampler_StandardDeviation
+  commentId: M:SharpHoundCommonLib.ExecutionTimeSampler.StandardDeviation
+  fullName: SharpHoundCommonLib.ExecutionTimeSampler.StandardDeviation()
+  nameWithType: ExecutionTimeSampler.StandardDeviation()
+- uid: SharpHoundCommonLib.ExecutionTimeSampler.StandardDeviation*
+  name: StandardDeviation
+  href: api/SharpHoundCommonLib.ExecutionTimeSampler.html#SharpHoundCommonLib_ExecutionTimeSampler_StandardDeviation_
+  commentId: Overload:SharpHoundCommonLib.ExecutionTimeSampler.StandardDeviation
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.ExecutionTimeSampler.StandardDeviation
+  nameWithType: ExecutionTimeSampler.StandardDeviation
 - uid: SharpHoundCommonLib.Extensions
   name: Extensions
   href: api/SharpHoundCommonLib.Extensions.html
@@ -6478,15 +6744,15 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.Ntlm.HttpNtlmAuthenticationService.HttpNtlmAuthenticationService
   nameWithType: HttpNtlmAuthenticationService.HttpNtlmAuthenticationService
-- uid: SharpHoundCommonLib.Ntlm.HttpNtlmAuthenticationService.EnsureRequiresAuth(System.Uri,System.Nullable{System.Boolean},System.TimeSpan)
-  name: EnsureRequiresAuth(Uri, Nullable<Boolean>, TimeSpan)
-  href: api/SharpHoundCommonLib.Ntlm.HttpNtlmAuthenticationService.html#SharpHoundCommonLib_Ntlm_HttpNtlmAuthenticationService_EnsureRequiresAuth_System_Uri_System_Nullable_System_Boolean__System_TimeSpan_
-  commentId: M:SharpHoundCommonLib.Ntlm.HttpNtlmAuthenticationService.EnsureRequiresAuth(System.Uri,System.Nullable{System.Boolean},System.TimeSpan)
-  name.vb: EnsureRequiresAuth(Uri, Nullable(Of Boolean), TimeSpan)
-  fullName: SharpHoundCommonLib.Ntlm.HttpNtlmAuthenticationService.EnsureRequiresAuth(System.Uri, System.Nullable<System.Boolean>, System.TimeSpan)
-  fullName.vb: SharpHoundCommonLib.Ntlm.HttpNtlmAuthenticationService.EnsureRequiresAuth(System.Uri, System.Nullable(Of System.Boolean), System.TimeSpan)
-  nameWithType: HttpNtlmAuthenticationService.EnsureRequiresAuth(Uri, Nullable<Boolean>, TimeSpan)
-  nameWithType.vb: HttpNtlmAuthenticationService.EnsureRequiresAuth(Uri, Nullable(Of Boolean), TimeSpan)
+- uid: SharpHoundCommonLib.Ntlm.HttpNtlmAuthenticationService.EnsureRequiresAuth(System.Uri,System.Nullable{System.Boolean})
+  name: EnsureRequiresAuth(Uri, Nullable<Boolean>)
+  href: api/SharpHoundCommonLib.Ntlm.HttpNtlmAuthenticationService.html#SharpHoundCommonLib_Ntlm_HttpNtlmAuthenticationService_EnsureRequiresAuth_System_Uri_System_Nullable_System_Boolean__
+  commentId: M:SharpHoundCommonLib.Ntlm.HttpNtlmAuthenticationService.EnsureRequiresAuth(System.Uri,System.Nullable{System.Boolean})
+  name.vb: EnsureRequiresAuth(Uri, Nullable(Of Boolean))
+  fullName: SharpHoundCommonLib.Ntlm.HttpNtlmAuthenticationService.EnsureRequiresAuth(System.Uri, System.Nullable<System.Boolean>)
+  fullName.vb: SharpHoundCommonLib.Ntlm.HttpNtlmAuthenticationService.EnsureRequiresAuth(System.Uri, System.Nullable(Of System.Boolean))
+  nameWithType: HttpNtlmAuthenticationService.EnsureRequiresAuth(Uri, Nullable<Boolean>)
+  nameWithType.vb: HttpNtlmAuthenticationService.EnsureRequiresAuth(Uri, Nullable(Of Boolean))
 - uid: SharpHoundCommonLib.Ntlm.HttpNtlmAuthenticationService.EnsureRequiresAuth*
   name: EnsureRequiresAuth
   href: api/SharpHoundCommonLib.Ntlm.HttpNtlmAuthenticationService.html#SharpHoundCommonLib_Ntlm_HttpNtlmAuthenticationService_EnsureRequiresAuth_
@@ -9908,12 +10174,12 @@ references:
   commentId: E:SharpHoundCommonLib.Processors.ComputerSessionProcessor.ComputerStatusEvent
   fullName: SharpHoundCommonLib.Processors.ComputerSessionProcessor.ComputerStatusEvent
   nameWithType: ComputerSessionProcessor.ComputerStatusEvent
-- uid: SharpHoundCommonLib.Processors.ComputerSessionProcessor.ReadUserSessions(System.String,System.String,System.String,System.TimeSpan)
-  name: ReadUserSessions(String, String, String, TimeSpan)
-  href: api/SharpHoundCommonLib.Processors.ComputerSessionProcessor.html#SharpHoundCommonLib_Processors_ComputerSessionProcessor_ReadUserSessions_System_String_System_String_System_String_System_TimeSpan_
-  commentId: M:SharpHoundCommonLib.Processors.ComputerSessionProcessor.ReadUserSessions(System.String,System.String,System.String,System.TimeSpan)
-  fullName: SharpHoundCommonLib.Processors.ComputerSessionProcessor.ReadUserSessions(System.String, System.String, System.String, System.TimeSpan)
-  nameWithType: ComputerSessionProcessor.ReadUserSessions(String, String, String, TimeSpan)
+- uid: SharpHoundCommonLib.Processors.ComputerSessionProcessor.ReadUserSessions(System.String,System.String,System.String)
+  name: ReadUserSessions(String, String, String)
+  href: api/SharpHoundCommonLib.Processors.ComputerSessionProcessor.html#SharpHoundCommonLib_Processors_ComputerSessionProcessor_ReadUserSessions_System_String_System_String_System_String_
+  commentId: M:SharpHoundCommonLib.Processors.ComputerSessionProcessor.ReadUserSessions(System.String,System.String,System.String)
+  fullName: SharpHoundCommonLib.Processors.ComputerSessionProcessor.ReadUserSessions(System.String, System.String, System.String)
+  nameWithType: ComputerSessionProcessor.ReadUserSessions(String, String, String)
 - uid: SharpHoundCommonLib.Processors.ComputerSessionProcessor.ReadUserSessions*
   name: ReadUserSessions
   href: api/SharpHoundCommonLib.Processors.ComputerSessionProcessor.html#SharpHoundCommonLib_Processors_ComputerSessionProcessor_ReadUserSessions_
@@ -9921,12 +10187,12 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.Processors.ComputerSessionProcessor.ReadUserSessions
   nameWithType: ComputerSessionProcessor.ReadUserSessions
-- uid: SharpHoundCommonLib.Processors.ComputerSessionProcessor.ReadUserSessionsPrivileged(System.String,System.String,System.String,System.TimeSpan)
-  name: ReadUserSessionsPrivileged(String, String, String, TimeSpan)
-  href: api/SharpHoundCommonLib.Processors.ComputerSessionProcessor.html#SharpHoundCommonLib_Processors_ComputerSessionProcessor_ReadUserSessionsPrivileged_System_String_System_String_System_String_System_TimeSpan_
-  commentId: M:SharpHoundCommonLib.Processors.ComputerSessionProcessor.ReadUserSessionsPrivileged(System.String,System.String,System.String,System.TimeSpan)
-  fullName: SharpHoundCommonLib.Processors.ComputerSessionProcessor.ReadUserSessionsPrivileged(System.String, System.String, System.String, System.TimeSpan)
-  nameWithType: ComputerSessionProcessor.ReadUserSessionsPrivileged(String, String, String, TimeSpan)
+- uid: SharpHoundCommonLib.Processors.ComputerSessionProcessor.ReadUserSessionsPrivileged(System.String,System.String,System.String)
+  name: ReadUserSessionsPrivileged(String, String, String)
+  href: api/SharpHoundCommonLib.Processors.ComputerSessionProcessor.html#SharpHoundCommonLib_Processors_ComputerSessionProcessor_ReadUserSessionsPrivileged_System_String_System_String_System_String_
+  commentId: M:SharpHoundCommonLib.Processors.ComputerSessionProcessor.ReadUserSessionsPrivileged(System.String,System.String,System.String)
+  fullName: SharpHoundCommonLib.Processors.ComputerSessionProcessor.ReadUserSessionsPrivileged(System.String, System.String, System.String)
+  nameWithType: ComputerSessionProcessor.ReadUserSessionsPrivileged(String, String, String)
 - uid: SharpHoundCommonLib.Processors.ComputerSessionProcessor.ReadUserSessionsPrivileged*
   name: ReadUserSessionsPrivileged
   href: api/SharpHoundCommonLib.Processors.ComputerSessionProcessor.html#SharpHoundCommonLib_Processors_ComputerSessionProcessor_ReadUserSessionsPrivileged_
@@ -10106,12 +10372,12 @@ references:
   commentId: E:SharpHoundCommonLib.Processors.DCLdapProcessor.ComputerStatusEvent
   fullName: SharpHoundCommonLib.Processors.DCLdapProcessor.ComputerStatusEvent
   nameWithType: DCLdapProcessor.ComputerStatusEvent
-- uid: SharpHoundCommonLib.Processors.DCLdapProcessor.Scan(System.String,System.TimeSpan)
-  name: Scan(String, TimeSpan)
-  href: api/SharpHoundCommonLib.Processors.DCLdapProcessor.html#SharpHoundCommonLib_Processors_DCLdapProcessor_Scan_System_String_System_TimeSpan_
-  commentId: M:SharpHoundCommonLib.Processors.DCLdapProcessor.Scan(System.String,System.TimeSpan)
-  fullName: SharpHoundCommonLib.Processors.DCLdapProcessor.Scan(System.String, System.TimeSpan)
-  nameWithType: DCLdapProcessor.Scan(String, TimeSpan)
+- uid: SharpHoundCommonLib.Processors.DCLdapProcessor.Scan(System.String)
+  name: Scan(String)
+  href: api/SharpHoundCommonLib.Processors.DCLdapProcessor.html#SharpHoundCommonLib_Processors_DCLdapProcessor_Scan_System_String_
+  commentId: M:SharpHoundCommonLib.Processors.DCLdapProcessor.Scan(System.String)
+  fullName: SharpHoundCommonLib.Processors.DCLdapProcessor.Scan(System.String)
+  nameWithType: DCLdapProcessor.Scan(String)
 - uid: SharpHoundCommonLib.Processors.DCLdapProcessor.Scan*
   name: Scan
   href: api/SharpHoundCommonLib.Processors.DCLdapProcessor.html#SharpHoundCommonLib_Processors_DCLdapProcessor_Scan_
@@ -10797,12 +11063,12 @@ references:
   commentId: M:SharpHoundCommonLib.Processors.LocalGroupProcessor.GetLocalGroups(SharpHoundCommonLib.ResolvedSearchResult)
   fullName: SharpHoundCommonLib.Processors.LocalGroupProcessor.GetLocalGroups(SharpHoundCommonLib.ResolvedSearchResult)
   nameWithType: LocalGroupProcessor.GetLocalGroups(ResolvedSearchResult)
-- uid: SharpHoundCommonLib.Processors.LocalGroupProcessor.GetLocalGroups(System.String,System.String,System.String,System.Boolean,System.TimeSpan)
-  name: GetLocalGroups(String, String, String, Boolean, TimeSpan)
-  href: api/SharpHoundCommonLib.Processors.LocalGroupProcessor.html#SharpHoundCommonLib_Processors_LocalGroupProcessor_GetLocalGroups_System_String_System_String_System_String_System_Boolean_System_TimeSpan_
-  commentId: M:SharpHoundCommonLib.Processors.LocalGroupProcessor.GetLocalGroups(System.String,System.String,System.String,System.Boolean,System.TimeSpan)
-  fullName: SharpHoundCommonLib.Processors.LocalGroupProcessor.GetLocalGroups(System.String, System.String, System.String, System.Boolean, System.TimeSpan)
-  nameWithType: LocalGroupProcessor.GetLocalGroups(String, String, String, Boolean, TimeSpan)
+- uid: SharpHoundCommonLib.Processors.LocalGroupProcessor.GetLocalGroups(System.String,System.String,System.String,System.Boolean)
+  name: GetLocalGroups(String, String, String, Boolean)
+  href: api/SharpHoundCommonLib.Processors.LocalGroupProcessor.html#SharpHoundCommonLib_Processors_LocalGroupProcessor_GetLocalGroups_System_String_System_String_System_String_System_Boolean_
+  commentId: M:SharpHoundCommonLib.Processors.LocalGroupProcessor.GetLocalGroups(System.String,System.String,System.String,System.Boolean)
+  fullName: SharpHoundCommonLib.Processors.LocalGroupProcessor.GetLocalGroups(System.String, System.String, System.String, System.Boolean)
+  nameWithType: LocalGroupProcessor.GetLocalGroups(String, String, String, Boolean)
 - uid: SharpHoundCommonLib.Processors.LocalGroupProcessor.GetLocalGroups*
   name: GetLocalGroups
   href: api/SharpHoundCommonLib.Processors.LocalGroupProcessor.html#SharpHoundCommonLib_Processors_LocalGroupProcessor_GetLocalGroups_
@@ -10810,12 +11076,12 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.Processors.LocalGroupProcessor.GetLocalGroups
   nameWithType: LocalGroupProcessor.GetLocalGroups
-- uid: SharpHoundCommonLib.Processors.LocalGroupProcessor.OpenSamServer(System.String,System.TimeSpan)
-  name: OpenSamServer(String, TimeSpan)
-  href: api/SharpHoundCommonLib.Processors.LocalGroupProcessor.html#SharpHoundCommonLib_Processors_LocalGroupProcessor_OpenSamServer_System_String_System_TimeSpan_
-  commentId: M:SharpHoundCommonLib.Processors.LocalGroupProcessor.OpenSamServer(System.String,System.TimeSpan)
-  fullName: SharpHoundCommonLib.Processors.LocalGroupProcessor.OpenSamServer(System.String, System.TimeSpan)
-  nameWithType: LocalGroupProcessor.OpenSamServer(String, TimeSpan)
+- uid: SharpHoundCommonLib.Processors.LocalGroupProcessor.OpenSamServer(System.String)
+  name: OpenSamServer(String)
+  href: api/SharpHoundCommonLib.Processors.LocalGroupProcessor.html#SharpHoundCommonLib_Processors_LocalGroupProcessor_OpenSamServer_System_String_
+  commentId: M:SharpHoundCommonLib.Processors.LocalGroupProcessor.OpenSamServer(System.String)
+  fullName: SharpHoundCommonLib.Processors.LocalGroupProcessor.OpenSamServer(System.String)
+  nameWithType: LocalGroupProcessor.OpenSamServer(String)
 - uid: SharpHoundCommonLib.Processors.LocalGroupProcessor.OpenSamServer*
   name: OpenSamServer
   href: api/SharpHoundCommonLib.Processors.LocalGroupProcessor.html#SharpHoundCommonLib_Processors_LocalGroupProcessor_OpenSamServer_
@@ -10922,12 +11188,12 @@ references:
   commentId: M:SharpHoundCommonLib.Processors.PortScanner.#ctor
   fullName: SharpHoundCommonLib.Processors.PortScanner.PortScanner()
   nameWithType: PortScanner.PortScanner()
-- uid: SharpHoundCommonLib.Processors.PortScanner.#ctor(ILogger)
-  name: PortScanner(ILogger)
-  href: api/SharpHoundCommonLib.Processors.PortScanner.html#SharpHoundCommonLib_Processors_PortScanner__ctor_ILogger_
-  commentId: M:SharpHoundCommonLib.Processors.PortScanner.#ctor(ILogger)
-  fullName: SharpHoundCommonLib.Processors.PortScanner.PortScanner(ILogger)
-  nameWithType: PortScanner.PortScanner(ILogger)
+- uid: SharpHoundCommonLib.Processors.PortScanner.#ctor(ILogger,System.Int32)
+  name: PortScanner(ILogger, Int32)
+  href: api/SharpHoundCommonLib.Processors.PortScanner.html#SharpHoundCommonLib_Processors_PortScanner__ctor_ILogger_System_Int32_
+  commentId: M:SharpHoundCommonLib.Processors.PortScanner.#ctor(ILogger,System.Int32)
+  fullName: SharpHoundCommonLib.Processors.PortScanner.PortScanner(ILogger, System.Int32)
+  nameWithType: PortScanner.PortScanner(ILogger, Int32)
 - uid: SharpHoundCommonLib.Processors.PortScanner.#ctor*
   name: PortScanner
   href: api/SharpHoundCommonLib.Processors.PortScanner.html#SharpHoundCommonLib_Processors_PortScanner__ctor_
@@ -10935,12 +11201,12 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.Processors.PortScanner.PortScanner
   nameWithType: PortScanner.PortScanner
-- uid: SharpHoundCommonLib.Processors.PortScanner.CheckPort(System.String,System.Int32,System.Int32,System.Boolean)
-  name: CheckPort(String, Int32, Int32, Boolean)
-  href: api/SharpHoundCommonLib.Processors.PortScanner.html#SharpHoundCommonLib_Processors_PortScanner_CheckPort_System_String_System_Int32_System_Int32_System_Boolean_
-  commentId: M:SharpHoundCommonLib.Processors.PortScanner.CheckPort(System.String,System.Int32,System.Int32,System.Boolean)
-  fullName: SharpHoundCommonLib.Processors.PortScanner.CheckPort(System.String, System.Int32, System.Int32, System.Boolean)
-  nameWithType: PortScanner.CheckPort(String, Int32, Int32, Boolean)
+- uid: SharpHoundCommonLib.Processors.PortScanner.CheckPort(System.String,System.Int32,System.Boolean)
+  name: CheckPort(String, Int32, Boolean)
+  href: api/SharpHoundCommonLib.Processors.PortScanner.html#SharpHoundCommonLib_Processors_PortScanner_CheckPort_System_String_System_Int32_System_Boolean_
+  commentId: M:SharpHoundCommonLib.Processors.PortScanner.CheckPort(System.String,System.Int32,System.Boolean)
+  fullName: SharpHoundCommonLib.Processors.PortScanner.CheckPort(System.String, System.Int32, System.Boolean)
+  nameWithType: PortScanner.CheckPort(String, Int32, Boolean)
 - uid: SharpHoundCommonLib.Processors.PortScanner.CheckPort*
   name: CheckPort
   href: api/SharpHoundCommonLib.Processors.PortScanner.html#SharpHoundCommonLib_Processors_PortScanner_CheckPort_
@@ -11043,12 +11309,12 @@ references:
   commentId: E:SharpHoundCommonLib.Processors.SmbProcessor.ComputerStatusEvent
   fullName: SharpHoundCommonLib.Processors.SmbProcessor.ComputerStatusEvent
   nameWithType: SmbProcessor.ComputerStatusEvent
-- uid: SharpHoundCommonLib.Processors.SmbProcessor.Scan(System.String,System.TimeSpan)
-  name: Scan(String, TimeSpan)
-  href: api/SharpHoundCommonLib.Processors.SmbProcessor.html#SharpHoundCommonLib_Processors_SmbProcessor_Scan_System_String_System_TimeSpan_
-  commentId: M:SharpHoundCommonLib.Processors.SmbProcessor.Scan(System.String,System.TimeSpan)
-  fullName: SharpHoundCommonLib.Processors.SmbProcessor.Scan(System.String, System.TimeSpan)
-  nameWithType: SmbProcessor.Scan(String, TimeSpan)
+- uid: SharpHoundCommonLib.Processors.SmbProcessor.Scan(System.String)
+  name: Scan(String)
+  href: api/SharpHoundCommonLib.Processors.SmbProcessor.html#SharpHoundCommonLib_Processors_SmbProcessor_Scan_System_String_
+  commentId: M:SharpHoundCommonLib.Processors.SmbProcessor.Scan(System.String)
+  fullName: SharpHoundCommonLib.Processors.SmbProcessor.Scan(System.String)
+  nameWithType: SmbProcessor.Scan(String)
 - uid: SharpHoundCommonLib.Processors.SmbProcessor.Scan*
   name: Scan
   href: api/SharpHoundCommonLib.Processors.SmbProcessor.html#SharpHoundCommonLib_Processors_SmbProcessor_Scan_
@@ -11276,15 +11542,15 @@ references:
   fullName.vb: SharpHoundCommonLib.Processors.UserRightsAssignmentProcessor.GetUserRightsAssignments(SharpHoundCommonLib.ResolvedSearchResult, System.String())
   nameWithType: UserRightsAssignmentProcessor.GetUserRightsAssignments(ResolvedSearchResult, String[])
   nameWithType.vb: UserRightsAssignmentProcessor.GetUserRightsAssignments(ResolvedSearchResult, String())
-- uid: SharpHoundCommonLib.Processors.UserRightsAssignmentProcessor.GetUserRightsAssignments(System.String,System.String,System.String,System.Boolean,System.String[],System.TimeSpan)
-  name: GetUserRightsAssignments(String, String, String, Boolean, String[], TimeSpan)
-  href: api/SharpHoundCommonLib.Processors.UserRightsAssignmentProcessor.html#SharpHoundCommonLib_Processors_UserRightsAssignmentProcessor_GetUserRightsAssignments_System_String_System_String_System_String_System_Boolean_System_String___System_TimeSpan_
-  commentId: M:SharpHoundCommonLib.Processors.UserRightsAssignmentProcessor.GetUserRightsAssignments(System.String,System.String,System.String,System.Boolean,System.String[],System.TimeSpan)
-  name.vb: GetUserRightsAssignments(String, String, String, Boolean, String(), TimeSpan)
-  fullName: SharpHoundCommonLib.Processors.UserRightsAssignmentProcessor.GetUserRightsAssignments(System.String, System.String, System.String, System.Boolean, System.String[], System.TimeSpan)
-  fullName.vb: SharpHoundCommonLib.Processors.UserRightsAssignmentProcessor.GetUserRightsAssignments(System.String, System.String, System.String, System.Boolean, System.String(), System.TimeSpan)
-  nameWithType: UserRightsAssignmentProcessor.GetUserRightsAssignments(String, String, String, Boolean, String[], TimeSpan)
-  nameWithType.vb: UserRightsAssignmentProcessor.GetUserRightsAssignments(String, String, String, Boolean, String(), TimeSpan)
+- uid: SharpHoundCommonLib.Processors.UserRightsAssignmentProcessor.GetUserRightsAssignments(System.String,System.String,System.String,System.Boolean,System.String[])
+  name: GetUserRightsAssignments(String, String, String, Boolean, String[])
+  href: api/SharpHoundCommonLib.Processors.UserRightsAssignmentProcessor.html#SharpHoundCommonLib_Processors_UserRightsAssignmentProcessor_GetUserRightsAssignments_System_String_System_String_System_String_System_Boolean_System_String___
+  commentId: M:SharpHoundCommonLib.Processors.UserRightsAssignmentProcessor.GetUserRightsAssignments(System.String,System.String,System.String,System.Boolean,System.String[])
+  name.vb: GetUserRightsAssignments(String, String, String, Boolean, String())
+  fullName: SharpHoundCommonLib.Processors.UserRightsAssignmentProcessor.GetUserRightsAssignments(System.String, System.String, System.String, System.Boolean, System.String[])
+  fullName.vb: SharpHoundCommonLib.Processors.UserRightsAssignmentProcessor.GetUserRightsAssignments(System.String, System.String, System.String, System.Boolean, System.String())
+  nameWithType: UserRightsAssignmentProcessor.GetUserRightsAssignments(String, String, String, Boolean, String[])
+  nameWithType.vb: UserRightsAssignmentProcessor.GetUserRightsAssignments(String, String, String, Boolean, String())
 - uid: SharpHoundCommonLib.Processors.UserRightsAssignmentProcessor.GetUserRightsAssignments*
   name: GetUserRightsAssignments
   href: api/SharpHoundCommonLib.Processors.UserRightsAssignmentProcessor.html#SharpHoundCommonLib_Processors_UserRightsAssignmentProcessor_GetUserRightsAssignments_
@@ -13843,12 +14109,31 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.SMB.SmbScanner.SmbScanner
   nameWithType: SmbScanner.SmbScanner
+- uid: SharpHoundCommonLib.SMB.SmbScanner._adaptiveTimeout
+  name: _adaptiveTimeout
+  href: api/SharpHoundCommonLib.SMB.SmbScanner.html#SharpHoundCommonLib_SMB_SmbScanner__adaptiveTimeout
+  commentId: F:SharpHoundCommonLib.SMB.SmbScanner._adaptiveTimeout
+  fullName: SharpHoundCommonLib.SMB.SmbScanner._adaptiveTimeout
+  nameWithType: SmbScanner._adaptiveTimeout
 - uid: SharpHoundCommonLib.SMB.SmbScanner._log
   name: _log
   href: api/SharpHoundCommonLib.SMB.SmbScanner.html#SharpHoundCommonLib_SMB_SmbScanner__log
   commentId: F:SharpHoundCommonLib.SMB.SmbScanner._log
   fullName: SharpHoundCommonLib.SMB.SmbScanner._log
   nameWithType: SmbScanner._log
+- uid: SharpHoundCommonLib.SMB.SmbScanner.MaxTimeoutMs
+  name: MaxTimeoutMs
+  href: api/SharpHoundCommonLib.SMB.SmbScanner.html#SharpHoundCommonLib_SMB_SmbScanner_MaxTimeoutMs
+  commentId: P:SharpHoundCommonLib.SMB.SmbScanner.MaxTimeoutMs
+  fullName: SharpHoundCommonLib.SMB.SmbScanner.MaxTimeoutMs
+  nameWithType: SmbScanner.MaxTimeoutMs
+- uid: SharpHoundCommonLib.SMB.SmbScanner.MaxTimeoutMs*
+  name: MaxTimeoutMs
+  href: api/SharpHoundCommonLib.SMB.SmbScanner.html#SharpHoundCommonLib_SMB_SmbScanner_MaxTimeoutMs_
+  commentId: Overload:SharpHoundCommonLib.SMB.SmbScanner.MaxTimeoutMs
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.SMB.SmbScanner.MaxTimeoutMs
+  nameWithType: SmbScanner.MaxTimeoutMs
 - uid: SharpHoundCommonLib.SMB.SmbScanner.ScanHost(System.String,System.Int32,System.Threading.CancellationToken)
   name: ScanHost(String, Int32, CancellationToken)
   href: api/SharpHoundCommonLib.SMB.SmbScanner.html#SharpHoundCommonLib_SMB_SmbScanner_ScanHost_System_String_System_Int32_System_Threading_CancellationToken_
@@ -13862,19 +14147,6 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.SMB.SmbScanner.ScanHost
   nameWithType: SmbScanner.ScanHost
-- uid: SharpHoundCommonLib.SMB.SmbScanner.TimeoutMs
-  name: TimeoutMs
-  href: api/SharpHoundCommonLib.SMB.SmbScanner.html#SharpHoundCommonLib_SMB_SmbScanner_TimeoutMs
-  commentId: P:SharpHoundCommonLib.SMB.SmbScanner.TimeoutMs
-  fullName: SharpHoundCommonLib.SMB.SmbScanner.TimeoutMs
-  nameWithType: SmbScanner.TimeoutMs
-- uid: SharpHoundCommonLib.SMB.SmbScanner.TimeoutMs*
-  name: TimeoutMs
-  href: api/SharpHoundCommonLib.SMB.SmbScanner.html#SharpHoundCommonLib_SMB_SmbScanner_TimeoutMs_
-  commentId: Overload:SharpHoundCommonLib.SMB.SmbScanner.TimeoutMs
-  isSpec: "True"
-  fullName: SharpHoundCommonLib.SMB.SmbScanner.TimeoutMs
-  nameWithType: SmbScanner.TimeoutMs
 - uid: SharpHoundCommonLib.ThirdParty.PSOpenAD
   name: SharpHoundCommonLib.ThirdParty.PSOpenAD
   href: api/SharpHoundCommonLib.ThirdParty.PSOpenAD.html
@@ -14147,15 +14419,15 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.Timeout.ExecuteNetAPIWithTimeout
   nameWithType: Timeout.ExecuteNetAPIWithTimeout
-- uid: SharpHoundCommonLib.Timeout.ExecuteNetAPIWithTimeout``1(System.TimeSpan,System.Func{System.Threading.CancellationToken,SharpHoundRPC.NetAPINative.NetAPIResult{``0}})
-  name: ExecuteNetAPIWithTimeout<T>(TimeSpan, Func<CancellationToken, NetAPIResult<T>>)
-  href: api/SharpHoundCommonLib.Timeout.html#SharpHoundCommonLib_Timeout_ExecuteNetAPIWithTimeout__1_System_TimeSpan_System_Func_System_Threading_CancellationToken_SharpHoundRPC_NetAPINative_NetAPIResult___0___
-  commentId: M:SharpHoundCommonLib.Timeout.ExecuteNetAPIWithTimeout``1(System.TimeSpan,System.Func{System.Threading.CancellationToken,SharpHoundRPC.NetAPINative.NetAPIResult{``0}})
-  name.vb: ExecuteNetAPIWithTimeout(Of T)(TimeSpan, Func(Of CancellationToken, NetAPIResult(Of T)))
-  fullName: SharpHoundCommonLib.Timeout.ExecuteNetAPIWithTimeout<T>(System.TimeSpan, System.Func<System.Threading.CancellationToken, SharpHoundRPC.NetAPINative.NetAPIResult<T>>)
-  fullName.vb: SharpHoundCommonLib.Timeout.ExecuteNetAPIWithTimeout(Of T)(System.TimeSpan, System.Func(Of System.Threading.CancellationToken, SharpHoundRPC.NetAPINative.NetAPIResult(Of T)))
-  nameWithType: Timeout.ExecuteNetAPIWithTimeout<T>(TimeSpan, Func<CancellationToken, NetAPIResult<T>>)
-  nameWithType.vb: Timeout.ExecuteNetAPIWithTimeout(Of T)(TimeSpan, Func(Of CancellationToken, NetAPIResult(Of T)))
+- uid: SharpHoundCommonLib.Timeout.ExecuteNetAPIWithTimeout``1(System.TimeSpan,System.Func{System.Threading.CancellationToken,SharpHoundRPC.NetAPINative.NetAPIResult{``0}},System.Threading.CancellationToken)
+  name: ExecuteNetAPIWithTimeout<T>(TimeSpan, Func<CancellationToken, NetAPIResult<T>>, CancellationToken)
+  href: api/SharpHoundCommonLib.Timeout.html#SharpHoundCommonLib_Timeout_ExecuteNetAPIWithTimeout__1_System_TimeSpan_System_Func_System_Threading_CancellationToken_SharpHoundRPC_NetAPINative_NetAPIResult___0___System_Threading_CancellationToken_
+  commentId: M:SharpHoundCommonLib.Timeout.ExecuteNetAPIWithTimeout``1(System.TimeSpan,System.Func{System.Threading.CancellationToken,SharpHoundRPC.NetAPINative.NetAPIResult{``0}},System.Threading.CancellationToken)
+  name.vb: ExecuteNetAPIWithTimeout(Of T)(TimeSpan, Func(Of CancellationToken, NetAPIResult(Of T)), CancellationToken)
+  fullName: SharpHoundCommonLib.Timeout.ExecuteNetAPIWithTimeout<T>(System.TimeSpan, System.Func<System.Threading.CancellationToken, SharpHoundRPC.NetAPINative.NetAPIResult<T>>, System.Threading.CancellationToken)
+  fullName.vb: SharpHoundCommonLib.Timeout.ExecuteNetAPIWithTimeout(Of T)(System.TimeSpan, System.Func(Of System.Threading.CancellationToken, SharpHoundRPC.NetAPINative.NetAPIResult(Of T)), System.Threading.CancellationToken)
+  nameWithType: Timeout.ExecuteNetAPIWithTimeout<T>(TimeSpan, Func<CancellationToken, NetAPIResult<T>>, CancellationToken)
+  nameWithType.vb: Timeout.ExecuteNetAPIWithTimeout(Of T)(TimeSpan, Func(Of CancellationToken, NetAPIResult(Of T)), CancellationToken)
 - uid: SharpHoundCommonLib.Timeout.ExecuteRPCWithTimeout*
   name: ExecuteRPCWithTimeout
   href: api/SharpHoundCommonLib.Timeout.html#SharpHoundCommonLib_Timeout_ExecuteRPCWithTimeout_
@@ -14163,24 +14435,24 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.Timeout.ExecuteRPCWithTimeout
   nameWithType: Timeout.ExecuteRPCWithTimeout
-- uid: SharpHoundCommonLib.Timeout.ExecuteRPCWithTimeout``1(System.TimeSpan,System.Func{System.Threading.CancellationToken,SharpHoundRPC.Result{``0}})
-  name: ExecuteRPCWithTimeout<T>(TimeSpan, Func<CancellationToken, Result<T>>)
-  href: api/SharpHoundCommonLib.Timeout.html#SharpHoundCommonLib_Timeout_ExecuteRPCWithTimeout__1_System_TimeSpan_System_Func_System_Threading_CancellationToken_SharpHoundRPC_Result___0___
-  commentId: M:SharpHoundCommonLib.Timeout.ExecuteRPCWithTimeout``1(System.TimeSpan,System.Func{System.Threading.CancellationToken,SharpHoundRPC.Result{``0}})
-  name.vb: ExecuteRPCWithTimeout(Of T)(TimeSpan, Func(Of CancellationToken, Result(Of T)))
-  fullName: SharpHoundCommonLib.Timeout.ExecuteRPCWithTimeout<T>(System.TimeSpan, System.Func<System.Threading.CancellationToken, SharpHoundRPC.Result<T>>)
-  fullName.vb: SharpHoundCommonLib.Timeout.ExecuteRPCWithTimeout(Of T)(System.TimeSpan, System.Func(Of System.Threading.CancellationToken, SharpHoundRPC.Result(Of T)))
-  nameWithType: Timeout.ExecuteRPCWithTimeout<T>(TimeSpan, Func<CancellationToken, Result<T>>)
-  nameWithType.vb: Timeout.ExecuteRPCWithTimeout(Of T)(TimeSpan, Func(Of CancellationToken, Result(Of T)))
-- uid: SharpHoundCommonLib.Timeout.ExecuteRPCWithTimeout``1(System.TimeSpan,System.Func{System.Threading.CancellationToken,System.Threading.Tasks.Task{SharpHoundRPC.Result{``0}}})
-  name: ExecuteRPCWithTimeout<T>(TimeSpan, Func<CancellationToken, Task<Result<T>>>)
-  href: api/SharpHoundCommonLib.Timeout.html#SharpHoundCommonLib_Timeout_ExecuteRPCWithTimeout__1_System_TimeSpan_System_Func_System_Threading_CancellationToken_System_Threading_Tasks_Task_SharpHoundRPC_Result___0____
-  commentId: M:SharpHoundCommonLib.Timeout.ExecuteRPCWithTimeout``1(System.TimeSpan,System.Func{System.Threading.CancellationToken,System.Threading.Tasks.Task{SharpHoundRPC.Result{``0}}})
-  name.vb: ExecuteRPCWithTimeout(Of T)(TimeSpan, Func(Of CancellationToken, Task(Of Result(Of T))))
-  fullName: SharpHoundCommonLib.Timeout.ExecuteRPCWithTimeout<T>(System.TimeSpan, System.Func<System.Threading.CancellationToken, System.Threading.Tasks.Task<SharpHoundRPC.Result<T>>>)
-  fullName.vb: SharpHoundCommonLib.Timeout.ExecuteRPCWithTimeout(Of T)(System.TimeSpan, System.Func(Of System.Threading.CancellationToken, System.Threading.Tasks.Task(Of SharpHoundRPC.Result(Of T))))
-  nameWithType: Timeout.ExecuteRPCWithTimeout<T>(TimeSpan, Func<CancellationToken, Task<Result<T>>>)
-  nameWithType.vb: Timeout.ExecuteRPCWithTimeout(Of T)(TimeSpan, Func(Of CancellationToken, Task(Of Result(Of T))))
+- uid: SharpHoundCommonLib.Timeout.ExecuteRPCWithTimeout``1(System.TimeSpan,System.Func{System.Threading.CancellationToken,SharpHoundRPC.Result{``0}},System.Threading.CancellationToken)
+  name: ExecuteRPCWithTimeout<T>(TimeSpan, Func<CancellationToken, Result<T>>, CancellationToken)
+  href: api/SharpHoundCommonLib.Timeout.html#SharpHoundCommonLib_Timeout_ExecuteRPCWithTimeout__1_System_TimeSpan_System_Func_System_Threading_CancellationToken_SharpHoundRPC_Result___0___System_Threading_CancellationToken_
+  commentId: M:SharpHoundCommonLib.Timeout.ExecuteRPCWithTimeout``1(System.TimeSpan,System.Func{System.Threading.CancellationToken,SharpHoundRPC.Result{``0}},System.Threading.CancellationToken)
+  name.vb: ExecuteRPCWithTimeout(Of T)(TimeSpan, Func(Of CancellationToken, Result(Of T)), CancellationToken)
+  fullName: SharpHoundCommonLib.Timeout.ExecuteRPCWithTimeout<T>(System.TimeSpan, System.Func<System.Threading.CancellationToken, SharpHoundRPC.Result<T>>, System.Threading.CancellationToken)
+  fullName.vb: SharpHoundCommonLib.Timeout.ExecuteRPCWithTimeout(Of T)(System.TimeSpan, System.Func(Of System.Threading.CancellationToken, SharpHoundRPC.Result(Of T)), System.Threading.CancellationToken)
+  nameWithType: Timeout.ExecuteRPCWithTimeout<T>(TimeSpan, Func<CancellationToken, Result<T>>, CancellationToken)
+  nameWithType.vb: Timeout.ExecuteRPCWithTimeout(Of T)(TimeSpan, Func(Of CancellationToken, Result(Of T)), CancellationToken)
+- uid: SharpHoundCommonLib.Timeout.ExecuteRPCWithTimeout``1(System.TimeSpan,System.Func{System.Threading.CancellationToken,System.Threading.Tasks.Task{SharpHoundRPC.Result{``0}}},System.Threading.CancellationToken)
+  name: ExecuteRPCWithTimeout<T>(TimeSpan, Func<CancellationToken, Task<Result<T>>>, CancellationToken)
+  href: api/SharpHoundCommonLib.Timeout.html#SharpHoundCommonLib_Timeout_ExecuteRPCWithTimeout__1_System_TimeSpan_System_Func_System_Threading_CancellationToken_System_Threading_Tasks_Task_SharpHoundRPC_Result___0____System_Threading_CancellationToken_
+  commentId: M:SharpHoundCommonLib.Timeout.ExecuteRPCWithTimeout``1(System.TimeSpan,System.Func{System.Threading.CancellationToken,System.Threading.Tasks.Task{SharpHoundRPC.Result{``0}}},System.Threading.CancellationToken)
+  name.vb: ExecuteRPCWithTimeout(Of T)(TimeSpan, Func(Of CancellationToken, Task(Of Result(Of T))), CancellationToken)
+  fullName: SharpHoundCommonLib.Timeout.ExecuteRPCWithTimeout<T>(System.TimeSpan, System.Func<System.Threading.CancellationToken, System.Threading.Tasks.Task<SharpHoundRPC.Result<T>>>, System.Threading.CancellationToken)
+  fullName.vb: SharpHoundCommonLib.Timeout.ExecuteRPCWithTimeout(Of T)(System.TimeSpan, System.Func(Of System.Threading.CancellationToken, System.Threading.Tasks.Task(Of SharpHoundRPC.Result(Of T))), System.Threading.CancellationToken)
+  nameWithType: Timeout.ExecuteRPCWithTimeout<T>(TimeSpan, Func<CancellationToken, Task<Result<T>>>, CancellationToken)
+  nameWithType.vb: Timeout.ExecuteRPCWithTimeout(Of T)(TimeSpan, Func(Of CancellationToken, Task(Of Result(Of T))), CancellationToken)
 - uid: SharpHoundCommonLib.Timeout.ExecuteWithTimeout(System.TimeSpan,System.Action{System.Threading.CancellationToken},System.Threading.CancellationToken)
   name: ExecuteWithTimeout(TimeSpan, Action<CancellationToken>, CancellationToken)
   href: api/SharpHoundCommonLib.Timeout.html#SharpHoundCommonLib_Timeout_ExecuteWithTimeout_System_TimeSpan_System_Action_System_Threading_CancellationToken__System_Threading_CancellationToken_
@@ -16105,12 +16377,12 @@ references:
   commentId: T:SharpHoundRPC.PortScanner.IPortScanner
   fullName: SharpHoundRPC.PortScanner.IPortScanner
   nameWithType: IPortScanner
-- uid: SharpHoundRPC.PortScanner.IPortScanner.CheckPort(System.String,System.Int32,System.Int32,System.Boolean)
-  name: CheckPort(String, Int32, Int32, Boolean)
-  href: api/SharpHoundRPC.PortScanner.IPortScanner.html#SharpHoundRPC_PortScanner_IPortScanner_CheckPort_System_String_System_Int32_System_Int32_System_Boolean_
-  commentId: M:SharpHoundRPC.PortScanner.IPortScanner.CheckPort(System.String,System.Int32,System.Int32,System.Boolean)
-  fullName: SharpHoundRPC.PortScanner.IPortScanner.CheckPort(System.String, System.Int32, System.Int32, System.Boolean)
-  nameWithType: IPortScanner.CheckPort(String, Int32, Int32, Boolean)
+- uid: SharpHoundRPC.PortScanner.IPortScanner.CheckPort(System.String,System.Int32,System.Boolean)
+  name: CheckPort(String, Int32, Boolean)
+  href: api/SharpHoundRPC.PortScanner.IPortScanner.html#SharpHoundRPC_PortScanner_IPortScanner_CheckPort_System_String_System_Int32_System_Boolean_
+  commentId: M:SharpHoundRPC.PortScanner.IPortScanner.CheckPort(System.String,System.Int32,System.Boolean)
+  fullName: SharpHoundRPC.PortScanner.IPortScanner.CheckPort(System.String, System.Int32, System.Boolean)
+  nameWithType: IPortScanner.CheckPort(String, Int32, Boolean)
 - uid: SharpHoundRPC.PortScanner.IPortScanner.CheckPort*
   name: CheckPort
   href: api/SharpHoundRPC.PortScanner.IPortScanner.html#SharpHoundRPC_PortScanner_IPortScanner_CheckPort_
