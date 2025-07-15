@@ -46,7 +46,7 @@ namespace SharpHoundCommonLib.Processors {
                 if (!ca.IsSuccess) {
                     _log.LogDebug("{HostName} did not respond to scan on port {Port} within {Timeout}ms", hostname, port, _adaptiveTimeout.GetAdaptiveTimeout());
                     if (throwError) {
-                        throw new TimeoutException("Timed Out");
+                        throw new TimeoutException(ca.Error);
                     }
                     PortScanCache.TryAdd(key, false);
                     return false;
