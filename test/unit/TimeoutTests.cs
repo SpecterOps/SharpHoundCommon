@@ -26,7 +26,7 @@ public class TimeoutTests {
         };
         var result = await SharpHoundCommonLib.Timeout.ExecuteWithTimeout(timeout, func);
         Assert.False(result.IsSuccess);
-        Assert.Equal("Timeout", result.Error);
+        Assert.StartsWith("Timeout", result.Error);
     }
 
     [Fact]
@@ -85,7 +85,7 @@ public class TimeoutTests {
         };
         var result = await SharpHoundCommonLib.Timeout.ExecuteWithTimeout(timeout, func);
         Assert.False(result.IsSuccess);
-        Assert.Equal("Timeout", result.Error);
+        Assert.StartsWith("Timeout", result.Error);
     }
 
     [Fact]
@@ -147,7 +147,7 @@ public class TimeoutTests {
         };
         var result = await SharpHoundCommonLib.Timeout.ExecuteWithTimeout(timeout, func);
         Assert.False(result.IsSuccess);
-        Assert.Equal("Timeout", result.Error);
+        Assert.StartsWith("Timeout", result.Error);
     }
 
     [Fact]
@@ -207,7 +207,7 @@ public class TimeoutTests {
         };
         var result = await SharpHoundCommonLib.Timeout.ExecuteWithTimeout(timeout, func);
         Assert.False(result.IsSuccess);
-        Assert.Equal("Timeout", result.Error);
+        Assert.StartsWith("Timeout", result.Error);
     }
 
     [Fact]

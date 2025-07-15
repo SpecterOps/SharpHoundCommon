@@ -11,14 +11,12 @@ namespace SharpHoundCommonLib.Processors {
         private readonly int _computerExpiryDays;
         private readonly ILogger _log;
         private readonly IPortScanner _scanner;
-        private readonly int _scanTimeout;
         private readonly bool _skipPasswordCheck;
         private readonly bool _skipPortScan;
 
         public ComputerAvailability(int timeout = 10000, int computerExpiryDays = 60, bool skipPortScan = false,
             bool skipPasswordCheck = false, ILogger log = null) {
-            _scanner = new PortScanner();
-            _scanTimeout = timeout;
+            _scanner = new PortScanner(maxTimeout: timeout);
             _skipPortScan = skipPortScan;
             _log = log ?? Logging.LogProvider.CreateLogger("CompAvail");
             _computerExpiryDays = computerExpiryDays;
@@ -28,8 +26,7 @@ namespace SharpHoundCommonLib.Processors {
         public ComputerAvailability(IPortScanner scanner, int timeout = 500, int computerExpiryDays = 60,
             bool skipPortScan = false, bool skipPasswordCheck = false,
             ILogger log = null) {
-            _scanner = scanner ?? new PortScanner();
-            _scanTimeout = timeout;
+            _scanner = scanner ?? new PortScanner(maxTimeout: timeout);
             _skipPortScan = skipPortScan;
             _log = log ?? Logging.LogProvider.CreateLogger("CompAvail");
             _computerExpiryDays = computerExpiryDays;
@@ -101,7 +98,7 @@ namespace SharpHoundCommonLib.Processors {
                     Error = null
                 };
 
-            if (!await _scanner.CheckPort(computerName, timeout: _scanTimeout)) {
+            if (!await _scanner.CheckPort(computerName)) {
                 _log.LogTrace("{ComputerName} is not available because port 445 is unavailable", computerName);
                 await SendComputerStatus(new CSVComputerStatus {
                     Status = ComputerStatus.PortNotOpen,
