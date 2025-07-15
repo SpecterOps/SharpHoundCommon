@@ -170,15 +170,17 @@ public sealed class AdaptiveTimeout : IDisposable {
         _sampler.Dispose();
     }
 
-    // Within 5 standard deviations will have a conservative lower bound of catching 98% of executions (1 - 1/(k^2 / 2)),
+    // Within 5 standard deviations will have a conservative lower bound of catching 96% of executions (1 - 1/5^2),
     // regardless of sample shape
     // so long as those samples are independent and identically distributed
     // (and if they're not, our TimeSpikeSafetyValve should provide us with some adaptability)
-    // But we'll cap at configured timeout
+    // But the effective collection rate is probably closer to 98+%
+    // (in part because we don't need to filter out "too fast" outliers)
+    // But we'll cap at configured maximum timeout
     // https://modelassist.epixanalytics.com/space/EA/26574957/Tchebysheffs+Rule
     // https://en.wikipedia.org/wiki/Independent_and_identically_distributed_random_variables
     public TimeSpan GetAdaptiveTimeout() {
-        if (!_useAdaptiveTimeout || _sampler.Count < _minSamplesForAdaptiveTimeout)
+        if (!UseAdaptiveTimeout())
             return _maxTimeout;
 
         try {
@@ -206,8 +208,9 @@ public sealed class AdaptiveTimeout : IDisposable {
         else
             _clearSamplesDecay += TimeSpikePenalty;
 
+
         if (_clearSamplesDecay >= ClearSamplesThreshold) {
-            if (_useAdaptiveTimeout && _sampler.Count >= _minSamplesForAdaptiveTimeout) {
+            if (UseAdaptiveTimeout()) {
                 ClearSamples();
                 _log.LogTrace("Time spike safety valve event at timeout {CurrentTimeout}.", GetAdaptiveTimeout());
             }
@@ -215,5 +218,9 @@ public sealed class AdaptiveTimeout : IDisposable {
                 _log.LogWarning("This call is frequently running over the maximum allowed timeout of {MaxTimeout}.", _maxTimeout);
             }
         }
+    }
+
+    private bool UseAdaptiveTimeout() {
+        return _useAdaptiveTimeout && _sampler.Count >= _minSamplesForAdaptiveTimeout;
     }
 }
