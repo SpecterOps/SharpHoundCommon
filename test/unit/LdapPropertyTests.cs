@@ -129,7 +129,7 @@ namespace CommonLibTest
                 }, "S-1-5-21-3130019616-2776909439-2417379446-512","");
             var processor = new LdapPropertyProcessor(new MockLdapUtils());
 
-            var groupProperties = await processor.ReadGroupProperties(mock, "domain");
+            var groupProperties = await processor.ReadGroupPropertiesAsync(mock, "domain");
             var test = groupProperties.Props;
             Assert.Contains("description", test.Keys);
             Assert.Equal("Test", test["description"] as string);
@@ -148,7 +148,7 @@ namespace CommonLibTest
                 }, "S-1-5-21-3130019616-2776909439-2417379446-512","");
             var processor = new LdapPropertyProcessor(new MockLdapUtils());
 
-            var groupProperties = await processor.ReadGroupProperties(mock, "domain");
+            var groupProperties = await processor.ReadGroupPropertiesAsync(mock, "domain");
             var test = groupProperties.Props;
             Assert.Contains("description", test.Keys);
             Assert.Equal("Test", test["description"] as string);
@@ -166,7 +166,7 @@ namespace CommonLibTest
                 }, "S-1-5-21-3130019616-2776909439-2417379446-512","");
             var processor = new LdapPropertyProcessor(new MockLdapUtils());
 
-            var groupProperties = await processor.ReadGroupProperties(mock, "domain");
+            var groupProperties = await processor.ReadGroupPropertiesAsync(mock, "domain");
             var test = groupProperties.Props;
             Assert.Contains("description", test.Keys);
             Assert.Equal("Test", test["description"] as string);
@@ -188,7 +188,7 @@ namespace CommonLibTest
                 }, "S-1-5-21-3130019616-2776909439-2417379446-512","");
             var processor = new LdapPropertyProcessor(new MockLdapUtils());
 
-            var groupProperties = await processor.ReadGroupProperties(mock, "domain");
+            var groupProperties = await processor.ReadGroupPropertiesAsync(mock, "domain");
             Assert.NotEmpty(groupProperties.SidHistory);
             Assert.Equal("S-1-5-21-3130019616-2776909439-2417379446-519", groupProperties.SidHistory[0].ObjectIdentifier);
             Assert.Equal(Label.Group, groupProperties.SidHistory[0].ObjectType);

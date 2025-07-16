@@ -178,9 +178,9 @@ namespace SharpHoundCommonLib.Processors {
             return props;
         }
         
-        public Task<GroupProperties> ReadGroupProperties(IDirectoryObject entry,
+        public Task<GroupProperties> ReadGroupPropertiesAsync(IDirectoryObject entry,
             ResolvedSearchResult searchResult) {
-            return ReadGroupProperties(entry, searchResult.Domain);
+            return ReadGroupPropertiesAsync(entry, searchResult.Domain);
         }
 
         /// <summary>
@@ -189,7 +189,7 @@ namespace SharpHoundCommonLib.Processors {
         /// <param name="entry"></param>
         /// <param name="domain"></param>
         /// <returns></returns>
-        public async Task<GroupProperties> ReadGroupProperties(IDirectoryObject entry, string domain)
+        public async Task<GroupProperties> ReadGroupPropertiesAsync(IDirectoryObject entry, string domain)
         {
             var groupProperties = new GroupProperties();
             var props = GetCommonProps(entry);
