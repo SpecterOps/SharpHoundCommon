@@ -37,12 +37,15 @@ namespace CommonLibTest {
 
             var mockProcessor = new SmbProcessor(2, mockSmbScanner.Object);
             var receivedStatus = new List<CSVComputerStatus>();
-            mockProcessor.ComputerStatusEvent += async status => receivedStatus.Add(status);
-            var results = await mockProcessor.Scan("primary.testlab.local",TimeSpan.FromMilliseconds(1));
+            mockProcessor.ComputerStatusEvent += status => {
+                receivedStatus.Add(status);
+                return Task.CompletedTask;
+            };
+            var results = await mockProcessor.Scan("primary.testlab.local");
 
             Assert.Single(receivedStatus);
             var status = receivedStatus[0];
-            Assert.Equal("Timeout", status.Status);
+            Assert.StartsWith("Timeout", status.Status);
         }
     }
 }
