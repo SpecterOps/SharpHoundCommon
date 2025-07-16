@@ -18,12 +18,12 @@ namespace CommonLibTest
         {
             _testOutputHelper = testOutputHelper;
             var m = new Mock<PortScanner>();
-            m.Setup(x => x.CheckPort(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<bool>()))
+            m.Setup(x => x.CheckPort(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<bool>()))
                 .Returns(Task.FromResult(false));
             _falsePortScanner = m.Object;
 
             var m2 = new Mock<PortScanner>();
-            m2.Setup(x => x.CheckPort(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<bool>()))
+            m2.Setup(x => x.CheckPort(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<bool>()))
                 .Returns(Task.FromResult(true));
             _truePortScanner = m2.Object;
         }

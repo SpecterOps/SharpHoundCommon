@@ -7,7 +7,6 @@ using System.DirectoryServices.ActiveDirectory;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Security.Cryptography;
 using System.Security.Principal;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -37,6 +36,10 @@ namespace SharpHoundCommonLib {
 
         private static readonly ConcurrentDictionary<string, ResolvedWellKnownPrincipal>
             SeenWellKnownPrincipals = new();
+
+        private static readonly AdaptiveTimeout _requestNetBiosNameAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(1), Logging.LogProvider.CreateLogger(nameof(RequestNETBIOSNameFromComputerAsync)));
+
+        private static readonly AdaptiveTimeout _callNetWkstaGetInfoAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(NativeMethods.CallNetWkstaGetInfo)));
 
         private readonly ConcurrentDictionary<string, string>
             _hostResolutionMap = new(StringComparer.OrdinalIgnoreCase);
@@ -713,7 +716,7 @@ namespace SharpHoundCommonLib {
             }
             
             // Blocking External Call
-            var result = await Timeout.ExecuteNetAPIWithTimeout(TimeSpan.FromMinutes(2), (_) => _nativeMethods.CallNetWkstaGetInfo(hostname));
+            var result = await _callNetWkstaGetInfoAdaptiveTimeout.ExecuteNetAPIWithTimeout((_) => _nativeMethods.CallNetWkstaGetInfo(hostname));
 
             if (result.IsSuccess)
                 return (true, result.Value);
@@ -781,7 +784,7 @@ namespace SharpHoundCommonLib {
         }
 
         private static async Task<(bool Success, string NetBiosName)> RequestNETBIOSNameFromComputerWithTimeout(string server, string domain) {
-            var result = await Timeout.ExecuteWithTimeout(TimeSpan.FromMinutes(1), async (timeoutToken) => await RequestNETBIOSNameFromComputerAsync(server, domain, timeoutToken));
+            var result = await _requestNetBiosNameAdaptiveTimeout.ExecuteWithTimeout(async (timeoutToken) => await RequestNETBIOSNameFromComputerAsync(server, domain, timeoutToken));
             if (result.IsSuccess)
                 return (result.Value.Success, result.Value.NetBiosName);
             else
