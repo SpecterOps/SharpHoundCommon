@@ -202,12 +202,11 @@ public sealed class AdaptiveTimeout : IDisposable {
     // so we should create a safety valve in case this happens to reset our data samples
     private void TimeSpikeSafetyValve(bool isSuccess) {
         if (isSuccess) {
-            Interlocked.Add(ref _clearSamplesDecay, -TimeSpikeForgiveness);
-            Interlocked.Exchange(ref _clearSamplesDecay, Math.Max(0, _clearSamplesDecay));
+            AtomicDecrementWithFloor(ref _clearSamplesDecay, TimeSpikeForgiveness);
         }
         else {
             Interlocked.Add(ref _clearSamplesDecay, TimeSpikePenalty);
-            
+
             if (_clearSamplesDecay >= ClearSamplesThreshold) {
                 if (UseAdaptiveTimeout()) {
                     ClearSamples();
@@ -220,6 +219,27 @@ public sealed class AdaptiveTimeout : IDisposable {
             }
         }
     }
+
+    // AI-generated code
+    // Effects:
+    // // Interlocked.Add(ref location, -decrement);
+    // // Interlocked.Exchange(ref location, Math.Max(floor, location));
+    // But since the above doesn't guarnantee atomicity, we need to be more clever.
+    // This method will continually check the very latest value in <location>,
+    // compute the new expected value after the decrement,
+    // and try to replace <location> with this new value.
+    // If it fails for any reason (race condition), it does all this again
+    // until it wins the race.
+    // This is however supposedly still much faster than using lock objects.
+    private void AtomicDecrementWithFloor(ref int location, int decrement, int floor = 0) {
+        int initialValue, computedValue;
+        do {
+            initialValue = Volatile.Read(ref location);
+            computedValue = Math.Max(floor, initialValue - decrement);
+        }
+        while (Interlocked.CompareExchange(ref location, computedValue, initialValue) != initialValue);
+    }
+
 
     private bool UseAdaptiveTimeout() {
         return _useAdaptiveTimeout && _sampler.Count >= _minSamplesForAdaptiveTimeout;
