@@ -38,7 +38,7 @@ public sealed class AdaptiveTimeout : IDisposable {
     }
 
     public void ClearSamples() {
-        _clearSamplesDecay = 0;
+        Interlocked.Exchange(ref _clearSamplesDecay, 0);
         _sampler.ClearSamples();
     }
 
@@ -198,24 +198,25 @@ public sealed class AdaptiveTimeout : IDisposable {
     // AdaptiveTimeout will not respond well to rapid spikes in execution time
     // imagine the wrapped function very regularly executes in 10ms
     // then suddenly starts taking a regular 100ms
-    // this is fine (if it fits in our max timeout budget), and we shouldn't block
+    // this is fine (if it fits in our max timeout budget), and we shouldn't timeout
     // so we should create a safety valve in case this happens to reset our data samples
     private void TimeSpikeSafetyValve(bool isSuccess) {
         if (isSuccess) {
-            _clearSamplesDecay -= TimeSpikeForgiveness;
-            _clearSamplesDecay = Math.Max(0, _clearSamplesDecay);
+            Interlocked.Add(ref _clearSamplesDecay, -TimeSpikeForgiveness);
+            Interlocked.Exchange(ref _clearSamplesDecay, Math.Max(0, _clearSamplesDecay));
         }
-        else
-            _clearSamplesDecay += TimeSpikePenalty;
-
-
-        if (_clearSamplesDecay >= ClearSamplesThreshold) {
-            if (UseAdaptiveTimeout()) {
-                ClearSamples();
-                _log.LogTrace("Time spike safety valve event at timeout {CurrentTimeout}.", GetAdaptiveTimeout());
-            }
-            else {
-                _log.LogWarning("This call is frequently running over the maximum allowed timeout of {MaxTimeout}.", _maxTimeout);
+        else {
+            Interlocked.Add(ref _clearSamplesDecay, TimeSpikePenalty);
+            
+            if (_clearSamplesDecay >= ClearSamplesThreshold) {
+                if (UseAdaptiveTimeout()) {
+                    ClearSamples();
+                    _log.LogTrace("Time spike safety valve event at timeout {CurrentTimeout}.", GetAdaptiveTimeout());
+                }
+                else {
+                    _log.LogWarning("This call is frequently running over the maximum allowed timeout of {MaxTimeout}.", _maxTimeout);
+                    Interlocked.Exchange(ref _clearSamplesDecay, 0);
+                }
             }
         }
     }
