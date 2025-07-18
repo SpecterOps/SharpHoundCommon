@@ -1,5 +1,4 @@
 using System;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using SharpHoundCommonLib;
@@ -75,7 +74,6 @@ public class AdaptiveTimeoutTest {
         int decrement = 1;
         int threads = 10;
         int decrementsPerThread = 100;
-        int updated = 0;
 
         Parallel.For(0, threads, i =>
         {
@@ -85,6 +83,6 @@ public class AdaptiveTimeoutTest {
             }
         });
 
-        Assert.Equal(1000 - threads * decrementsPerThread, updated);
+        Assert.Equal(1000 - threads * decrementsPerThread, value);
     }
 }
