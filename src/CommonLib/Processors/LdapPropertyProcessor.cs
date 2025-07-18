@@ -120,7 +120,7 @@ namespace SharpHoundCommonLib.Processors {
             }
             props.Add("functionallevel", FunctionalLevelToString((int)functionalLevel));
 
-            if (entry.TryGetProperty(LDAPProperties.PrincipalName, out var principalname)) {          
+            if (entry.TryGetProperty(LDAPProperties.PrincipalName, out var principalname)) {
                 if (!string.IsNullOrEmpty(principalname) && principalname.IndexOf('\\') > 0) {
                     var netBios = principalname.Split('\\')[0];
                     props.Add("netbios", netBios);
@@ -364,6 +364,9 @@ namespace SharpHoundCommonLib.Processors {
 
             var encryptionTypes = ConvertEncryptionTypes(entry.GetProperty(LDAPProperties.SupportedEncryptionTypes));
             props.Add("supportedencryptiontypes", encryptionTypes);
+
+            entry.TryGetLongProperty(LDAPProperties.AdminCount, out var ac);
+            props.Add("admincount", ac != 0);
 
             var comps = new List<TypedPrincipal>();
             if (flags.HasFlag(UacFlags.TrustedToAuthForDelegation) &&
@@ -939,7 +942,7 @@ namespace SharpHoundCommonLib.Processors {
             IS_TEXT_UNICODE_NOT_UNICODE_MASK = 0x0F00,
             IS_TEXT_UNICODE_NOT_ASCII_MASK = 0xF000
         }
-        
+
         private async Task SendComputerStatus(CSVComputerStatus status) {
             if (ComputerStatusEvent is not null) await ComputerStatusEvent.Invoke(status);
         }
