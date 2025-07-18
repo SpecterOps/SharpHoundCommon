@@ -38,7 +38,7 @@ public sealed class AdaptiveTimeout : IDisposable {
     }
 
     public void ClearSamples() {
-        _clearSamplesDecay = 0;
+        Interlocked.Exchange(ref _clearSamplesDecay, 0);
         _sampler.ClearSamples();
     }
 
@@ -198,29 +198,70 @@ public sealed class AdaptiveTimeout : IDisposable {
     // AdaptiveTimeout will not respond well to rapid spikes in execution time
     // imagine the wrapped function very regularly executes in 10ms
     // then suddenly starts taking a regular 100ms
-    // this is fine (if it fits in our max timeout budget), and we shouldn't block
+    // this is fine (if it fits in our max timeout budget), and we shouldn't timeout
     // so we should create a safety valve in case this happens to reset our data samples
     private void TimeSpikeSafetyValve(bool isSuccess) {
         if (isSuccess) {
-            _clearSamplesDecay -= TimeSpikeForgiveness;
-            _clearSamplesDecay = Math.Max(0, _clearSamplesDecay);
+            AtomicDecrementWithFloor(ref _clearSamplesDecay, TimeSpikeForgiveness);
         }
-        else
-            _clearSamplesDecay += TimeSpikePenalty;
+        else {
+            Interlocked.Add(ref _clearSamplesDecay, TimeSpikePenalty);
 
-
-        if (_clearSamplesDecay >= ClearSamplesThreshold) {
-            if (UseAdaptiveTimeout()) {
-                ClearSamples();
-                _log.LogTrace("Time spike safety valve event at timeout {CurrentTimeout}.", GetAdaptiveTimeout());
-            }
-            else {
-                _log.LogWarning("This call is frequently running over the maximum allowed timeout of {MaxTimeout}.", _maxTimeout);
+            if (_clearSamplesDecay >= ClearSamplesThreshold) {
+                if (UseAdaptiveTimeout()) {
+                    ClearSamples();
+                    _log.LogTrace("Time spike safety valve event at timeout {CurrentTimeout}.", GetAdaptiveTimeout());
+                }
+                else {
+                    _log.LogWarning("This call is frequently running over the maximum allowed timeout of {MaxTimeout}.", _maxTimeout);
+                    Interlocked.Exchange(ref _clearSamplesDecay, 0);
+                }
             }
         }
     }
 
     private bool UseAdaptiveTimeout() {
         return _useAdaptiveTimeout && _sampler.Count >= _minSamplesForAdaptiveTimeout;
+    }
+
+    // AI-generated code
+    // Effectively accomplishes:
+    // // Interlocked.Add(ref location, -decrement);
+    // // Interlocked.Exchange(ref location, Math.Max(floor, location));
+    // But since the above doesn't guarnantee atomicity, we need to be more clever.
+    // This method will continually check the very latest value in <location>,
+    // compute the new expected value after the decrement,
+    // and try to replace <location> with this new value.
+    // If it fails for any reason (race condition), it does all this again
+    // until it wins the race.
+    // This is however supposedly still much faster than using lock objects.
+    // // Example:
+    /*
+        // target == 0
+        // 1: this thread
+        // 2: interceding thread
+        
+        1: do {
+        1: var initialVal = target;
+        2: target = 2;
+        1: var computedVal = Math.Max(0, initialVal - 1);   // computedVal == 0
+        1: } while (target != initialVal);
+
+        // target changed midway thru the op (2 != 0) and so isn't changed by CompareExchange, retry loop:
+
+        1: var initialVal = target; // 2
+        1: var computedVal = Math.Max(0, initialVal - 1);   // computedVal == 1
+        1: } while (target != initialVal);
+
+        // target (2) == initialVal (2), assign target to 1 and exit loop
+    */
+    public static void AtomicDecrementWithFloor(ref int target, int decrement, int floor = 0) {
+        int initialValue, computedValue;
+        do {
+            initialValue = Volatile.Read(ref target);
+            computedValue = Math.Max(floor, initialValue - decrement);
+        }
+        // If target is modified by another thread between initialValue assignment and now, continue loop
+        while (Interlocked.CompareExchange(ref target, computedValue, initialValue) != initialValue);
     }
 }
