@@ -143,6 +143,9 @@ namespace SharpHoundCommonLib {
             if (Cache.GetIDType(sid, out var type)) {
                 return (true, type);
             }
+            else if (_unresolvablePrincipals.Contains(GetDomainSidFromObjectSid(sid))) {
+                return (false, Label.Base);
+            }
 
             var tempDomain = domain;
 
@@ -330,14 +333,7 @@ namespace SharpHoundCommonLib {
         }
 
         public virtual async Task<(bool Success, string DomainName)> GetDomainNameFromSid(string sid) {
-            string domainSid;
-            try {
-                domainSid = new SecurityIdentifier(sid).AccountDomainSid?.Value.ToUpper();
-            }
-            catch {
-                var match = SIDRegex.Match(sid);
-                domainSid = match.Success ? match.Groups[1].Value : null;
-            }
+            var domainSid = GetDomainSidFromObjectSid(sid);
 
             if (domainSid == null) {
                 return (false, "");
@@ -384,8 +380,26 @@ namespace SharpHoundCommonLib {
             return (false, string.Empty);
         }
 
+        private string GetDomainSidFromObjectSid(string sid) {
+            try {
+                return new SecurityIdentifier(sid).AccountDomainSid?.Value.ToUpper();
+            }
+            catch {
+                var match = SIDRegex.Match(sid);
+                return match.Success ? match.Groups[1].Value : null;
+            }
+        }
+
         private async Task<(bool Success, string DomainName)> ConvertDomainSidToDomainNameFromLdap(string domainSid) {
-            if (!GetDomain(out var domain) || domain?.Name == null) {
+            Domain domain;
+            try {
+                if (!GetDomainWithUnreachableThrow(out domain) || domain?.Name == null) {
+                    return (false, string.Empty);
+                }
+            }
+            catch (ActiveDirectoryOperationException) {
+                // Domain is unreachable, add to unresolvable sids
+                _unresolvablePrincipals.Add(domainSid);
                 return (false, string.Empty);
             }
 
@@ -568,6 +582,31 @@ namespace SharpHoundCommonLib {
                 domain = Domain.GetDomain(context);
                 _domainCache.TryAdd(_nullCacheKey, domain);
                 return true;
+            }
+            catch (Exception e) {
+                _log.LogDebug(e, "GetDomain call failed for blank domain");
+                domain = null;
+                return false;
+            }
+        }
+
+        private bool GetDomainWithUnreachableThrow(out Domain domain) {
+            if (_domainCache.TryGetValue(_nullCacheKey, out domain)) return true;
+
+            try {
+                var context = _ldapConfig.Username != null
+                    ? new DirectoryContext(DirectoryContextType.Domain, _ldapConfig.Username,
+                        _ldapConfig.Password)
+                    : new DirectoryContext(DirectoryContextType.Domain);
+
+                // Blocking External Call
+                domain = Domain.GetDomain(context);
+                _domainCache.TryAdd(_nullCacheKey, domain);
+                return true;
+            }
+            catch (ActiveDirectoryOperationException e) when (e.Message.Equals("Current security context is not associated with an Active Directory domain or forest.", StringComparison.OrdinalIgnoreCase)) {
+                // This domain is unreachable
+                throw;
             }
             catch (Exception e) {
                 _log.LogDebug(e, "GetDomain call failed for blank domain");
