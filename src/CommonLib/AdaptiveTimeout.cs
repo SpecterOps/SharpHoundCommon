@@ -220,8 +220,12 @@ public sealed class AdaptiveTimeout : IDisposable {
         }
     }
 
+    private bool UseAdaptiveTimeout() {
+        return _useAdaptiveTimeout && _sampler.Count >= _minSamplesForAdaptiveTimeout;
+    }
+
     // AI-generated code
-    // Effects:
+    // Effectively accomplishes:
     // // Interlocked.Add(ref location, -decrement);
     // // Interlocked.Exchange(ref location, Math.Max(floor, location));
     // But since the above doesn't guarnantee atomicity, we need to be more clever.
@@ -231,17 +235,33 @@ public sealed class AdaptiveTimeout : IDisposable {
     // If it fails for any reason (race condition), it does all this again
     // until it wins the race.
     // This is however supposedly still much faster than using lock objects.
-    private void AtomicDecrementWithFloor(ref int location, int decrement, int floor = 0) {
+    // // Example:
+    /*
+        // target == 0
+        // 1: this thread
+        // 2: interceding thread
+        
+        1: do {
+        1: var initialVal = target;
+        2: target = 2;
+        1: var computedVal = Math.Max(0, initialVal - 1);   // computedVal == 0
+        1: } while (target != initialVal);
+
+        // target changed midway thru the op (2 != 0) and so isn't changed by CompareExchange, retry loop:
+
+        1: var initialVal = target; // 2
+        1: var computedVal = Math.Max(0, initialVal - 1);   // computedVal == 1
+        1: } while (target != initialVal);
+
+        // target (2) == initialVal (2), assign target to 1 and exit loop
+    */
+    public static void AtomicDecrementWithFloor(ref int target, int decrement, int floor = 0) {
         int initialValue, computedValue;
         do {
-            initialValue = Volatile.Read(ref location);
+            initialValue = Volatile.Read(ref target);
             computedValue = Math.Max(floor, initialValue - decrement);
         }
-        while (Interlocked.CompareExchange(ref location, computedValue, initialValue) != initialValue);
-    }
-
-
-    private bool UseAdaptiveTimeout() {
-        return _useAdaptiveTimeout && _sampler.Count >= _minSamplesForAdaptiveTimeout;
+        // If target is modified by another thread between initialValue assignment and now, continue loop
+        while (Interlocked.CompareExchange(ref target, computedValue, initialValue) != initialValue);
     }
 }
