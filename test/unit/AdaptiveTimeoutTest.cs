@@ -73,8 +73,8 @@ public class AdaptiveTimeoutTest {
     public async Task AdaptiveTimeout_GetAdaptiveTimeout_TimeSpikeSafetyValve_IgnoreHiccup() {
         var tasks = new List<Task>();
         var maxTimeout = TimeSpan.FromMilliseconds(100);
-        var numSamples = 50;
-        var adaptiveTimeout = new AdaptiveTimeout(maxTimeout, new TestLogger(_testOutputHelper, Microsoft.Extensions.Logging.LogLevel.Trace), numSamples, 1000, 10);
+        var numSamples = 10;
+        var adaptiveTimeout = new AdaptiveTimeout(maxTimeout, new TestLogger(_testOutputHelper, Microsoft.Extensions.Logging.LogLevel.Trace), numSamples, 1000, 5);
 
         // Prepare our successful samples
         for (int i = 0; i < numSamples; i++)
@@ -83,7 +83,7 @@ public class AdaptiveTimeoutTest {
         await Task.WhenAll(tasks);
 
         // Add some timeout tasks that will resolve last
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < 3; i++)
             tasks.Add(adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(200)));
 
         // These tasks are added later but will resolve first

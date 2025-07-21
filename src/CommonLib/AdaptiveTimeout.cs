@@ -64,10 +64,10 @@ public sealed class AdaptiveTimeout : IDisposable {
     /// <param name="parentToken"></param>
     /// <returns>Returns a Fail result if a task runs longer than its budgeted time.</returns>
     public async Task<Result<T>> ExecuteWithTimeout<T>(Func<CancellationToken, T> func, CancellationToken parentToken = default) {
-        DateTime startTime = DateTime.MinValue; // for ordinal tracking; see use in TimeSpikeSafetyValve
+        DateTime startTime = DateTime.MinValue;
         var result = await Timeout.ExecuteWithTimeout(GetAdaptiveTimeout(), (timeoutToken) =>
             _sampler.SampleExecutionTime(() => {
-                startTime = DateTime.Now;
+                startTime = DateTime.Now; // for ordinal tracking; see use in TimeSpikeSafetyValve
                 return func(timeoutToken);
             }), parentToken);
         TimeSpikeSafetyValve(result.IsSuccess, startTime);
@@ -86,10 +86,10 @@ public sealed class AdaptiveTimeout : IDisposable {
     /// <param name="parentToken"></param>
     /// <returns>Returns a Fail result if a task runs longer than its budgeted time.</returns>
     public async Task<Result> ExecuteWithTimeout(Action<CancellationToken> func, CancellationToken parentToken = default) {
-        DateTime startTime = DateTime.MinValue; // for ordinal tracking; see use in TimeSpikeSafetyValve
+        DateTime startTime = DateTime.MinValue;
         var result = await Timeout.ExecuteWithTimeout(GetAdaptiveTimeout(), (timeoutToken) =>
             _sampler.SampleExecutionTime(() => {
-                startTime = DateTime.Now;
+                startTime = DateTime.Now; // for ordinal tracking; see use in TimeSpikeSafetyValve
                 func(timeoutToken);
             }), parentToken);
         TimeSpikeSafetyValve(result.IsSuccess, startTime);
@@ -109,10 +109,10 @@ public sealed class AdaptiveTimeout : IDisposable {
     /// <param name="parentToken"></param>
     /// <returns>Returns a Fail result if a task runs longer than its budgeted time.</returns>
     public async Task<Result<T>> ExecuteWithTimeout<T>(Func<CancellationToken, Task<T>> func, CancellationToken parentToken = default) {
-        DateTime startTime = DateTime.MinValue; // for ordinal tracking; see use in TimeSpikeSafetyValve
+        DateTime startTime = DateTime.MinValue;
         var result = await Timeout.ExecuteWithTimeout(GetAdaptiveTimeout(), (timeoutToken) =>
             _sampler.SampleExecutionTime(() => {
-                startTime = DateTime.Now;
+                startTime = DateTime.Now; // for ordinal tracking; see use in TimeSpikeSafetyValve
                 return func(timeoutToken);
             }), parentToken);
         TimeSpikeSafetyValve(result.IsSuccess, startTime);
@@ -131,10 +131,10 @@ public sealed class AdaptiveTimeout : IDisposable {
     /// <param name="parentToken"></param>
     /// <returns>Returns a Fail result if a task runs longer than its budgeted time.</returns>
     public async Task<Result> ExecuteWithTimeout(Func<CancellationToken, Task> func, CancellationToken parentToken = default) {
-        DateTime startTime = DateTime.MinValue; // for ordinal tracking; see use in TimeSpikeSafetyValve
+        DateTime startTime = DateTime.MinValue;
         var result = await Timeout.ExecuteWithTimeout(GetAdaptiveTimeout(), (timeoutToken) =>
             _sampler.SampleExecutionTime(() => {
-                startTime = DateTime.Now;
+                startTime = DateTime.Now; // for ordinal tracking; see use in TimeSpikeSafetyValve
                 return func(timeoutToken);
             }), parentToken);
         TimeSpikeSafetyValve(result.IsSuccess, startTime);
@@ -154,10 +154,10 @@ public sealed class AdaptiveTimeout : IDisposable {
     /// <param name="parentToken"></param>
     /// <returns>Returns a Fail result if a task runs longer than its budgeted time.</returns>
     public async Task<NetAPIResult<T>> ExecuteNetAPIWithTimeout<T>(Func<CancellationToken, NetAPIResult<T>> func, CancellationToken parentToken = default) {
-        DateTime startTime = DateTime.MinValue; // for ordinal tracking; see use in TimeSpikeSafetyValve
+        DateTime startTime = DateTime.MinValue;
         var result = await Timeout.ExecuteNetAPIWithTimeout(GetAdaptiveTimeout(), (timeoutToken) =>
             _sampler.SampleExecutionTime(() => {
-                startTime = DateTime.Now;
+                startTime = DateTime.Now; // for ordinal tracking; see use in TimeSpikeSafetyValve
                 return func(timeoutToken);
             }), parentToken);
         TimeSpikeSafetyValve(result.IsSuccess, startTime);
@@ -177,10 +177,10 @@ public sealed class AdaptiveTimeout : IDisposable {
     /// <param name="parentToken"></param>
     /// <returns>Returns a Fail result if a task runs longer than its budgeted time.</returns>
     public async Task<SharpHoundRPC.Result<T>> ExecuteRPCWithTimeout<T>(Func<CancellationToken, SharpHoundRPC.Result<T>> func, CancellationToken parentToken = default) {
-        DateTime startTime = DateTime.MinValue; // for ordinal tracking; see use in TimeSpikeSafetyValve
+        DateTime startTime = DateTime.MinValue;
         var result = await Timeout.ExecuteRPCWithTimeout(GetAdaptiveTimeout(), (timeoutToken) =>
             _sampler.SampleExecutionTime(() => {
-                startTime = DateTime.Now;
+                startTime = DateTime.Now; // for ordinal tracking; see use in TimeSpikeSafetyValve
                 return func(timeoutToken);
             }), parentToken);
         TimeSpikeSafetyValve(result.IsSuccess, startTime);
@@ -200,10 +200,10 @@ public sealed class AdaptiveTimeout : IDisposable {
     /// <param name="parentToken"></param>
     /// <returns>Returns a Fail result if a task runs longer than its budgeted time.</returns>
     public async Task<SharpHoundRPC.Result<T>> ExecuteRPCWithTimeout<T>(Func<CancellationToken, Task<SharpHoundRPC.Result<T>>> func, CancellationToken parentToken = default) {
-        DateTime startTime = DateTime.MinValue; // for ordinal tracking; see use in TimeSpikeSafetyValve
+        DateTime startTime = DateTime.MinValue;
         var result = await Timeout.ExecuteRPCWithTimeout(GetAdaptiveTimeout(), (timeoutToken) =>
             _sampler.SampleExecutionTime(() => {
-                startTime = DateTime.Now;
+                startTime = DateTime.Now; // for ordinal tracking; see use in TimeSpikeSafetyValve
                 return func(timeoutToken);
             }), parentToken);
         TimeSpikeSafetyValve(result.IsSuccess, startTime);
