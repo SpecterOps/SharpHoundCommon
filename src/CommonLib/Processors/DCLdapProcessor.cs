@@ -39,8 +39,8 @@ public class DCLdapProcessor {
         _ldapTimeout = connectionTimeoutMs / 1000;
         _ldapEndpoint = new Uri($"ldap://{dcHostname}:389");
         _ldapSslEndpoint = new Uri($"ldaps://{dcHostname}:636");
-        _checkIsNtlmSigningRequiredAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(1), Logging.LogProvider.CreateLogger(nameof(CheckIsNtlmSigningRequired)));
-        _checkIsChannelBindingDisabledAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(1), Logging.LogProvider.CreateLogger(nameof(CheckIsChannelBindingDisabled)));
+        _checkIsNtlmSigningRequiredAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromSeconds(30), Logging.LogProvider.CreateLogger(nameof(CheckIsNtlmSigningRequired)));
+        _checkIsChannelBindingDisabledAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromSeconds(30), Logging.LogProvider.CreateLogger(nameof(CheckIsChannelBindingDisabled)));
     }
     
     public event ComputerStatusDelegate ComputerStatusEvent;

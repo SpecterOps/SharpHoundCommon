@@ -21,9 +21,9 @@ namespace SharpHoundCommonLib.Processors {
         public UserRightsAssignmentProcessor(ILdapUtils utils, ILogger log = null) {
             _utils = utils;
             _log = log ?? Logging.LogProvider.CreateLogger("UserRightsAssignmentProcessor");
-            _openLSAPolicyAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(OpenLSAPolicy)));
-            _getLocalDomainInfoAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ILSAPolicy.GetLocalDomainInformation)));
-            _getResolvedPrincipalWithPriviledgeAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ILSAPolicy.GetResolvedPrincipalsWithPrivilege)));
+            _openLSAPolicyAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromSeconds(30), Logging.LogProvider.CreateLogger(nameof(OpenLSAPolicy)));
+            _getLocalDomainInfoAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromSeconds(30), Logging.LogProvider.CreateLogger(nameof(ILSAPolicy.GetLocalDomainInformation)));
+            _getResolvedPrincipalWithPriviledgeAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromSeconds(30), Logging.LogProvider.CreateLogger(nameof(ILSAPolicy.GetResolvedPrincipalsWithPrivilege)));
         }
 
         public event ComputerStatusDelegate ComputerStatusEvent;

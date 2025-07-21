@@ -36,8 +36,8 @@ namespace SharpHoundCommonLib.Processors {
             _doLocalAdminSessionEnum = doLocalAdminSessionEnum;
             _localAdminUsername = localAdminUsername;
             _localAdminPassword = localAdminPassword;
-            _readUserSessionsAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ReadUserSessions)));
-            _readUserSessionsPriviledgedAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ReadUserSessionsPrivileged)));
+            _readUserSessionsAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromSeconds(30), Logging.LogProvider.CreateLogger(nameof(ReadUserSessions)));
+            _readUserSessionsPriviledgedAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromSeconds(30), Logging.LogProvider.CreateLogger(nameof(ReadUserSessionsPrivileged)));
         }
 
         public event ComputerStatusDelegate ComputerStatusEvent;
