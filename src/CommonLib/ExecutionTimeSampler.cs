@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
@@ -84,7 +85,7 @@ public class ExecutionTimeSampler : IDisposable {
         }
 
         _samples.Enqueue(timeSpan.TotalMilliseconds);
-        _samplesSinceLastLog++;
+        Interlocked.Increment(ref _samplesSinceLastLog);
 
         Log();
     }
@@ -98,7 +99,7 @@ public class ExecutionTimeSampler : IDisposable {
                 _log.LogWarning("Failed to calculate execution time statistics: {Error}", ex.Message);
             }
 
-            _samplesSinceLastLog = 0;
+            Interlocked.Exchange(ref _samplesSinceLastLog, 0);
         }
     }
 }

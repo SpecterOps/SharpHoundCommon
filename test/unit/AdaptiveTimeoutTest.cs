@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using SharpHoundCommonLib;
+using SharpHoundCommonLib.Exceptions;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -54,31 +56,92 @@ public class AdaptiveTimeoutTest {
     [Fact]
     public async Task AdaptiveTimeout_GetAdaptiveTimeout_TimeSpikeSafetyValve() {
         var maxTimeout = TimeSpan.FromSeconds(1);
-        var numSamples = 100;
+        var numSamples = 50;
         var adaptiveTimeout = new AdaptiveTimeout(maxTimeout, new TestLogger(_testOutputHelper, Microsoft.Extensions.Logging.LogLevel.Trace), numSamples, 1000, 10);
 
         for (int i = 0; i < numSamples; i++)
-            await adaptiveTimeout.ExecuteWithTimeout((_) => Thread.Sleep(10));
+            await adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(10));
 
-        for (int i = 0; i < 6; i++)
-            await adaptiveTimeout.ExecuteWithTimeout((_) => Thread.Sleep(200));
+        for (int i = 0; i < 5; i++)
+            await adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(200));
 
         var adaptiveTimeoutResult = adaptiveTimeout.GetAdaptiveTimeout();
         Assert.Equal(maxTimeout, adaptiveTimeoutResult);
     }
 
     [Fact]
-    public void AdaptiveTimeout_AtomicDecrementWithFloor_IsThreadSafe()
-    {
+    public async Task AdaptiveTimeout_GetAdaptiveTimeout_TimeSpikeSafetyValve_IgnoreHiccup() {
+        var tasks = new List<Task>();
+        var maxTimeout = TimeSpan.FromMilliseconds(100);
+        var numSamples = 50;
+        var adaptiveTimeout = new AdaptiveTimeout(maxTimeout, new TestLogger(_testOutputHelper, Microsoft.Extensions.Logging.LogLevel.Trace), numSamples, 1000, 10);
+
+        // Prepare our successful samples
+        for (int i = 0; i < numSamples; i++)
+            tasks.Add(adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(i)));
+
+        await Task.WhenAll(tasks);
+
+        // Add some timeout tasks that will resolve last
+        for (int i = 0; i < 5; i++)
+            tasks.Add(adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(200)));
+
+        // These tasks are added later but will resolve first
+        for (int i = 0; i < 4; i++)
+            tasks.Add(adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(i)));
+
+        await Task.WhenAll(tasks);
+        var adaptiveTimeoutResult = adaptiveTimeout.GetAdaptiveTimeout();
+        // So our time spike safety valve should ignore the hiccup, since later tasks have resolved
+        // by the time the safety valve has triggered by the timeout tasks
+        Assert.True(adaptiveTimeoutResult < maxTimeout);
+    }
+
+    [Fact]
+    public async Task AdaptiveTimeout_GetAdaptiveTimeout_ThrowWhenExcessiveTimeouts() {
+        var tasks = new List<Task>();
+        var maxTimeout = TimeSpan.FromMilliseconds(100);
+        var numSamples = 10;
+        var adaptiveTimeout = new AdaptiveTimeout(maxTimeout, new TestLogger(_testOutputHelper, Microsoft.Extensions.Logging.LogLevel.Trace), numSamples, 1000, 5, throwIfExcessiveTimeouts: true);
+
+        for (int i = 0; i < numSamples; i++)
+            tasks.Add(adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(10)));
+
+        await Task.WhenAll(tasks);
+
+        for (int i = 0; i < 20; i++)
+            tasks.Add(adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(200)));
+
+        await Assert.ThrowsAsync<ExcessiveTimeoutsException>(async () => await Task.WhenAll(tasks));
+    }
+
+    [Fact]
+    public async Task AdaptiveTimeout_GetAdaptiveTimeout_DoNotThrowWhenExcessiveTimeouts() {
+        var tasks = new List<Task>();
+        var maxTimeout = TimeSpan.FromMilliseconds(100);
+        var numSamples = 10;
+        var adaptiveTimeout = new AdaptiveTimeout(maxTimeout, new TestLogger(_testOutputHelper, Microsoft.Extensions.Logging.LogLevel.Trace), numSamples, 1000, 5, throwIfExcessiveTimeouts: false);
+
+        for (int i = 0; i < numSamples; i++)
+            tasks.Add(adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(10)));
+
+        await Task.WhenAll(tasks);
+
+        for (int i = 0; i < 20; i++)
+            tasks.Add(adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(200)));
+
+        await Task.WhenAll(tasks);
+    }
+
+    [Fact]
+    public void AdaptiveTimeout_AtomicDecrementWithFloor_IsThreadSafe() {
         int value = 1000;
         int decrement = 1;
         int threads = 10;
         int decrementsPerThread = 100;
 
-        Parallel.For(0, threads, i =>
-        {
-            for (int j = 0; j < decrementsPerThread; j++)
-            {
+        Parallel.For(0, threads, i => {
+            for (int j = 0; j < decrementsPerThread; j++) {
                 AdaptiveTimeout.AtomicDecrementWithFloor(ref value, decrement, 0);
             }
         });
