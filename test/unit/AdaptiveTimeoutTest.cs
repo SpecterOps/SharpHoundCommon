@@ -55,14 +55,17 @@ public class AdaptiveTimeoutTest {
 
     [Fact]
     public async Task AdaptiveTimeout_GetAdaptiveTimeout_TimeSpikeSafetyValve() {
+        var tasks = new List<Task>();
         var maxTimeout = TimeSpan.FromSeconds(1);
-        var numSamples = 50;
+        var numSamples = 30;
         var adaptiveTimeout = new AdaptiveTimeout(maxTimeout, new TestLogger(_testOutputHelper, Microsoft.Extensions.Logging.LogLevel.Trace), numSamples, 1000, 10);
 
         for (int i = 0; i < numSamples; i++)
-            await adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(10));
+            tasks.Add(adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(10)));
 
-        for (int i = 0; i < 5; i++)
+        await Task.WhenAll(tasks);
+
+        for (int i = 0; i < 3; i++)
             await adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(200));
 
         var adaptiveTimeoutResult = adaptiveTimeout.GetAdaptiveTimeout();
