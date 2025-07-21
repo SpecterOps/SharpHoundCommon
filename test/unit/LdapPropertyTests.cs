@@ -464,6 +464,7 @@ namespace CommonLibTest
             Assert.Contains("unconstraineddelegation", keys);
             Assert.Contains("trustedtoauth", keys);
             Assert.Contains("isdc", keys);
+            Assert.Contains("isreadonlydc", keys);
             Assert.Contains("lastlogon", keys);
             Assert.Contains("lastlogontimestamp", keys);
             Assert.Contains("pwdlastset", keys);
@@ -471,6 +472,7 @@ namespace CommonLibTest
             Assert.False((bool)props["unconstraineddelegation"]);
             Assert.True((bool)props["trustedtoauth"]);
             Assert.False((bool)props["isdc"]);
+            Assert.False((bool)props["isreadonlydc"]);
 
             Assert.Contains("lastlogon", keys);
             Assert.Equal(1622827514, (long)props["lastlogon"]);

@@ -356,6 +356,7 @@ namespace SharpHoundCommonLib.Processors {
             props.Add("unconstraineddelegation", flags.HasFlag(UacFlags.TrustedForDelegation));
             props.Add("trustedtoauth", flags.HasFlag(UacFlags.TrustedToAuthForDelegation));
             props.Add("isdc", flags.HasFlag(UacFlags.ServerTrustAccount));
+            props.Add("isreadonlydc", flags.HasFlag(UacFlags.PartialSecretsAccount));
             props.Add("encryptedtextpwdallowed", flags.HasFlag(UacFlags.EncryptedTextPwdAllowed));
             props.Add("usedeskeyonly", flags.HasFlag(UacFlags.UseDesKeyOnly));
             props.Add("logonscriptenabled", flags.HasFlag(UacFlags.Script));
