@@ -58,10 +58,10 @@ namespace SharpHoundCommonLib {
             _log = log ?? Logging.LogProvider.CreateLogger("LdapConnectionPool");
             _portScanner = scanner ?? new PortScanner();
             _nativeMethods = nativeMethods ?? new NativeMethods();
-            _queryAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(1), Logging.LogProvider.CreateLogger("LdapQuery"));
-            _pagedQueryAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(1), Logging.LogProvider.CreateLogger("LdapPagedQuery"));
-            _rangedRetrievalAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(1), Logging.LogProvider.CreateLogger("LdapRangedRetrieval"));
-            _testConnectionAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromSeconds(15), Logging.LogProvider.CreateLogger("TestLdapConnection"));
+            _queryAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(1), Logging.LogProvider.CreateLogger("LdapQuery"), throwIfExcessiveTimeouts: true);
+            _pagedQueryAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(1), Logging.LogProvider.CreateLogger("LdapPagedQuery"), throwIfExcessiveTimeouts: true);
+            _rangedRetrievalAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(1), Logging.LogProvider.CreateLogger("LdapRangedRetrieval"), throwIfExcessiveTimeouts: true);
+            _testConnectionAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromSeconds(15), Logging.LogProvider.CreateLogger("TestLdapConnection"), throwIfExcessiveTimeouts: true);
         }
 
         private async Task<(bool Success, LdapConnectionWrapper ConnectionWrapper, string Message)> GetLdapConnection(
