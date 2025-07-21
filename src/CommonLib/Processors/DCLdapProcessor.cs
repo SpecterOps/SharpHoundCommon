@@ -22,43 +22,41 @@ public class LdapAuthOptions {
 public class DCLdapProcessor {
     private readonly ILogger _log;
     private readonly IPortScanner _scanner;
-    private readonly int _portScanTimeout;
     private readonly int _ldapTimeout;
     private readonly Uri _ldapEndpoint;
     private readonly Uri _ldapSslEndpoint;
+    private readonly AdaptiveTimeout _checkIsNtlmSigningRequiredAdaptiveTimeout;
+    private readonly AdaptiveTimeout _checkIsChannelBindingDisabledAdaptiveTimeout;
     public delegate Task ComputerStatusDelegate(CSVComputerStatus status);
 
     private readonly string SEC_E_UNSUPPORTED_FUNCTION = "80090302";
     private readonly string SEC_E_BAD_BINDINGS = "80090346";
 
 
-    public DCLdapProcessor(int portScanTimeout, string dcHostname, ILogger log = null) {
+    public DCLdapProcessor(int connectionTimeoutMs, string dcHostname, ILogger log = null) {
         _log = log ?? Logging.LogProvider.CreateLogger("DCLdapProcessor");
-        _scanner = new PortScanner();
-        _portScanTimeout = portScanTimeout;
-        _ldapTimeout = portScanTimeout / 1000;
+        _scanner = new PortScanner(maxTimeout: connectionTimeoutMs);
+        _ldapTimeout = connectionTimeoutMs / 1000;
         _ldapEndpoint = new Uri($"ldap://{dcHostname}:389");
         _ldapSslEndpoint = new Uri($"ldaps://{dcHostname}:636");
+        _checkIsNtlmSigningRequiredAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(1), Logging.LogProvider.CreateLogger(nameof(CheckIsNtlmSigningRequired)));
+        _checkIsChannelBindingDisabledAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(1), Logging.LogProvider.CreateLogger(nameof(CheckIsChannelBindingDisabled)));
     }
     
     public event ComputerStatusDelegate ComputerStatusEvent;
 
-    public async Task<LdapService> Scan(string computerName, TimeSpan timeout = default) {
-        if (timeout == default) {
-            timeout = TimeSpan.FromMinutes(2);
-        }
-        
+    public async Task<LdapService> Scan(string computerName) {
         var hasLdap = await TestLdapPort();
         var hasLdaps = await TestLdapsPort();
         SharpHoundRPC.Result<bool> isSigningRequired = new(),
             isChannelBindingDisabled = new();
 
         if (hasLdap) {
-            isSigningRequired = await Timeout.ExecuteRPCWithTimeout(timeout, CheckIsNtlmSigningRequired);
+            isSigningRequired = await _checkIsNtlmSigningRequiredAdaptiveTimeout.ExecuteRPCWithTimeout(CheckIsNtlmSigningRequired);
         }
 
         if (hasLdaps) {
-            isChannelBindingDisabled = await Timeout.ExecuteRPCWithTimeout(timeout, CheckIsChannelBindingDisabled);
+            isChannelBindingDisabled = await _checkIsChannelBindingDisabledAdaptiveTimeout.ExecuteRPCWithTimeout(CheckIsChannelBindingDisabled);
         }
 
         if (isSigningRequired.IsFailed) {
@@ -117,12 +115,12 @@ public class DCLdapProcessor {
     /// <returns>bool</returns>
     [ExcludeFromCodeCoverage]
     public virtual async Task<bool> TestLdapPort() {
-        return await _scanner.CheckPort(_ldapEndpoint.Host, _ldapEndpoint.Port, _portScanTimeout);
+        return await _scanner.CheckPort(_ldapEndpoint.Host, _ldapEndpoint.Port);
     }
 
     [ExcludeFromCodeCoverage]
     public virtual async Task<bool> TestLdapsPort() {
-        return await _scanner.CheckPort(_ldapSslEndpoint.Host, _ldapSslEndpoint.Port, _portScanTimeout);
+        return await _scanner.CheckPort(_ldapSslEndpoint.Host, _ldapSslEndpoint.Port);
     }
 
     public async Task<SharpHoundRPC.Result<bool>> CheckIsNtlmSigningRequired(CancellationToken cancellationToken = default) {
