@@ -66,4 +66,23 @@ public class AdaptiveTimeoutTest {
         var adaptiveTimeoutResult = adaptiveTimeout.GetAdaptiveTimeout();
         Assert.Equal(maxTimeout, adaptiveTimeoutResult);
     }
+
+    [Fact]
+    public void AdaptiveTimeout_AtomicDecrementWithFloor_IsThreadSafe()
+    {
+        int value = 1000;
+        int decrement = 1;
+        int threads = 10;
+        int decrementsPerThread = 100;
+
+        Parallel.For(0, threads, i =>
+        {
+            for (int j = 0; j < decrementsPerThread; j++)
+            {
+                AdaptiveTimeout.AtomicDecrementWithFloor(ref value, decrement, 0);
+            }
+        });
+
+        Assert.Equal(1000 - threads * decrementsPerThread, value);
+    }
 }
