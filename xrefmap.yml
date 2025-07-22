@@ -390,12 +390,12 @@ references:
   commentId: T:SharpHoundCommonLib.AdaptiveTimeout
   fullName: SharpHoundCommonLib.AdaptiveTimeout
   nameWithType: AdaptiveTimeout
-- uid: SharpHoundCommonLib.AdaptiveTimeout.#ctor(System.TimeSpan,ILogger,System.Int32,System.Int32,System.Int32,System.Boolean)
-  name: AdaptiveTimeout(TimeSpan, ILogger, Int32, Int32, Int32, Boolean)
-  href: api/SharpHoundCommonLib.AdaptiveTimeout.html#SharpHoundCommonLib_AdaptiveTimeout__ctor_System_TimeSpan_ILogger_System_Int32_System_Int32_System_Int32_System_Boolean_
-  commentId: M:SharpHoundCommonLib.AdaptiveTimeout.#ctor(System.TimeSpan,ILogger,System.Int32,System.Int32,System.Int32,System.Boolean)
-  fullName: SharpHoundCommonLib.AdaptiveTimeout.AdaptiveTimeout(System.TimeSpan, ILogger, System.Int32, System.Int32, System.Int32, System.Boolean)
-  nameWithType: AdaptiveTimeout.AdaptiveTimeout(TimeSpan, ILogger, Int32, Int32, Int32, Boolean)
+- uid: SharpHoundCommonLib.AdaptiveTimeout.#ctor(System.TimeSpan,ILogger,System.Int32,System.Int32,System.Int32,System.Boolean,System.Boolean)
+  name: AdaptiveTimeout(TimeSpan, ILogger, Int32, Int32, Int32, Boolean, Boolean)
+  href: api/SharpHoundCommonLib.AdaptiveTimeout.html#SharpHoundCommonLib_AdaptiveTimeout__ctor_System_TimeSpan_ILogger_System_Int32_System_Int32_System_Int32_System_Boolean_System_Boolean_
+  commentId: M:SharpHoundCommonLib.AdaptiveTimeout.#ctor(System.TimeSpan,ILogger,System.Int32,System.Int32,System.Int32,System.Boolean,System.Boolean)
+  fullName: SharpHoundCommonLib.AdaptiveTimeout.AdaptiveTimeout(System.TimeSpan, ILogger, System.Int32, System.Int32, System.Int32, System.Boolean, System.Boolean)
+  nameWithType: AdaptiveTimeout.AdaptiveTimeout(TimeSpan, ILogger, Int32, Int32, Int32, Boolean, Boolean)
 - uid: SharpHoundCommonLib.AdaptiveTimeout.#ctor*
   name: AdaptiveTimeout
   href: api/SharpHoundCommonLib.AdaptiveTimeout.html#SharpHoundCommonLib_AdaptiveTimeout__ctor_
@@ -403,6 +403,22 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.AdaptiveTimeout.AdaptiveTimeout
   nameWithType: AdaptiveTimeout.AdaptiveTimeout
+- uid: SharpHoundCommonLib.AdaptiveTimeout.AtomicDecrementWithFloor(System.Int32@,System.Int32,System.Int32)
+  name: AtomicDecrementWithFloor(ref Int32, Int32, Int32)
+  href: api/SharpHoundCommonLib.AdaptiveTimeout.html#SharpHoundCommonLib_AdaptiveTimeout_AtomicDecrementWithFloor_System_Int32__System_Int32_System_Int32_
+  commentId: M:SharpHoundCommonLib.AdaptiveTimeout.AtomicDecrementWithFloor(System.Int32@,System.Int32,System.Int32)
+  name.vb: AtomicDecrementWithFloor(ByRef Int32, Int32, Int32)
+  fullName: SharpHoundCommonLib.AdaptiveTimeout.AtomicDecrementWithFloor(ref System.Int32, System.Int32, System.Int32)
+  fullName.vb: SharpHoundCommonLib.AdaptiveTimeout.AtomicDecrementWithFloor(ByRef System.Int32, System.Int32, System.Int32)
+  nameWithType: AdaptiveTimeout.AtomicDecrementWithFloor(ref Int32, Int32, Int32)
+  nameWithType.vb: AdaptiveTimeout.AtomicDecrementWithFloor(ByRef Int32, Int32, Int32)
+- uid: SharpHoundCommonLib.AdaptiveTimeout.AtomicDecrementWithFloor*
+  name: AtomicDecrementWithFloor
+  href: api/SharpHoundCommonLib.AdaptiveTimeout.html#SharpHoundCommonLib_AdaptiveTimeout_AtomicDecrementWithFloor_
+  commentId: Overload:SharpHoundCommonLib.AdaptiveTimeout.AtomicDecrementWithFloor
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.AdaptiveTimeout.AtomicDecrementWithFloor
+  nameWithType: AdaptiveTimeout.AtomicDecrementWithFloor
 - uid: SharpHoundCommonLib.AdaptiveTimeout.ClearSamples
   name: ClearSamples()
   href: api/SharpHoundCommonLib.AdaptiveTimeout.html#SharpHoundCommonLib_AdaptiveTimeout_ClearSamples
@@ -7341,6 +7357,32 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.OutputTypes.ACE.IsInherited
   nameWithType: ACE.IsInherited
+- uid: SharpHoundCommonLib.OutputTypes.ACE.IsInheritedPermissionForOwnerRightsSid
+  name: IsInheritedPermissionForOwnerRightsSid
+  href: api/SharpHoundCommonLib.OutputTypes.ACE.html#SharpHoundCommonLib_OutputTypes_ACE_IsInheritedPermissionForOwnerRightsSid
+  commentId: P:SharpHoundCommonLib.OutputTypes.ACE.IsInheritedPermissionForOwnerRightsSid
+  fullName: SharpHoundCommonLib.OutputTypes.ACE.IsInheritedPermissionForOwnerRightsSid
+  nameWithType: ACE.IsInheritedPermissionForOwnerRightsSid
+- uid: SharpHoundCommonLib.OutputTypes.ACE.IsInheritedPermissionForOwnerRightsSid*
+  name: IsInheritedPermissionForOwnerRightsSid
+  href: api/SharpHoundCommonLib.OutputTypes.ACE.html#SharpHoundCommonLib_OutputTypes_ACE_IsInheritedPermissionForOwnerRightsSid_
+  commentId: Overload:SharpHoundCommonLib.OutputTypes.ACE.IsInheritedPermissionForOwnerRightsSid
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.OutputTypes.ACE.IsInheritedPermissionForOwnerRightsSid
+  nameWithType: ACE.IsInheritedPermissionForOwnerRightsSid
+- uid: SharpHoundCommonLib.OutputTypes.ACE.IsPermissionForOwnerRightsSid
+  name: IsPermissionForOwnerRightsSid
+  href: api/SharpHoundCommonLib.OutputTypes.ACE.html#SharpHoundCommonLib_OutputTypes_ACE_IsPermissionForOwnerRightsSid
+  commentId: P:SharpHoundCommonLib.OutputTypes.ACE.IsPermissionForOwnerRightsSid
+  fullName: SharpHoundCommonLib.OutputTypes.ACE.IsPermissionForOwnerRightsSid
+  nameWithType: ACE.IsPermissionForOwnerRightsSid
+- uid: SharpHoundCommonLib.OutputTypes.ACE.IsPermissionForOwnerRightsSid*
+  name: IsPermissionForOwnerRightsSid
+  href: api/SharpHoundCommonLib.OutputTypes.ACE.html#SharpHoundCommonLib_OutputTypes_ACE_IsPermissionForOwnerRightsSid_
+  commentId: Overload:SharpHoundCommonLib.OutputTypes.ACE.IsPermissionForOwnerRightsSid
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.OutputTypes.ACE.IsPermissionForOwnerRightsSid
+  nameWithType: ACE.IsPermissionForOwnerRightsSid
 - uid: SharpHoundCommonLib.OutputTypes.ACE.PrincipalSID
   name: PrincipalSID
   href: api/SharpHoundCommonLib.OutputTypes.ACE.html#SharpHoundCommonLib_OutputTypes_ACE_PrincipalSID
@@ -8396,6 +8438,19 @@ references:
   commentId: T:SharpHoundCommonLib.OutputTypes.Group
   fullName: SharpHoundCommonLib.OutputTypes.Group
   nameWithType: Group
+- uid: SharpHoundCommonLib.OutputTypes.Group.HasSIDHistory
+  name: HasSIDHistory
+  href: api/SharpHoundCommonLib.OutputTypes.Group.html#SharpHoundCommonLib_OutputTypes_Group_HasSIDHistory
+  commentId: P:SharpHoundCommonLib.OutputTypes.Group.HasSIDHistory
+  fullName: SharpHoundCommonLib.OutputTypes.Group.HasSIDHistory
+  nameWithType: Group.HasSIDHistory
+- uid: SharpHoundCommonLib.OutputTypes.Group.HasSIDHistory*
+  name: HasSIDHistory
+  href: api/SharpHoundCommonLib.OutputTypes.Group.html#SharpHoundCommonLib_OutputTypes_Group_HasSIDHistory_
+  commentId: Overload:SharpHoundCommonLib.OutputTypes.Group.HasSIDHistory
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.OutputTypes.Group.HasSIDHistory
+  nameWithType: Group.HasSIDHistory
 - uid: SharpHoundCommonLib.OutputTypes.Group.Members
   name: Members
   href: api/SharpHoundCommonLib.OutputTypes.Group.html#SharpHoundCommonLib_OutputTypes_Group_Members
@@ -10724,6 +10779,38 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.Processors.GroupProcessor.ReadGroupMembers
   nameWithType: GroupProcessor.ReadGroupMembers
+- uid: SharpHoundCommonLib.Processors.GroupProperties
+  name: GroupProperties
+  href: api/SharpHoundCommonLib.Processors.GroupProperties.html
+  commentId: T:SharpHoundCommonLib.Processors.GroupProperties
+  fullName: SharpHoundCommonLib.Processors.GroupProperties
+  nameWithType: GroupProperties
+- uid: SharpHoundCommonLib.Processors.GroupProperties.Props
+  name: Props
+  href: api/SharpHoundCommonLib.Processors.GroupProperties.html#SharpHoundCommonLib_Processors_GroupProperties_Props
+  commentId: P:SharpHoundCommonLib.Processors.GroupProperties.Props
+  fullName: SharpHoundCommonLib.Processors.GroupProperties.Props
+  nameWithType: GroupProperties.Props
+- uid: SharpHoundCommonLib.Processors.GroupProperties.Props*
+  name: Props
+  href: api/SharpHoundCommonLib.Processors.GroupProperties.html#SharpHoundCommonLib_Processors_GroupProperties_Props_
+  commentId: Overload:SharpHoundCommonLib.Processors.GroupProperties.Props
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Processors.GroupProperties.Props
+  nameWithType: GroupProperties.Props
+- uid: SharpHoundCommonLib.Processors.GroupProperties.SidHistory
+  name: SidHistory
+  href: api/SharpHoundCommonLib.Processors.GroupProperties.html#SharpHoundCommonLib_Processors_GroupProperties_SidHistory
+  commentId: P:SharpHoundCommonLib.Processors.GroupProperties.SidHistory
+  fullName: SharpHoundCommonLib.Processors.GroupProperties.SidHistory
+  nameWithType: GroupProperties.SidHistory
+- uid: SharpHoundCommonLib.Processors.GroupProperties.SidHistory*
+  name: SidHistory
+  href: api/SharpHoundCommonLib.Processors.GroupProperties.html#SharpHoundCommonLib_Processors_GroupProperties_SidHistory_
+  commentId: Overload:SharpHoundCommonLib.Processors.GroupProperties.SidHistory
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Processors.GroupProperties.SidHistory
+  nameWithType: GroupProperties.SidHistory
 - uid: SharpHoundCommonLib.Processors.IssuancePolicyProperties
   name: IssuancePolicyProperties
   href: api/SharpHoundCommonLib.Processors.IssuancePolicyProperties.html
@@ -10942,19 +11029,25 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.Processors.LdapPropertyProcessor.ReadGPOProperties
   nameWithType: LdapPropertyProcessor.ReadGPOProperties
-- uid: SharpHoundCommonLib.Processors.LdapPropertyProcessor.ReadGroupProperties(SharpHoundCommonLib.IDirectoryObject)
-  name: ReadGroupProperties(IDirectoryObject)
-  href: api/SharpHoundCommonLib.Processors.LdapPropertyProcessor.html#SharpHoundCommonLib_Processors_LdapPropertyProcessor_ReadGroupProperties_SharpHoundCommonLib_IDirectoryObject_
-  commentId: M:SharpHoundCommonLib.Processors.LdapPropertyProcessor.ReadGroupProperties(SharpHoundCommonLib.IDirectoryObject)
-  fullName: SharpHoundCommonLib.Processors.LdapPropertyProcessor.ReadGroupProperties(SharpHoundCommonLib.IDirectoryObject)
-  nameWithType: LdapPropertyProcessor.ReadGroupProperties(IDirectoryObject)
-- uid: SharpHoundCommonLib.Processors.LdapPropertyProcessor.ReadGroupProperties*
-  name: ReadGroupProperties
-  href: api/SharpHoundCommonLib.Processors.LdapPropertyProcessor.html#SharpHoundCommonLib_Processors_LdapPropertyProcessor_ReadGroupProperties_
-  commentId: Overload:SharpHoundCommonLib.Processors.LdapPropertyProcessor.ReadGroupProperties
+- uid: SharpHoundCommonLib.Processors.LdapPropertyProcessor.ReadGroupPropertiesAsync(SharpHoundCommonLib.IDirectoryObject,SharpHoundCommonLib.ResolvedSearchResult)
+  name: ReadGroupPropertiesAsync(IDirectoryObject, ResolvedSearchResult)
+  href: api/SharpHoundCommonLib.Processors.LdapPropertyProcessor.html#SharpHoundCommonLib_Processors_LdapPropertyProcessor_ReadGroupPropertiesAsync_SharpHoundCommonLib_IDirectoryObject_SharpHoundCommonLib_ResolvedSearchResult_
+  commentId: M:SharpHoundCommonLib.Processors.LdapPropertyProcessor.ReadGroupPropertiesAsync(SharpHoundCommonLib.IDirectoryObject,SharpHoundCommonLib.ResolvedSearchResult)
+  fullName: SharpHoundCommonLib.Processors.LdapPropertyProcessor.ReadGroupPropertiesAsync(SharpHoundCommonLib.IDirectoryObject, SharpHoundCommonLib.ResolvedSearchResult)
+  nameWithType: LdapPropertyProcessor.ReadGroupPropertiesAsync(IDirectoryObject, ResolvedSearchResult)
+- uid: SharpHoundCommonLib.Processors.LdapPropertyProcessor.ReadGroupPropertiesAsync(SharpHoundCommonLib.IDirectoryObject,System.String)
+  name: ReadGroupPropertiesAsync(IDirectoryObject, String)
+  href: api/SharpHoundCommonLib.Processors.LdapPropertyProcessor.html#SharpHoundCommonLib_Processors_LdapPropertyProcessor_ReadGroupPropertiesAsync_SharpHoundCommonLib_IDirectoryObject_System_String_
+  commentId: M:SharpHoundCommonLib.Processors.LdapPropertyProcessor.ReadGroupPropertiesAsync(SharpHoundCommonLib.IDirectoryObject,System.String)
+  fullName: SharpHoundCommonLib.Processors.LdapPropertyProcessor.ReadGroupPropertiesAsync(SharpHoundCommonLib.IDirectoryObject, System.String)
+  nameWithType: LdapPropertyProcessor.ReadGroupPropertiesAsync(IDirectoryObject, String)
+- uid: SharpHoundCommonLib.Processors.LdapPropertyProcessor.ReadGroupPropertiesAsync*
+  name: ReadGroupPropertiesAsync
+  href: api/SharpHoundCommonLib.Processors.LdapPropertyProcessor.html#SharpHoundCommonLib_Processors_LdapPropertyProcessor_ReadGroupPropertiesAsync_
+  commentId: Overload:SharpHoundCommonLib.Processors.LdapPropertyProcessor.ReadGroupPropertiesAsync
   isSpec: "True"
-  fullName: SharpHoundCommonLib.Processors.LdapPropertyProcessor.ReadGroupProperties
-  nameWithType: LdapPropertyProcessor.ReadGroupProperties
+  fullName: SharpHoundCommonLib.Processors.LdapPropertyProcessor.ReadGroupPropertiesAsync
+  nameWithType: LdapPropertyProcessor.ReadGroupPropertiesAsync
 - uid: SharpHoundCommonLib.Processors.LdapPropertyProcessor.ReadIssuancePolicyProperties(SharpHoundCommonLib.IDirectoryObject)
   name: ReadIssuancePolicyProperties(IDirectoryObject)
   href: api/SharpHoundCommonLib.Processors.LdapPropertyProcessor.html#SharpHoundCommonLib_Processors_LdapPropertyProcessor_ReadIssuancePolicyProperties_SharpHoundCommonLib_IDirectoryObject_
