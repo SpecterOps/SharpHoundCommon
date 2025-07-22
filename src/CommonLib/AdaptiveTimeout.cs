@@ -1,24 +1,31 @@
 using System;
+using System.Collections.Concurrent;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using SharpHoundCommonLib.Exceptions;
 using SharpHoundRPC.NetAPINative;
 
 namespace SharpHoundCommonLib;
 
 public sealed class AdaptiveTimeout : IDisposable {
     private readonly ExecutionTimeSampler _sampler;
+    private readonly ConcurrentQueue<DateTime> _latestSuccessTimestamps;
     private readonly ILogger _log;
     private readonly TimeSpan _maxTimeout;
     private readonly bool _useAdaptiveTimeout;
     private readonly int _minSamplesForAdaptiveTimeout;
-    private int _clearSamplesDecay;
+    private readonly bool _throwIfExcessiveTimeouts;
+    private int _timeSpikeDecay;
     private const int TimeSpikePenalty = 2;
     private const int TimeSpikeForgiveness = 1;
-    private const int ClearSamplesThreshold = 5;
+    private const int TimeSpikeThreshold = 5;
+    private const int ExcessiveTimeoutsThreshold = 7;
     private const int StdDevMultiplier = 5;
+    private const int CountOfLatestSuccessToKeep = 4;
 
-    public AdaptiveTimeout(TimeSpan maxTimeout, ILogger log, int sampleCount = 100, int logFrequency = 1000, int minSamplesForAdaptiveTimeout = 30, bool useAdaptiveTimeout = true) {
+    public AdaptiveTimeout(TimeSpan maxTimeout, ILogger log, int sampleCount = 100, int logFrequency = 1000, int minSamplesForAdaptiveTimeout = 30, bool useAdaptiveTimeout = true, bool throwIfExcessiveTimeouts = false) {
         if (maxTimeout <= TimeSpan.Zero)
             throw new ArgumentException("maxTimeout must be positive", nameof(maxTimeout));
         if (sampleCount <= 0)
@@ -31,14 +38,16 @@ public sealed class AdaptiveTimeout : IDisposable {
             throw new ArgumentNullException(nameof(log));
 
         _sampler = new ExecutionTimeSampler(log, sampleCount, logFrequency);
+        _latestSuccessTimestamps = new ConcurrentQueue<DateTime>();
         _log = log;
         _maxTimeout = maxTimeout;
-        _useAdaptiveTimeout = useAdaptiveTimeout;
         _minSamplesForAdaptiveTimeout = minSamplesForAdaptiveTimeout;
+        _useAdaptiveTimeout = useAdaptiveTimeout;
+        _throwIfExcessiveTimeouts = throwIfExcessiveTimeouts;
     }
 
     public void ClearSamples() {
-        Interlocked.Exchange(ref _clearSamplesDecay, 0);
+        Interlocked.Exchange(ref _timeSpikeDecay, 0);
         _sampler.ClearSamples();
     }
 
@@ -55,8 +64,13 @@ public sealed class AdaptiveTimeout : IDisposable {
     /// <param name="parentToken"></param>
     /// <returns>Returns a Fail result if a task runs longer than its budgeted time.</returns>
     public async Task<Result<T>> ExecuteWithTimeout<T>(Func<CancellationToken, T> func, CancellationToken parentToken = default) {
-        var result = await Timeout.ExecuteWithTimeout(GetAdaptiveTimeout(), (timeoutToken) => _sampler.SampleExecutionTime(() => func(timeoutToken)), parentToken);
-        TimeSpikeSafetyValve(result.IsSuccess);
+        DateTime startTime = default;
+        var result = await Timeout.ExecuteWithTimeout(GetAdaptiveTimeout(), (timeoutToken) =>
+            _sampler.SampleExecutionTime(() => {
+                startTime = DateTime.Now; // for ordinal tracking; see use in TimeSpikeSafetyValve
+                return func(timeoutToken);
+            }), parentToken);
+        TimeSpikeSafetyValve(result.IsSuccess, startTime);
         return result;
     }
 
@@ -72,8 +86,13 @@ public sealed class AdaptiveTimeout : IDisposable {
     /// <param name="parentToken"></param>
     /// <returns>Returns a Fail result if a task runs longer than its budgeted time.</returns>
     public async Task<Result> ExecuteWithTimeout(Action<CancellationToken> func, CancellationToken parentToken = default) {
-        var result = await Timeout.ExecuteWithTimeout(GetAdaptiveTimeout(), (timeoutToken) => _sampler.SampleExecutionTime(() => func(timeoutToken)), parentToken);
-        TimeSpikeSafetyValve(result.IsSuccess);
+        DateTime startTime = default;
+        var result = await Timeout.ExecuteWithTimeout(GetAdaptiveTimeout(), (timeoutToken) =>
+            _sampler.SampleExecutionTime(() => {
+                startTime = DateTime.Now; // for ordinal tracking; see use in TimeSpikeSafetyValve
+                func(timeoutToken);
+            }), parentToken);
+        TimeSpikeSafetyValve(result.IsSuccess, startTime);
         return result;
     }
 
@@ -90,8 +109,13 @@ public sealed class AdaptiveTimeout : IDisposable {
     /// <param name="parentToken"></param>
     /// <returns>Returns a Fail result if a task runs longer than its budgeted time.</returns>
     public async Task<Result<T>> ExecuteWithTimeout<T>(Func<CancellationToken, Task<T>> func, CancellationToken parentToken = default) {
-        var result = await Timeout.ExecuteWithTimeout(GetAdaptiveTimeout(), (timeoutToken) => _sampler.SampleExecutionTime(() => func(timeoutToken)), parentToken);
-        TimeSpikeSafetyValve(result.IsSuccess);
+        DateTime startTime = default;
+        var result = await Timeout.ExecuteWithTimeout(GetAdaptiveTimeout(), (timeoutToken) =>
+            _sampler.SampleExecutionTime(() => {
+                startTime = DateTime.Now; // for ordinal tracking; see use in TimeSpikeSafetyValve
+                return func(timeoutToken);
+            }), parentToken);
+        TimeSpikeSafetyValve(result.IsSuccess, startTime);
         return result;
     }
 
@@ -107,8 +131,13 @@ public sealed class AdaptiveTimeout : IDisposable {
     /// <param name="parentToken"></param>
     /// <returns>Returns a Fail result if a task runs longer than its budgeted time.</returns>
     public async Task<Result> ExecuteWithTimeout(Func<CancellationToken, Task> func, CancellationToken parentToken = default) {
-        var result = await Timeout.ExecuteWithTimeout(GetAdaptiveTimeout(), (timeoutToken) => _sampler.SampleExecutionTime(() => func(timeoutToken)), parentToken);
-        TimeSpikeSafetyValve(result.IsSuccess);
+        DateTime startTime = default;
+        var result = await Timeout.ExecuteWithTimeout(GetAdaptiveTimeout(), (timeoutToken) =>
+            _sampler.SampleExecutionTime(() => {
+                startTime = DateTime.Now; // for ordinal tracking; see use in TimeSpikeSafetyValve
+                return func(timeoutToken);
+            }), parentToken);
+        TimeSpikeSafetyValve(result.IsSuccess, startTime);
         return result;
     }
 
@@ -125,8 +154,13 @@ public sealed class AdaptiveTimeout : IDisposable {
     /// <param name="parentToken"></param>
     /// <returns>Returns a Fail result if a task runs longer than its budgeted time.</returns>
     public async Task<NetAPIResult<T>> ExecuteNetAPIWithTimeout<T>(Func<CancellationToken, NetAPIResult<T>> func, CancellationToken parentToken = default) {
-        var result = await Timeout.ExecuteNetAPIWithTimeout(GetAdaptiveTimeout(), (timeoutToken) => _sampler.SampleExecutionTime(() => func(timeoutToken)), parentToken);
-        TimeSpikeSafetyValve(result.IsSuccess);
+        DateTime startTime = default;
+        var result = await Timeout.ExecuteNetAPIWithTimeout(GetAdaptiveTimeout(), (timeoutToken) =>
+            _sampler.SampleExecutionTime(() => {
+                startTime = DateTime.Now; // for ordinal tracking; see use in TimeSpikeSafetyValve
+                return func(timeoutToken);
+            }), parentToken);
+        TimeSpikeSafetyValve(result.IsSuccess, startTime);
         return result;
     }
 
@@ -143,8 +177,13 @@ public sealed class AdaptiveTimeout : IDisposable {
     /// <param name="parentToken"></param>
     /// <returns>Returns a Fail result if a task runs longer than its budgeted time.</returns>
     public async Task<SharpHoundRPC.Result<T>> ExecuteRPCWithTimeout<T>(Func<CancellationToken, SharpHoundRPC.Result<T>> func, CancellationToken parentToken = default) {
-        var result = await Timeout.ExecuteRPCWithTimeout(GetAdaptiveTimeout(), (timeoutToken) => _sampler.SampleExecutionTime(() => func(timeoutToken)), parentToken);
-        TimeSpikeSafetyValve(result.IsSuccess);
+        DateTime startTime = default;
+        var result = await Timeout.ExecuteRPCWithTimeout(GetAdaptiveTimeout(), (timeoutToken) =>
+            _sampler.SampleExecutionTime(() => {
+                startTime = DateTime.Now; // for ordinal tracking; see use in TimeSpikeSafetyValve
+                return func(timeoutToken);
+            }), parentToken);
+        TimeSpikeSafetyValve(result.IsSuccess, startTime);
         return result;
     }
 
@@ -161,8 +200,13 @@ public sealed class AdaptiveTimeout : IDisposable {
     /// <param name="parentToken"></param>
     /// <returns>Returns a Fail result if a task runs longer than its budgeted time.</returns>
     public async Task<SharpHoundRPC.Result<T>> ExecuteRPCWithTimeout<T>(Func<CancellationToken, Task<SharpHoundRPC.Result<T>>> func, CancellationToken parentToken = default) {
-        var result = await Timeout.ExecuteRPCWithTimeout(GetAdaptiveTimeout(), (timeoutToken) => _sampler.SampleExecutionTime(() => func(timeoutToken)), parentToken);
-        TimeSpikeSafetyValve(result.IsSuccess);
+        DateTime startTime = default;
+        var result = await Timeout.ExecuteRPCWithTimeout(GetAdaptiveTimeout(), (timeoutToken) =>
+            _sampler.SampleExecutionTime(() => {
+                startTime = DateTime.Now; // for ordinal tracking; see use in TimeSpikeSafetyValve
+                return func(timeoutToken);
+            }), parentToken);
+        TimeSpikeSafetyValve(result.IsSuccess, startTime);
         return result;
     }
 
@@ -200,28 +244,64 @@ public sealed class AdaptiveTimeout : IDisposable {
     // then suddenly starts taking a regular 100ms
     // this is fine (if it fits in our max timeout budget), and we shouldn't timeout
     // so we should create a safety valve in case this happens to reset our data samples
-    private void TimeSpikeSafetyValve(bool isSuccess) {
+    private void TimeSpikeSafetyValve(bool isSuccess, DateTime startTime) {
         if (isSuccess) {
-            AtomicDecrementWithFloor(ref _clearSamplesDecay, TimeSpikeForgiveness);
+            AtomicDecrementWithFloor(ref _timeSpikeDecay, TimeSpikeForgiveness);
+            AddLatestSuccessTimestamp(startTime);
         }
         else {
-            Interlocked.Add(ref _clearSamplesDecay, TimeSpikePenalty);
+            Interlocked.Add(ref _timeSpikeDecay, TimeSpikePenalty);
 
-            if (_clearSamplesDecay >= ClearSamplesThreshold) {
-                if (UseAdaptiveTimeout()) {
-                    ClearSamples();
-                    _log.LogTrace("Time spike safety valve event at timeout {CurrentTimeout}.", GetAdaptiveTimeout());
+            if (Volatile.Read(ref _timeSpikeDecay) >= TimeSpikeThreshold) {
+                if (EnoughSuccessesSince(startTime)) {
+                    // Time spike is in the past now, no action needed
+                    // This happens when earlier calls report back timeouts
+                    // but we've since seen sufficent successful calls completed in the time between
+                    _log.LogTrace("Time spike hiccup spotted but since recovered.");
+                    Interlocked.Exchange(ref _timeSpikeDecay, 0);
                 }
                 else {
-                    _log.LogWarning("This call is frequently running over the maximum allowed timeout of {MaxTimeout}.", _maxTimeout);
-                    Interlocked.Exchange(ref _clearSamplesDecay, 0);
+                    TriggerTimeSpikeEvent();
                 }
             }
         }
     }
 
+    private void TriggerTimeSpikeEvent() {
+        // Most recent calls made have been timing out
+        // If adaptive timeout is in play when a spike in timeout events occurs,
+        // flush our samples and back off to the max timeout until we have enough new ones
+        // to rebuild our data confidence
+        if (UseAdaptiveTimeout()) {
+            _log.LogTrace("Time spike safety valve event at timeout {CurrentTimeout}.", GetAdaptiveTimeout());
+            ClearSamples();
+        }
+
+        // Otherwise, if we're using the max configured timeout already and this spike in timeout events is still occuring,
+        // log it and maybe throw an error if so configuredx
+        else if (Volatile.Read(ref _timeSpikeDecay) >= ExcessiveTimeoutsThreshold) {
+            _log.LogWarning("This call is frequently running over the maximum allowed timeout of {MaxTimeout}.", _maxTimeout);
+            Interlocked.Exchange(ref _timeSpikeDecay, 0);
+
+            if (_throwIfExcessiveTimeouts)
+                throw new ExcessiveTimeoutsException($"This call is frequently running over the maximum allowed timeout of {_maxTimeout}.");
+        }
+    }
+
     private bool UseAdaptiveTimeout() {
         return _useAdaptiveTimeout && _sampler.Count >= _minSamplesForAdaptiveTimeout;
+    }
+
+    private void AddLatestSuccessTimestamp(DateTime startTime) {
+        while (_latestSuccessTimestamps.Count >= CountOfLatestSuccessToKeep) {
+            _latestSuccessTimestamps.TryDequeue(out var _);
+        }
+
+        _latestSuccessTimestamps.Enqueue(startTime);
+    }
+
+    private bool EnoughSuccessesSince(DateTime startTime) {
+        return _latestSuccessTimestamps.All(t => t >= startTime);
     }
 
     // AI-generated code
