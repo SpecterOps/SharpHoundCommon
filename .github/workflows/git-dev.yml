@@ -35,7 +35,7 @@ jobs:
       - name: Pack
         run: | 
           mkdir pkgs
-          dotnet pack --no-restore -c Release -p:PackageVersion=git-dev -o ./pkgs
+          dotnet pack --no-restore -c Release -p:PackageVersion=0.0.0-git-dev -o ./pkgs
         
 #      - name: Prep Packages
 #        run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/BloodHoundAD/index.json"
