@@ -7,8 +7,6 @@ namespace SharpHoundCommonLib.OutputTypes {
         public string RightName { get; set; }
         public bool IsInherited { get; set; }
         public string InheritanceHash { get; set; }
-        public bool IsPermissionForOwnerRightsSid {get; set; }
-        public bool IsInheritedPermissionForOwnerRightsSid { get; set; }
 
         public override string ToString() {
             return $"{PrincipalType} {PrincipalSID} - {RightName} {(IsInherited ? "" : "Not")} Inherited";

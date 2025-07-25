@@ -9,7 +9,7 @@ namespace SharpHoundCommonLib.OutputTypes
     public class OutputBase
     {
         public Dictionary<string, object> Properties = new();
-        public IEnumerable<ACE> Aces { get; set; } = Array.Empty<ACE>();
+        public ACE[] Aces { get; set; } = Array.Empty<ACE>();
         public string ObjectIdentifier { get; set; }
         public bool IsDeleted { get; set; }
         public bool IsACLProtected { get; set; }

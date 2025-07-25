@@ -229,13 +229,13 @@ namespace SharpHoundCommonLib.Processors {
             return ProcessACL(descriptor, result.Domain, result.ObjectType, searchResult.HasLAPS(), result.DisplayName);
         }
 
-        public IAsyncEnumerable<ACE> ProcessACL(ResolvedSearchResult result, IDirectoryObject searchResult, bool checkForOwnerRights)
+        public async Task<(ACE[], bool, bool)> ProcessACL(ResolvedSearchResult result, IDirectoryObject searchResult, bool checkForOwnerRights)
         {
             if (!searchResult.TryGetByteProperty(LDAPProperties.SecurityDescriptor, out var descriptor))
             {
-                return AsyncEnumerable.Empty<ACE>();
+                return (Array.Empty<ACE>(), false, false);
             }
-            return ProcessACL(descriptor, result.Domain, result.ObjectType, searchResult.HasLAPS(), checkForOwnerRights, result.DisplayName);
+            return await ProcessACL(descriptor, result.Domain, result.ObjectType, searchResult.HasLAPS(), checkForOwnerRights, result.DisplayName);
         }
 
         /// <summary>
@@ -248,444 +248,447 @@ namespace SharpHoundCommonLib.Processors {
         /// <param name="objectType"></param>
         /// <param name="hasLaps"></param>
         /// <returns></returns>
-        public IAsyncEnumerable<ACE> ProcessACL(byte[] ntSecurityDescriptor, string objectDomain,
+        public async IAsyncEnumerable<ACE> ProcessACL(byte[] ntSecurityDescriptor, string objectDomain,
            Label objectType, bool hasLaps, string objectName = "")
         {
-            return ProcessACL(ntSecurityDescriptor, objectDomain, objectType, hasLaps, true, objectName);
+            var (aces, _, _) = await ProcessACL(ntSecurityDescriptor, objectDomain, objectType, hasLaps, true, objectName);
+            foreach (var ace in aces)
+            {
+                yield return ace;
+            }
         }
 
-        public async IAsyncEnumerable<ACE> ProcessACL(byte[] ntSecurityDescriptor, string objectDomain,
-            Label objectType, bool hasLaps, bool checkForOwnerRights, string objectName) {
+        public async Task<(ACE[], bool, bool)> ProcessACL(byte[] ntSecurityDescriptor, string objectDomain,
+            Label objectType, bool hasLaps, bool checkForOwnerRights, string objectName)
+        {
+            var aces = new List<ACE>();
+            bool isAnyPermissionForOwnerRightsSid = false;
+            bool isAnyPermissionForOwnerRightsSidInherited = false;
+
             await BuildGuidCache(objectDomain);
 
-            if (ntSecurityDescriptor == null) {
+            if (ntSecurityDescriptor == null)
+            {
                 _log.LogDebug("Security Descriptor is null for {Name}", objectName);
-                yield break;
             }
+            else
+            {
 
-            var descriptor = _utils.MakeSecurityDescriptor();
-            try {
-                descriptor.SetSecurityDescriptorBinaryForm(ntSecurityDescriptor);
-            }
-            catch (OverflowException) {
-                _log.LogWarning(
-                    "Security descriptor on object {Name} exceeds maximum allowable length. Unable to process",
-                    objectName);
-                yield break;
-            }
-
-            _log.LogDebug("Processing ACL for {ObjectName}", objectName);
-            var ownerSid = Helpers.PreProcessSID(descriptor.GetOwner(typeof(SecurityIdentifier)));
-
-            if (ownerSid != null) {
-                if (await _utils.ResolveIDAndType(ownerSid, objectDomain) is (true, var resolvedOwner)) {
-                    yield return new ACE {
-                        PrincipalType = resolvedOwner.ObjectType,
-                        PrincipalSID = resolvedOwner.ObjectIdentifier,
-                        RightName = EdgeNames.Owns,
-                        IsInherited = false,
-                        InheritanceHash = ""
-                    };
+                var descriptor = _utils.MakeSecurityDescriptor();
+                try
+                {
+                    descriptor.SetSecurityDescriptorBinaryForm(ntSecurityDescriptor);
                 }
-                else {
-                    _log.LogTrace("Failed to resolve owner for {Name}", objectName);
-                    yield return new ACE {
-                        PrincipalType = Label.Base,
-                        PrincipalSID = ownerSid,
-                        RightName = EdgeNames.Owns,
-                        IsInherited = false,
-                        InheritanceHash = ""
-                    };
-                }
-            }
-
-            foreach (var ace in descriptor.GetAccessRules(true, true, typeof(SecurityIdentifier))) {
-                bool isPermissionForOwnerRightsSid = false;
-                bool isInheritedPermissionForOwnerRightsSid = false;
-
-                if (ace == null || ace.AccessControlType() == AccessControlType.Deny || !ace.IsAceInheritedFrom(BaseGuids[objectType])) {
-                    continue;
+                catch (OverflowException)
+                {
+                    _log.LogWarning(
+                        "Security descriptor on object {Name} exceeds maximum allowable length. Unable to process",
+                        objectName);
                 }
 
-                var ir = ace.IdentityReference();
-                var principalSid = Helpers.PreProcessSID(ir);
+                _log.LogDebug("Processing ACL for {ObjectName}", objectName);
+                var ownerSid = Helpers.PreProcessSID(descriptor.GetOwner(typeof(SecurityIdentifier)));
 
-                //Preprocess returns null if this is an ignored sid
-                if (principalSid == null) {
-                    continue;
-                }
-
-                var (success, resolvedPrincipal) = await _utils.ResolveIDAndType(principalSid, objectDomain);
-                if (!success) {
-                    _log.LogTrace("Failed to resolve type for principal {Sid} on ACE for {Object}", principalSid, objectName);
-                    resolvedPrincipal.ObjectIdentifier = principalSid;
-                    resolvedPrincipal.ObjectType = Label.Base;
-                }
-
-                //Check if any rights are explicitly defined for the OWNER RIGHTS SID
-                if (checkForOwnerRights && resolvedPrincipal.ObjectIdentifier.EndsWith("S-1-3-4")) {
-                    isPermissionForOwnerRightsSid = true;
-                }
-
-                var aceRights = ace.ActiveDirectoryRights();
-                //Lowercase this just in case. As far as I know it should always come back that way anyways, but better safe than sorry
-                var aceType = ace.ObjectType().ToString().ToLower();
-                var inherited = ace.IsInherited();
-
-                var aceInheritanceHash = "";
-                if (inherited) {
-                    aceInheritanceHash = CalculateInheritanceHash(ir, aceRights, aceType, ace.InheritedObjectType());
-
-                    //Check if any rights that are explicitly defined for the OWNER RIGHTS SID are inherited
-                    if (checkForOwnerRights && resolvedPrincipal.ObjectIdentifier.EndsWith("S-1-3-4")) {
-                        isInheritedPermissionForOwnerRightsSid = true;
+                if (ownerSid != null)
+                {
+                    if (await _utils.ResolveIDAndType(ownerSid, objectDomain) is (true, var resolvedOwner))
+                    {
+                        aces.Add(new ACE
+                        {
+                            PrincipalType = resolvedOwner.ObjectType,
+                            PrincipalSID = resolvedOwner.ObjectIdentifier,
+                            RightName = EdgeNames.Owns,
+                            IsInherited = false,
+                            InheritanceHash = ""
+                        });
+                    }
+                    else
+                    {
+                        _log.LogTrace("Failed to resolve owner for {Name}", objectName);
+                        aces.Add(new ACE
+                        {
+                            PrincipalType = Label.Base,
+                            PrincipalSID = ownerSid,
+                            RightName = EdgeNames.Owns,
+                            IsInherited = false,
+                            InheritanceHash = ""
+                        });
                     }
                 }
 
-                //// This log is exceptionally noisy, disabling
-                // _log.LogTrace("Processing ACE with rights {Rights} and guid {GUID} on object {Name}", aceRights,
-                //     aceType, objectName);
-
-                //GenericAll, WriteDacl, and WriteOwner apply to every object
-                //All three require ObjectType (aceType) is "AllGuid" or not set (see: https://github.com/SpecterOps/BloodHound/issues/613)
-                if (aceType is ACEGuids.AllGuid or "") {
-                    if (aceRights.HasFlag(ActiveDirectoryRights.GenericAll)) {
-                        yield return new ACE {
-                            PrincipalType = resolvedPrincipal.ObjectType,
-                            PrincipalSID = resolvedPrincipal.ObjectIdentifier,
-                            IsInherited = inherited,
-                            RightName = EdgeNames.GenericAll,
-                            InheritanceHash = aceInheritanceHash,
-                            IsPermissionForOwnerRightsSid = isPermissionForOwnerRightsSid,
-                            IsInheritedPermissionForOwnerRightsSid = isInheritedPermissionForOwnerRightsSid,
-
-                        };
-                        //This is a special case. If we don't continue here, every other ACE will match because GenericAll includes all other permissions
+                foreach (var ace in descriptor.GetAccessRules(true, true, typeof(SecurityIdentifier)))
+                {
+                    if (ace == null || ace.AccessControlType() == AccessControlType.Deny || !ace.IsAceInheritedFrom(BaseGuids[objectType]))
+                    {
                         continue;
                     }
-                    if (aceRights.HasFlag(ActiveDirectoryRights.WriteDacl)) {
-                        yield return new ACE {
+
+                    var ir = ace.IdentityReference();
+                    var principalSid = Helpers.PreProcessSID(ir);
+
+                    //Preprocess returns null if this is an ignored sid
+                    if (principalSid == null)
+                    {
+                        continue;
+                    }
+
+                    var (success, resolvedPrincipal) = await _utils.ResolveIDAndType(principalSid, objectDomain);
+                    if (!success)
+                    {
+                        _log.LogTrace("Failed to resolve type for principal {Sid} on ACE for {Object}", principalSid, objectName);
+                        resolvedPrincipal.ObjectIdentifier = principalSid;
+                        resolvedPrincipal.ObjectType = Label.Base;
+                    }
+
+                    //Check if any rights are explicitly defined for the OWNER RIGHTS SID
+                    if (checkForOwnerRights && resolvedPrincipal.ObjectIdentifier.EndsWith("S-1-3-4"))
+                    {
+                        isAnyPermissionForOwnerRightsSid = true;
+                    }
+
+                    var aceRights = ace.ActiveDirectoryRights();
+                    //Lowercase this just in case. As far as I know it should always come back that way anyways, but better safe than sorry
+                    var aceType = ace.ObjectType().ToString().ToLower();
+                    var inherited = ace.IsInherited();
+
+                    var aceInheritanceHash = "";
+                    if (inherited)
+                    {
+                        aceInheritanceHash = CalculateInheritanceHash(ir, aceRights, aceType, ace.InheritedObjectType());
+
+                        //Check if any rights that are explicitly defined for the OWNER RIGHTS SID are inherited
+                        if (checkForOwnerRights && resolvedPrincipal.ObjectIdentifier.EndsWith("S-1-3-4"))
+                        {
+                            isAnyPermissionForOwnerRightsSidInherited = true;
+                        }
+                    }
+
+                    _log.LogTrace("Processing ACE with rights {Rights} and guid {GUID} on object {Name}", aceRights,
+                        aceType, objectName);
+
+                    //GenericAll, WriteDacl, and WriteOwner apply to every object
+                    //All three require ObjectType (aceType) is "AllGuid" or not set (see: https://github.com/SpecterOps/BloodHound/issues/613)
+                    if (aceType is ACEGuids.AllGuid or "") {
+                        if (aceRights.HasFlag(ActiveDirectoryRights.GenericAll)) {
+                            aces.Add(new ACE
+                            {
+                                PrincipalType = resolvedPrincipal.ObjectType,
+                                PrincipalSID = resolvedPrincipal.ObjectIdentifier,
+                                IsInherited = inherited,
+                                RightName = EdgeNames.GenericAll,
+                                InheritanceHash = aceInheritanceHash
+                            });
+                            //This is a special case. If we don't continue here, every other ACE will match because GenericAll includes all other permissions
+                            continue;
+                        }
+                        if (aceRights.HasFlag(ActiveDirectoryRights.WriteDacl)) {
+                            aces.Add(new ACE
+                            {
+                                PrincipalType = resolvedPrincipal.ObjectType,
+                                PrincipalSID = resolvedPrincipal.ObjectIdentifier,
+                                IsInherited = inherited,
+                                RightName = EdgeNames.WriteDacl,
+                                InheritanceHash = aceInheritanceHash
+                            });
+                        }
+                        if (aceRights.HasFlag(ActiveDirectoryRights.WriteOwner)) {
+                            aces.Add(new ACE
+                            {
+                                PrincipalType = resolvedPrincipal.ObjectType,
+                                PrincipalSID = resolvedPrincipal.ObjectIdentifier,
+                                IsInherited = inherited,
+                                RightName = EdgeNames.WriteOwner,
+                                InheritanceHash = aceInheritanceHash
+                            });
+                        }
+                    }
+
+                    //Cool ACE courtesy of @rookuu. Allows a principal to add itself to a group and no one else
+                    if (aceRights.HasFlag(ActiveDirectoryRights.Self) &&
+                        !aceRights.HasFlag(ActiveDirectoryRights.WriteProperty) &&
+                        !aceRights.HasFlag(ActiveDirectoryRights.GenericWrite) && objectType == Label.Group &&
+                        aceType is ACEGuids.WriteMember or ACEGuids.AllGuid)
+                        aces.Add(new ACE
+                        {
                             PrincipalType = resolvedPrincipal.ObjectType,
                             PrincipalSID = resolvedPrincipal.ObjectIdentifier,
                             IsInherited = inherited,
-                            RightName = EdgeNames.WriteDacl,
-                            InheritanceHash = aceInheritanceHash,
-                            IsPermissionForOwnerRightsSid = isPermissionForOwnerRightsSid,
-                            IsInheritedPermissionForOwnerRightsSid = isInheritedPermissionForOwnerRightsSid,
-                        };
-                    }
-                    if (aceRights.HasFlag(ActiveDirectoryRights.WriteOwner)) {
-                        yield return new ACE {
-                            PrincipalType = resolvedPrincipal.ObjectType,
-                            PrincipalSID = resolvedPrincipal.ObjectIdentifier,
-                            IsInherited = inherited,
-                            RightName = EdgeNames.WriteOwner,
-                            InheritanceHash = aceInheritanceHash,
-                            IsPermissionForOwnerRightsSid = isPermissionForOwnerRightsSid,
-                            IsInheritedPermissionForOwnerRightsSid = isInheritedPermissionForOwnerRightsSid,
-                        };
-                    }
-                }
+                            RightName = EdgeNames.AddSelf,
+                            InheritanceHash = aceInheritanceHash
+                        });
 
-                //Cool ACE courtesy of @rookuu. Allows a principal to add itself to a group and no one else
-                if (aceRights.HasFlag(ActiveDirectoryRights.Self) &&
-                    !aceRights.HasFlag(ActiveDirectoryRights.WriteProperty) &&
-                    !aceRights.HasFlag(ActiveDirectoryRights.GenericWrite) && objectType == Label.Group &&
-                    aceType is ACEGuids.WriteMember or ACEGuids.AllGuid)
-                    yield return new ACE {
-                        PrincipalType = resolvedPrincipal.ObjectType,
-                        PrincipalSID = resolvedPrincipal.ObjectIdentifier,
-                        IsInherited = inherited,
-                        RightName = EdgeNames.AddSelf,
-                        InheritanceHash = aceInheritanceHash,
-                        IsPermissionForOwnerRightsSid = isPermissionForOwnerRightsSid,
-                        IsInheritedPermissionForOwnerRightsSid = isInheritedPermissionForOwnerRightsSid,
-                    };
-
-                //Process object type specific ACEs. Extended rights apply to users, domains, computers, and cert templates
-                if (aceRights.HasFlag(ActiveDirectoryRights.ExtendedRight) ||
-                    aceRights.HasFlag(ActiveDirectoryRights.GenericAll)) //GenericAll also works (see: https://github.com/SpecterOps/BloodHound/issues/613#issuecomment-2728437374)
-                {
-                    if (objectType == Label.Domain) {
-                        if (aceType == ACEGuids.DSReplicationGetChanges)
-                            yield return new ACE {
-                                PrincipalType = resolvedPrincipal.ObjectType,
-                                PrincipalSID = resolvedPrincipal.ObjectIdentifier,
-                                IsInherited = inherited,
-                                RightName = EdgeNames.GetChanges,
-                                InheritanceHash = aceInheritanceHash,
-                                IsPermissionForOwnerRightsSid = isPermissionForOwnerRightsSid,
-                                IsInheritedPermissionForOwnerRightsSid = isInheritedPermissionForOwnerRightsSid,
-                            };
-                        else if (aceType == ACEGuids.DSReplicationGetChangesAll)
-                            yield return new ACE {
-                                PrincipalType = resolvedPrincipal.ObjectType,
-                                PrincipalSID = resolvedPrincipal.ObjectIdentifier,
-                                IsInherited = inherited,
-                                RightName = EdgeNames.GetChangesAll,
-                                InheritanceHash = aceInheritanceHash,
-                                IsPermissionForOwnerRightsSid = isPermissionForOwnerRightsSid,
-                                IsInheritedPermissionForOwnerRightsSid = isInheritedPermissionForOwnerRightsSid,
-                            };
-                        else if (aceType == ACEGuids.DSReplicationGetChangesInFilteredSet)
-                            yield return new ACE {
-                                PrincipalType = resolvedPrincipal.ObjectType,
-                                PrincipalSID = resolvedPrincipal.ObjectIdentifier,
-                                IsInherited = inherited,
-                                RightName = EdgeNames.GetChangesInFilteredSet,
-                                InheritanceHash = aceInheritanceHash,
-                                IsPermissionForOwnerRightsSid = isPermissionForOwnerRightsSid,
-                                IsInheritedPermissionForOwnerRightsSid = isInheritedPermissionForOwnerRightsSid,
-                            };
-                        else if (aceType is ACEGuids.AllGuid or "")
-                            yield return new ACE {
-                                PrincipalType = resolvedPrincipal.ObjectType,
-                                PrincipalSID = resolvedPrincipal.ObjectIdentifier,
-                                IsInherited = inherited,
-                                RightName = EdgeNames.AllExtendedRights,
-                                InheritanceHash = aceInheritanceHash,
-                                IsPermissionForOwnerRightsSid = isPermissionForOwnerRightsSid,
-                                IsInheritedPermissionForOwnerRightsSid = isInheritedPermissionForOwnerRightsSid,
-                            };
-                    }
-                    else if (objectType == Label.User) {
-                        if (aceType == ACEGuids.UserForceChangePassword)
-                            yield return new ACE {
-                                PrincipalType = resolvedPrincipal.ObjectType,
-                                PrincipalSID = resolvedPrincipal.ObjectIdentifier,
-                                IsInherited = inherited,
-                                RightName = EdgeNames.ForceChangePassword,
-                                InheritanceHash = aceInheritanceHash,
-                                IsPermissionForOwnerRightsSid = isPermissionForOwnerRightsSid,
-                                IsInheritedPermissionForOwnerRightsSid = isInheritedPermissionForOwnerRightsSid,
-                            };
-                        else if (aceType is ACEGuids.AllGuid or "")
-                            yield return new ACE {
-                                PrincipalType = resolvedPrincipal.ObjectType,
-                                PrincipalSID = resolvedPrincipal.ObjectIdentifier,
-                                IsInherited = inherited,
-                                RightName = EdgeNames.AllExtendedRights,
-                                InheritanceHash = aceInheritanceHash,
-                                IsPermissionForOwnerRightsSid = isPermissionForOwnerRightsSid,
-                                IsInheritedPermissionForOwnerRightsSid = isInheritedPermissionForOwnerRightsSid,
-                            };
-                    }
-                    else if (objectType == Label.Computer) {
-                        //ReadLAPSPassword is only applicable if the computer actually has LAPS. Check the world readable property ms-mcs-admpwdexpirationtime
-                        if (hasLaps) {
-                            if (aceType is ACEGuids.AllGuid or "")
-                                yield return new ACE {
+                    //Process object type specific ACEs. Extended rights apply to users, domains, computers, and cert templates
+                    if (aceRights.HasFlag(ActiveDirectoryRights.ExtendedRight) ||
+                        aceRights.HasFlag(ActiveDirectoryRights.GenericAll)) //GenericAll also works (see: https://github.com/SpecterOps/BloodHound/issues/613#issuecomment-2728437374)
+                    {
+                        if (objectType == Label.Domain)
+                        {
+                            if (aceType == ACEGuids.DSReplicationGetChanges)
+                                aces.Add(new ACE
+                                {
+                                    PrincipalType = resolvedPrincipal.ObjectType,
+                                    PrincipalSID = resolvedPrincipal.ObjectIdentifier,
+                                    IsInherited = inherited,
+                                    RightName = EdgeNames.GetChanges,
+                                    InheritanceHash = aceInheritanceHash
+                                });
+                            else if (aceType == ACEGuids.DSReplicationGetChangesAll)
+                                aces.Add(new ACE
+                                {
+                                    PrincipalType = resolvedPrincipal.ObjectType,
+                                    PrincipalSID = resolvedPrincipal.ObjectIdentifier,
+                                    IsInherited = inherited,
+                                    RightName = EdgeNames.GetChangesAll,
+                                    InheritanceHash = aceInheritanceHash
+                                });
+                            else if (aceType == ACEGuids.DSReplicationGetChangesInFilteredSet)
+                                aces.Add(new ACE
+                                {
+                                    PrincipalType = resolvedPrincipal.ObjectType,
+                                    PrincipalSID = resolvedPrincipal.ObjectIdentifier,
+                                    IsInherited = inherited,
+                                    RightName = EdgeNames.GetChangesInFilteredSet,
+                                    InheritanceHash = aceInheritanceHash
+                                });
+                            else if (aceType is ACEGuids.AllGuid or "")
+                                aces.Add(new ACE
+                                {
                                     PrincipalType = resolvedPrincipal.ObjectType,
                                     PrincipalSID = resolvedPrincipal.ObjectIdentifier,
                                     IsInherited = inherited,
                                     RightName = EdgeNames.AllExtendedRights,
-                                    InheritanceHash = aceInheritanceHash,
-                                    IsPermissionForOwnerRightsSid = isPermissionForOwnerRightsSid,
-                                    IsInheritedPermissionForOwnerRightsSid = isInheritedPermissionForOwnerRightsSid,
-                                };
-                            else if (_guidMap.TryGetValue(aceType, out var lapsAttribute)) {
-                                // Compare the retrieved attribute name against LDAPProperties values
-                                if (lapsAttribute == LDAPProperties.LegacyLAPSPassword ||
-                                    lapsAttribute == LDAPProperties.LAPSPlaintextPassword ||
-                                    lapsAttribute == LDAPProperties.LAPSEncryptedPassword) {
-                                    yield return new ACE {
+                                    InheritanceHash = aceInheritanceHash
+                                });
+                        }
+                        else if (objectType == Label.User)
+                        {
+                            if (aceType == ACEGuids.UserForceChangePassword)
+                                aces.Add(new ACE
+                                {
+                                    PrincipalType = resolvedPrincipal.ObjectType,
+                                    PrincipalSID = resolvedPrincipal.ObjectIdentifier,
+                                    IsInherited = inherited,
+                                    RightName = EdgeNames.ForceChangePassword,
+                                    InheritanceHash = aceInheritanceHash
+                                });
+                            else if (aceType is ACEGuids.AllGuid or "")
+                                aces.Add(new ACE
+                                {
+                                    PrincipalType = resolvedPrincipal.ObjectType,
+                                    PrincipalSID = resolvedPrincipal.ObjectIdentifier,
+                                    IsInherited = inherited,
+                                    RightName = EdgeNames.AllExtendedRights,
+                                    InheritanceHash = aceInheritanceHash
+                                });
+                        }
+                        else if (objectType == Label.Computer)
+                        {
+                            //ReadLAPSPassword is only applicable if the computer actually has LAPS. Check the world readable property ms-mcs-admpwdexpirationtime
+                            if (hasLaps)
+                            {
+                                if (aceType is ACEGuids.AllGuid or "")
+                                    aces.Add(new ACE
+                                    {
                                         PrincipalType = resolvedPrincipal.ObjectType,
                                         PrincipalSID = resolvedPrincipal.ObjectIdentifier,
                                         IsInherited = inherited,
-                                        RightName = EdgeNames.ReadLAPSPassword,
-                                        InheritanceHash = aceInheritanceHash,
-                                        IsPermissionForOwnerRightsSid = isPermissionForOwnerRightsSid,
-                                        IsInheritedPermissionForOwnerRightsSid = isInheritedPermissionForOwnerRightsSid,
-                                    };
+                                        RightName = EdgeNames.AllExtendedRights,
+                                        InheritanceHash = aceInheritanceHash
+                                    });
+                                else if (_guidMap.TryGetValue(aceType, out var lapsAttribute))
+                                {
+                                    // Compare the retrieved attribute name against LDAPProperties values
+                                    if (lapsAttribute == LDAPProperties.LegacyLAPSPassword ||
+                                        lapsAttribute == LDAPProperties.LAPSPlaintextPassword ||
+                                        lapsAttribute == LDAPProperties.LAPSEncryptedPassword)
+                                    {
+                                        aces.Add(new ACE
+                                        {
+                                            PrincipalType = resolvedPrincipal.ObjectType,
+                                            PrincipalSID = resolvedPrincipal.ObjectIdentifier,
+                                            IsInherited = inherited,
+                                            RightName = EdgeNames.ReadLAPSPassword,
+                                            InheritanceHash = aceInheritanceHash
+                                        });
+                                    }
                                 }
                             }
                         }
+                        else if (objectType == Label.CertTemplate)
+                        {
+                            if (aceType is ACEGuids.AllGuid or "")
+                                aces.Add(new ACE
+                                {
+                                    PrincipalType = resolvedPrincipal.ObjectType,
+                                    PrincipalSID = resolvedPrincipal.ObjectIdentifier,
+                                    IsInherited = inherited,
+                                    RightName = EdgeNames.AllExtendedRights,
+                                    InheritanceHash = aceInheritanceHash
+                                });
+                            else if (aceType is ACEGuids.Enroll)
+                                aces.Add(new ACE
+                                {
+                                    PrincipalType = resolvedPrincipal.ObjectType,
+                                    PrincipalSID = resolvedPrincipal.ObjectIdentifier,
+                                    IsInherited = inherited,
+                                    RightName = EdgeNames.Enroll,
+                                    InheritanceHash = aceInheritanceHash
+                                });
+                        }
                     }
-                    else if (objectType == Label.CertTemplate) {
-                        if (aceType is ACEGuids.AllGuid or "")
-                            yield return new ACE {
+
+                    //GenericWrite encapsulates WriteProperty, so process them in tandem to avoid duplicate edges
+                    if (aceRights.HasFlag(ActiveDirectoryRights.GenericWrite) ||
+                        aceRights.HasFlag(ActiveDirectoryRights.WriteProperty) || 
+                        aceRights.HasFlag(ActiveDirectoryRights.GenericAll)) //GenericAll also works (see: https://github.com/SpecterOps/BloodHound/issues/613#issuecomment-2728437374)
+                    {
+                        if (objectType is Label.User
+                            or Label.Group
+                            or Label.Computer
+                            or Label.GPO
+                            or Label.OU
+                            or Label.Domain
+                            or Label.CertTemplate
+                            or Label.RootCA
+                            or Label.EnterpriseCA
+                            or Label.AIACA
+                            or Label.NTAuthStore
+                            or Label.IssuancePolicy)
+                            if (aceType is ACEGuids.AllGuid or "")
+                                aces.Add(new ACE
+                                {
+                                    PrincipalType = resolvedPrincipal.ObjectType,
+                                    PrincipalSID = resolvedPrincipal.ObjectIdentifier,
+                                    IsInherited = inherited,
+                                    RightName = EdgeNames.GenericWrite,
+                                    InheritanceHash = aceInheritanceHash
+                                });
+
+                        if (objectType == Label.User && aceType == ACEGuids.WriteSPN)
+                            aces.Add(new ACE
+                            {
                                 PrincipalType = resolvedPrincipal.ObjectType,
                                 PrincipalSID = resolvedPrincipal.ObjectIdentifier,
                                 IsInherited = inherited,
-                                RightName = EdgeNames.AllExtendedRights,
-                                InheritanceHash = aceInheritanceHash,
-                                IsPermissionForOwnerRightsSid = isPermissionForOwnerRightsSid,
-                                IsInheritedPermissionForOwnerRightsSid = isInheritedPermissionForOwnerRightsSid,
-                            };
-                        else if (aceType is ACEGuids.Enroll)
-                            yield return new ACE {
+                                RightName = EdgeNames.WriteSPN,
+                                InheritanceHash = aceInheritanceHash
+                            });
+                        else if (objectType == Label.Computer && aceType == ACEGuids.WriteAllowedToAct)
+                            aces.Add(new ACE
+                            {
+                                PrincipalType = resolvedPrincipal.ObjectType,
+                                PrincipalSID = resolvedPrincipal.ObjectIdentifier,
+                                IsInherited = inherited,
+                                RightName = EdgeNames.AddAllowedToAct,
+                                InheritanceHash = aceInheritanceHash
+                            });
+                        else if (objectType == Label.Computer && aceType == ACEGuids.UserAccountRestrictions)
+                            aces.Add(new ACE
+                            {
+                                PrincipalType = resolvedPrincipal.ObjectType,
+                                PrincipalSID = resolvedPrincipal.ObjectIdentifier,
+                                IsInherited = inherited,
+                                RightName = EdgeNames.WriteAccountRestrictions,
+                                InheritanceHash = aceInheritanceHash
+                            });
+                        else if (objectType is Label.OU or Label.Domain && aceType == ACEGuids.WriteGPLink)
+                            aces.Add(new ACE
+                            {
+                                PrincipalType = resolvedPrincipal.ObjectType,
+                                PrincipalSID = resolvedPrincipal.ObjectIdentifier,
+                                IsInherited = inherited,
+                                RightName = EdgeNames.WriteGPLink,
+                                InheritanceHash = aceInheritanceHash
+                            });
+                        else if (objectType == Label.Group && aceType == ACEGuids.WriteMember)
+                            aces.Add(new ACE
+                            {
+                                PrincipalType = resolvedPrincipal.ObjectType,
+                                PrincipalSID = resolvedPrincipal.ObjectIdentifier,
+                                IsInherited = inherited,
+                                RightName = EdgeNames.AddMember,
+                                InheritanceHash = aceInheritanceHash
+                            });
+                        else if (objectType is Label.User or Label.Computer && aceType == ACEGuids.AddKeyPrincipal)
+                            aces.Add(new ACE
+                            {
+                                PrincipalType = resolvedPrincipal.ObjectType,
+                                PrincipalSID = resolvedPrincipal.ObjectIdentifier,
+                                IsInherited = inherited,
+                                RightName = EdgeNames.AddKeyCredentialLink,
+                                InheritanceHash = aceInheritanceHash
+                            });
+                        else if (objectType is Label.CertTemplate)
+                        {
+                            if (aceType == ACEGuids.PKIEnrollmentFlag)
+                                aces.Add(new ACE
+                                {
+                                    PrincipalType = resolvedPrincipal.ObjectType,
+                                    PrincipalSID = resolvedPrincipal.ObjectIdentifier,
+                                    IsInherited = inherited,
+                                    RightName = EdgeNames.WritePKIEnrollmentFlag,
+                                    InheritanceHash = aceInheritanceHash
+                                });
+                            else if (aceType == ACEGuids.PKINameFlag)
+                                aces.Add(new ACE
+                                {
+                                    PrincipalType = resolvedPrincipal.ObjectType,
+                                    PrincipalSID = resolvedPrincipal.ObjectIdentifier,
+                                    IsInherited = inherited,
+                                    RightName = EdgeNames.WritePKINameFlag,
+                                    InheritanceHash = aceInheritanceHash
+                                });
+                        }
+                    }
+
+                    // EnterpriseCA rights
+                    if (objectType == Label.EnterpriseCA)
+                    {
+                        if (aceType is ACEGuids.Enroll)
+                            aces.Add(new ACE
+                            {
                                 PrincipalType = resolvedPrincipal.ObjectType,
                                 PrincipalSID = resolvedPrincipal.ObjectIdentifier,
                                 IsInherited = inherited,
                                 RightName = EdgeNames.Enroll,
-                                InheritanceHash = aceInheritanceHash,
-                                IsPermissionForOwnerRightsSid = isPermissionForOwnerRightsSid,
-                                IsInheritedPermissionForOwnerRightsSid = isInheritedPermissionForOwnerRightsSid,
-                            };
+                                InheritanceHash = aceInheritanceHash
+                            });
+
+                        var cARights = (CertificationAuthorityRights)aceRights;
+
+                        // TODO: These if statements are also present in ProcessRegistryEnrollmentPermissions. Move to shared location.               
+                        if ((cARights & CertificationAuthorityRights.ManageCA) != 0)
+                            aces.Add(new ACE
+                            {
+                                PrincipalType = resolvedPrincipal.ObjectType,
+                                PrincipalSID = resolvedPrincipal.ObjectIdentifier,
+                                IsInherited = inherited,
+                                RightName = EdgeNames.ManageCA,
+                                InheritanceHash = aceInheritanceHash
+                            });
+                        if ((cARights & CertificationAuthorityRights.ManageCertificates) != 0)
+                            aces.Add(new ACE
+                            {
+                                PrincipalType = resolvedPrincipal.ObjectType,
+                                PrincipalSID = resolvedPrincipal.ObjectIdentifier,
+                                IsInherited = inherited,
+                                RightName = EdgeNames.ManageCertificates,
+                                InheritanceHash = aceInheritanceHash
+                            });
+
+                        if ((cARights & CertificationAuthorityRights.Enroll) != 0)
+                            aces.Add(new ACE
+                            {
+                                PrincipalType = resolvedPrincipal.ObjectType,
+                                PrincipalSID = resolvedPrincipal.ObjectIdentifier,
+                                IsInherited = inherited,
+                                RightName = EdgeNames.Enroll,
+                                InheritanceHash = aceInheritanceHash
+                            });
                     }
-                }
-
-                //GenericWrite encapsulates WriteProperty, so process them in tandem to avoid duplicate edges
-                if (aceRights.HasFlag(ActiveDirectoryRights.GenericWrite) ||
-                    aceRights.HasFlag(ActiveDirectoryRights.WriteProperty) ||
-                    aceRights.HasFlag(ActiveDirectoryRights.GenericAll)) //GenericAll also works (see: https://github.com/SpecterOps/BloodHound/issues/613#issuecomment-2728437374)
-                {
-                    if (objectType is Label.User
-                        or Label.Group
-                        or Label.Computer
-                        or Label.GPO
-                        or Label.OU
-                        or Label.Domain
-                        or Label.CertTemplate
-                        or Label.RootCA
-                        or Label.EnterpriseCA
-                        or Label.AIACA
-                        or Label.NTAuthStore
-                        or Label.IssuancePolicy)
-                        if (aceType is ACEGuids.AllGuid or "")
-                            yield return new ACE {
-                                PrincipalType = resolvedPrincipal.ObjectType,
-                                PrincipalSID = resolvedPrincipal.ObjectIdentifier,
-                                IsInherited = inherited,
-                                RightName = EdgeNames.GenericWrite,
-                                InheritanceHash = aceInheritanceHash,
-                                IsPermissionForOwnerRightsSid = isPermissionForOwnerRightsSid,
-                                IsInheritedPermissionForOwnerRightsSid = isInheritedPermissionForOwnerRightsSid,
-                            };
-
-                    if (objectType == Label.User && aceType == ACEGuids.WriteSPN)
-                        yield return new ACE {
-                            PrincipalType = resolvedPrincipal.ObjectType,
-                            PrincipalSID = resolvedPrincipal.ObjectIdentifier,
-                            IsInherited = inherited,
-                            RightName = EdgeNames.WriteSPN,
-                            InheritanceHash = aceInheritanceHash,
-                            IsPermissionForOwnerRightsSid = isPermissionForOwnerRightsSid,
-                            IsInheritedPermissionForOwnerRightsSid = isInheritedPermissionForOwnerRightsSid,
-                        };
-                    else if (objectType == Label.Computer && aceType == ACEGuids.WriteAllowedToAct)
-                        yield return new ACE {
-                            PrincipalType = resolvedPrincipal.ObjectType,
-                            PrincipalSID = resolvedPrincipal.ObjectIdentifier,
-                            IsInherited = inherited,
-                            RightName = EdgeNames.AddAllowedToAct,
-                            InheritanceHash = aceInheritanceHash,
-                            IsPermissionForOwnerRightsSid = isPermissionForOwnerRightsSid,
-                            IsInheritedPermissionForOwnerRightsSid = isInheritedPermissionForOwnerRightsSid,
-                        };
-                    else if (objectType == Label.Computer && aceType == ACEGuids.UserAccountRestrictions)
-                        yield return new ACE {
-                            PrincipalType = resolvedPrincipal.ObjectType,
-                            PrincipalSID = resolvedPrincipal.ObjectIdentifier,
-                            IsInherited = inherited,
-                            RightName = EdgeNames.WriteAccountRestrictions,
-                            InheritanceHash = aceInheritanceHash,
-                            IsPermissionForOwnerRightsSid = isPermissionForOwnerRightsSid,
-                            IsInheritedPermissionForOwnerRightsSid = isInheritedPermissionForOwnerRightsSid,
-                        };
-                    else if (objectType is Label.OU or Label.Domain && aceType == ACEGuids.WriteGPLink)
-                        yield return new ACE {
-                            PrincipalType = resolvedPrincipal.ObjectType,
-                            PrincipalSID = resolvedPrincipal.ObjectIdentifier,
-                            IsInherited = inherited,
-                            RightName = EdgeNames.WriteGPLink,
-                            InheritanceHash = aceInheritanceHash,
-                            IsPermissionForOwnerRightsSid = isPermissionForOwnerRightsSid,
-                            IsInheritedPermissionForOwnerRightsSid = isInheritedPermissionForOwnerRightsSid,
-                        };
-                    else if (objectType == Label.Group && aceType == ACEGuids.WriteMember)
-                        yield return new ACE {
-                            PrincipalType = resolvedPrincipal.ObjectType,
-                            PrincipalSID = resolvedPrincipal.ObjectIdentifier,
-                            IsInherited = inherited,
-                            RightName = EdgeNames.AddMember,
-                            InheritanceHash = aceInheritanceHash,
-                            IsPermissionForOwnerRightsSid = isPermissionForOwnerRightsSid,
-                            IsInheritedPermissionForOwnerRightsSid = isInheritedPermissionForOwnerRightsSid,
-                        };
-                    else if (objectType is Label.User or Label.Computer && aceType == ACEGuids.AddKeyPrincipal)
-                        yield return new ACE {
-                            PrincipalType = resolvedPrincipal.ObjectType,
-                            PrincipalSID = resolvedPrincipal.ObjectIdentifier,
-                            IsInherited = inherited,
-                            RightName = EdgeNames.AddKeyCredentialLink,
-                            InheritanceHash = aceInheritanceHash,
-                            IsPermissionForOwnerRightsSid = isPermissionForOwnerRightsSid,
-                            IsInheritedPermissionForOwnerRightsSid = isInheritedPermissionForOwnerRightsSid,
-                        };
-                    else if (objectType is Label.CertTemplate) {
-                        if (aceType == ACEGuids.PKIEnrollmentFlag)
-                            yield return new ACE {
-                                PrincipalType = resolvedPrincipal.ObjectType,
-                                PrincipalSID = resolvedPrincipal.ObjectIdentifier,
-                                IsInherited = inherited,
-                                RightName = EdgeNames.WritePKIEnrollmentFlag,
-                                InheritanceHash = aceInheritanceHash,
-                                IsPermissionForOwnerRightsSid = isPermissionForOwnerRightsSid,
-                                IsInheritedPermissionForOwnerRightsSid = isInheritedPermissionForOwnerRightsSid,
-                            };
-                        else if (aceType == ACEGuids.PKINameFlag)
-                            yield return new ACE {
-                                PrincipalType = resolvedPrincipal.ObjectType,
-                                PrincipalSID = resolvedPrincipal.ObjectIdentifier,
-                                IsInherited = inherited,
-                                RightName = EdgeNames.WritePKINameFlag,
-                                InheritanceHash = aceInheritanceHash,
-                                IsPermissionForOwnerRightsSid = isPermissionForOwnerRightsSid,
-                                IsInheritedPermissionForOwnerRightsSid = isInheritedPermissionForOwnerRightsSid,
-                            };
-                    }
-                }
-
-                // EnterpriseCA rights
-                if (objectType == Label.EnterpriseCA) {
-                    if (aceType is ACEGuids.Enroll)
-                        yield return new ACE {
-                            PrincipalType = resolvedPrincipal.ObjectType,
-                            PrincipalSID = resolvedPrincipal.ObjectIdentifier,
-                            IsInherited = inherited,
-                            RightName = EdgeNames.Enroll,
-                            InheritanceHash = aceInheritanceHash,
-                            IsPermissionForOwnerRightsSid = isPermissionForOwnerRightsSid,
-                            IsInheritedPermissionForOwnerRightsSid = isInheritedPermissionForOwnerRightsSid,
-                        };
-
-                    var cARights = (CertificationAuthorityRights)aceRights;
-
-                    // TODO: These if statements are also present in ProcessRegistryEnrollmentPermissions. Move to shared location.               
-                    if ((cARights & CertificationAuthorityRights.ManageCA) != 0)
-                        yield return new ACE {
-                            PrincipalType = resolvedPrincipal.ObjectType,
-                            PrincipalSID = resolvedPrincipal.ObjectIdentifier,
-                            IsInherited = inherited,
-                            RightName = EdgeNames.ManageCA,
-                            InheritanceHash = aceInheritanceHash,
-                            IsPermissionForOwnerRightsSid = isPermissionForOwnerRightsSid,
-                            IsInheritedPermissionForOwnerRightsSid = isInheritedPermissionForOwnerRightsSid,
-                        };
-                    if ((cARights & CertificationAuthorityRights.ManageCertificates) != 0)
-                        yield return new ACE {
-                            PrincipalType = resolvedPrincipal.ObjectType,
-                            PrincipalSID = resolvedPrincipal.ObjectIdentifier,
-                            IsInherited = inherited,
-                            RightName = EdgeNames.ManageCertificates,
-                            InheritanceHash = aceInheritanceHash,
-                            IsPermissionForOwnerRightsSid = isPermissionForOwnerRightsSid,
-                            IsInheritedPermissionForOwnerRightsSid = isInheritedPermissionForOwnerRightsSid,
-                        };
-
-                    if ((cARights & CertificationAuthorityRights.Enroll) != 0)
-                        yield return new ACE {
-                            PrincipalType = resolvedPrincipal.ObjectType,
-                            PrincipalSID = resolvedPrincipal.ObjectIdentifier,
-                            IsInherited = inherited,
-                            RightName = EdgeNames.Enroll,
-                            InheritanceHash = aceInheritanceHash,
-                            IsPermissionForOwnerRightsSid = isPermissionForOwnerRightsSid,
-                            IsInheritedPermissionForOwnerRightsSid = isInheritedPermissionForOwnerRightsSid,
-                        };
                 }
             }
+            return (aces.ToArray(), isAnyPermissionForOwnerRightsSid, isAnyPermissionForOwnerRightsSidInherited);
         }
 
 
