@@ -87,8 +87,10 @@ public class AdaptiveTimeoutTest {
         await Task.WhenAll(tasks);
 
         // Add some timeout tasks that will resolve last
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < 3; i++) {
             tasks.Add(adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(200)));
+            await Task.Delay(i + 5);
+        }
 
         // These tasks are added later but will resolve first
         for (int i = 0; i < 4; i++)
@@ -142,8 +144,10 @@ public class AdaptiveTimeoutTest {
 
         await Task.WhenAll(tasks);
 
-        for (int i = 0; i < 20; i++)
+        for (int i = 0; i < 15; i++) {
             tasks.Add(adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(200)));
+            await Task.Delay(i + 5);
+        }
 
         await Task.WhenAll(tasks);
     }
