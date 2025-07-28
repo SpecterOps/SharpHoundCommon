@@ -18,6 +18,7 @@ public sealed class AdaptiveTimeout : IDisposable {
     private readonly int _minSamplesForAdaptiveTimeout;
     private readonly bool _throwIfExcessiveTimeouts;
     private int _timeSpikeDecay;
+    private object _lock;
     private const int TimeSpikePenalty = 2;
     private const int TimeSpikeForgiveness = 1;
     private const int TimeSpikeThreshold = 5;
@@ -44,6 +45,7 @@ public sealed class AdaptiveTimeout : IDisposable {
         _minSamplesForAdaptiveTimeout = minSamplesForAdaptiveTimeout;
         _useAdaptiveTimeout = useAdaptiveTimeout;
         _throwIfExcessiveTimeouts = throwIfExcessiveTimeouts;
+        _lock = new object();
     }
 
     public void ClearSamples() {
@@ -252,16 +254,18 @@ public sealed class AdaptiveTimeout : IDisposable {
         else {
             Interlocked.Add(ref _timeSpikeDecay, TimeSpikePenalty);
 
-            if (Volatile.Read(ref _timeSpikeDecay) >= TimeSpikeThreshold) {
-                if (EnoughSuccessesSince(startTime)) {
-                    // Time spike is in the past now, no action needed
-                    // This happens when earlier calls report back timeouts
-                    // but we've since seen sufficent successful calls completed in the time between
-                    _log.LogTrace("Time spike hiccup spotted but since recovered.");
-                    Interlocked.Exchange(ref _timeSpikeDecay, 0);
-                }
-                else {
-                    TriggerTimeSpikeEvent();
+            lock (_lock) {
+                if (Volatile.Read(ref _timeSpikeDecay) >= TimeSpikeThreshold) {
+                    if (EnoughSuccessesSince(startTime)) {
+                        // Time spike is in the past now, no action needed
+                        // This happens when earlier calls report back timeouts
+                        // but we've since seen sufficent successful calls completed in the time between
+                        _log.LogTrace("Time spike hiccup spotted but since recovered.");
+                        Interlocked.Exchange(ref _timeSpikeDecay, 0);
+                    }
+                    else {
+                        TriggerTimeSpikeEvent();
+                    }
                 }
             }
         }
