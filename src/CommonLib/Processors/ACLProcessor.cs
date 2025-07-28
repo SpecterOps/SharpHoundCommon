@@ -173,7 +173,7 @@ namespace SharpHoundCommonLib.Processors {
         public bool? IsAdminSDHolderProtected(byte[] ntSecurityDescriptor, string adminSdHolderHash = null, string objectName = "") {
             bool? isAdminSdHolderProtected = null;
 
-            if (ntSecurityDescriptor == null || string.IsNullOrEmpty(adminSdHolderHash)) {
+            if (ntSecurityDescriptor == null || ntSecurityDescriptor.Length == 0 || string.IsNullOrEmpty(adminSdHolderHash)) {
                 _log.LogDebug("Required input(s) missing for AdminSDHolder hash comparison for object: {Name}", objectName);
                 return isAdminSdHolderProtected;
             }
@@ -246,7 +246,7 @@ namespace SharpHoundCommonLib.Processors {
                 return string.Empty;
             }
 
-            _log.LogDebug("Calculating hash of implicit ACEs for {Name}", objectName);
+            _log.LogInformation("Calculating hash of implicit ACEs for {Name}", objectName);
             var descriptor = _utils.MakeSecurityDescriptor();
 
             try
@@ -263,7 +263,7 @@ namespace SharpHoundCommonLib.Processors {
 
             // Check if DACL is protected
             bool isDaclProtected = descriptor.AreAccessRulesProtected();
-            _log.LogDebug("DACL Protection status for {Name}: {IsProtected}", objectName, isDaclProtected);
+            _log.LogInformation("DACL Protection status for {Name}: {IsProtected}", objectName, isDaclProtected);
 
             // Get all ACEs, including Deny ACEs, but skip inherited ones
             var aceList = new List<ACEForHashing>();
