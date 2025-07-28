@@ -66,7 +66,7 @@ public class AdaptiveTimeoutTest {
 
         for (int i = 0; i < 3; i++) {
             await adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(200));
-            await Task.Delay(i);
+            await Task.Delay(i + 5);
         }
 
         var adaptiveTimeoutResult = adaptiveTimeout.GetAdaptiveTimeout();
@@ -124,7 +124,7 @@ public class AdaptiveTimeoutTest {
             // on a process that I want to run very very fast.
             // So instead of making TimeSpikeSafetyValve more thread safe than it is now,
             // I think I'd rather leave that hole and hack some thread stagger in this test.
-            await Task.Delay(i);
+            await Task.Delay(i + 5);
         }
 
         await Assert.ThrowsAsync<ExcessiveTimeoutsException>(async () => await Task.WhenAll(tasks));
