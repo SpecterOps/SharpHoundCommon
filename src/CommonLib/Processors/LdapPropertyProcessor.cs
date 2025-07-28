@@ -177,20 +177,33 @@ namespace SharpHoundCommonLib.Processors {
             var props = GetCommonProps(entry);
             return props;
         }
+        
+        public Task<GroupProperties> ReadGroupPropertiesAsync(IDirectoryObject entry,
+            ResolvedSearchResult searchResult) {
+            return ReadGroupPropertiesAsync(entry, searchResult.Domain);
+        }
 
         /// <summary>
         ///     Reads specific LDAP properties related to Groups
         /// </summary>
         /// <param name="entry"></param>
+        /// <param name="domain"></param>
         /// <returns></returns>
-        public static Dictionary<string, object> ReadGroupProperties(IDirectoryObject entry) {
+        public async Task<GroupProperties> ReadGroupPropertiesAsync(IDirectoryObject entry, string domain)
+        {
+            var groupProperties = new GroupProperties();
             var props = GetCommonProps(entry);
             entry.TryGetLongProperty(LDAPProperties.AdminCount, out var ac);
             props.Add("admincount", ac != 0);
             entry.TryGetLongProperty(LDAPProperties.GroupType, out var groupType);
             props.Add("groupscope", GetGroupScope(groupType));
+            entry.TryGetByteArrayProperty(LDAPProperties.SIDHistory, out var sh);
+            var (sidHistoryStrings, sidHistoryPrincipals) = await ProcessSidHistory(sh, domain);
+            groupProperties.SidHistory = sidHistoryPrincipals;
+            props.Add("sidhistory", sidHistoryStrings);
+            groupProperties.Props = props;
 
-            return props;
+            return groupProperties;
         }
 
         /// <summary>
@@ -307,25 +320,9 @@ namespace SharpHoundCommonLib.Processors {
             props.Add("supportedencryptiontypes", encryptionTypes);
 
             entry.TryGetByteArrayProperty(LDAPProperties.SIDHistory, out var sh);
-            var sidHistoryList = new List<string>();
-            var sidHistoryPrincipals = new List<TypedPrincipal>();
-            foreach (var sid in sh) {
-                string sSid;
-                try {
-                    sSid = new SecurityIdentifier(sid, 0).Value;
-                } catch {
-                    continue;
-                }
-
-                sidHistoryList.Add(sSid);
-
-                if (await _utils.ResolveIDAndType(sSid, domain) is (true, var res))
-                    sidHistoryPrincipals.Add(res);
-            }
-
-            userProps.SidHistory = sidHistoryPrincipals.Distinct().ToArray();
-
-            props.Add("sidhistory", sidHistoryList.ToArray());
+            var (sidHistoryStrings, sidHistoryPrincipals) = await ProcessSidHistory(sh, domain);
+            userProps.SidHistory = sidHistoryPrincipals;
+            props.Add("sidhistory", sidHistoryStrings);
 
             userProps.Props = props;
 
@@ -356,6 +353,7 @@ namespace SharpHoundCommonLib.Processors {
             props.Add("unconstraineddelegation", flags.HasFlag(UacFlags.TrustedForDelegation));
             props.Add("trustedtoauth", flags.HasFlag(UacFlags.TrustedToAuthForDelegation));
             props.Add("isdc", flags.HasFlag(UacFlags.ServerTrustAccount));
+            props.Add("isreadonlydc", flags.HasFlag(UacFlags.PartialSecretsAccount));
             props.Add("encryptedtextpwdallowed", flags.HasFlag(UacFlags.EncryptedTextPwdAllowed));
             props.Add("usedeskeyonly", flags.HasFlag(UacFlags.UseDesKeyOnly));
             props.Add("logonscriptenabled", flags.HasFlag(UacFlags.Script));
@@ -423,25 +421,9 @@ namespace SharpHoundCommonLib.Processors {
             props.Add("operatingsystem", os);
 
             entry.TryGetByteArrayProperty(LDAPProperties.SIDHistory, out var sh);
-            var sidHistoryList = new List<string>();
-            var sidHistoryPrincipals = new List<TypedPrincipal>();
-            foreach (var sid in sh) {
-                string sSid;
-                try {
-                    sSid = new SecurityIdentifier(sid, 0).Value;
-                } catch {
-                    continue;
-                }
-
-                sidHistoryList.Add(sSid);
-
-                if (await _utils.ResolveIDAndType(sSid, domain) is (true, var res))
-                    sidHistoryPrincipals.Add(res);
-            }
-
-            compProps.SidHistory = sidHistoryPrincipals.ToArray();
-
-            props.Add("sidhistory", sidHistoryList.ToArray());
+            var (sidHistoryStrings, sidHistoryPrincipals) = await ProcessSidHistory(sh, domain);
+            compProps.SidHistory = sidHistoryPrincipals;
+            props.Add("sidhistory", sidHistoryStrings);
 
             var smsaPrincipals = new List<TypedPrincipal>();
             if (entry.TryGetArrayProperty(LDAPProperties.HostServiceAccount, out var hsa)) {
@@ -788,6 +770,30 @@ namespace SharpHoundCommonLib.Processors {
 
             return supportedEncryptionTypes;
         }
+        
+        private async Task<(string[] sidHistoryStrings, TypedPrincipal[] sidHistoryPrincipals)> 
+            ProcessSidHistory(byte[][] sidHistory, string domain) {
+            var sidHistoryList = new List<string>();
+            var sidHistoryPrincipals = new List<TypedPrincipal>();
+                
+            if (sidHistory == null) return ([], []);
+                
+            foreach (var sid in sidHistory) {
+                string sSid;
+                try { 
+                    sSid = new SecurityIdentifier(sid, 0).Value;
+                } catch {
+                    continue;
+                }
+                        
+                sidHistoryList.Add(sSid);
+                        
+                if (await _utils.ResolveIDAndType(sSid, domain) is (true, var res))
+                    sidHistoryPrincipals.Add(res);
+            }
+                
+            return (sidHistoryList.ToArray(), sidHistoryPrincipals.Distinct().ToArray());
+        }
 
         private static string ConvertNanoDuration(long duration) {
             // In case duration is long.MinValue, Math.Abs will overflow.  Value represents Forever or Never
@@ -981,6 +987,12 @@ namespace SharpHoundCommonLib.Processors {
                 }
             }
         }
+    }
+
+    public class GroupProperties
+    {
+        public Dictionary<string, object> Props { get; set; } = new();
+        public TypedPrincipal[] SidHistory { get; set; } = Array.Empty<TypedPrincipal>();
     }
 
     public class UserProperties {
