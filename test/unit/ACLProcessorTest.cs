@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.DirectoryServices;
 using System.Linq;
@@ -1392,25 +1391,33 @@ namespace CommonLibTest {
 
         [Fact]
         public void Test_ACLProcessor_IsACLProtected_Protected() {
+            // Setup
             var mockLDAPUtils = new Mock<ILdapUtils>();
             var mockSecurityDescriptor = new Mock<ActiveDirectorySecurityDescriptor>(MockBehavior.Loose, null);
             mockSecurityDescriptor.Setup(x => x.AreAccessRulesProtected()).Returns(true);
             mockLDAPUtils.Setup(x => x.MakeSecurityDescriptor()).Returns(mockSecurityDescriptor.Object);
 
+            // Act
             var processor = new ACLProcessor(mockLDAPUtils.Object);
             var result = processor.IsACLProtected(Array.Empty<byte>());
+
+            // Assert
             Assert.True(result);
         }
 
         [Fact]
         public void Test_ACLProcessor_IsACLProtected_NotProtected() {
+            // Setup
             var mockLDAPUtils = new Mock<ILdapUtils>();
             var mockSecurityDescriptor = new Mock<ActiveDirectorySecurityDescriptor>(MockBehavior.Loose, null);
             mockSecurityDescriptor.Setup(x => x.AreAccessRulesProtected()).Returns(false);
             mockLDAPUtils.Setup(x => x.MakeSecurityDescriptor()).Returns(mockSecurityDescriptor.Object);
 
+            // Act
             var processor = new ACLProcessor(mockLDAPUtils.Object);
             var result = processor.IsACLProtected(Array.Empty<byte>());
+
+            // Assert
             Assert.False(result);
         }
 
@@ -1436,16 +1443,9 @@ namespace CommonLibTest {
         public void ACLProcessor_CalculateImplicitACLHash_DifferentInputs_ProducesUniqueHashes()
         {
             // Setup
-            var expectedPrincipalType = Label.CertTemplate;
-            var expectedPrincipalSID = "S-1-5-21-3130019616-2776909439-2417379446-512";
-            var expectedRightName = EdgeNames.WritePKINameFlag;
             var mockLDAPUtils = new Mock<ILdapUtils>();
             var sd = new ActiveDirectorySecurityDescriptor(new ActiveDirectorySecurity());
             mockLDAPUtils.Setup(x => x.MakeSecurityDescriptor()).Returns(sd);
-            mockLDAPUtils.Setup(x => x.ResolveIDAndType(It.IsAny<string>(), It.IsAny<string>()))
-                .ReturnsAsync((true, new TypedPrincipal(expectedPrincipalSID, expectedPrincipalType)));
-            mockLDAPUtils.Setup(x => x.PagedQuery(It.IsAny<LdapQueryParameters>(), It.IsAny<CancellationToken>()))
-                .Returns(Array.Empty<LdapResult<IDirectoryObject>>().ToAsyncEnumerable);
             var proc = new ACLProcessor(mockLDAPUtils.Object);
 
             // Act
@@ -1458,49 +1458,31 @@ namespace CommonLibTest {
             Assert.NotEqual(protectedResult, adminsdResult);
         }
 
-        [Fact]
-        public async Task ACLProcessor_NullAdminSDHolderHash_Returns_Null_Bool()
+        [WindowsOnlyFact]
+        public void ACLProcessor_NullAdminSDHolderHash_Returns_Null_Bool()
         {
             // Setup
-            var expectedPrincipalType = Label.CertTemplate;
-            var expectedPrincipalSID = "S-1-5-21-3130019616-2776909439-2417379446-512";
-            var expectedRightName = EdgeNames.WritePKINameFlag;
             var mockLDAPUtils = new Mock<ILdapUtils>();
-            var mockSecurityDescriptor = new Mock<ActiveDirectorySecurityDescriptor>(MockBehavior.Loose, null);
-            var mockRule = new Mock<ActiveDirectoryRuleDescriptor>(MockBehavior.Loose, null);
-            var collection = new List<ActiveDirectoryRuleDescriptor>();
-            mockRule.Setup(x => x.AccessControlType()).Returns(AccessControlType.Allow);
-            mockRule.Setup(x => x.IsAceInheritedFrom(It.IsAny<string>())).Returns(true);
-            mockRule.Setup(x => x.IdentityReference()).Returns(expectedPrincipalSID);
-            mockRule.Setup(x => x.ActiveDirectoryRights()).Returns(ActiveDirectoryRights.GenericWrite);
-            mockRule.Setup(x => x.ObjectType()).Returns(new Guid(ACEGuids.PKINameFlag));
-            collection.Add(mockRule.Object);
-            mockSecurityDescriptor.Setup(m => m.GetAccessRules(It.IsAny<bool>(), It.IsAny<bool>(), It.IsAny<Type>()))
-                .Returns(collection);
-            mockSecurityDescriptor.Setup(m => m.GetOwner(It.IsAny<Type>())).Returns((string)null);
-            mockLDAPUtils.Setup(x => x.MakeSecurityDescriptor()).Returns(mockSecurityDescriptor.Object);
-            mockLDAPUtils.Setup(x => x.ResolveIDAndType(It.IsAny<string>(), It.IsAny<string>()))
-                .ReturnsAsync((true, new TypedPrincipal(expectedPrincipalSID, expectedPrincipalType)));
-            mockLDAPUtils.Setup(x => x.PagedQuery(It.IsAny<LdapQueryParameters>(), It.IsAny<CancellationToken>()))
-                .Returns(Array.Empty<LdapResult<IDirectoryObject>>().ToAsyncEnumerable);
+            var sd = new ActiveDirectorySecurityDescriptor(new ActiveDirectorySecurity());
+            mockLDAPUtils.Setup(x => x.MakeSecurityDescriptor()).Returns(sd);
             var proc = new ACLProcessor(mockLDAPUtils.Object);
             var bytes = Utils.B64ToBytes(AdminSDHolderSecurityDescriptor);
 
             // Act
             bool? isAdminSdHolderProtected = proc.IsAdminSDHolderProtected(bytes, null, "");
+
             // Assert
             Assert.Null(isAdminSdHolderProtected);
         }
 
 
         [WindowsOnlyFact]
-        public async Task ACLProcessor_AdminSDHolderHash_Returns_Match()
+        public void ACLProcessor_AdminSDHolderHash_Returns_Match()
         {
             // Setup
             const string hash = "EA7A6279E3018DE6A19EE5554850292F92B293AE";
             var expectedPrincipalType = Label.CertTemplate;
             var expectedPrincipalSID = "S-1-5-21-3130019616-2776909439-2417379446-512";
-            var expectedRightName = EdgeNames.WritePKINameFlag;
             var mockLDAPUtils = new Mock<ILdapUtils>();
             var sd = new ActiveDirectorySecurityDescriptor(new ActiveDirectorySecurity());
             mockLDAPUtils.Setup(x => x.MakeSecurityDescriptor()).Returns(sd);
@@ -1513,6 +1495,7 @@ namespace CommonLibTest {
 
             // Act
             bool? isAdminSdHolderProtected = proc.IsAdminSDHolderProtected(bytes, hash, "");
+
             // Assert
             Assert.True(isAdminSdHolderProtected);
         }

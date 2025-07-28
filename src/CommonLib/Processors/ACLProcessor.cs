@@ -157,7 +157,7 @@ namespace SharpHoundCommonLib.Processors {
                 return IsAdminSDHolderProtected(ntSecurityDescriptor, adminSdHolderHash, objectName);
             }
 
-            return false;
+            return null;
         }
 
         /// <summary>
@@ -309,7 +309,9 @@ namespace SharpHoundCommonLib.Processors {
             }
 
             // Concatenate all ACE strings & DaclProtected status using pure StringBuilder for performance on large DACLs
-            var stringBuilder = new StringBuilder(sortedAces.Count * 50); // Pre-allocate with estimated capacity  TODO: is this a good estimate?
+            // Calculate more accurate capacity based on first ACE or use a conservative estimate
+            var estimatedCapacity = sortedAces.Count > 0 ? sortedAces[0].ToString().Length * sortedAces.Count * 1.2 : 1024;
+            var stringBuilder = new StringBuilder((int)estimatedCapacity);
             bool first = true;
             foreach (var ace in sortedAces)
             {
