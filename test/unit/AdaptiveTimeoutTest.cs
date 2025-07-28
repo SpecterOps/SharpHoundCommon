@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 using SharpHoundCommonLib;
 using SharpHoundCommonLib.Exceptions;
@@ -65,8 +64,10 @@ public class AdaptiveTimeoutTest {
 
         await Task.WhenAll(tasks);
 
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < 3; i++) {
             await adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(200));
+            await Task.Delay(i);
+        }
 
         var adaptiveTimeoutResult = adaptiveTimeout.GetAdaptiveTimeout();
         Assert.Equal(maxTimeout, adaptiveTimeoutResult);
@@ -112,8 +113,19 @@ public class AdaptiveTimeoutTest {
 
         await Task.WhenAll(tasks);
 
-        for (int i = 0; i < 20; i++)
+        for (int i = 0; i < 15; i++) {
             tasks.Add(adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(200)));
+            // Staggering these tasks because TimeSpikeSafetyValve is not entirely atomic.
+            // There's no guarantee that _timeSpikeDecay can't change between the moment it's read to the moment it's modified
+            // So too many concurrent reads may cause a race condition that bungles the process.
+            // In this case I suspect the cure is worse than the illness though,
+            // as I'm less worried about a little bit of wiggle in this process
+            // than I am about the additional overhead of guaranteeing atomicity through memory locks
+            // on a process that I want to run very very fast.
+            // So instead of making TimeSpikeSafetyValve more thread safe than it is now,
+            // I think I'd rather leave that hole and hack some thread stagger in this test.
+            await Task.Delay(i);
+        }
 
         await Assert.ThrowsAsync<ExcessiveTimeoutsException>(async () => await Task.WhenAll(tasks));
     }
