@@ -320,7 +320,7 @@ public sealed class AdaptiveTimeout : IDisposable {
         // target == 0
         // 1: this thread
         // 2: interceding thread
-        
+
         1: do {
         1: var initialVal = target;
         2: target = 2;

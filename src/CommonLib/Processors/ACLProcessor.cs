@@ -11,6 +11,7 @@ using Microsoft.Extensions.Logging;
 using SharpHoundCommonLib.DirectoryObjects;
 using SharpHoundCommonLib.Enums;
 using SharpHoundCommonLib.OutputTypes;
+using System.Linq;
 
 namespace SharpHoundCommonLib.Processors {
     public class ACLProcessor {
@@ -41,9 +42,30 @@ namespace SharpHoundCommonLib.Processors {
             };
         }
 
-        public ACLProcessor(ILdapUtils utils, ILogger log = null) {
+        public ACLProcessor(ILdapUtils utils, ILogger log = null)
+        {
             _utils = utils;
             _log = log ?? Logging.LogProvider.CreateLogger("ACLProc");
+        }
+
+        /// Represents a lightweight Access Control Entry (ACE) used to compute hash values
+        /// for AdminSDHolder purposes
+        internal class ACEForHashing {
+            public string IdentityReference { get; set; }
+            public ActiveDirectoryRights Rights { get; set; }
+            public AccessControlType AccessControlType { get; set; }
+            public string ObjectType { get; set; }
+            public string InheritedObjectType { get; set; }
+            public InheritanceFlags InheritanceFlags { get; set; }
+            /// <summary>
+            /// Converts the object to its string representation, providing a meaningful representation for debugging or display purposes.
+            /// </summary>
+            /// <returns>
+            /// A string that represents the current object.
+            /// </returns>
+            public override string ToString() {
+                return $"{IdentityReference}|{Rights}|{AccessControlType}|{ObjectType}|{InheritedObjectType}|{InheritanceFlags}";
+            }
         }
 
         /// <summary>
@@ -123,8 +145,58 @@ namespace SharpHoundCommonLib.Processors {
             return descriptor.AreAccessRulesProtected();
         }
 
+        /// <summary>
+        ///     Helper function to use commonlib types in IsAdminSDHolderProtected
+        /// </summary>
+        /// <param name="entry"></param>
+        /// <returns></returns>
+        public bool? IsAdminSDHolderProtected(IDirectoryObject entry, string adminSdHolderHash = null) {
+            if (entry.TryGetByteProperty(LDAPProperties.SecurityDescriptor, out var ntSecurityDescriptor)) {
+                entry.TryGetDistinguishedName(out var objectName);
+                return IsAdminSDHolderProtected(ntSecurityDescriptor, adminSdHolderHash, objectName);
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        ///     Determines if the security descriptor is protected by AdminSDHolder by comparing its hash
+        ///     with the AdminSDHolder hash.
+        /// </summary>
+        /// <param name="ntSecurityDescriptor">The security descriptor to check</param>
+        /// <param name="adminSdHolderHash">The AdminSDHolder hash to compare against</param>
+        /// <param name="objectName">The name of the object being checked (for logging)</param>
+        /// <returns>
+        ///     True if protected by AdminSDHolder, False if not protected, or null if the check couldn't be performed
+        /// </returns>
+        public bool? IsAdminSDHolderProtected(byte[] ntSecurityDescriptor, string adminSdHolderHash = null, string objectName = "") {
+            bool? isAdminSdHolderProtected = null;
+
+            if (ntSecurityDescriptor == null || ntSecurityDescriptor.Length == 0 || string.IsNullOrEmpty(adminSdHolderHash)) {
+                _log.LogDebug("Required input(s) missing for AdminSDHolder hash comparison for object: {Name}", objectName);
+                return isAdminSdHolderProtected;
+            }
+
+            // Calculate the implicit ACL hash for the current object
+            string currentObjectHash = CalculateImplicitACLHash(ntSecurityDescriptor, objectName);
+
+            // If we got a valid hash, check if it matches this domain's AdminSDHolder hash
+            if (!string.IsNullOrEmpty(currentObjectHash)) {
+                _log.LogDebug("Comparing ACL hash {Hash} with AdminSDHolder hashes for {Name}",
+                    currentObjectHash, objectName);
+                isAdminSdHolderProtected = adminSdHolderHash.Equals(currentObjectHash, StringComparison.OrdinalIgnoreCase);
+
+                if (isAdminSdHolderProtected == true) {
+                    _log.LogDebug("Object {Name} is protected by AdminSDHolder", objectName);
+                }
+            }
+
+            return isAdminSdHolderProtected;
+        }
+
         internal static string CalculateInheritanceHash(string identityReference, ActiveDirectoryRights rights,
-            string aceType, string inheritedObjectType) {
+            string aceType, string inheritedObjectType)
+        {
             var hash = identityReference + rights + aceType + inheritedObjectType;
             /*
              * We're using SHA1 because its fast and this data isn't cryptographically important.
@@ -161,30 +233,149 @@ namespace SharpHoundCommonLib.Processors {
         }
 
         /// <summary>
+        /// Calculates a hash of all implicit (non-inherited) ACEs in the security descriptor and the ACL protection status
+        /// </summary>
+        /// <param name="ntSecurityDescriptor">The raw security descriptor bytes</param>
+        /// <param name="objectName">Optional name for logging purposes</param>
+        /// <returns>A SHA1 hash of the concatenated implicit ACEs + IsACLProtected, or empty string if error</returns>
+        public string CalculateImplicitACLHash(byte[] ntSecurityDescriptor, string objectName = "")
+        {
+            if (ntSecurityDescriptor == null) {
+                _log.LogDebug("Security Descriptor is null for {Name}", objectName);
+                return string.Empty;
+            }
+
+            _log.LogInformation("Calculating hash of implicit ACEs for {Name}", objectName);
+            var descriptor = _utils.MakeSecurityDescriptor();
+
+            try
+            {
+                descriptor.SetSecurityDescriptorBinaryForm(ntSecurityDescriptor);
+            }
+            catch (OverflowException)
+            {
+                _log.LogWarning(
+                    "Security descriptor on object {Name} exceeds maximum allowable length. Unable to process",
+                    objectName);
+                return string.Empty;
+            }
+
+            // Check if DACL is protected
+            bool isDaclProtected = descriptor.AreAccessRulesProtected();
+            _log.LogInformation("DACL Protection status for {Name}: {IsProtected}", objectName, isDaclProtected);
+
+            // Get all ACEs, including Deny ACEs, but skip inherited ones
+            var aceList = new List<ACEForHashing>();
+
+            foreach (var ace in descriptor.GetAccessRules(true, false, typeof(SecurityIdentifier))) {
+                if (ace == null) {
+                    continue; // Skip null ACEs
+                }
+
+                var ir = ace.IdentityReference();
+                if (ir == null) {
+                    _log.LogDebug("Skipping ACE with null identity reference for {Name}", objectName);
+                    continue;
+                }
+
+                // Create a simplified representation of the ACE for consistent ordering and hashing
+                // No filtering of principals - include all principals in the hash calculation
+                aceList.Add(new ACEForHashing
+                {
+                    IdentityReference = ir,
+                    Rights = ace.ActiveDirectoryRights(),
+                    AccessControlType = ace.AccessControlType(),
+                    ObjectType = ace.ObjectType().ToString().ToLower(),
+                    InheritedObjectType = ace.InheritedObjectType().ToString().ToLower(),
+                    InheritanceFlags = ace.InheritanceFlags,
+                });
+            }
+            // TODO: From here through the end of the method I'm not sure this is the most efficient path forward.
+            // Using an IComparer to sort and then instead of string comparison consider serializing data to a byte array
+
+            // Sort the ACEs to ensure consistent ordering
+            var sortedAces = aceList.OrderBy(a => a.AccessControlType)
+                                   .ThenBy(a => a.IdentityReference)
+                                   .ThenBy(a => a.Rights)
+                                   .ThenBy(a => a.ObjectType)
+                                   .ThenBy(a => a.InheritedObjectType)
+                                   .ThenBy(a => a.InheritanceFlags)
+                                   .ToList();
+
+            if (sortedAces.Count == 0) {
+                _log.LogDebug("No implicit ACEs found for {Name}", objectName);
+                return string.Empty;
+            }
+
+            // Concatenate all ACE strings & DaclProtected status using pure StringBuilder for performance on large DACLs
+            // Calculate more accurate capacity based on first ACE or use a conservative estimate
+            var estimatedCapacity = sortedAces.Count > 0 ? sortedAces[0].ToString().Length * sortedAces.Count * 1.2 : 1024;
+            var stringBuilder = new StringBuilder((int)estimatedCapacity);
+            bool first = true;
+            foreach (var ace in sortedAces)
+            {
+                if (!first)
+                    stringBuilder.Append(';');
+                else
+                    first = false;
+                stringBuilder.Append(ace.ToString());
+            }
+            stringBuilder.Append("|DaclProtected:");
+            stringBuilder.Append(isDaclProtected);
+            var concatenatedAces = stringBuilder.ToString();
+
+
+            // Calculate SHA1 hash of the concatenated string
+            try
+            {
+                /*
+                * We're using SHA1 because its fast and this data isn't cryptographically important.
+                * Additionally, the chances of a collision in our data size is miniscule and irrelevant.
+                * We cannot use MD5 as it is not FIPS compliant and environments can enforce this setting
+                */
+                using var sha1 = SHA1.Create();
+                var bytes = sha1.ComputeHash(Encoding.UTF8.GetBytes(concatenatedAces));
+                return BitConverter.ToString(bytes).Replace("-", string.Empty).ToUpper();
+            }
+            catch (Exception ex)
+            {
+                _log.LogWarning("Error calculating SHA1 hash for {Name}: {Error}", objectName, ex.Message);
+                return string.Empty;
+            }
+        }
+
+        /// <summary>
         /// Gets the hashes for all aces that are pushing inheritance down the tree for later comparison
         /// </summary>
         /// <param name="ntSecurityDescriptor"></param>
         /// <param name="objectName"></param>
         /// <returns></returns>
-        public IEnumerable<string> GetInheritedAceHashes(byte[] ntSecurityDescriptor, string objectName = "") {
-            if (ntSecurityDescriptor == null) {
+        public IEnumerable<string> GetInheritedAceHashes(byte[] ntSecurityDescriptor, string objectName = "")
+        {
+            if (ntSecurityDescriptor == null)
+            {
                 yield break;
             }
-            
+
             _log.LogDebug("Processing Inherited ACE hashes for {Name}", objectName);
             var descriptor = _utils.MakeSecurityDescriptor();
-            try {
+            try
+            {
                 descriptor.SetSecurityDescriptorBinaryForm(ntSecurityDescriptor);
-            } catch (OverflowException) {
+            }
+            catch (OverflowException)
+            {
                 _log.LogWarning(
                     "Security descriptor on object {Name} exceeds maximum allowable length. Unable to process",
                     objectName);
                 yield break;
             }
 
-            foreach (var ace in descriptor.GetAccessRules(true, true, typeof(SecurityIdentifier))) {
+            foreach (var ace in descriptor.GetAccessRules(true, true, typeof(SecurityIdentifier)))
+            {
                 //Skip all null/deny/inherited aces
-                if (ace == null || ace.AccessControlType() == AccessControlType.Deny || ace.IsInherited()) {
+                if (ace == null || ace.AccessControlType() == AccessControlType.Deny || ace.IsInherited())
+                {
                     continue;
                 }
 
@@ -192,12 +383,14 @@ namespace SharpHoundCommonLib.Processors {
                 var principalSid = Helpers.PreProcessSID(ir);
 
                 //Skip aces for filtered principals
-                if (principalSid == null) {
+                if (principalSid == null)
+                {
                     continue;
                 }
 
                 var iFlags = ace.InheritanceFlags;
-                if (iFlags == InheritanceFlags.None) {
+                if (iFlags == InheritanceFlags.None)
+                {
                     continue;
                 }
 
@@ -652,7 +845,7 @@ namespace SharpHoundCommonLib.Processors {
 
                     var cARights = (CertificationAuthorityRights)aceRights;
 
-                    // TODO: These if statements are also present in ProcessRegistryEnrollmentPermissions. Move to shared location.               
+                    // TODO: These if statements are also present in ProcessRegistryEnrollmentPermissions. Move to shared location.
                     if ((cARights & CertificationAuthorityRights.ManageCA) != 0)
                         yield return new ACE {
                             PrincipalType = resolvedPrincipal.ObjectType,
@@ -740,7 +933,7 @@ namespace SharpHoundCommonLib.Processors {
                     objectName);
                 yield break;
             }
-            
+
             _log.LogDebug("Processing GMSA Readers for {ObjectName}", objectName);
             foreach (var ace in descriptor.GetAccessRules(true, true, typeof(SecurityIdentifier))) {
                 if (ace == null || ace.AccessControlType() == AccessControlType.Deny) {
