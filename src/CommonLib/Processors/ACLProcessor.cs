@@ -42,6 +42,12 @@ namespace SharpHoundCommonLib.Processors {
             };
         }
 
+        public ACLProcessor(ILdapUtils utils, ILogger log = null)
+        {
+            _utils = utils;
+            _log = log ?? Logging.LogProvider.CreateLogger("ACLProc");
+        }
+
         /// Represents a lightweight Access Control Entry (ACE) used to compute hash values
         /// for AdminSDHolder purposes
         internal class ACEForHashing {
@@ -60,13 +66,6 @@ namespace SharpHoundCommonLib.Processors {
             public override string ToString() {
                 return $"{IdentityReference}|{Rights}|{AccessControlType}|{ObjectType}|{InheritedObjectType}|{InheritanceFlags}";
             }
-        }
-
-
-        public ACLProcessor(ILdapUtils utils, ILogger log = null)
-        {
-            _utils = utils;
-            _log = log ?? Logging.LogProvider.CreateLogger("ACLProc");
         }
 
         /// <summary>
