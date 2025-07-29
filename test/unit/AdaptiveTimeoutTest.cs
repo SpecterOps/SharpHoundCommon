@@ -64,10 +64,8 @@ public class AdaptiveTimeoutTest {
 
         await Task.WhenAll(tasks);
 
-        for (int i = 0; i < 3; i++) {
-            await adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(200));
-            await Task.Delay(i + 5);
-        }
+        for (int i = 0; i < 3; i++)
+            await adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(500));
 
         var adaptiveTimeoutResult = adaptiveTimeout.GetAdaptiveTimeout();
         Assert.Equal(maxTimeout, adaptiveTimeoutResult);
@@ -76,25 +74,23 @@ public class AdaptiveTimeoutTest {
     [Fact]
     public async Task AdaptiveTimeout_GetAdaptiveTimeout_TimeSpikeSafetyValve_IgnoreHiccup() {
         var tasks = new List<Task>();
-        var maxTimeout = TimeSpan.FromMilliseconds(100);
-        var numSamples = 10;
-        var adaptiveTimeout = new AdaptiveTimeout(maxTimeout, new TestLogger(_testOutputHelper, Microsoft.Extensions.Logging.LogLevel.Trace), numSamples, 1000, 5);
+        var maxTimeout = TimeSpan.FromSeconds(1);
+        var numSamples = 5;
+        var adaptiveTimeout = new AdaptiveTimeout(maxTimeout, new TestLogger(_testOutputHelper, Microsoft.Extensions.Logging.LogLevel.Trace), numSamples, 1000, 2);
 
         // Prepare our successful samples
         for (int i = 0; i < numSamples; i++)
-            tasks.Add(adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(i)));
+            tasks.Add(adaptiveTimeout.ExecuteWithTimeout((_) => Task.CompletedTask));
 
         await Task.WhenAll(tasks);
 
         // Add some timeout tasks that will resolve last
-        for (int i = 0; i < 3; i++) {
-            tasks.Add(adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(200)));
-            await Task.Delay(i + 5);
-        }
+        for (int i = 0; i < 5; i++)
+            tasks.Add(adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(2000)));
 
         // These tasks are added later but will resolve first
         for (int i = 0; i < 4; i++)
-            tasks.Add(adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(i)));
+            tasks.Add(adaptiveTimeout.ExecuteWithTimeout((_) => Task.CompletedTask));
 
         await Task.WhenAll(tasks);
         var adaptiveTimeoutResult = adaptiveTimeout.GetAdaptiveTimeout();
@@ -106,28 +102,17 @@ public class AdaptiveTimeoutTest {
     [Fact]
     public async Task AdaptiveTimeout_GetAdaptiveTimeout_ThrowWhenExcessiveTimeouts() {
         var tasks = new List<Task>();
-        var maxTimeout = TimeSpan.FromMilliseconds(100);
-        var numSamples = 10;
-        var adaptiveTimeout = new AdaptiveTimeout(maxTimeout, new TestLogger(_testOutputHelper, Microsoft.Extensions.Logging.LogLevel.Trace), numSamples, 1000, 5, throwIfExcessiveTimeouts: true);
+        var maxTimeout = TimeSpan.FromMilliseconds(500);
+        var numSamples = 5;
+        var adaptiveTimeout = new AdaptiveTimeout(maxTimeout, new TestLogger(_testOutputHelper, Microsoft.Extensions.Logging.LogLevel.Trace), numSamples, 1000, 2, throwIfExcessiveTimeouts: true);
 
         for (int i = 0; i < numSamples; i++)
-            tasks.Add(adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(10)));
+            tasks.Add(adaptiveTimeout.ExecuteWithTimeout((_) => Task.CompletedTask));
 
         await Task.WhenAll(tasks);
 
-        for (int i = 0; i < 15; i++) {
-            tasks.Add(adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(200)));
-            // Staggering these tasks because TimeSpikeSafetyValve is not entirely atomic.
-            // There's no guarantee that _timeSpikeDecay can't change between the moment it's read to the moment it's modified
-            // So too many concurrent reads may cause a race condition that bungles the process.
-            // In this case I suspect the cure is worse than the illness though,
-            // as I'm less worried about a little bit of wiggle in this process
-            // than I am about the additional overhead of guaranteeing atomicity through memory locks
-            // on a process that I want to run very very fast.
-            // So instead of making TimeSpikeSafetyValve more thread safe than it is now,
-            // I think I'd rather leave that hole and hack some thread stagger in this test.
-            await Task.Delay(i + 5);
-        }
+        for (int i = 0; i < 20; i++)
+            tasks.Add(adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(1000)));
 
         await Assert.ThrowsAsync<ExcessiveTimeoutsException>(async () => await Task.WhenAll(tasks));
     }
@@ -135,19 +120,17 @@ public class AdaptiveTimeoutTest {
     [Fact]
     public async Task AdaptiveTimeout_GetAdaptiveTimeout_DoNotThrowWhenExcessiveTimeouts() {
         var tasks = new List<Task>();
-        var maxTimeout = TimeSpan.FromMilliseconds(100);
-        var numSamples = 10;
-        var adaptiveTimeout = new AdaptiveTimeout(maxTimeout, new TestLogger(_testOutputHelper, Microsoft.Extensions.Logging.LogLevel.Trace), numSamples, 1000, 5, throwIfExcessiveTimeouts: false);
+        var maxTimeout = TimeSpan.FromMilliseconds(500);
+        var numSamples = 5;
+        var adaptiveTimeout = new AdaptiveTimeout(maxTimeout, new TestLogger(_testOutputHelper, Microsoft.Extensions.Logging.LogLevel.Trace), numSamples, 1000, 2, throwIfExcessiveTimeouts: false);
 
         for (int i = 0; i < numSamples; i++)
-            tasks.Add(adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(10)));
+            tasks.Add(adaptiveTimeout.ExecuteWithTimeout((_) => Task.CompletedTask));
 
         await Task.WhenAll(tasks);
 
-        for (int i = 0; i < 15; i++) {
-            tasks.Add(adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(200)));
-            await Task.Delay(i + 5);
-        }
+        for (int i = 0; i < 20; i++)
+            tasks.Add(adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(1000)));
 
         await Task.WhenAll(tasks);
     }
