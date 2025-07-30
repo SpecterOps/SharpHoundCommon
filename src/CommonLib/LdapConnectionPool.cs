@@ -727,6 +727,7 @@ namespace SharpHoundCommonLib {
 
         public async Task<(bool Success, LdapConnectionWrapper ConnectionWrapper, string Message)>
             GetGlobalCatalogConnectionAsync() {
+            // TODO: why is this not working for this ticket
             if (_excludedDomains.Contains(_identifier)) {
                 return (false, null, $"Identifier {_identifier} excluded for connection attempt");
             }
@@ -868,6 +869,10 @@ namespace SharpHoundCommonLib {
         }
 
         private async Task<(bool, LdapConnectionWrapper)> CreateLdapConnection(string target, bool globalCatalog) {
+            if (_excludedDomains.Contains(target)) {
+                return (false, null);
+            }
+
             var baseConnection = CreateBaseConnection(target, true, globalCatalog);
             if (await TestLdapConnection(baseConnection) is (true, var result)) {
                 var connection = new LdapConnectionWrapper(baseConnection, result.SearchResultEntry, globalCatalog,
