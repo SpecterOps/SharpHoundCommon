@@ -182,12 +182,12 @@ namespace SharpHoundCommonLib.Processors {
 
             // If we got a valid hash, check if it matches this domain's AdminSDHolder hash
             if (!string.IsNullOrEmpty(currentObjectHash)) {
-                _log.LogDebug("Comparing ACL hash {Hash} with AdminSDHolder hashes for {Name}",
+                _log.LogTrace("Comparing ACL hash {Hash} with AdminSDHolder hashes for {Name}",
                     currentObjectHash, objectName);
                 isAdminSdHolderProtected = adminSdHolderHash.Equals(currentObjectHash, StringComparison.OrdinalIgnoreCase);
 
                 if (isAdminSdHolderProtected == true) {
-                    _log.LogDebug("Object {Name} is protected by AdminSDHolder", objectName);
+                    _log.LogTrace("Object {Name} is protected by AdminSDHolder", objectName);
                 }
             }
 
@@ -245,7 +245,7 @@ namespace SharpHoundCommonLib.Processors {
                 return string.Empty;
             }
 
-            _log.LogInformation("Calculating hash of implicit ACEs for {Name}", objectName);
+            _log.LogTrace("Calculating hash of implicit ACEs for {Name}", objectName);
             var descriptor = _utils.MakeSecurityDescriptor();
 
             try
@@ -262,7 +262,7 @@ namespace SharpHoundCommonLib.Processors {
 
             // Check if DACL is protected
             bool isDaclProtected = descriptor.AreAccessRulesProtected();
-            _log.LogInformation("DACL Protection status for {Name}: {IsProtected}", objectName, isDaclProtected);
+            _log.LogTrace("DACL Protection status for {Name}: {IsProtected}", objectName, isDaclProtected);
 
             // Get all ACEs, including Deny ACEs, but skip inherited ones
             var aceList = new List<ACEForHashing>();
