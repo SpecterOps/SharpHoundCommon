@@ -108,6 +108,8 @@ namespace SharpHoundCommonLib {
             return await ResolveIDAndType(securityIdentifier.Value, objectDomain);
         }
 
+        // TODO MC: After profiling, this still seems like this is still getting called quite often, even though it seems to be blocked by the
+        // unresolvable domains. 
         public async Task<(bool Success, TypedPrincipal Principal)>
             ResolveIDAndType(string identifier, string objectDomain) {
             if (identifier.IndexOf("0ACNF", StringComparison.OrdinalIgnoreCase) >= 0) {
@@ -204,6 +206,13 @@ namespace SharpHoundCommonLib {
             if (Cache.GetIDType(guid, out var type)) {
                 return (true, type);
             }
+            if (await GetDomainSidFromDomainName(domain) is (true, var domainSid) 
+                && _unresolvablePrincipals.Contains(domainSid)) {
+                _log.LogDebug("We have already seen this domain as unresolvable.");
+                return (false, Label.Base);
+            }
+
+ 
 
             var result = await Query(new LdapQueryParameters() {
                 DomainName = domain,
@@ -644,6 +653,12 @@ namespace SharpHoundCommonLib {
                     ObjectIdentifier = id,
                     ObjectType = type
                 });
+            
+            if (await GetDomainSidFromDomainName(domain) is (true, var domainSid) 
+                && _unresolvablePrincipals.Contains(domainSid)) {
+                _log.LogDebug("We have already seen this domain as unresolvable.");
+                return (false, null);
+            }
 
             var result = await Query(new LdapQueryParameters() {
                 DomainName = domain,
@@ -971,6 +986,7 @@ namespace SharpHoundCommonLib {
                 return (true, principal);
             }
 
+            // TODO MC: - should this be distiguished name and not sid?
             if (_unresolvablePrincipals.Contains(distinguishedName)) {
                 return (false, default);
             }
@@ -1321,6 +1337,10 @@ namespace SharpHoundCommonLib {
 
             res.Domain = domain;
             res.DomainSid = domainSid;
+            
+            if (_unresolvablePrincipals.Contains(domainSid)) {
+                return (false, default);
+            }
 
             if (WellKnownPrincipal.GetWellKnownPrincipal(objectIdentifier, out var wellKnownPrincipal)) {
                 res.DisplayName = $"{wellKnownPrincipal.ObjectIdentifier}@{domain}";
@@ -1332,6 +1352,7 @@ namespace SharpHoundCommonLib {
                 return (true, res);
             }
 
+            // TODO - MC: This calls get label which is slow in profiling
             res.ObjectType = await ComputeLabel(directoryObject, objectIdentifier, domain, utils);
 
             directoryObject.TryGetProperty(LDAPProperties.SAMAccountName, out var samAccountName);
@@ -1339,6 +1360,7 @@ namespace SharpHoundCommonLib {
             return (true, res);
         }
 
+        // TODO - MC: This does not have a clear way to ignore unresolvable 
         private static async Task<Label> ComputeLabel(IDirectoryObject directoryObject, string objectIdentifier,
             string domain, ILdapUtils utils) {
             if (!directoryObject.GetLabel(out var label)) {

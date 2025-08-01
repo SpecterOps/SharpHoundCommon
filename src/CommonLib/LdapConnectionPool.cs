@@ -631,6 +631,7 @@ namespace SharpHoundCommonLib {
             }
             else if (!connectionWrapper.GetSearchBase(queryParameters.NamingContext, out basePath)) {
                 string tempPath;
+                // TODO: This blocking call might not be protected by the excluded domains
                 if (CallDsGetDcName(queryParameters.DomainName, out var info) && info != null) {
                     tempPath = Helpers.DomainNameToDistinguishedName(info.Value.DomainName);
                     connectionWrapper.SaveContext(queryParameters.NamingContext, basePath);
