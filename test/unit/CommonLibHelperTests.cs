@@ -259,7 +259,7 @@ namespace CommonLibTest {
                 throw new ApplicationException();
             };
 
-            await Assert.ThrowsAsync<ApplicationException>(async () => await Helpers.RetryOnException<ApplicationException>(throws, 3));
+            await Assert.ThrowsAsync<ApplicationException>(() => Helpers.RetryOnException<ApplicationException>(throws, 3));
             Assert.Equal(3, attemptCount);
         }
 
@@ -271,7 +271,7 @@ namespace CommonLibTest {
                 throw new Exception();
             };
 
-            await Assert.ThrowsAsync<Exception>(async () => await Helpers.RetryOnException<ApplicationException>(throws, 3));
+            await Assert.ThrowsAsync<Exception>(() => Helpers.RetryOnException<ApplicationException>(throws, 3));
             // First try throws an Exception, but retry only happens on ApplicationException
             Assert.Equal(1, attemptCount);
         }
