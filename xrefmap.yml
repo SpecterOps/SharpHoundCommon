@@ -9760,22 +9760,6 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.Processors.ACLProcessor.ACLProcessor
   nameWithType: ACLProcessor.ACLProcessor
-- uid: SharpHoundCommonLib.Processors.ACLProcessor.CalculateImplicitACLHash(System.Byte[],System.String)
-  name: CalculateImplicitACLHash(Byte[], String)
-  href: api/SharpHoundCommonLib.Processors.ACLProcessor.html#SharpHoundCommonLib_Processors_ACLProcessor_CalculateImplicitACLHash_System_Byte___System_String_
-  commentId: M:SharpHoundCommonLib.Processors.ACLProcessor.CalculateImplicitACLHash(System.Byte[],System.String)
-  name.vb: CalculateImplicitACLHash(Byte(), String)
-  fullName: SharpHoundCommonLib.Processors.ACLProcessor.CalculateImplicitACLHash(System.Byte[], System.String)
-  fullName.vb: SharpHoundCommonLib.Processors.ACLProcessor.CalculateImplicitACLHash(System.Byte(), System.String)
-  nameWithType: ACLProcessor.CalculateImplicitACLHash(Byte[], String)
-  nameWithType.vb: ACLProcessor.CalculateImplicitACLHash(Byte(), String)
-- uid: SharpHoundCommonLib.Processors.ACLProcessor.CalculateImplicitACLHash*
-  name: CalculateImplicitACLHash
-  href: api/SharpHoundCommonLib.Processors.ACLProcessor.html#SharpHoundCommonLib_Processors_ACLProcessor_CalculateImplicitACLHash_
-  commentId: Overload:SharpHoundCommonLib.Processors.ACLProcessor.CalculateImplicitACLHash
-  isSpec: "True"
-  fullName: SharpHoundCommonLib.Processors.ACLProcessor.CalculateImplicitACLHash
-  nameWithType: ACLProcessor.CalculateImplicitACLHash
 - uid: SharpHoundCommonLib.Processors.ACLProcessor.GetInheritedAceHashes(SharpHoundCommonLib.IDirectoryObject,SharpHoundCommonLib.ResolvedSearchResult)
   name: GetInheritedAceHashes(IDirectoryObject, ResolvedSearchResult)
   href: api/SharpHoundCommonLib.Processors.ACLProcessor.html#SharpHoundCommonLib_Processors_ACLProcessor_GetInheritedAceHashes_SharpHoundCommonLib_IDirectoryObject_SharpHoundCommonLib_ResolvedSearchResult_
@@ -9820,28 +9804,6 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.Processors.ACLProcessor.IsACLProtected
   nameWithType: ACLProcessor.IsACLProtected
-- uid: SharpHoundCommonLib.Processors.ACLProcessor.IsAdminSDHolderProtected(SharpHoundCommonLib.IDirectoryObject,System.String)
-  name: IsAdminSDHolderProtected(IDirectoryObject, String)
-  href: api/SharpHoundCommonLib.Processors.ACLProcessor.html#SharpHoundCommonLib_Processors_ACLProcessor_IsAdminSDHolderProtected_SharpHoundCommonLib_IDirectoryObject_System_String_
-  commentId: M:SharpHoundCommonLib.Processors.ACLProcessor.IsAdminSDHolderProtected(SharpHoundCommonLib.IDirectoryObject,System.String)
-  fullName: SharpHoundCommonLib.Processors.ACLProcessor.IsAdminSDHolderProtected(SharpHoundCommonLib.IDirectoryObject, System.String)
-  nameWithType: ACLProcessor.IsAdminSDHolderProtected(IDirectoryObject, String)
-- uid: SharpHoundCommonLib.Processors.ACLProcessor.IsAdminSDHolderProtected(System.Byte[],System.String,System.String)
-  name: IsAdminSDHolderProtected(Byte[], String, String)
-  href: api/SharpHoundCommonLib.Processors.ACLProcessor.html#SharpHoundCommonLib_Processors_ACLProcessor_IsAdminSDHolderProtected_System_Byte___System_String_System_String_
-  commentId: M:SharpHoundCommonLib.Processors.ACLProcessor.IsAdminSDHolderProtected(System.Byte[],System.String,System.String)
-  name.vb: IsAdminSDHolderProtected(Byte(), String, String)
-  fullName: SharpHoundCommonLib.Processors.ACLProcessor.IsAdminSDHolderProtected(System.Byte[], System.String, System.String)
-  fullName.vb: SharpHoundCommonLib.Processors.ACLProcessor.IsAdminSDHolderProtected(System.Byte(), System.String, System.String)
-  nameWithType: ACLProcessor.IsAdminSDHolderProtected(Byte[], String, String)
-  nameWithType.vb: ACLProcessor.IsAdminSDHolderProtected(Byte(), String, String)
-- uid: SharpHoundCommonLib.Processors.ACLProcessor.IsAdminSDHolderProtected*
-  name: IsAdminSDHolderProtected
-  href: api/SharpHoundCommonLib.Processors.ACLProcessor.html#SharpHoundCommonLib_Processors_ACLProcessor_IsAdminSDHolderProtected_
-  commentId: Overload:SharpHoundCommonLib.Processors.ACLProcessor.IsAdminSDHolderProtected
-  isSpec: "True"
-  fullName: SharpHoundCommonLib.Processors.ACLProcessor.IsAdminSDHolderProtected
-  nameWithType: ACLProcessor.IsAdminSDHolderProtected
 - uid: SharpHoundCommonLib.Processors.ACLProcessor.ProcessACL(SharpHoundCommonLib.ResolvedSearchResult,SharpHoundCommonLib.IDirectoryObject)
   name: ProcessACL(ResolvedSearchResult, IDirectoryObject)
   href: api/SharpHoundCommonLib.Processors.ACLProcessor.html#SharpHoundCommonLib_Processors_ACLProcessor_ProcessACL_SharpHoundCommonLib_ResolvedSearchResult_SharpHoundCommonLib_IDirectoryObject_
