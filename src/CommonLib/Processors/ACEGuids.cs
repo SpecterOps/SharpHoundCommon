@@ -14,7 +14,8 @@
         public const string UserAccountRestrictions = "4c164200-20c0-11d0-a768-00aa006e0529";
         public const string WriteGPLink = "f30e3bbe-9ff0-11d1-b603-0000f80367c1";
         public const string WriteTitle = "bf967a55-0de6-11d0-a285-00aa003049e2"; // Not an edge, just used for testing
-
+        public const string WriteAltSecurityIdentities = "00fbf30c-91fe-11d1-aebc-0000f80367c1";
+        public const string WritePublicInformation = "e48d0154-bcf8-11d1-8702-00c04fb96050";
 
         //Cert abuse ACEs
         public const string PKINameFlag = "ea1dddc4-60ff-416e-8cc0-17cee534bce7";
