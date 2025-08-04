@@ -972,14 +972,23 @@ namespace SharpHoundCommonLib {
                 return (false, testResult);
             }
 
-            SearchResponse response;
+            SearchResponse response = null;
             try {
                 //Do an initial search request to get the rootDSE
                 //This ldap filter is equivalent to (objectclass=*)
                 var searchRequest = CreateSearchRequest("", new LdapFilter().AddAllObjects().GetFilter(),
                     SearchScope.Base, null);
 
-                response = await SendRequestWithTimeout(connection, searchRequest, _testConnectionAdaptiveTimeout);
+                await Helpers.RetryOnException<TimeoutException>(async () => {
+                    response = await SendRequestWithTimeout(connection, searchRequest, _testConnectionAdaptiveTimeout);
+                }, retryCount: 2, logger: _log);
+            }
+            catch (TimeoutException e) {
+                /*
+                 * We've retried this connection a few times but haven't succeeded
+                 */
+                testResult.Message = e.Message;
+                return (false, testResult);
             }
             catch (LdapException e) {
                 /*

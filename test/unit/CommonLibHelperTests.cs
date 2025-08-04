@@ -1,5 +1,6 @@
 using System;
 using System.Text;
+using System.Threading.Tasks;
 using SharpHoundCommonLib;
 using SharpHoundCommonLib.Enums;
 using Xunit;
@@ -248,6 +249,49 @@ namespace CommonLibTest {
                 Helpers.ConvertTimestampToUnixEpoch("-201adsfasf12180244");
 
             Assert.Equal(0, result);
+        }
+
+        [Fact]
+        public async Task RetryOnException_ThrowsExpected() {
+            int attemptCount = 0;
+            Func<Task> throws = () => {
+                attemptCount++;
+                throw new ApplicationException();
+            };
+
+            await Assert.ThrowsAsync<ApplicationException>(() => Helpers.RetryOnException<ApplicationException>(throws, 3));
+            Assert.Equal(3, attemptCount);
+        }
+
+        [Fact]
+        public async Task RetryOnException_ThrowsUnexpected() {
+            int attemptCount = 0;
+            Func<Task> throws = () => {
+                attemptCount++;
+                throw new Exception();
+            };
+
+            await Assert.ThrowsAsync<Exception>(() => Helpers.RetryOnException<ApplicationException>(throws, 3));
+            // First try throws an Exception, but retry only happens on ApplicationException
+            Assert.Equal(1, attemptCount);
+        }
+
+        [Fact]
+        public async Task RetryOnException_SucceedsOnLastAttempt() {
+            int attemptCount = 0;
+            bool success = false;
+            Func<Task> throws = () => {
+                attemptCount++;
+                if (attemptCount < 3)
+                    throw new ApplicationException();
+
+                success = true;
+                return Task.CompletedTask;
+            };
+
+            await Helpers.RetryOnException<ApplicationException>(throws, 3);
+
+            Assert.True(success);
         }
     }
 }
