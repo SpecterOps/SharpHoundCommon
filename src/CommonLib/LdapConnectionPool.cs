@@ -981,7 +981,7 @@ namespace SharpHoundCommonLib {
 
                 await Helpers.RetryOnException<TimeoutException>(async () => {
                     response = await SendRequestWithTimeout(connection, searchRequest, _testConnectionAdaptiveTimeout);
-                }, retryCount: 2, _log);
+                }, retryCount: 2, logger: _log);
             }
             catch (TimeoutException e) {
                 /*

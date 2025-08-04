@@ -334,7 +334,7 @@ namespace SharpHoundCommonLib {
                 }
                 catch (T e) {
                     attempt++;
-                    logger?.LogDebug($"Exception caught, retrying: {e.Message}", e);
+                    logger?.LogDebug(e, "Exception caught, retrying attempt {Attempt}", attempt);
                     if (attempt >= retryCount)
                         throw;
                 }

@@ -252,26 +252,26 @@ namespace CommonLibTest {
         }
 
         [Fact]
-        public void RetryOnException_ThrowsExpected() {
+        public async Task RetryOnException_ThrowsExpected() {
             int attemptCount = 0;
             Func<Task> throws = () => {
                 attemptCount++;
                 throw new ApplicationException();
             };
 
-            Assert.ThrowsAsync<ApplicationException>(async () => await Helpers.RetryOnException<ApplicationException>(throws, 3));
+            await Assert.ThrowsAsync<ApplicationException>(async () => await Helpers.RetryOnException<ApplicationException>(throws, 3));
             Assert.Equal(3, attemptCount);
         }
 
         [Fact]
-        public void RetryOnException_ThrowsUnexpected() {
+        public async Task RetryOnException_ThrowsUnexpected() {
             int attemptCount = 0;
             Func<Task> throws = () => {
                 attemptCount++;
                 throw new Exception();
             };
 
-            Assert.ThrowsAsync<Exception>(async () => await Helpers.RetryOnException<ApplicationException>(throws, 3));
+            await Assert.ThrowsAsync<Exception>(async () => await Helpers.RetryOnException<ApplicationException>(throws, 3));
             // First try throws an Exception, but retry only happens on ApplicationException
             Assert.Equal(1, attemptCount);
         }
