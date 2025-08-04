@@ -8,5 +8,6 @@ namespace SharpHoundCommonLib.OutputTypes
         public EnrollmentAgentRegistryAPIResult EnrollmentAgentRestrictions { get; set; }
         public BoolRegistryAPIResult IsUserSpecifiesSanEnabled { get; set; }
         public BoolRegistryAPIResult RoleSeparationEnabled { get; set; }
+        public StringArrayRegistryAPIResult DisabledExtensions { get; set; }
     }
 }

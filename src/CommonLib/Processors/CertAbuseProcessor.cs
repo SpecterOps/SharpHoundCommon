@@ -254,9 +254,10 @@ namespace SharpHoundCommonLib.Processors
         public BoolRegistryAPIResult IsUserSpecifiesSanEnabled(string target, string caName)
         {
             var ret = new BoolRegistryAPIResult();
+            var activePolicy = "CertificateAuthority_MicrosoftDefault.Policy";
             var subKey =
-                $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{caName}\\PolicyModules\\CertificateAuthority_MicrosoftDefault.Policy";
-            const string subValue = "EditFlags";
+                $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{caName}\\PolicyModules";
+            const string subValue = "Active";
             var data = Helpers.GetRegistryKeyData(target, subKey, subValue, _log);
 
             ret.Collected = data.Collected;
@@ -266,13 +267,75 @@ namespace SharpHoundCommonLib.Processors
                 return ret;
             }
 
-            if (data.Value == null)
+            if (data.Value != null)
+            {
+                activePolicy = (string)data.Value;
+            }
+
+            var subKey2 =
+                $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{caName}\\PolicyModules\\{activePolicy}";
+            const string subValue2 = "EditFlags";
+            var data2 = Helpers.GetRegistryKeyData(target, subKey2, subValue2, _log);
+
+            ret.Collected = data2.Collected;
+            if (!data2.Collected)
+            {
+                ret.FailureReason = data2.FailureReason;
+                return ret;
+            }
+
+            if (data2.Value == null)
             {
                 return ret;
             }
 
-            var editFlags = (int)data.Value;
+            var editFlags = (int)data2.Value;
             ret.Value = (editFlags & 0x00040000) == 0x00040000;
+
+            return ret;
+        }
+
+        [ExcludeFromCodeCoverage]
+        public StringArrayRegistryAPIResult DisabledExtensions(string target, string caName)
+        {
+            var ret = new StringArrayRegistryAPIResult();
+            var activePolicy = "CertificateAuthority_MicrosoftDefault.Policy";
+            var subKey =
+                $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{caName}\\PolicyModules";
+            const string subValue = "Active";
+            var data = Helpers.GetRegistryKeyData(target, subKey, subValue, _log);
+
+            ret.Collected = data.Collected;
+            if (!data.Collected)
+            {
+                ret.FailureReason = data.FailureReason;
+                return ret;
+            }
+
+            if (data.Value != null)
+            {
+                activePolicy = (string)data.Value;
+            }
+
+            var subKey2 =
+                $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{caName}\\PolicyModules\\{activePolicy}";
+            const string subValue2 = "DisableExtensionList";
+            var data2 = Helpers.GetRegistryKeyData(target, subKey2, subValue2, _log);
+
+            ret.Collected = data2.Collected;
+            if (!data2.Collected)
+            {
+                ret.FailureReason = data2.FailureReason;
+                return ret;
+            }
+
+            if (data2.Value == null)
+            {
+                return ret;
+            }
+
+            var disableExtensionList = (string[])data2.Value;
+            ret.Data = disableExtensionList;
 
             return ret;
         }
