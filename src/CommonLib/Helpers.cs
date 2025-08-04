@@ -317,6 +317,29 @@ namespace SharpHoundCommonLib {
 
             return builder.ToString();
         }
+
+        /// <summary>
+        /// Attempt an action a number of times, quietly eating a specific exception until the last attempt if it throws.
+        /// </summary>
+        /// <param name="action"></param>
+        /// <param name="retryCount"></param>
+        /// <param name="logger"></param>
+        public static async Task RetryOnException<T>(Func<Task> action, int retryCount, ILogger logger = null) where T : Exception {
+            int attempt = 0;
+            bool success = false;
+            do {
+                try {
+                    await action();
+                    success = true;
+                }
+                catch (T e) {
+                    attempt++;
+                    logger?.LogDebug($"Exception caught, retrying: {e.Message}", e);
+                    if (attempt >= retryCount)
+                        throw;
+                }
+            } while (!success && attempt < retryCount);
+        }
     }
 
     public class ParsedGPLink {
