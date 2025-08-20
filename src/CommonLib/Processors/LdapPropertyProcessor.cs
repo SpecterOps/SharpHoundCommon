@@ -166,24 +166,10 @@ namespace SharpHoundCommonLib.Processors {
             entry.TryGetProperty(LDAPProperties.GPCFileSYSPath, out var path);
             props.Add("gpcpath", path.ToUpper());
             entry.TryGetProperty(LDAPProperties.Flags, out var flags);
-            props.Add("gpostatus", TranslateGPOFlag(flags));
+            props.Add("gpostatus", flags);
             return props;
         }
 
-        private static string TranslateGPOFlag(string flag) {
-            switch (flag) {
-                case "0":
-                    return "Enabled";
-                case "1":
-                    return "User configuration disabled";
-                case "2":
-                    return "Computer configuration disabled";
-                case "3":
-                default:
-                    return "Disabled";
-            }
-        }
-        
         /// <summary>
         ///     Reads specific LDAP properties related to OUs
         /// </summary>
