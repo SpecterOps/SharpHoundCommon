@@ -340,6 +340,23 @@ namespace SharpHoundCommonLib {
                 }
             } while (!success && attempt < retryCount);
         }
+
+        public static U RetryOnException<T, U>(Func<U> action, int retryCount, ILogger logger = null) where T : Exception {
+            int attempt = 0;
+            do {
+                try {
+                    return action();
+                }
+                catch (T e) {
+                    attempt++;
+                    logger?.LogDebug(e, "Exception caught, retrying attempt {Attempt}", attempt);
+                    if (attempt >= retryCount)
+                        throw;
+                }
+            } while (attempt < retryCount);
+
+            throw new InvalidOperationException($"You really shouldn't be here, {nameof(RetryOnException)} isn't working as intended.");
+        }
     }
 
     public class ParsedGPLink {
