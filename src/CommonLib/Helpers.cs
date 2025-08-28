@@ -19,6 +19,7 @@ namespace SharpHoundCommonLib {
         private static readonly HashSet<string> Groups = new() { "268435456", "268435457", "536870912", "536870913" };
         private static readonly HashSet<string> Computers = new() { "805306369" };
         private static readonly HashSet<string> Users = new() { "805306368", "805306370" };
+        private static readonly double MaxTimeSpanTicks = (double)TimeSpan.MaxValue.Ticks - 1_000;
 
         private static readonly Regex DCReplaceRegex = new("DC=", RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private static readonly Regex SPNRegex = new(@".*\/.*", RegexOptions.Compiled);
@@ -344,8 +345,10 @@ namespace SharpHoundCommonLib {
             } while (!success && attempt < retryCount);
         }
 
-        public static async Task<U> RetryOnException<T, U>(Func<U> action, int retryCount, ILogger logger = null) where T : Exception {
+        public static async Task<U> RetryOnException<T, U>(Func<U> action, int retryCount, TimeSpan? baseDelay = null, TimeSpan? maxDelay = null, ILogger logger = null) where T : Exception {
             int attempt = 0;
+            baseDelay ??= TimeSpan.FromSeconds(1);
+            maxDelay ??= TimeSpan.FromSeconds(10);
             do {
                 try {
                     return action();
@@ -355,8 +358,15 @@ namespace SharpHoundCommonLib {
                     logger?.LogDebug(e, "Exception caught, retrying attempt {Attempt}", attempt);
                     if (attempt >= retryCount)
                         throw;
-
-                    await Task.Delay(200 * attempt * attempt);
+                    
+                    // Decorrelated Jitter Backoff - see https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/
+                    var temp = RandomUtils.Between(0,
+                        Math.Min(maxDelay.Value.Ticks, baseDelay.Value.Ticks * Math.Pow(2, attempt)));
+                    var ticksToDelay = Math.Min(maxDelay.Value.Ticks, RandomUtils.Between(baseDelay.Value.Ticks, temp * 3));
+                    if (double.IsInfinity(ticksToDelay)) {
+                        await Task.Delay(TimeSpan.FromTicks((long)MaxTimeSpanTicks));
+                    }
+                    await Task.Delay(TimeSpan.FromTicks((long)Math.Min(MaxTimeSpanTicks, ticksToDelay)));
                 }
             } while (attempt < retryCount);
 
