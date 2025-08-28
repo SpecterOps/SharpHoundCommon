@@ -506,7 +506,7 @@ namespace SharpHoundCommonLib {
                         : new DirectoryContext(DirectoryContextType.Domain);
 
                 // Blocking External Call
-                domain = Helpers.RetryOnException<ActiveDirectoryObjectNotFoundException, Domain>(() => Domain.GetDomain(context), 2);
+                domain = Helpers.RetryOnException<ActiveDirectoryObjectNotFoundException, Domain>(() => Domain.GetDomain(context), 2).GetAwaiter().GetResult();
                 if (domain == null) return false;
                 _domainCache.TryAdd(cacheKey, domain);
                 return true;
@@ -535,7 +535,7 @@ namespace SharpHoundCommonLib {
                         : new DirectoryContext(DirectoryContextType.Domain);
 
                 // Blocking External Call
-                domain = Helpers.RetryOnException<ActiveDirectoryObjectNotFoundException, Domain>(() => Domain.GetDomain(context), 2);
+                domain = Helpers.RetryOnException<ActiveDirectoryObjectNotFoundException, Domain>(() => Domain.GetDomain(context), 2).GetAwaiter().GetResult();
                 if (domain == null) return false;
                 _domainCache.TryAdd(domainName, domain);
                 return true;
@@ -565,7 +565,7 @@ namespace SharpHoundCommonLib {
                     : new DirectoryContext(DirectoryContextType.Domain);
 
                 // Blocking External Call
-                domain = Helpers.RetryOnException<ActiveDirectoryObjectNotFoundException, Domain>(() => Domain.GetDomain(context), 2);
+                domain = Helpers.RetryOnException<ActiveDirectoryObjectNotFoundException, Domain>(() => Domain.GetDomain(context), 2).GetAwaiter().GetResult();
                 _domainCache.TryAdd(_nullCacheKey, domain);
                 return true;
             }

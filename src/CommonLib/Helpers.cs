@@ -12,6 +12,7 @@ using System.Security;
 using SharpHoundCommonLib.Processors;
 using Microsoft.Win32;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace SharpHoundCommonLib {
     public static class Helpers {
@@ -337,11 +338,13 @@ namespace SharpHoundCommonLib {
                     logger?.LogDebug(e, "Exception caught, retrying attempt {Attempt}", attempt);
                     if (attempt >= retryCount)
                         throw;
+
+                    await Task.Delay(200 * attempt * attempt);
                 }
             } while (!success && attempt < retryCount);
         }
 
-        public static U RetryOnException<T, U>(Func<U> action, int retryCount, ILogger logger = null) where T : Exception {
+        public static async Task<U> RetryOnException<T, U>(Func<U> action, int retryCount, ILogger logger = null) where T : Exception {
             int attempt = 0;
             do {
                 try {
@@ -352,6 +355,8 @@ namespace SharpHoundCommonLib {
                     logger?.LogDebug(e, "Exception caught, retrying attempt {Attempt}", attempt);
                     if (attempt >= retryCount)
                         throw;
+
+                    await Task.Delay(200 * attempt * attempt);
                 }
             } while (attempt < retryCount);
 
