@@ -320,15 +320,28 @@ namespace SharpHoundCommonLib {
             return builder.ToString();
         }
 
+        public static TimeSpan BackoffWithDecorrelatedJitter(int attempt, TimeSpan baseDelay, TimeSpan maxDelay) {
+            // Decorrelated Jitter Backoff - see https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/
+            var temp = Math.Min(maxDelay.Ticks, baseDelay.Ticks * Math.Pow(2, attempt));
+            temp = temp / 2 + RandomUtils.Between(0, temp / 2);
+            var ticksToDelay = Math.Min(maxDelay.Ticks, RandomUtils.Between(baseDelay.Ticks, temp * 3));
+            
+            // This ensures that a TimeSpan can be created with the ticks amount as TimeSpan uses a long.
+            return double.IsInfinity(ticksToDelay) ? TimeSpan.FromTicks((long)MaxTimeSpanTicks) :
+                TimeSpan.FromTicks((long)Math.Min(MaxTimeSpanTicks, ticksToDelay));
+        }
+
         /// <summary>
         /// Attempt an action a number of times, quietly eating a specific exception until the last attempt if it throws.
         /// </summary>
         /// <param name="action"></param>
         /// <param name="retryCount"></param>
         /// <param name="logger"></param>
-        public static async Task RetryOnException<T>(Func<Task> action, int retryCount, ILogger logger = null) where T : Exception {
+        public static async Task RetryOnException<T>(Func<Task> action, int retryCount, TimeSpan? baseDelay = null, TimeSpan? maxDelay = null, ILogger logger = null) where T : Exception {
             int attempt = 0;
             bool success = false;
+            baseDelay ??= TimeSpan.FromSeconds(1);
+            maxDelay ??= TimeSpan.FromSeconds(30);
             do {
                 try {
                     await action();
@@ -340,7 +353,8 @@ namespace SharpHoundCommonLib {
                     if (attempt >= retryCount)
                         throw;
 
-                    await Task.Delay(200 * attempt * attempt);
+                    var delay = BackoffWithDecorrelatedJitter(attempt, baseDelay.Value, maxDelay.Value);
+                    await Task.Delay(delay);
                 }
             } while (!success && attempt < retryCount);
         }
@@ -348,7 +362,7 @@ namespace SharpHoundCommonLib {
         public static async Task<U> RetryOnException<T, U>(Func<U> action, int retryCount, TimeSpan? baseDelay = null, TimeSpan? maxDelay = null, ILogger logger = null) where T : Exception {
             int attempt = 0;
             baseDelay ??= TimeSpan.FromSeconds(1);
-            maxDelay ??= TimeSpan.FromSeconds(10);
+            maxDelay ??= TimeSpan.FromSeconds(30);
             do {
                 try {
                     return action();
@@ -358,15 +372,8 @@ namespace SharpHoundCommonLib {
                     logger?.LogDebug(e, "Exception caught, retrying attempt {Attempt}", attempt);
                     if (attempt >= retryCount)
                         throw;
-                    
-                    // Decorrelated Jitter Backoff - see https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/
-                    var temp = RandomUtils.Between(0,
-                        Math.Min(maxDelay.Value.Ticks, baseDelay.Value.Ticks * Math.Pow(2, attempt)));
-                    var ticksToDelay = Math.Min(maxDelay.Value.Ticks, RandomUtils.Between(baseDelay.Value.Ticks, temp * 3));
-                    if (double.IsInfinity(ticksToDelay)) {
-                        await Task.Delay(TimeSpan.FromTicks((long)MaxTimeSpanTicks));
-                    }
-                    await Task.Delay(TimeSpan.FromTicks((long)Math.Min(MaxTimeSpanTicks, ticksToDelay)));
+                    var delay = BackoffWithDecorrelatedJitter(attempt, baseDelay.Value, maxDelay.Value);
+                    await Task.Delay(delay);
                 }
             } while (attempt < retryCount);
 
