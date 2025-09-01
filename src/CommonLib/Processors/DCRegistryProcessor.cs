@@ -81,5 +81,36 @@ namespace SharpHoundCommonLib.Processors
 
             return ret;
         }
+
+        /// <summary>
+        /// This function gets the VulnerableChannelAllowList registry value stored on DCs.
+        /// </summary>
+        /// <remarks>https://support.microsoft.com/en-us/topic/how-to-manage-the-changes-in-netlogon-secure-channel-connections-associated-with-cve-2020-1472-f7e8cc17-0309-1d6a-304e-5ba73cd1a11e</remarks>
+        /// <param name="target"></param>
+        /// <returns>IntRegistryAPIResult</returns>
+        [ExcludeFromCodeCoverage]
+        public StrRegistryAPIResult GetZeroLogonSecurityDescriptor(string target)
+        {
+            var ret = new StrRegistryAPIResult();
+            const string subKey = @"SYSTEM\CurrentControlSet\Services\Netlogon\Parameters";
+            const string subValue = "VulnerableChannelAllowList";
+            var data = Helpers.GetRegistryKeyData(target, subKey, subValue, _log);
+
+            ret.Collected = data.Collected;
+            if (!data.Collected)
+            {
+                ret.FailureReason = data.FailureReason;
+                return ret;
+            }
+
+            if (data.Value == null)
+            {
+                return ret;
+            }
+
+            ret.Value = (string)data.Value;
+
+            return ret;
+        }
     }
 }
