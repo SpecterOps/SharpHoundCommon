@@ -30,6 +30,9 @@ namespace SharpHoundCommonLib {
         private static ConcurrentDictionary<string, Domain> _domainCache = new();
         private static ConcurrentHashSet _domainControllers = new(StringComparer.OrdinalIgnoreCase);
         private static ConcurrentHashSet _unresolvablePrincipals = new(StringComparer.OrdinalIgnoreCase);
+        
+        // Tracks Domains we know we've determined we shouldn't try to connect to
+        private static ConcurrentHashSet _excludedDomains = new(StringComparer.OrdinalIgnoreCase);
 
         private static readonly ConcurrentDictionary<string, string> DomainToForestCache =
             new(StringComparer.OrdinalIgnoreCase);
@@ -513,6 +516,8 @@ namespace SharpHoundCommonLib {
             }
             catch (Exception e) {
                 _log.LogDebug(e, "GetDomain call failed for domain name {Name}", domainName);
+                // TODO: should the domain be excluded here? 
+                // AddExcludedDomain(domainName);
                 domain = null;
                 return false;
             }
@@ -543,6 +548,7 @@ namespace SharpHoundCommonLib {
             catch (Exception e) {
                 Logging.Logger.LogDebug("Static GetDomain call failed for domain {DomainName}: {Error}", domainName,
                     e.Message);
+                // TODO: should the domain be excluded here? 
                 domain = null;
                 return false;
             }
@@ -571,6 +577,7 @@ namespace SharpHoundCommonLib {
             }
             catch (Exception e) {
                 _log.LogDebug(e, "GetDomain call failed for blank domain");
+                // TODO: should the domain be excluded here? 
                 domain = null;
                 return false;
             }
@@ -1129,6 +1136,7 @@ namespace SharpHoundCommonLib {
             _domainControllers = new ConcurrentHashSet(StringComparer.OrdinalIgnoreCase);
             _connectionPool?.Dispose();
             _connectionPool = new ConnectionPoolManager(_ldapConfig, scanner: _portScanner);
+            _excludedDomains = new ConcurrentHashSet(StringComparer.OrdinalIgnoreCase);
         }
 
         private IDirectoryObject CreateDirectoryEntry(string path) {
@@ -1142,6 +1150,9 @@ namespace SharpHoundCommonLib {
         public void Dispose() {
             _connectionPool?.Dispose();
         }
+
+        public static bool IsExcludedDomain(string domain) => _excludedDomains.Contains(domain);
+        public static void AddExcludedDomain(string domain) => _excludedDomains.Add(domain);
 
         internal static bool ResolveLabel(string objectIdentifier, string distinguishedName, string samAccountType,
             string[] objectClasses, int flags, out Label type) {

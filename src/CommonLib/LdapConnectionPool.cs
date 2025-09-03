@@ -37,9 +37,6 @@ namespace SharpHoundCommonLib {
         private const int MaxRetries = 3;
         private static readonly ConcurrentDictionary<string, NetAPIStructs.DomainControllerInfo?> DCInfoCache = new();
 
-        // Tracks domains we know we've determined we shouldn't try to connect to
-        private static readonly ConcurrentHashSet _excludedDomains = new();
-
         public LdapConnectionPool(string identifier, string poolIdentifier, LdapConfig config,
             IPortScanner scanner = null, NativeMethods nativeMethods = null, ILogger log = null) {
             _connections = new ConcurrentBag<LdapConnectionWrapper>();
@@ -693,7 +690,7 @@ namespace SharpHoundCommonLib {
 
         public async Task<(bool Success, LdapConnectionWrapper ConnectionWrapper, string Message)>
             GetConnectionAsync() {
-            if (_excludedDomains.Contains(_identifier)) {
+            if (LdapUtils.IsExcludedDomain(_identifier)) {
                 return (false, null, $"Identifier {_identifier} excluded for connection attempt");
             }
 
@@ -727,7 +724,7 @@ namespace SharpHoundCommonLib {
 
         public async Task<(bool Success, LdapConnectionWrapper ConnectionWrapper, string Message)>
             GetGlobalCatalogConnectionAsync() {
-            if (_excludedDomains.Contains(_identifier)) {
+            if (LdapUtils.IsExcludedDomain(_identifier)) {
                 return (false, null, $"Identifier {_identifier} excluded for connection attempt");
             }
 
@@ -813,7 +810,7 @@ namespace SharpHoundCommonLib {
                     _log.LogDebug(
                         "Could not get domain object from GetDomain, unable to create ldap connection for domain {Domain}",
                         _identifier);
-                    _excludedDomains.Add(_identifier);
+                    LdapUtils.AddExcludedDomain(_identifier);
                     return (false, null, "Unable to get domain object for further strategies");
                 }
 
@@ -852,7 +849,7 @@ namespace SharpHoundCommonLib {
             catch (Exception e) {
                 _log.LogInformation(e, "We will not be able to connect to domain {Domain} by any strategy, leaving it.",
                     _identifier);
-                _excludedDomains.Add(_identifier);
+                LdapUtils.AddExcludedDomain(_identifier);
             }
 
             return (false, null, "All attempted connections failed");
