@@ -515,9 +515,9 @@ namespace SharpHoundCommonLib {
                 return true;
             }
             catch (Exception e) {
+                // The Static GetDomain Function ran into an issue requiring to exclude a domain as it would continuously 
+                // try to connect to a domain that it could not connect to. This method may also need the same logic. 
                 _log.LogDebug(e, "GetDomain call failed for domain name {Name}", domainName);
-                // TODO: should the domain be excluded here? 
-                // AddExcludedDomain(domainName);
                 domain = null;
                 return false;
             }
@@ -525,6 +525,10 @@ namespace SharpHoundCommonLib {
 
         public static bool GetDomain(string domainName, LdapConfig ldapConfig, out Domain domain) {
             if (_domainCache.TryGetValue(domainName, out domain)) return true;
+            if (IsExcludedDomain(domainName)) {
+                Logging.Logger.LogDebug("Domain: {DomainName} has been excluded for collection. Skipping", domainName);
+                return false;
+            }
 
             try {
                 DirectoryContext context;
@@ -546,9 +550,11 @@ namespace SharpHoundCommonLib {
                 return true;
             }
             catch (Exception e) {
-                Logging.Logger.LogDebug("Static GetDomain call failed for domain {DomainName}: {Error}", domainName,
+                Logging.Logger.LogDebug("Static GetDomain call failed, adding to exclusion, for domain {DomainName}: {Error}", domainName,
                     e.Message);
-                // TODO: should the domain be excluded here? 
+                // If a domain cannot be contacted, this will exclude the domain so that it does not continuously try to connect, and 
+                // cause more timeouts. 
+                AddExcludedDomain(domainName);
                 domain = null;
                 return false;
             }
@@ -576,8 +582,9 @@ namespace SharpHoundCommonLib {
                 return true;
             }
             catch (Exception e) {
+                // The Static GetDomain Function ran into an issue requiring to exclude a domain as it would continuously 
+                // try to connect to a domain that it could not connect to. This method may also need the same logic. 
                 _log.LogDebug(e, "GetDomain call failed for blank domain");
-                // TODO: should the domain be excluded here? 
                 domain = null;
                 return false;
             }
