@@ -133,15 +133,18 @@ namespace SharpHoundCommonLib.Processors {
 
             try {
                 await authService.EnsureRequiresAuth(url, useBadChannelBinding);
+                _logger.LogDebug("{Url} was accessible. BadChannelBindings: {UseBadChannelBindings}", url.AbsoluteUri, useBadChannelBinding);
                 return APIResult<CAEnrollmentEndpoint>.Success(output);
             } catch (HttpRequestException ex) {
                 if (ex.InnerException is WebException webEx) {
                     if (webEx.InnerException is SocketException) {
                         output.Status = CAEnrollmentEndpointScanResult.NotVulnerable_PortInaccessible;
+                        _logger.LogDebug("{Url} labeled not vulnerable due to port being inaccessible.", url.AbsoluteUri);
                         return APIResult<CAEnrollmentEndpoint>.Success(output);
                     }
 
                     if (webEx.Status == WebExceptionStatus.NameResolutionFailure) {
+                        _logger.LogDebug("{Url} could not be resolved.", url.AbsoluteUri);
                         return APIResult<CAEnrollmentEndpoint>.Failure("Could not resolve hostname");
                     }
 
@@ -151,12 +154,16 @@ namespace SharpHoundCommonLib.Processors {
                         switch (statusCode) {
                             case HttpStatusCode.NotFound:
                                 output.Status = CAEnrollmentEndpointScanResult.NotVulnerable_PathNotFound;
+                                _logger.LogDebug("{Url} labeled not vulnerable as the path was not found.", url.AbsoluteUri);
                                 break;
                             case HttpStatusCode.Forbidden:
                                 // Returned if the IIS is configured to require SSL (so no HTTP possible)
                                 output.Status = CAEnrollmentEndpointScanResult.NotVulnerable_PathForbidden;
+                                _logger.LogDebug("{Url} labeled not vulnerable as the path was forbidden.", url.AbsoluteUri);
                                 break;
                             default:
+                                _logger.LogError("{Url} recieved an unexpected status code of {StatusCode}. UseBadChannelBindings: {UseBadChannelBindings}",
+                                    url.AbsoluteUri, statusCode, useBadChannelBinding);
                                 return APIResult<CAEnrollmentEndpoint>
                                     .Failure(
                                         $"Unexpected status code '{statusCode}' for the URL {url}. UseBadChannelBindings: {useBadChannelBinding}");
@@ -165,42 +172,51 @@ namespace SharpHoundCommonLib.Processors {
                         return APIResult<CAEnrollmentEndpoint>.Success(output);
                     }
 
-                    _logger.LogError($"WebException occurred: {ex}");
-
+                    _logger.LogError("Unhandled WebException. Url: {Url}. Exception: {ExceptionMessage}. Inner: {InnerExceptionMessage}  Data: {ExceptionData}",
+                        url.AbsoluteUri, webEx.Message, webEx.InnerException?.Message, webEx.Data);
                     return APIResult<CAEnrollmentEndpoint>
                         .Failure(
                             $"Unhandled WebException. Url: {url}. Exception: {webEx.Message}. Inner: {webEx.InnerException?.Message}  Data: {webEx.Data}");
                 }
-
+                
+                _logger.LogError("HttpRequestException occurred checking NTLM accessibility for URL: {URL}. Exception: {Message}", url.AbsoluteUri, ex.Message);
                 return APIResult<CAEnrollmentEndpoint>
                     .Failure(
                         $"HttpRequestException occured checking NTLM accessibility for URL: {url}. Exception: {ex.Message}");
             } catch (HttpUnauthorizedException ex) {
                 if (useBadChannelBinding == true) {
                     output.Status = CAEnrollmentEndpointScanResult.NotVulnerable_NtlmChannelBindingRequired;
+                    _logger.LogDebug("{Url} labeled as not vulnerable, NTLM channel binding is required", url.AbsoluteUri);
                     return APIResult<CAEnrollmentEndpoint>.Success(output);
                 }
 
+                _logger.LogError("Unauthorized exception checking NTLM accessibility for URL: {Url}. Exception: {Message}", url.AbsoluteUri, ex.Message);
                 return APIResult<CAEnrollmentEndpoint>
                     .Failure(
                         $"401 Unauthorized exception checking NTLM accessibility for URL: {url}. Exception: {ex.Message}");
             } catch (HttpForbiddenException) {
                 output.Status = CAEnrollmentEndpointScanResult.NotVulnerable_PathForbidden;
+                _logger.LogDebug("{Url} labeled not vulnerable as the path was forbidden.", url.AbsoluteUri);
                 return APIResult<CAEnrollmentEndpoint>
                     .Success(output);
             } catch (HttpServerErrorException) {
                 output.Status = CAEnrollmentEndpointScanResult.NotVulnerable_PathNotFound;
+                _logger.LogDebug("{Url} labeled not vulnerable as the path was not found.", url.AbsoluteUri);
                 return APIResult<CAEnrollmentEndpoint>
                     .Success(output);
             } catch (MissingChallengeException) {
                 output.Status = CAEnrollmentEndpointScanResult.NotVulnerable_NoNtlmChallenge;
+                _logger.LogDebug("{Url} labeled not vulnerable as no NTLM challenge.", url.AbsoluteUri);
                 return APIResult<CAEnrollmentEndpoint>
                     .Success(output);
             } catch (ExtendedProtectionMisconfiguredException) {
                 output.Status = CAEnrollmentEndpointScanResult.NotVulnerable_EpaMisconfigured;
+                _logger.LogDebug("{Url} labeled not vulnerable as EPA is misconfigured.", url.AbsoluteUri);
                 return APIResult<CAEnrollmentEndpoint>
                     .Success(output);
             } catch (Exception ex) {
+                _logger.LogError("An unhandled exception occurred checking NTLM accessibility for URL: {Url}. BadChannelBindings: {UseBadChannelBindings} Exception: {Message}",
+                    url.AbsoluteUri, useBadChannelBinding, ex.Message);
                 return APIResult<CAEnrollmentEndpoint>
                     .Failure(
                         $"Unhandled exception checking NTLM accessibility for URL: {url}. BadChannelBindings: {useBadChannelBinding}.  Exception: {ex.Message}");
