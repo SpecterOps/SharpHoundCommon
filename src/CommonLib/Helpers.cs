@@ -322,7 +322,7 @@ namespace SharpHoundCommonLib {
 
         public static TimeSpan BackoffWithDecorrelatedJitter(int attempt, TimeSpan baseDelay, TimeSpan maxDelay) {
             // Decorrelated Jitter Backoff - see https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/
-            var temp = Math.Min(maxDelay.Ticks, baseDelay.Ticks * Math.Pow(2, attempt));
+            var temp = Math.Min(maxDelay.Ticks, baseDelay.Ticks * (attempt * attempt));
             temp = temp / 2 + RandomUtils.Between(0, temp / 2);
             var ticksToDelay = Math.Min(maxDelay.Ticks, RandomUtils.Between(baseDelay.Ticks, temp * 3));
             
