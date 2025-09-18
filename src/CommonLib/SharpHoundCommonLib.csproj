@@ -9,7 +9,7 @@
         <PackageDescription>Common library for C# BloodHound enumeration tasks</PackageDescription>
         <PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
         <RepositoryUrl>https://github.com/BloodHoundAD/SharpHoundCommon</RepositoryUrl>
-        <Version>4.3.1</Version>
+        <Version>4.3.2</Version>
         <AssemblyName>SharpHoundCommonLib</AssemblyName>
         <RootNamespace>SharpHoundCommonLib</RootNamespace>
     </PropertyGroup>
