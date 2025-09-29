@@ -9363,6 +9363,25 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.OutputTypes.SPNPrivilege.Service
   nameWithType: SPNPrivilege.Service
+- uid: SharpHoundCommonLib.OutputTypes.StrRegistryAPIResult
+  name: StrRegistryAPIResult
+  href: api/SharpHoundCommonLib.OutputTypes.StrRegistryAPIResult.html
+  commentId: T:SharpHoundCommonLib.OutputTypes.StrRegistryAPIResult
+  fullName: SharpHoundCommonLib.OutputTypes.StrRegistryAPIResult
+  nameWithType: StrRegistryAPIResult
+- uid: SharpHoundCommonLib.OutputTypes.StrRegistryAPIResult.Value
+  name: Value
+  href: api/SharpHoundCommonLib.OutputTypes.StrRegistryAPIResult.html#SharpHoundCommonLib_OutputTypes_StrRegistryAPIResult_Value
+  commentId: P:SharpHoundCommonLib.OutputTypes.StrRegistryAPIResult.Value
+  fullName: SharpHoundCommonLib.OutputTypes.StrRegistryAPIResult.Value
+  nameWithType: StrRegistryAPIResult.Value
+- uid: SharpHoundCommonLib.OutputTypes.StrRegistryAPIResult.Value*
+  name: Value
+  href: api/SharpHoundCommonLib.OutputTypes.StrRegistryAPIResult.html#SharpHoundCommonLib_OutputTypes_StrRegistryAPIResult_Value_
+  commentId: Overload:SharpHoundCommonLib.OutputTypes.StrRegistryAPIResult.Value
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.OutputTypes.StrRegistryAPIResult.Value
+  nameWithType: StrRegistryAPIResult.Value
 - uid: SharpHoundCommonLib.OutputTypes.TypedPrincipal
   name: TypedPrincipal
   href: api/SharpHoundCommonLib.OutputTypes.TypedPrincipal.html
@@ -10577,6 +10596,19 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.Processors.DCRegistryProcessor.GetStrongCertificateBindingEnforcement
   nameWithType: DCRegistryProcessor.GetStrongCertificateBindingEnforcement
+- uid: SharpHoundCommonLib.Processors.DCRegistryProcessor.GetVulnerableNetlogonSecurityDescriptor(System.String)
+  name: GetVulnerableNetlogonSecurityDescriptor(String)
+  href: api/SharpHoundCommonLib.Processors.DCRegistryProcessor.html#SharpHoundCommonLib_Processors_DCRegistryProcessor_GetVulnerableNetlogonSecurityDescriptor_System_String_
+  commentId: M:SharpHoundCommonLib.Processors.DCRegistryProcessor.GetVulnerableNetlogonSecurityDescriptor(System.String)
+  fullName: SharpHoundCommonLib.Processors.DCRegistryProcessor.GetVulnerableNetlogonSecurityDescriptor(System.String)
+  nameWithType: DCRegistryProcessor.GetVulnerableNetlogonSecurityDescriptor(String)
+- uid: SharpHoundCommonLib.Processors.DCRegistryProcessor.GetVulnerableNetlogonSecurityDescriptor*
+  name: GetVulnerableNetlogonSecurityDescriptor
+  href: api/SharpHoundCommonLib.Processors.DCRegistryProcessor.html#SharpHoundCommonLib_Processors_DCRegistryProcessor_GetVulnerableNetlogonSecurityDescriptor_
+  commentId: Overload:SharpHoundCommonLib.Processors.DCRegistryProcessor.GetVulnerableNetlogonSecurityDescriptor
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Processors.DCRegistryProcessor.GetVulnerableNetlogonSecurityDescriptor
+  nameWithType: DCRegistryProcessor.GetVulnerableNetlogonSecurityDescriptor
 - uid: SharpHoundCommonLib.Processors.DomainTrustProcessor
   name: DomainTrustProcessor
   href: api/SharpHoundCommonLib.Processors.DomainTrustProcessor.html
