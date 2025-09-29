@@ -53,7 +53,7 @@ namespace SharpHoundCommonLib {
         private readonly ILogger _log;
         private readonly IPortScanner _portScanner;
         private readonly NativeMethods _nativeMethods;
-        private readonly string _nullCacheKey = Guid.NewGuid().ToString();
+        private static readonly string _nullCacheKey = Guid.NewGuid().ToString();
         private static readonly Regex SIDRegex = new(@"^(S-\d+-\d+-\d+-\d+-\d+-\d+)(-\d+)?$");
 
         private readonly string[] _translateNames = { "Administrator", "admin" };
@@ -524,9 +524,11 @@ namespace SharpHoundCommonLib {
         }
 
         public static bool GetDomain(string domainName, LdapConfig ldapConfig, out Domain domain) {
+            var cacheKey = domainName ?? _nullCacheKey;
             if (_domainCache.TryGetValue(domainName, out domain)) return true;
             if (IsExcludedDomain(domainName)) {
                 Logging.Logger.LogDebug("Domain: {DomainName} has been excluded for collection. Skipping", domainName);
+                domain = null;
                 return false;
             }
 
@@ -546,7 +548,7 @@ namespace SharpHoundCommonLib {
                 // Blocking External Call
                 domain = Helpers.RetryOnException<ActiveDirectoryObjectNotFoundException, Domain>(() => Domain.GetDomain(context), 2).GetAwaiter().GetResult();
                 if (domain == null) return false;
-                _domainCache.TryAdd(domainName, domain);
+                _domainCache.TryAdd(cacheKey, domain);
                 return true;
             }
             catch (Exception e) {
@@ -554,7 +556,7 @@ namespace SharpHoundCommonLib {
                     e.Message);
                 // If a domain cannot be contacted, this will exclude the domain so that it does not continuously try to connect, and 
                 // cause more timeouts. 
-                AddExcludedDomain(domainName);
+                AddExcludedDomain(cacheKey);
                 domain = null;
                 return false;
             }
