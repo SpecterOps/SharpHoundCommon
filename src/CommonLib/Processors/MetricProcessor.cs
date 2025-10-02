@@ -1,51 +1,54 @@
-using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Threading;
+using System.Linq;
 using System.Threading.Tasks;
+using SharpHoundCommonLib.Interfaces;
+using SharpHoundCommonLib.Models;
 
 namespace SharpHoundCommonLib.Processors;
 
-public interface IMetricWriter {
-    Task WriteAsync(List<Metric> metrics);
-}
+public class MetricProcessor(IMetricWriter writer) : IMetricProcessor {
+    private readonly ConcurrentDictionary<string, Metric> _metrics = [];
 
-public enum MetricType {
-    Counter,
-    Gauge,
-    Histogram
-}
 
-public class Metric {
-    public string Name { get; set; } = string.Empty;
-    public MetricType MetricType { get; set; }
-    public double Value { get; set; }
-    public Dictionary<string, string>? Labels { get; set; } = null;
-}
-
-public class MetricProcessor {
-    private readonly ConcurrentBag<Metric> _metrics = [];
-    private readonly TimeSpan _flushInterval;
-    private readonly IMetricWriter _writer;
-    private readonly CancellationTokenSource _cancellationTokenSource = new();
-    
-
-    public MetricProcessor(IMetricWriter writer, TimeSpan? flushInterval = null) {
-        _writer = writer;
-        _flushInterval = flushInterval ?? TimeSpan.FromSeconds(60);
-        _ = RunFlushLoop();
+    public void Record(string name, object value, MetricType metricType = MetricType.Counter,
+        IDictionary<string, string> labels = null) {
+        _metrics.AddOrUpdate(name, (_) => CreateMetric(name, value, metricType, labels),
+            (_, metric) => UpdateMetric(name, value, metric, metricType, labels));
     }
 
-    private async Task RunFlushLoop() {
-        while (!_cancellationTokenSource.IsCancellationRequested) {
-            await Task.Delay(_flushInterval);
-            await FlushAsync();
+    private static Metric CreateMetric(string name, object value, MetricType metricType = MetricType.Counter,
+            IDictionary<string, string> labels = null) => metricType switch {
+            MetricType.Counter when value is double v => new Metric.DoubleMetric(name, metricType, v, labels),
+            MetricType.Counter => new Metric.DoubleMetric(name, metricType, -1, labels),
+            MetricType.Gauge when value is double v => new Metric.DoubleMetric(name, metricType, v, labels),
+            MetricType.Gauge => new Metric.DoubleMetric(name, metricType, -1, labels),
+            MetricType.Histogram when value is IEnumerable<double> v => new Metric.VectorMetric(name, metricType, v, labels),
+            MetricType.Histogram => new Metric.VectorMetric(name, metricType, [], labels),
+            _ => new Metric.DoubleMetric(name, metricType, -1, labels)
+        };
+
+    private static Metric UpdateMetric(string name, object value, Metric existingMetric, MetricType metricType = MetricType.Counter,
+        IDictionary<string, string> labels = null) => existingMetric switch {
+            Metric.DoubleMetric m when metricType is MetricType.Counter && value is double v =>
+                m with { Labels = CombineLabels(m.Labels, labels), Value = m.Value + v },
+            Metric.DoubleMetric m when metricType is MetricType.Gauge && value is double v =>
+                m with { Labels = CombineLabels(m.Labels, labels), Value = v },
+            Metric.DoubleMetric m when metricType is MetricType.Counter => m,
+            Metric.VectorMetric m when metricType is MetricType.Histogram && value is double v =>
+                m with { Labels = CombineLabels(m.Labels, labels), Value = m.Value.Concat([v]) },
+            Metric.VectorMetric m when metricType is MetricType.Histogram && value is IEnumerable<double> v =>
+                m with { Labels = CombineLabels(m.Labels, labels), Value = m.Value.Concat(v) },
+            Metric.VectorMetric m => m,
+            _ => new Metric.DoubleMetric(name, metricType, -1, labels)
+        };
+
+    private static IDictionary<string, string> CombineLabels(IDictionary<string, string> labels1 = null,
+        IDictionary<string, string> labels2 = null) {
+        if (labels1 != null && labels2 != null) {
+             return labels1.Concat(labels2.Where( x=> !labels1.ContainsKey(x.Key))).ToDictionary(x=>x.Key, x=>x.Value);
         }
-    }
-
-    public void Record(string name, double value, MetricType metricType = MetricType.Gauge,
-        Dictionary<string, string> labels = null) {
-        _metrics.Add(new Metric { Name = name, Value = value, MetricType = metricType, Labels = labels});
+        return labels1 ?? labels2;
     }
 
     public async Task FlushAsync() {
@@ -53,18 +56,11 @@ public class MetricProcessor {
             return;
         }
 
-        var batch = new List<Metric>();
-        while (_metrics.TryTake(out var metric)) {
-            batch.Add(metric);
-        }
-
         try {
-            await _writer.WriteAsync(batch);
+            await writer.WriteAsync(_metrics);
         }
         catch {
             // Don't crash program if we cannot write metrics
         }
     }
-
-    public void Stop() => _cancellationTokenSource.Cancel();
 }
