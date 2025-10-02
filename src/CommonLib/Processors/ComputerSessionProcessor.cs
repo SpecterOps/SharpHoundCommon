@@ -87,7 +87,8 @@ namespace SharpHoundCommonLib.Processors {
                 await SendComputerStatus(new CSVComputerStatus {
                     Status = result.GetErrorStatus(),
                     Task = "NetSessionEnum",
-                    ComputerName = computerName
+                    ComputerName = computerName,
+                    ObjectId = computerSid,
                 });
                 _log.LogTrace("NetSessionEnum failed on {ComputerName}: {Status}", computerName, result.Status);
                 ret.Collected = false;
@@ -99,7 +100,8 @@ namespace SharpHoundCommonLib.Processors {
             await SendComputerStatus(new CSVComputerStatus {
                 Status = CSVComputerStatus.StatusSuccess,
                 Task = "NetSessionEnum",
-                ComputerName = computerName
+                ComputerName = computerName,
+                ObjectId = computerSid,
             });
 
             ret.Collected = true;
@@ -144,6 +146,7 @@ namespace SharpHoundCommonLib.Processors {
                         Status = CSVComputerStatus.StatusSuccess,
                         Task = "NetSessionEnum",
                         ComputerName = computerSessionName,
+                        ObjectId = resolvedComputerSID,
                     });
                 }
                     
@@ -166,6 +169,7 @@ namespace SharpHoundCommonLib.Processors {
                             Status = CSVComputerStatus.StatusSuccess,
                             Task = "NetSessionEnum",
                             ComputerName = computerSessionName,
+                            ObjectId = resolvedComputerSID,
                         });
                         results.Add(new Session {
                             ComputerSID = resolvedComputerSID,
