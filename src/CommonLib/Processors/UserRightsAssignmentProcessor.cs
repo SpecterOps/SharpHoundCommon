@@ -60,7 +60,8 @@ namespace SharpHoundCommonLib.Processors {
                 await SendComputerStatus(new CSVComputerStatus {
                     Task = "LSAOpenPolicy",
                     ComputerName = computerName,
-                    Status = policyOpenResult.Error
+                    Status = policyOpenResult.Error,
+                    ObjectId = computerObjectId,
                 });
                 yield break;
             }
@@ -78,7 +79,8 @@ namespace SharpHoundCommonLib.Processors {
                     await SendComputerStatus(new CSVComputerStatus {
                         ComputerName = computerName,
                         Status = getMachineSidResult.SError,
-                        Task = "LSAGetMachineSID"
+                        Task = "LSAGetMachineSID",
+                        ObjectId = computerObjectId,
                     });
                     yield break;
                 }
@@ -106,7 +108,8 @@ namespace SharpHoundCommonLib.Processors {
                     await SendComputerStatus(new CSVComputerStatus {
                         ComputerName = computerName,
                         Status = enumerateAccountsResult.SError,
-                        Task = "LSAEnumerateAccountsWithUserRight"
+                        Task = "LSAEnumerateAccountsWithUserRight",
+                        ObjectId = computerObjectId,
                     });
                     ret.FailureReason =
                         $"LSAEnumerateAccountsWithUserRights returned {enumerateAccountsResult.SError}";
@@ -121,7 +124,8 @@ namespace SharpHoundCommonLib.Processors {
                 await SendComputerStatus(new CSVComputerStatus {
                     ComputerName = computerName,
                     Status = CSVComputerStatus.StatusSuccess,
-                    Task = "LSAEnumerateAccountsWithUserRight"
+                    Task = "LSAEnumerateAccountsWithUserRight",
+                    ObjectId = computerObjectId,
                 });
 
                 var resolved = new List<TypedPrincipal>();

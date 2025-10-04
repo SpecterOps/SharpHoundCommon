@@ -362,7 +362,8 @@ namespace SharpHoundCommonLib.Processors
                     {
                         Task = "SamConnect",
                         ComputerName = computerName,
-                        Status = openServerResult.SError
+                        Status = openServerResult.SError,
+                        ObjectId = computerObjectId,
                     });
                     return null;
                 }
@@ -376,7 +377,8 @@ namespace SharpHoundCommonLib.Processors
                     {
                         Status = getMachineSidResult.SError,
                         ComputerName = computerName,
-                        Task = "GetMachineSid"
+                        Task = "GetMachineSid",
+                        ObjectId = computerObjectId,
                     });
                     //If we can't get a machine sid, we wont be able to make local principals with unique object ids, or differentiate local/domain objects
                     _log.LogWarning("Unable to get machineSid for {Computer}: {Status}", computerName, getMachineSidResult.SError);
