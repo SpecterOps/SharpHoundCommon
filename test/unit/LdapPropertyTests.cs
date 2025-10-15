@@ -392,6 +392,7 @@ namespace CommonLibTest
                     {"useraccountcontrol", "abc"},
                     {"lastlogon", "132673011142753043"},
                     {"lastlogontimestamp", "132670318095676525"},
+                    {"objectguid", Guid.Parse("a6f75ba4-f1ae-4b47-a606-e3a0a69aec83").ToByteArray()},
                     {"homedirectory", @"\\win10\testdir"},
                     {
                         "serviceprincipalname", new[]
@@ -446,6 +447,7 @@ namespace CommonLibTest
                     {"lastlogon", "132673011142753043"},
                     {"lastlogontimestamp", "132670318095676525"},
                     {"operatingsystem", "Windows 10 Enterprise"},
+                    {"objectguid", Guid.Parse("a6f75ba4-f1ae-4b47-a606-e3a0a69aec83").ToByteArray()},
                     {"operatingsystemservicepack", "1607"},
                     {"mail", "test@testdomain.com"},
                     {"admincount", "c"},
@@ -555,6 +557,7 @@ namespace CommonLibTest
                     {"lastlogon", "132673011142753043"},
                     {"lastlogontimestamp", "132670318095676525"},
                     {"operatingsystem", "Windows 10 Enterprise"},
+                    {"objectguid", Guid.Parse("a6f75ba4-f1ae-4b47-a606-e3a0a69aec83").ToByteArray()},
                     {"admincount", "c"},
                     {
                         "sidhistory", new[]
@@ -612,6 +615,7 @@ namespace CommonLibTest
                     {"lastlogontimestamp", "132670318095676525"},
                     {"operatingsystem", "Windows 10 Enterprise"},
                     {"operatingsystemservicepack", "1607"},
+                    {"objectguid", Guid.Parse("a6f75ba4-f1ae-4b47-a606-e3a0a69aec83").ToByteArray()},
                     {"admincount", "c"},
                     {
                         "sidhistory", new[]
@@ -1380,6 +1384,7 @@ namespace CommonLibTest
                     {"operatingsystem", "Windows 10 Enterprise"},
                     {"operatingsystemservicepack", "1607"},
                     {"mail", "test@testdomain.com"},
+                    {"objectguid", Guid.Parse("a6f75ba4-f1ae-4b47-a606-e3a0a69aec83").ToByteArray()},
                     {"admincount", "c"},
                     {
                         "sidhistory", new[]
@@ -1445,13 +1450,14 @@ namespace CommonLibTest
                     {"lastlogontimestamp", "132670318095676525"},
                     {"operatingsystem", "Windows 10 Enterprise"},
                     {"operatingsystemservicepack", "1607"},
+                    {"objectguid", Guid.Parse("a6f75ba4-f1ae-4b47-a606-e3a0a69aec83").ToByteArray()},
                     {"mail", "test@testdomain.com"},
                     {"admincount", "c"},
                     {
-                        "msds-allowedtoactonbehalfofotheridentity", 
-                        
+                        "msds-allowedtoactonbehalfofotheridentity",
+
                             Utils.B64ToBytes("AQUAAAAAAAUVAAAAIE+Qun9GhKV2SBaQUQQAAA==")
-                        
+
                     }
                 }, "S-1-5-21-3130019616-2776909439-2417379446-1101","");
             
