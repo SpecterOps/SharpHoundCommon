@@ -437,10 +437,17 @@ namespace SharpHoundCommonLib.Processors {
             }
 
             var objectGuidBytes = entry.GetByteProperty(LDAPProperties.ObjectGUID);
-            if (objectGuidBytes != null)
+            if (objectGuidBytes != null && objectGuidBytes.Length == 16)
             {
-                Guid guid = new Guid(objectGuidBytes);
-                props.Add(LDAPProperties.ObjectGUID, guid.ToString().ToUpper());
+                try
+                {
+                    Guid guid = new Guid(objectGuidBytes);
+                    props.Add(LDAPProperties.ObjectGUID, guid.ToString().ToUpper());
+                }
+                catch
+                {
+                    // Skip malformed GUID bytes
+                }
             }
 
             compProps.DumpSMSAPassword = smsaPrincipals.ToArray();
