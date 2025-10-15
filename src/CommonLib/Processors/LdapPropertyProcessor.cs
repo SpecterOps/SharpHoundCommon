@@ -440,7 +440,7 @@ namespace SharpHoundCommonLib.Processors {
             if (objectGuidBytes != null)
             {
                 Guid guid = new Guid(objectGuidBytes);
-                props.Add(LDAPProperties.ObjectGUID, guid.ToString());
+                props.Add(LDAPProperties.ObjectGUID, guid.ToString().ToUpper());
             }
 
             compProps.DumpSMSAPassword = smsaPrincipals.ToArray();
