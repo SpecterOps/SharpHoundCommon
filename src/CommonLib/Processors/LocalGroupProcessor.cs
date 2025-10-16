@@ -77,7 +77,8 @@ namespace SharpHoundCommonLib.Processors
                 {
                     Task = "SamConnect",
                     ComputerName = computerName,
-                    Status = openServerResult.SError
+                    Status = openServerResult.SError,
+                    ObjectId = computerObjectId,
                 });
                 yield break;
             }
@@ -96,7 +97,8 @@ namespace SharpHoundCommonLib.Processors
                     {
                         Status = getMachineSidResult.SError,
                         ComputerName = computerName,
-                        Task = "GetMachineSid"
+                        Task = "GetMachineSid",
+                        ObjectId = computerObjectId,
                     });
                     //If we can't get a machine sid, we wont be able to make local principals with unique object ids, or differentiate local/domain objects
                     _log.LogWarning("Unable to get machineSid for {Computer}: {Status}. Abandoning local group processing", computerName, getMachineSidResult.SError);
@@ -120,7 +122,8 @@ namespace SharpHoundCommonLib.Processors
                 {
                     Task = "GetDomains",
                     ComputerName = computerName,
-                    Status = getDomainsResult.SError
+                    Status = getDomainsResult.SError,
+                    ObjectId = computerObjectId,
                 });
                 yield break;
             }
@@ -141,7 +144,8 @@ namespace SharpHoundCommonLib.Processors
                     {
                         Task = $"OpenDomain - {domainResult.Name}",
                         ComputerName = computerName,
-                        Status = openDomainResult.SError
+                        Status = openDomainResult.SError,
+                        ObjectId = computerObjectId,
                     });
                     if (openDomainResult.IsTimeout) {
                         yield break;
@@ -161,7 +165,8 @@ namespace SharpHoundCommonLib.Processors
                     {
                         Task = $"GetAliases - {domainResult.Name}",
                         ComputerName = computerName,
-                        Status = getAliasesResult.SError
+                        Status = getAliasesResult.SError,
+                        ObjectId = computerObjectId,
                     });
 
                     if (getAliasesResult.IsTimeout) {
@@ -193,7 +198,8 @@ namespace SharpHoundCommonLib.Processors
                         {
                             Task = $"OpenAlias - {alias.Name}",
                             ComputerName = computerName,
-                            Status = openAliasResult.SError
+                            Status = openAliasResult.SError,
+                            ObjectId = computerObjectId,
                         });
                         ret.Collected = false;
                         ret.FailureReason = $"SamOpenAliasInDomain failed with status {openAliasResult.SError}";
@@ -214,7 +220,8 @@ namespace SharpHoundCommonLib.Processors
                         {
                             Task = $"GetMembersInAlias - {alias.Name}",
                             ComputerName = computerName,
-                            Status = getMembersResult.SError
+                            Status = getMembersResult.SError,
+                            ObjectId = computerObjectId,
                         });
                         ret.Collected = false;
                         ret.FailureReason = $"SamGetMembersInAlias failed with status {getMembersResult.SError}";
@@ -229,7 +236,8 @@ namespace SharpHoundCommonLib.Processors
                     {
                         Task = $"GetMembersInAlias - {alias.Name}",
                         ComputerName = computerName,
-                        Status = CSVComputerStatus.StatusSuccess
+                        Status = CSVComputerStatus.StatusSuccess,
+                        ObjectId = computerObjectId,
                     });
                     
                     var results = new List<TypedPrincipal>();

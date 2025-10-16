@@ -43,7 +43,7 @@ namespace CommonLibTest {
                 receivedStatus.Add(status);
                 return Task.CompletedTask;
             };
-            var results = await processor.Scan("primary.testlab.local");
+            var results = await processor.Scan("primary.testlab.local", "");
 
             Assert.Equal(2, receivedStatus.Count);
             var status = receivedStatus[0];
@@ -71,7 +71,7 @@ namespace CommonLibTest {
                 receivedStatus.Add(status);
                 return Task.CompletedTask;
             };
-            var results = await processor.Scan("primary.testlab.local");
+            var results = await processor.Scan("primary.testlab.local", "");
 
             Assert.Equal(2, receivedStatus.Count);
             var status = receivedStatus[0];

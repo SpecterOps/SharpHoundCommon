@@ -269,6 +269,7 @@ namespace SharpHoundCommonLib.Processors {
                             Status = CSVComputerStatus.StatusSuccess,
                             Task = nameof(ReadUserProperties),
                             ComputerName = Helpers.StripServicePrincipalName(d).ToUpper().TrimEnd('$'),
+                            ObjectId = resolvedHost.SecurityIdentifier,
                         });
                         comps.Add(new TypedPrincipal {
                             ObjectIdentifier = resolvedHost.SecurityIdentifier,
@@ -384,6 +385,7 @@ namespace SharpHoundCommonLib.Processors {
                             Status = CSVComputerStatus.StatusSuccess,
                             Task = nameof(ReadComputerProperties),
                             ComputerName = d,
+                            ObjectId = resolvedHost.SecurityIdentifier,
                         });
                         comps.Add(new TypedPrincipal {
                             ObjectIdentifier = resolvedHost.SecurityIdentifier,
