@@ -45,7 +45,7 @@ public class DCLdapProcessor {
     
     public event ComputerStatusDelegate ComputerStatusEvent;
 
-    public async Task<LdapService> Scan(string computerName) {
+    public async Task<LdapService> Scan(string computerName, string computerObjectId) {
         var hasLdap = await TestLdapPort();
         var hasLdaps = await TestLdapsPort();
         SharpHoundRPC.Result<bool> isSigningRequired = new(),
@@ -63,14 +63,16 @@ public class DCLdapProcessor {
             await SendComputerStatus(new CSVComputerStatus {
                 Status = isSigningRequired.Error,
                 Task = "DCLdapIsSigningRequired",
-                ComputerName = computerName
+                ComputerName = computerName,
+                ObjectId = computerObjectId
             });
             _log.LogTrace("DCLdapScan failed on IsSigningRequired for {ComputerName}: {Status}", computerName, isSigningRequired.Status);
         } else {
             await SendComputerStatus(new CSVComputerStatus {
                 Status = CSVComputerStatus.StatusSuccess,
                 Task = "DCLdapIsSigningRequired",
-                ComputerName = computerName
+                ComputerName = computerName,
+                ObjectId = computerObjectId
             });
         }
 
@@ -78,14 +80,16 @@ public class DCLdapProcessor {
             await SendComputerStatus(new CSVComputerStatus {
                 Status = isChannelBindingDisabled.Error,
                 Task = "DCLdapIsChannelBindingDisabled",
-                ComputerName = computerName
+                ComputerName = computerName,
+                ObjectId = computerObjectId,
             });
             _log.LogTrace("DCLdapScan failed on IsChannelBindingDisabled for {ComputerName}: {Status}", computerName, isSigningRequired.Status);
         } else {
             await SendComputerStatus(new CSVComputerStatus {
                 Status = CSVComputerStatus.StatusSuccess,
                 Task = "DCLdapIsChannelBindingDisabled",
-                ComputerName = computerName
+                ComputerName = computerName,
+                ObjectId = computerObjectId,
             });
         }
         

@@ -271,6 +271,7 @@ namespace SharpHoundCommonLib.Processors {
                             Status = CSVComputerStatus.StatusSuccess,
                             Task = nameof(ReadUserProperties),
                             ComputerName = Helpers.StripServicePrincipalName(d).ToUpper().TrimEnd('$'),
+                            ObjectId = resolvedHost.SecurityIdentifier,
                         });
                         comps.Add(new TypedPrincipal {
                             ObjectIdentifier = resolvedHost.SecurityIdentifier,
@@ -386,6 +387,7 @@ namespace SharpHoundCommonLib.Processors {
                             Status = CSVComputerStatus.StatusSuccess,
                             Task = nameof(ReadComputerProperties),
                             ComputerName = d,
+                            ObjectId = resolvedHost.SecurityIdentifier,
                         });
                         comps.Add(new TypedPrincipal {
                             ObjectIdentifier = resolvedHost.SecurityIdentifier,
@@ -435,6 +437,20 @@ namespace SharpHoundCommonLib.Processors {
                 foreach (var dn in hsa) {
                     if (await _utils.ResolveDistinguishedName(dn) is (true, var resolvedPrincipal))
                         smsaPrincipals.Add(resolvedPrincipal);
+                }
+            }
+
+            var objectGuidBytes = entry.GetByteProperty(LDAPProperties.ObjectGUID);
+            if (objectGuidBytes != null && objectGuidBytes.Length == 16)
+            {
+                try
+                {
+                    Guid guid = new Guid(objectGuidBytes);
+                    props.Add(LDAPProperties.ObjectGUID, guid.ToString().ToUpper());
+                }
+                catch
+                {
+                    // Skip malformed GUID bytes
                 }
             }
 

@@ -47,7 +47,7 @@ namespace SharpHoundCommonLib.Processors {
             var pwdlastset = entry.GetProperty(LDAPProperties.PasswordLastSet);
             var lastLogon = entry.GetProperty(LDAPProperties.LastLogonTimestamp);
 
-            return IsComputerAvailable(name, os, pwdlastset, lastLogon);
+            return IsComputerAvailable(name, os, pwdlastset, lastLogon, result.ObjectId);
         }
 
         /// <summary>
@@ -60,16 +60,18 @@ namespace SharpHoundCommonLib.Processors {
         /// <param name="operatingSystem">The LDAP operatingsystem attribute value</param>
         /// <param name="pwdLastSet">The LDAP pwdlastset attribute value</param>
         /// <param name="lastLogon">The LDAP lastlogontimestamp attribute value</param>
+        /// <param name="objectId">The objectId that pertains to the computer.</param>
         /// <returns>A <cref>ComputerStatus</cref> object that represents the availability of the computer</returns>
         public async Task<ComputerStatus> IsComputerAvailable(string computerName, string operatingSystem,
-            string pwdLastSet, string lastLogon) {
+            string pwdLastSet, string lastLogon, string objectId = null) {
             if (operatingSystem != null && !operatingSystem.StartsWith("Windows", StringComparison.OrdinalIgnoreCase)) {
                 _log.LogTrace("{ComputerName} is not available because operating system {OperatingSystem} is not valid",
                     computerName, operatingSystem);
                 await SendComputerStatus(new CSVComputerStatus {
                     Status = ComputerStatus.NonWindowsOS,
                     Task = "ComputerAvailability",
-                    ComputerName = computerName
+                    ComputerName = computerName,
+                    ObjectId = objectId,
                 });
                 return new ComputerStatus {
                     Connectable = false,
@@ -84,7 +86,8 @@ namespace SharpHoundCommonLib.Processors {
                 await SendComputerStatus(new CSVComputerStatus {
                     Status = ComputerStatus.NotActive,
                     Task = "ComputerAvailability",
-                    ComputerName = computerName
+                    ComputerName = computerName,
+                    ObjectId = objectId,
                 });
                 return new ComputerStatus {
                     Connectable = false,
@@ -103,7 +106,8 @@ namespace SharpHoundCommonLib.Processors {
                 await SendComputerStatus(new CSVComputerStatus {
                     Status = ComputerStatus.PortNotOpen,
                     Task = "ComputerAvailability",
-                    ComputerName = computerName
+                    ComputerName = computerName,
+                    ObjectId = objectId,
                 });
                 return new ComputerStatus {
                     Connectable = false,
@@ -116,7 +120,8 @@ namespace SharpHoundCommonLib.Processors {
             await SendComputerStatus(new CSVComputerStatus {
                 Status = CSVComputerStatus.StatusSuccess,
                 Task = "ComputerAvailability",
-                ComputerName = computerName
+                ComputerName = computerName,
+                ObjectId = objectId,
             });
 
             return new ComputerStatus {
