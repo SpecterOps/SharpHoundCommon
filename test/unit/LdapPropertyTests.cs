@@ -392,7 +392,6 @@ namespace CommonLibTest
                     {"useraccountcontrol", "abc"},
                     {"lastlogon", "132673011142753043"},
                     {"lastlogontimestamp", "132670318095676525"},
-                    {"objectguid", Guid.Parse("a6f75ba4-f1ae-4b47-a606-e3a0a69aec83").ToByteArray()},
                     {"homedirectory", @"\\win10\testdir"},
                     {
                         "serviceprincipalname", new[]
@@ -618,7 +617,6 @@ namespace CommonLibTest
                     {"lastlogontimestamp", "132670318095676525"},
                     {"operatingsystem", "Windows 10 Enterprise"},
                     {"operatingsystemservicepack", "1607"},
-                    {"objectguid", Guid.Parse("a6f75ba4-f1ae-4b47-a606-e3a0a69aec83").ToByteArray()},
                     {"admincount", "c"},
                     {
                         "sidhistory", new[]
@@ -675,7 +673,6 @@ namespace CommonLibTest
             var testDumpSMSAPassword = test.DumpSMSAPassword;
             Assert.Equal(2, testDumpSMSAPassword.Length);
             Assert.Equal(expected, testDumpSMSAPassword);
-
         }
 
         [Fact]
