@@ -165,6 +165,8 @@ namespace SharpHoundCommonLib.Processors {
             var props = GetCommonProps(entry);
             entry.TryGetProperty(LDAPProperties.GPCFileSYSPath, out var path);
             props.Add("gpcpath", path.ToUpper());
+            entry.TryGetProperty(LDAPProperties.Flags, out var flags);
+            props.Add("gpostatus", flags);
             return props;
         }
 
