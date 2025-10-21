@@ -58,9 +58,9 @@ namespace SharpHoundCommonLib {
             _log = log ?? Logging.LogProvider.CreateLogger("LdapConnectionPool");
             _portScanner = scanner ?? new PortScanner();
             _nativeMethods = nativeMethods ?? new NativeMethods();
-            _queryAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger("LdapQuery"));
-            _pagedQueryAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger("LdapPagedQuery"));
-            _rangedRetrievalAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger("LdapRangedRetrieval"));
+            _queryAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger("LdapQuery"), useAdaptiveTimeout: false);
+            _pagedQueryAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger("LdapPagedQuery"), useAdaptiveTimeout: false);
+            _rangedRetrievalAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger("LdapRangedRetrieval"), useAdaptiveTimeout: false);
             _testConnectionAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger("TestLdapConnection"));
         }
 
