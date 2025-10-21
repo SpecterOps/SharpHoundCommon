@@ -9,7 +9,7 @@
         <PackageDescription>Common library for C# BloodHound enumeration tasks</PackageDescription>
         <PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
         <RepositoryUrl>https://github.com/BloodHoundAD/SharpHoundCommon</RepositoryUrl>
-        <Version>4.3.1</Version>
+        <Version>4.4.0</Version>
         <AssemblyName>SharpHoundCommonLib</AssemblyName>
         <RootNamespace>SharpHoundCommonLib</RootNamespace>
     </PropertyGroup>
@@ -35,7 +35,8 @@
         <ProjectReference Include="..\SharpHoundRPC\SharpHoundRPC.csproj" PrivateAssets="All" />
     </ItemGroup>
     <PropertyGroup>
-        <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
+        <TargetsForTfmSpecificBuildOutput>
+            $(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
         <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     </PropertyGroup>
     <Target Name="CopyProjectReferencesToPackage" DependsOnTargets="BuildOnlySettings;ResolveReferences">

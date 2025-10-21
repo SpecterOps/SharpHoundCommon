@@ -446,6 +446,7 @@ namespace CommonLibTest
                     {"lastlogon", "132673011142753043"},
                     {"lastlogontimestamp", "132670318095676525"},
                     {"operatingsystem", "Windows 10 Enterprise"},
+                    {"objectguid", Guid.Parse("a6f75ba4-f1ae-4b47-a606-e3a0a69aec83").ToByteArray()},
                     {"operatingsystemservicepack", "1607"},
                     {"mail", "test@testdomain.com"},
                     {"admincount", "c"},
@@ -542,6 +543,9 @@ namespace CommonLibTest
             {
                 Assert.Equal("Success", status.Status);
             }
+            Assert.Contains("objectguid", keys);
+            Assert.Equal("A6F75BA4-F1AE-4B47-A606-E3A0A69AEC83", props["objectguid"]);
+
         }
 
         [Fact]
@@ -597,6 +601,7 @@ namespace CommonLibTest
             Assert.False((bool)props["trustedtoauth"]);
             Assert.Contains("sidhistory", keys);
             Assert.Empty(props["sidhistory"] as string[]);
+            Assert.DoesNotContain("objectguid", keys);
         }
 
 
@@ -668,7 +673,6 @@ namespace CommonLibTest
             var testDumpSMSAPassword = test.DumpSMSAPassword;
             Assert.Equal(2, testDumpSMSAPassword.Length);
             Assert.Equal(expected, testDumpSMSAPassword);
-
         }
 
         [Fact]
@@ -1380,6 +1384,7 @@ namespace CommonLibTest
                     {"operatingsystem", "Windows 10 Enterprise"},
                     {"operatingsystemservicepack", "1607"},
                     {"mail", "test@testdomain.com"},
+                    {"objectguid", Guid.Parse("a6f75ba4-f1ae-4b47-a606-e3a0a69aec83").ToByteArray()},
                     {"admincount", "c"},
                     {
                         "sidhistory", new[]
@@ -1425,6 +1430,9 @@ namespace CommonLibTest
                 ObjectIdentifier = "S-1-5-21-3130019616-2776909439-2417379446-1001",
                 ObjectType = Label.Computer
             }, test.AllowedToDelegate);
+
+            Assert.Contains("objectguid", keys);
+            Assert.Equal("A6F75BA4-F1AE-4B47-A606-E3A0A69AEC83", props["objectguid"]);
         }
         
         [WindowsOnlyFact]
@@ -1445,13 +1453,14 @@ namespace CommonLibTest
                     {"lastlogontimestamp", "132670318095676525"},
                     {"operatingsystem", "Windows 10 Enterprise"},
                     {"operatingsystemservicepack", "1607"},
+                    {"objectguid", Guid.Parse("a6f75ba4-f1ae-4b47-a606-e3a0a69aec83").ToByteArray()},
                     {"mail", "test@testdomain.com"},
                     {"admincount", "c"},
                     {
-                        "msds-allowedtoactonbehalfofotheridentity", 
-                        
+                        "msds-allowedtoactonbehalfofotheridentity",
+
                             Utils.B64ToBytes("AQUAAAAAAAUVAAAAIE+Qun9GhKV2SBaQUQQAAA==")
-                        
+
                     }
                 }, "S-1-5-21-3130019616-2776909439-2417379446-1101","");
             
