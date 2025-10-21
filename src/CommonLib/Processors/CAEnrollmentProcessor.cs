@@ -167,7 +167,7 @@ namespace SharpHoundCommonLib.Processors {
                                     url.AbsoluteUri, useBadChannelBinding, type);
                                 break;
                             default:
-                                _logger.LogError("Unexpected status code while checking {Url}. StatusCode {StatusCode}. UseBadChannelBindings: {UseBadChannelBindings}, EnpointType: {EndpointType}",
+                                _logger.LogError("Unexpected status code while checking {Url}. StatusCode {StatusCode}. UseBadChannelBindings: {UseBadChannelBindings}, EndpointType: {EndpointType}",
                                     url.AbsoluteUri, statusCode, useBadChannelBinding, type);
                                 return APIResult<CAEnrollmentEndpoint>
                                     .Failure(
@@ -187,7 +187,7 @@ namespace SharpHoundCommonLib.Processors {
                 _logger.LogError("HttpRequestException occurred checking NTLM accessibility for URL: {Url}. Exception: {Message}", url.AbsoluteUri, ex.Message);
                 return APIResult<CAEnrollmentEndpoint>
                     .Failure(
-                        $"HttpRequestException occured checking NTLM accessibility for URL: {url}. Exception: {ex.Message}");
+                        $"HttpRequestException occurred checking NTLM accessibility for URL: {url}. Exception: {ex.Message}");
             } catch (HttpUnauthorizedException ex) {
                 if (useBadChannelBinding == true) {
                     output.Status = CAEnrollmentEndpointScanResult.NotVulnerable_NtlmChannelBindingRequired;
