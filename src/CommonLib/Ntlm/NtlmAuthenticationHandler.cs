@@ -38,22 +38,35 @@ public class NtlmAuthenticationHandler : INtlmAuthenticationHandler {
             Options.Signing,
             Options.Signing
         );
+        _logger.LogTrace("Starting {MethodName}", nameof(PerformNtlmAuthenticationAsync));
 
+        _logger.LogDebug("Check if cancellation token is requested.");
         cancellationToken.ThrowIfCancellationRequested();
+        _logger.LogTrace("After if cancellation token is requested.");
 
         // NEGOTIATE
+        _logger.LogDebug("Initial NTLM Negotiate Step.");
         var negotiateMsgBytes = context.Step();
+        _logger.LogTrace("After negotiate step.");
 
         // CHALLENGE
+        _logger.LogDebug("Challenge Negotiate bytes.");
         var challengeMessageBytes = await transport.NegotiateAsync(negotiateMsgBytes);
+        _logger.LogTrace("After Challenge message bytes.");
 
+        _logger.LogTrace("Check if cancellation token is requested.");
         cancellationToken.ThrowIfCancellationRequested();
+        _logger.LogTrace("After if cancellation token is requested.");
 
         // AUTHENTICATE
+        _logger.LogDebug("Perform NTLM Authentication Step.");
         var authenticateMsgBytes = context.Step(challengeMessageBytes);
+        _logger.LogTrace("After NTLM Authentication Step.");
 
         // Perform final authentication
+        _logger.LogDebug("Perform final NTLM Authentication.");
         var response = await transport.AuthenticateAsync(authenticateMsgBytes);
+        _logger.LogTrace("After authentication complete.");
 
         return response;
     }

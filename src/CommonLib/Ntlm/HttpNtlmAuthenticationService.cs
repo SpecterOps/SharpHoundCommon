@@ -37,7 +37,8 @@ public class HttpNtlmAuthenticationService {
 
         var supportedAuthSchemes = await GetSupportedNtlmAuthSchemesAsync(url);
 
-        _logger.LogDebug($"Supported NTLM auth schemes for {url}: " + string.Join(",", supportedAuthSchemes));
+        _logger.LogDebug("Supported NTLM auth schemes for {Url}: {AuthSchemes}. UseBadChannelBinding: {UseBadChannelBinding}. UseBadChannelBindings is null: {UseBadChannelBindingsHasValue}", 
+            url, string.Join(",", supportedAuthSchemes), useBadChannelBindings ?? false, !useBadChannelBindings.HasValue);
 
         foreach (var authScheme in supportedAuthSchemes) {
             if (useBadChannelBindings == null) {
