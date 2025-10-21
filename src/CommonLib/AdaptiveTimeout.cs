@@ -20,10 +20,10 @@ public sealed class AdaptiveTimeout : IDisposable {
     private int _timeSpikeDecay;
     private const int TimeSpikePenalty = 2;
     private const int TimeSpikeForgiveness = 1;
-    private const int TimeSpikeThreshold = 5;
+    private const int TimeSpikeThreshold = 3;
     private const int ExcessiveTimeoutsThreshold = 7;
-    private const int StdDevMultiplier = 5;
-    private const int CountOfLatestSuccessToKeep = 4;
+    private const int StdDevMultiplier = 7; // 7 standard deviations should be a very conservative upper bound
+    private const int CountOfLatestSuccessToKeep = 3;
 
     public AdaptiveTimeout(TimeSpan maxTimeout, ILogger log, int sampleCount = 100, int logFrequency = 1000, int minSamplesForAdaptiveTimeout = 30, bool useAdaptiveTimeout = true, bool throwIfExcessiveTimeouts = false) {
         if (maxTimeout <= TimeSpan.Zero)
