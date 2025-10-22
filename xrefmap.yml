@@ -854,6 +854,19 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.CSVComputerStatus.ComputerName
   nameWithType: CSVComputerStatus.ComputerName
+- uid: SharpHoundCommonLib.CSVComputerStatus.ObjectId
+  name: ObjectId
+  href: api/SharpHoundCommonLib.CSVComputerStatus.html#SharpHoundCommonLib_CSVComputerStatus_ObjectId
+  commentId: P:SharpHoundCommonLib.CSVComputerStatus.ObjectId
+  fullName: SharpHoundCommonLib.CSVComputerStatus.ObjectId
+  nameWithType: CSVComputerStatus.ObjectId
+- uid: SharpHoundCommonLib.CSVComputerStatus.ObjectId*
+  name: ObjectId
+  href: api/SharpHoundCommonLib.CSVComputerStatus.html#SharpHoundCommonLib_CSVComputerStatus_ObjectId_
+  commentId: Overload:SharpHoundCommonLib.CSVComputerStatus.ObjectId
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.CSVComputerStatus.ObjectId
+  nameWithType: CSVComputerStatus.ObjectId
 - uid: SharpHoundCommonLib.CSVComputerStatus.Status
   name: Status
   href: api/SharpHoundCommonLib.CSVComputerStatus.html#SharpHoundCommonLib_CSVComputerStatus_Status
@@ -10174,12 +10187,12 @@ references:
   commentId: M:SharpHoundCommonLib.Processors.ComputerAvailability.IsComputerAvailable(SharpHoundCommonLib.ResolvedSearchResult,SharpHoundCommonLib.IDirectoryObject)
   fullName: SharpHoundCommonLib.Processors.ComputerAvailability.IsComputerAvailable(SharpHoundCommonLib.ResolvedSearchResult, SharpHoundCommonLib.IDirectoryObject)
   nameWithType: ComputerAvailability.IsComputerAvailable(ResolvedSearchResult, IDirectoryObject)
-- uid: SharpHoundCommonLib.Processors.ComputerAvailability.IsComputerAvailable(System.String,System.String,System.String,System.String)
-  name: IsComputerAvailable(String, String, String, String)
-  href: api/SharpHoundCommonLib.Processors.ComputerAvailability.html#SharpHoundCommonLib_Processors_ComputerAvailability_IsComputerAvailable_System_String_System_String_System_String_System_String_
-  commentId: M:SharpHoundCommonLib.Processors.ComputerAvailability.IsComputerAvailable(System.String,System.String,System.String,System.String)
-  fullName: SharpHoundCommonLib.Processors.ComputerAvailability.IsComputerAvailable(System.String, System.String, System.String, System.String)
-  nameWithType: ComputerAvailability.IsComputerAvailable(String, String, String, String)
+- uid: SharpHoundCommonLib.Processors.ComputerAvailability.IsComputerAvailable(System.String,System.String,System.String,System.String,System.String)
+  name: IsComputerAvailable(String, String, String, String, String)
+  href: api/SharpHoundCommonLib.Processors.ComputerAvailability.html#SharpHoundCommonLib_Processors_ComputerAvailability_IsComputerAvailable_System_String_System_String_System_String_System_String_System_String_
+  commentId: M:SharpHoundCommonLib.Processors.ComputerAvailability.IsComputerAvailable(System.String,System.String,System.String,System.String,System.String)
+  fullName: SharpHoundCommonLib.Processors.ComputerAvailability.IsComputerAvailable(System.String, System.String, System.String, System.String, System.String)
+  nameWithType: ComputerAvailability.IsComputerAvailable(String, String, String, String, String)
 - uid: SharpHoundCommonLib.Processors.ComputerAvailability.IsComputerAvailable*
   name: IsComputerAvailable
   href: api/SharpHoundCommonLib.Processors.ComputerAvailability.html#SharpHoundCommonLib_Processors_ComputerAvailability_IsComputerAvailable_
@@ -10500,12 +10513,12 @@ references:
   commentId: E:SharpHoundCommonLib.Processors.DCLdapProcessor.ComputerStatusEvent
   fullName: SharpHoundCommonLib.Processors.DCLdapProcessor.ComputerStatusEvent
   nameWithType: DCLdapProcessor.ComputerStatusEvent
-- uid: SharpHoundCommonLib.Processors.DCLdapProcessor.Scan(System.String)
-  name: Scan(String)
-  href: api/SharpHoundCommonLib.Processors.DCLdapProcessor.html#SharpHoundCommonLib_Processors_DCLdapProcessor_Scan_System_String_
-  commentId: M:SharpHoundCommonLib.Processors.DCLdapProcessor.Scan(System.String)
-  fullName: SharpHoundCommonLib.Processors.DCLdapProcessor.Scan(System.String)
-  nameWithType: DCLdapProcessor.Scan(String)
+- uid: SharpHoundCommonLib.Processors.DCLdapProcessor.Scan(System.String,System.String)
+  name: Scan(String, String)
+  href: api/SharpHoundCommonLib.Processors.DCLdapProcessor.html#SharpHoundCommonLib_Processors_DCLdapProcessor_Scan_System_String_System_String_
+  commentId: M:SharpHoundCommonLib.Processors.DCLdapProcessor.Scan(System.String,System.String)
+  fullName: SharpHoundCommonLib.Processors.DCLdapProcessor.Scan(System.String, System.String)
+  nameWithType: DCLdapProcessor.Scan(String, String)
 - uid: SharpHoundCommonLib.Processors.DCLdapProcessor.Scan*
   name: Scan
   href: api/SharpHoundCommonLib.Processors.DCLdapProcessor.html#SharpHoundCommonLib_Processors_DCLdapProcessor_Scan_
@@ -11488,12 +11501,12 @@ references:
   commentId: E:SharpHoundCommonLib.Processors.SmbProcessor.ComputerStatusEvent
   fullName: SharpHoundCommonLib.Processors.SmbProcessor.ComputerStatusEvent
   nameWithType: SmbProcessor.ComputerStatusEvent
-- uid: SharpHoundCommonLib.Processors.SmbProcessor.Scan(System.String)
-  name: Scan(String)
-  href: api/SharpHoundCommonLib.Processors.SmbProcessor.html#SharpHoundCommonLib_Processors_SmbProcessor_Scan_System_String_
-  commentId: M:SharpHoundCommonLib.Processors.SmbProcessor.Scan(System.String)
-  fullName: SharpHoundCommonLib.Processors.SmbProcessor.Scan(System.String)
-  nameWithType: SmbProcessor.Scan(String)
+- uid: SharpHoundCommonLib.Processors.SmbProcessor.Scan(System.String,System.String)
+  name: Scan(String, String)
+  href: api/SharpHoundCommonLib.Processors.SmbProcessor.html#SharpHoundCommonLib_Processors_SmbProcessor_Scan_System_String_System_String_
+  commentId: M:SharpHoundCommonLib.Processors.SmbProcessor.Scan(System.String,System.String)
+  fullName: SharpHoundCommonLib.Processors.SmbProcessor.Scan(System.String, System.String)
+  nameWithType: SmbProcessor.Scan(String, String)
 - uid: SharpHoundCommonLib.Processors.SmbProcessor.Scan*
   name: Scan
   href: api/SharpHoundCommonLib.Processors.SmbProcessor.html#SharpHoundCommonLib_Processors_SmbProcessor_Scan_

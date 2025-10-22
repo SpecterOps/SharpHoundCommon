@@ -22,9 +22,9 @@
 <tr><th>Coverable lines:</th><td>34</td></tr>
 <tr><th>Total lines:</th><td>92</td></tr>
 <tr><th>Line coverage:</th><td>79.4% (27 of 34)</td></tr>
-<tr><th>Covered branches:</th><td>10</td></tr>
+<tr><th>Covered branches:</th><td>9</td></tr>
 <tr><th>Total branches:</th><td>16</td></tr>
-<tr><th>Branch coverage:</th><td>62.5% (10 of 16)</td></tr>
+<tr><th>Branch coverage:</th><td>56.2% (9 of 16)</td></tr>
 </tbody>
 </table>
 <h1>Metrics</h1>
@@ -32,7 +32,7 @@
 <thead><tr><th>Method</th><th>Branch coverage <a href="https://en.wikipedia.org/wiki/Code_coverage"><i class="icon-info-circled"></i></a></th><th>Cyclomatic complexity <a href="https://en.wikipedia.org/wiki/Cyclomatic_complexity"><i class="icon-info-circled"></i></a></th><th>NPath complexity <a href="https://modess.io/npath-complexity-cyclomatic-complexity-explained"><i class="icon-info-circled"></i></a></th><th>Sequence coverage <a href="https://en.wikipedia.org/wiki/Code_coverage"><i class="icon-info-circled"></i></a></th></tr></thead>
 <tbody>
 <tr><td title="System.Void SharpHoundCommonLib.Processors.WebClientServiceProcessor::.ctor(Microsoft.Extensions.Logging.ILogger)"><a href="#file0_line17" class="navigatetohash">.ctor(...)</a></td><td>100%</td><td>2</td><td>0</td><td>100%</td></tr>
-<tr><td title="System.Boolean SharpHoundCommonLib.Processors.WebClientServiceProcessor::TestPathExists(System.String)"><a href="#file0_line45" class="navigatetohash">TestPathExists(...)</a></td><td>50%</td><td>12</td><td>0</td><td>75%</td></tr>
+<tr><td title="System.Boolean SharpHoundCommonLib.Processors.WebClientServiceProcessor::TestPathExists(System.String)"><a href="#file0_line45" class="navigatetohash">TestPathExists(...)</a></td><td>41.66%</td><td>12</td><td>0</td><td>75%</td></tr>
 <tr><td title="IsWebClientRunning()"><a href="#file0_line77" class="navigatetohash">IsWebClientRunning()</a></td><td>100%</td><td>2</td><td>0</td><td>100%</td></tr>
 </tbody>
 </table>
@@ -100,7 +100,7 @@
 <tr class="coverableline" title="Covered (1 visits)" data-coverage="{'AllTestMethods': {'VC': '1', 'LVS': 'green'}}"><td class="green">&nbsp;</td><td class="leftmargin rightmargin right">1</td><td class="rightmargin right"><a id="file0_line57"></a><code>57</code></td><td></td><td class="lightgreen"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;var&nbsp;result&nbsp;=&nbsp;Marshal.GetHRForLastWin32Error();</code></td></tr>
 <tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line58"></a><code>58</code></td><td></td><td class="lightgray"><code></code></td></tr>
 <tr class="coverableline" title="Partially covered (2 visits, 1 of 2 branches are covered)" data-coverage="{'AllTestMethods': {'VC': '2', 'LVS': 'orange'}}"><td class="orange">&nbsp;</td><td class="leftmargin rightmargin right">2</td><td class="rightmargin right"><a id="file0_line59"></a><code>59</code></td><td class="percentagebar percentagebar50"><i class="icon-fork"></i></td><td class="lightorange"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;(handle.IsInvalid)&nbsp;{</code></td></tr>
-<tr class="coverableline" title="Partially covered (1 visits, 5 of 10 branches are covered)" data-coverage="{'AllTestMethods': {'VC': '1', 'LVS': 'orange'}}"><td class="orange">&nbsp;</td><td class="leftmargin rightmargin right">1</td><td class="rightmargin right"><a id="file0_line60"></a><code>60</code></td><td class="percentagebar percentagebar50"><i class="icon-fork"></i></td><td class="lightorange"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;switch&nbsp;((uint)result)&nbsp;{</code></td></tr>
+<tr class="coverableline" title="Partially covered (1 visits, 4 of 10 branches are covered)" data-coverage="{'AllTestMethods': {'VC': '1', 'LVS': 'orange'}}"><td class="orange">&nbsp;</td><td class="leftmargin rightmargin right">1</td><td class="rightmargin right"><a id="file0_line60"></a><code>60</code></td><td class="percentagebar percentagebar40"><i class="icon-fork"></i></td><td class="lightorange"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;switch&nbsp;((uint)result)&nbsp;{</code></td></tr>
 <tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line61"></a><code>61</code></td><td></td><td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case&nbsp;ERROR_ACCESS_DENIED:</code></td></tr>
 <tr class="coverableline" title="Not covered (0 visits)" data-coverage="{'AllTestMethods': {'VC': '0', 'LVS': 'red'}}"><td class="red">&nbsp;</td><td class="leftmargin rightmargin right">0</td><td class="rightmargin right"><a id="file0_line62"></a><code>62</code></td><td></td><td class="lightred"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;true;</code></td></tr>
 <tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line63"></a><code>63</code></td><td></td><td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case&nbsp;ERROR_BAD_NETPATH:</code></td></tr>
@@ -135,7 +135,7 @@
 <tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line92"></a><code>92</code></td><td></td><td class="lightgray"><code>}</code></td></tr>
 </tbody>
 </table>
-<div class="footer">Generated by: ReportGenerator 4.8.9.0<br />9/29/2025 - 9:11:26 PM<br /><a href="https://github.com/danielpalme/ReportGenerator">GitHub</a> | <a href="http://www.palmmedia.de">www.palmmedia.de</a></div></div>
+<div class="footer">Generated by: ReportGenerator 4.8.9.0<br />10/22/2025 - 4:41:25 PM<br /><a href="https://github.com/danielpalme/ReportGenerator">GitHub</a> | <a href="http://www.palmmedia.de">www.palmmedia.de</a></div></div>
 <div class="containerright">
 <div class="containerrightfixed">
 <h1>Methods/Properties</h1>
