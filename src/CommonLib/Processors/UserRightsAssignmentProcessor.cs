@@ -111,7 +111,7 @@ namespace SharpHoundCommonLib.Processors {
                         ObjectId = computerObjectId,
                     });
                     ret.FailureReason =
-                        $"LSAEnumerateAccountsWithUserRights returned (change reflected) {enumerateAccountsResult.SError}";
+                        $"LSAEnumerateAccountsWithUserRights returned {enumerateAccountsResult.SError}";
                     yield return ret;
                     if (enumerateAccountsResult.IsTimeout) {
                         yield break;
