@@ -47,6 +47,6 @@
         public const string TrustedCredManAccess = "SeTrustedCredManAccessPrivilege";
         public const string Undock = "SeUndockPrivilege";
 
-        public static readonly string[] DesiredPrivileges = {RemoteInteractiveLogon};
+        public static readonly string[] DesiredPrivileges = {InteractiveLogon, RemoteInteractiveLogon, AssignPrimaryToken, Backup, CreateToken, Debug, Impersonate, LoadDriver, ManageVolume, Restore, TakeOwnership, Tcb};
     }
 }

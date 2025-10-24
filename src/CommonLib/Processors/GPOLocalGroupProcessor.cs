@@ -57,7 +57,7 @@ namespace SharpHoundCommonLib.Processors {
             return Task.FromResult(new ResultingGPOChanges());
         }
 
-        public async Task<ResultingGPOChanges> ReadGPOLocalGroups(string gpLink, string distinguishedName) {
+        public async Task<ResultingGPOChanges> ReadGPOLocalGroups(string gpLink, string distinguishedName) {    
             var ret = new ResultingGPOChanges();
             //If the gplink property is null, we don't need to process anything
             if (gpLink == null)
