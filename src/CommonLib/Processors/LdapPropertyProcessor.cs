@@ -36,9 +36,11 @@ namespace SharpHoundCommonLib.Processors {
         }
 
         private readonly ILdapUtils _utils;
+        private readonly ILogger _log;
 
-        public LdapPropertyProcessor(ILdapUtils utils) {
+        public LdapPropertyProcessor(ILdapUtils utils, ILogger log = null) {
             _utils = utils;
+            _log = log ?? Logging.LogProvider.CreateLogger(nameof(LdapPropertyProcessor));
         }
 
         private static Dictionary<string, object> GetCommonProps(IDirectoryObject entry) {
@@ -233,55 +235,48 @@ namespace SharpHoundCommonLib.Processors {
             var userProps = new UserProperties();
             var props = GetCommonProps(entry);
 
-            var uacFlags = (UacFlags)0;
             if (entry.TryGetLongProperty(LDAPProperties.UserAccountControl, out var uac)) {
-                uacFlags = (UacFlags)uac;
-            }
+              var uacFlags = (UacFlags)uac;
+                props.Add("sensitive", uacFlags.HasFlag(UacFlags.NotDelegated));
+                props.Add("dontreqpreauth", uacFlags.HasFlag(UacFlags.DontReqPreauth));
+                props.Add("passwordnotreqd", uacFlags.HasFlag(UacFlags.PasswordNotRequired));
+                props.Add("unconstraineddelegation", uacFlags.HasFlag(UacFlags.TrustedForDelegation));
+                props.Add("pwdneverexpires", uacFlags.HasFlag(UacFlags.DontExpirePassword));
+                props.Add("enabled", !uacFlags.HasFlag(UacFlags.AccountDisable));
+                props.Add("trustedtoauth", uacFlags.HasFlag(UacFlags.TrustedToAuthForDelegation));
+                props.Add("smartcardrequired", uacFlags.HasFlag(UacFlags.SmartcardRequired));
+                props.Add("encryptedtextpwdallowed", uacFlags.HasFlag(UacFlags.EncryptedTextPwdAllowed));
+                props.Add("usedeskeyonly", uacFlags.HasFlag(UacFlags.UseDesKeyOnly));
+                props.Add("logonscriptenabled", uacFlags.HasFlag(UacFlags.Script));
+                props.Add("lockedout", uacFlags.HasFlag(UacFlags.Lockout));
+                props.Add("passwordcantchange", uacFlags.HasFlag(UacFlags.PasswordCantChange));
+                props.Add("passwordexpired", uacFlags.HasFlag(UacFlags.PasswordExpired));
 
-            props.Add("sensitive", uacFlags.HasFlag(UacFlags.NotDelegated));
-            props.Add("dontreqpreauth", uacFlags.HasFlag(UacFlags.DontReqPreauth));
-            props.Add("passwordnotreqd", uacFlags.HasFlag(UacFlags.PasswordNotRequired));
-            props.Add("unconstraineddelegation", uacFlags.HasFlag(UacFlags.TrustedForDelegation));
-            props.Add("pwdneverexpires", uacFlags.HasFlag(UacFlags.DontExpirePassword));
-            props.Add("enabled", !uacFlags.HasFlag(UacFlags.AccountDisable));
-            props.Add("trustedtoauth", uacFlags.HasFlag(UacFlags.TrustedToAuthForDelegation));
-            props.Add("smartcardrequired", uacFlags.HasFlag(UacFlags.SmartcardRequired));
-            props.Add("encryptedtextpwdallowed", uacFlags.HasFlag(UacFlags.EncryptedTextPwdAllowed));
-            props.Add("usedeskeyonly", uacFlags.HasFlag(UacFlags.UseDesKeyOnly));
-            props.Add("logonscriptenabled", uacFlags.HasFlag(UacFlags.Script));
-            props.Add("lockedout", uacFlags.HasFlag(UacFlags.Lockout));
-            props.Add("passwordcantchange", uacFlags.HasFlag(UacFlags.PasswordCantChange));
-            props.Add("passwordexpired", uacFlags.HasFlag(UacFlags.PasswordExpired));
+                userProps.UnconstrainedDelegation = uacFlags.HasFlag(UacFlags.TrustedForDelegation);
+                
+                var comps = new List<TypedPrincipal>();
+                if (uacFlags.HasFlag(UacFlags.TrustedToAuthForDelegation) &&
+                    entry.TryGetArrayProperty(LDAPProperties.AllowedToDelegateTo, out var delegates)) {
+                    props.Add("allowedtodelegate", delegates);
 
-            userProps.UnconstrainedDelegation = uacFlags.HasFlag(UacFlags.TrustedForDelegation);
+                    foreach (var d in delegates) {
+                        if (d == null)
+                            continue;
 
-            var comps = new List<TypedPrincipal>();
-            if (uacFlags.HasFlag(UacFlags.TrustedToAuthForDelegation) &&
-                entry.TryGetArrayProperty(LDAPProperties.AllowedToDelegateTo, out var delegates)) {
-                props.Add("allowedtodelegate", delegates);
-
-                foreach (var d in delegates) {
-                    if (d == null)
-                        continue;
-
-                    var resolvedHost = await _utils.ResolveHostToSid(d, domain);
-                    if (resolvedHost.Success && resolvedHost.SecurityIdentifier.Contains("S-1"))
-                    {
-                        await SendComputerStatus(new CSVComputerStatus {
-                            Status = CSVComputerStatus.StatusSuccess,
-                            Task = nameof(ReadUserProperties),
-                            ComputerName = Helpers.StripServicePrincipalName(d).ToUpper().TrimEnd('$'),
-                            ObjectId = resolvedHost.SecurityIdentifier,
-                        });
-                        comps.Add(new TypedPrincipal {
-                            ObjectIdentifier = resolvedHost.SecurityIdentifier,
-                            ObjectType = Label.Computer
-                        });
+                        var resolvedHost = await _utils.ResolveHostToSid(d, domain);
+                        if (resolvedHost.Success && resolvedHost.SecurityIdentifier.Contains("S-1"))
+                            comps.Add(new TypedPrincipal {
+                                ObjectIdentifier = resolvedHost.SecurityIdentifier,
+                                ObjectType = Label.Computer
+                            });
                     }
                 }
-            }
 
-            userProps.AllowedToDelegate = comps.Distinct().ToArray();
+                userProps.AllowedToDelegate = comps.Distinct().ToArray();
+            }
+            else {
+                _log.LogWarning("Unable to collect UserAccountControl flags.");
+            }
 
             if (!entry.TryGetProperty(LDAPProperties.LastLogon, out var lastLogon)) {
                 lastLogon = null;
