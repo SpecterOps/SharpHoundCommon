@@ -265,11 +265,18 @@ namespace SharpHoundCommonLib.Processors {
                             continue;
 
                         var resolvedHost = await _utils.ResolveHostToSid(d, domain);
-                        if (resolvedHost.Success && resolvedHost.SecurityIdentifier.Contains("S-1"))
-                            comps.Add(new TypedPrincipal {
-                                ObjectIdentifier = resolvedHost.SecurityIdentifier,
-                                ObjectType = Label.Computer
-                            });
+                        if (!resolvedHost.Success || !resolvedHost.SecurityIdentifier.Contains("S-1")) continue;
+                        await SendComputerStatus(new CSVComputerStatus {
+                            Status = CSVComputerStatus.StatusSuccess,
+                            Task = nameof(ReadUserProperties),
+                            ComputerName = Helpers.StripServicePrincipalName(d).ToUpper().TrimEnd('$'),
+                            ObjectId = resolvedHost.SecurityIdentifier,
+                        });
+                            
+                        comps.Add(new TypedPrincipal {
+                            ObjectIdentifier = resolvedHost.SecurityIdentifier,
+                            ObjectType = Label.Computer
+                        });
                     }
                 }
 

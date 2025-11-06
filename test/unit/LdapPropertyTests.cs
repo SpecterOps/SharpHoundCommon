@@ -418,20 +418,13 @@ namespace CommonLibTest
             Assert.Empty(props["sidhistory"] as string[]);
             Assert.Contains("admincount", keys);
             Assert.False((bool)props["admincount"]);
-            Assert.Contains("sensitive", keys);
-            Assert.Contains("dontreqpreauth", keys);
-            Assert.Contains("passwordnotreqd", keys);
-            Assert.Contains("unconstraineddelegation", keys);
-            Assert.Contains("pwdneverexpires", keys);
-            Assert.Contains("enabled", keys);
-            Assert.Contains("trustedtoauth", keys);
-            Assert.False((bool)props["trustedtoauth"]);
-            Assert.False((bool)props["sensitive"]);
-            Assert.False((bool)props["dontreqpreauth"]);
-            Assert.False((bool)props["passwordnotreqd"]);
-            Assert.False((bool)props["unconstraineddelegation"]);
-            Assert.False((bool)props["pwdneverexpires"]);
-            Assert.True((bool)props["enabled"]);
+            Assert.DoesNotContain("sensitive", keys);
+            Assert.DoesNotContain("dontreqpreauth", keys);
+            Assert.DoesNotContain("passwordnotreqd", keys);
+            Assert.DoesNotContain("unconstraineddelegation", keys);
+            Assert.DoesNotContain("pwdneverexpires", keys);
+            Assert.DoesNotContain("enabled", keys);
+            Assert.DoesNotContain("trustedtoauth", keys);
         }
 
         [WindowsOnlyFact]
