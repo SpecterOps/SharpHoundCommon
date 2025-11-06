@@ -251,6 +251,7 @@ namespace SharpHoundCommonLib.Processors {
                 props.Add("lockedout", uacFlags.HasFlag(UacFlags.Lockout));
                 props.Add("passwordcantchange", uacFlags.HasFlag(UacFlags.PasswordCantChange));
                 props.Add("passwordexpired", uacFlags.HasFlag(UacFlags.PasswordExpired));
+                props.Add("useraccountcontrol", uac);
 
                 userProps.UnconstrainedDelegation = uacFlags.HasFlag(UacFlags.TrustedForDelegation);
                 
@@ -275,7 +276,8 @@ namespace SharpHoundCommonLib.Processors {
                 userProps.AllowedToDelegate = comps.Distinct().ToArray();
             }
             else {
-                _log.LogWarning("Unable to collect UserAccountControl flags.");
+                entry.TryGetSecurityIdentifier(out var sid);
+                _log.LogWarning("Unable to collect UserAccountControl flags for {SecurityIdentifier}.", sid);
             }
 
             if (!entry.TryGetProperty(LDAPProperties.LastLogon, out var lastLogon)) {
@@ -308,7 +310,6 @@ namespace SharpHoundCommonLib.Processors {
             props.Add("unicodepassword", entry.GetProperty(LDAPProperties.UnicodePassword));
             props.Add("sfupassword", entry.GetProperty(LDAPProperties.MsSFU30Password));
             props.Add("logonscript", entry.GetProperty(LDAPProperties.ScriptPath));
-            props.Add("useraccountcontrol", uac);
             props.Add("profilepath", entry.GetProperty(LDAPProperties.ProfilePath));
 
             entry.TryGetLongProperty(LDAPProperties.AdminCount, out var ac);
