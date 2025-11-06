@@ -27,6 +27,7 @@ namespace SharpHoundCommonLib.Enums {
         WebClientService = 1 << 21,
         SmbInfo = 1 << 22,
         NTLMRegistry = 1 << 23,
+        Site = 1 << 24,
         //TODO: Re-introduce this when we're ready for Event Log collection
         //EventLogs = 1 << 23,
         LocalGroups = DCOM | RDP | LocalAdmin | PSRemote,
@@ -34,7 +35,7 @@ namespace SharpHoundCommonLib.Enums {
         DCOnly = ACL | Container | Group | ObjectProps | Trusts | GPOLocalGroup | CertServices,
 
         Default = Group | Session | Trusts | ACL | ObjectProps | LocalGroups | SPNTargets | Container | CertServices |
-                  LdapServices | SmbInfo | WebClientService,
+                  LdapServices | SmbInfo | WebClientService | Site,
 
         All = Default | LoggedOn | GPOLocalGroup | UserRights | CARegistry | DCRegistry | WebClientService |
               LdapServices | NTLMRegistry

@@ -104,9 +104,10 @@ public class LdapProducerQueryGenerator {
         properties.AddRange(CommonProperties.TypeResolutionProps);
 
         if (methods.HasFlag(CollectionMethod.ACL) || methods.HasFlag(CollectionMethod.ObjectProps) ||
-            methods.HasFlag(CollectionMethod.Container) || methods.HasFlag(CollectionMethod.CertServices)) {
+            methods.HasFlag(CollectionMethod.Container) || methods.HasFlag(CollectionMethod.CertServices) ||
+            methods.HasFlag(CollectionMethod.Site)) {
             filter = filter.AddContainers().AddConfiguration().AddCertificateTemplates().AddCertificateAuthorities()
-                .AddEnterpriseCertificationAuthorities().AddIssuancePolicies();
+                .AddEnterpriseCertificationAuthorities().AddIssuancePolicies().AddSites().AddSiteServers().AddSiteSubnets();
 
             if (methods.HasFlag(CollectionMethod.ObjectProps)) {
                 properties.AddRange(CommonProperties.ObjectPropsProps);
@@ -129,6 +130,13 @@ public class LdapProducerQueryGenerator {
 
             if (methods.HasFlag(CollectionMethod.CARegistry)) {
                 properties.AddRange(CommonProperties.CertAbuseProps);
+            }
+
+            if (methods.HasFlag(CollectionMethod.Site))
+            {
+                properties.AddRange(CommonProperties.SiteProps);
+                properties.AddRange(CommonProperties.SiteServerProps);
+                properties.AddRange(CommonProperties.SiteSubnetProps);
             }
 
             return new GeneratedLdapParameters {

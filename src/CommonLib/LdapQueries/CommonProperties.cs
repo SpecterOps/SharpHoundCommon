@@ -98,5 +98,23 @@
         public static readonly string[] StealthProperties = {
             LDAPProperties.HomeDirectory, LDAPProperties.ScriptPath, LDAPProperties.ProfilePath
         };
+
+        public static readonly string[] SiteProps =
+        {
+            LDAPProperties.DisplayName, LDAPProperties.Name, LDAPProperties.ObjectGUID, LDAPProperties.GPLink,
+            LDAPProperties.GroupPolicyOptions, LDAPProperties.ObjectClass
+        };
+
+        public static readonly string[] SiteServerProps =
+        {
+            LDAPProperties.DisplayName, LDAPProperties.Name, LDAPProperties.ObjectGUID, LDAPProperties.ObjectClass, LDAPProperties.DNSHostName,
+            LDAPProperties.ServerReference
+        };
+
+        public static readonly string[] SiteSubnetProps =
+        {
+            LDAPProperties.DisplayName, LDAPProperties.Name, LDAPProperties.CanonicalName, LDAPProperties.ObjectGUID, LDAPProperties.ObjectClass,
+            LDAPProperties.SiteObject
+        };
     }
 }

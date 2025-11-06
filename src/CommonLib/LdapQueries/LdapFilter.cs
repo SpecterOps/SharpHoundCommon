@@ -216,6 +216,45 @@ namespace SharpHoundCommonLib.LDAPQueries {
         }
 
         /// <summary>
+        ///     Add a filter that will match Active Directory sites
+        /// </summary>
+        /// <param name="conditions"></param>
+        /// <returns></returns>
+        public LdapFilter AddSites(params string[] conditions)
+        {
+            _filterParts.Add(BuildString(
+                "(objectClass=site)",
+                conditions));
+            return this;
+        }
+
+        /// <summary>
+        ///     Add a filter that will match Active Directory site servers
+        /// </summary>
+        /// <param name="conditions"></param>
+        /// <returns></returns>
+        public LdapFilter AddSiteServers(params string[] conditions)
+        {
+            _filterParts.Add(BuildString(
+                "(objectClass=server)",
+                conditions));
+            return this;
+        }
+
+        /// <summary>
+        ///     Add a filter that will match Active Directory site subnets
+        /// </summary>
+        /// <param name="conditions"></param>
+        /// <returns></returns>
+        public LdapFilter AddSiteSubnets(params string[] conditions)
+        {
+            _filterParts.Add(BuildString(
+                "(objectClass=subnet)",
+                conditions));
+            return this;
+        }
+
+        /// <summary>
         ///     Adds a generic user specified filter
         /// </summary>
         /// <param name="filter">LDAP Filter to add to query</param>

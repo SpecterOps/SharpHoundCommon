@@ -15,5 +15,8 @@
         public const string EnterpriseCAs = "enterprisecas";
         public const string CertTemplates = "certtemplates";
         public const string IssuancePolicies = "issuancepolicies";
+        public const string Sites = "sites";
+        public const string SiteServers = "siteservers";
+        public const string SiteSubnets = "sitesubnets";
     }
 }

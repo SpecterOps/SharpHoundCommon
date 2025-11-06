@@ -643,6 +643,29 @@ namespace SharpHoundCommonLib.Processors {
             return ret;
         }
 
+        public static Dictionary<string, object> ReadSiteProperties(IDirectoryObject entry)
+        {
+            var props = GetCommonProps(entry);
+            return props;
+        }
+
+
+        public static Dictionary<string, object> ReadSiteServerProperties(IDirectoryObject entry)
+        {
+            var props = GetCommonProps(entry);
+            props.Add("dnshostname", entry.GetProperty(LDAPProperties.DNSHostName));
+            props.Add("serverreference", entry.GetProperty(LDAPProperties.ServerReference));
+            return props;
+        }
+
+        public static Dictionary<string, object> ReadSiteSubnetProperties(IDirectoryObject entry)
+        {
+            var props = GetCommonProps(entry);
+            props.Add("cn", entry.GetProperty(LDAPProperties.CanonicalName));
+            props.Add("siteObject", entry.GetProperty(LDAPProperties.SiteObject));
+            return props;
+        }
+
         /// <summary>
         ///     Attempts to parse all LDAP attributes outside of the ones already collected and converts them to a human readable
         ///     format using a best guess

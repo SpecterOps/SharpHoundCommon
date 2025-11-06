@@ -1205,6 +1205,18 @@ namespace SharpHoundCommonLib {
                     type = Label.IssuancePolicy;
                 }
             }
+            else if (objectClasses.Contains(ObjectClass.SiteClass, StringComparer.OrdinalIgnoreCase))
+            {
+                type = Label.Site;
+            }
+            else if (objectClasses.Contains(ObjectClass.SiteServerClass, StringComparer.OrdinalIgnoreCase))
+            {
+                type = Label.SiteServer;
+            }
+            else if (objectClasses.Contains(ObjectClass.SiteSubnetClass, StringComparer.OrdinalIgnoreCase))
+            {
+                type = Label.SiteSubnet;
+            }
 
             return type != Label.Base;
         }
@@ -1214,7 +1226,7 @@ namespace SharpHoundCommonLib {
             if (!directoryObject.GetObjectIdentifier(out var objectIdentifier)) {
                 return (false, default);
             }
-
+            
             var res = new ResolvedSearchResult {
                 ObjectId = objectIdentifier
             };
@@ -1270,11 +1282,10 @@ namespace SharpHoundCommonLib {
                 if (await utils.GetWellKnownPrincipal(objectIdentifier, domain) is (true, var convertedPrincipal)) {
                     res.ObjectId = convertedPrincipal.ObjectIdentifier;
                 }
-
                 return (true, res);
             }
 
-            res.ObjectType = await ComputeLabel(directoryObject, objectIdentifier, domain, utils);
+            res.ObjectType = await ComputeLabel(directoryObject, objectIdentifier, domain, utils);          
 
             directoryObject.TryGetProperty(LDAPProperties.SAMAccountName, out var samAccountName);
             res.DisplayName = ComputeDisplayName(directoryObject, domain, res.ObjectType, samAccountName);
@@ -1395,6 +1406,43 @@ namespace SharpHoundCommonLib {
                             displayName = $"UNKNOWN@{domain}";
                         }
 
+                        break;
+                    }
+                case Label.Site: {
+                        if (directoryObject.TryGetProperty(LDAPProperties.Name, out var name))
+                        {
+                            displayName = $"{name}@{domain}";
+                        }
+                        else
+                        {
+                            displayName = $"UNKNOWN@{domain}";
+                        }
+                        break;
+                    }
+                case Label.SiteServer:
+                    {
+                        // Not specifying @{domain} here since Site servers may belong to other domains, so this might confuse the user
+                        if (directoryObject.TryGetProperty(LDAPProperties.Name, out var name))
+                        {
+                            displayName = $"{name}";
+                        }
+                        else
+                        {
+                            displayName = $"UNKNOWN";
+                        }
+                        break;
+                    }
+                case Label.SiteSubnet:
+                    {
+                        // Not specifying @{domain} here since subnets are not domain-specific
+                        if (directoryObject.TryGetProperty(LDAPProperties.Name, out var name))
+                        {
+                            displayName = $"{name}";
+                        }
+                        else
+                        {
+                            displayName = $"UNKNOWN";
+                        }
                         break;
                     }
                 default:
