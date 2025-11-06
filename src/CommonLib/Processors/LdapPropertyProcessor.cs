@@ -265,7 +265,7 @@ namespace SharpHoundCommonLib.Processors {
                             continue;
 
                         var resolvedHost = await _utils.ResolveHostToSid(d, domain);
-                        if (!resolvedHost.Success || !resolvedHost.SecurityIdentifier.Contains("S-1")) continue;
+                        if (!resolvedHost.Success || !resolvedHost.SecurityIdentifier.StartsWith("S-1-5-")) continue;
                         await SendComputerStatus(new CSVComputerStatus {
                             Status = CSVComputerStatus.StatusSuccess,
                             Task = nameof(ReadUserProperties),
@@ -384,19 +384,17 @@ namespace SharpHoundCommonLib.Processors {
                         continue;
 
                     var resolvedHost = await _utils.ResolveHostToSid(d, domain);
-                    if (resolvedHost.Success && resolvedHost.SecurityIdentifier.Contains("S-1"))
-                    {
-                        await SendComputerStatus(new CSVComputerStatus {
-                            Status = CSVComputerStatus.StatusSuccess,
-                            Task = nameof(ReadComputerProperties),
-                            ComputerName = d,
-                            ObjectId = resolvedHost.SecurityIdentifier,
-                        });
-                        comps.Add(new TypedPrincipal {
-                            ObjectIdentifier = resolvedHost.SecurityIdentifier,
-                            ObjectType = Label.Computer
-                        });
-                    }
+                    if (!resolvedHost.Success || !resolvedHost.SecurityIdentifier.StartsWith("S-1-5-")) continue;
+                    await SendComputerStatus(new CSVComputerStatus {
+                        Status = CSVComputerStatus.StatusSuccess,
+                        Task = nameof(ReadComputerProperties),
+                        ComputerName = d,
+                        ObjectId = resolvedHost.SecurityIdentifier,
+                    });
+                    comps.Add(new TypedPrincipal {
+                        ObjectIdentifier = resolvedHost.SecurityIdentifier,
+                        ObjectType = Label.Computer
+                    });
                 }
             }
 
