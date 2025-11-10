@@ -2,7 +2,8 @@
 
 namespace SharpHoundCommonLib.Enums {
     [Flags]
-    public enum CollectionMethod {
+    public enum CollectionMethod
+    {
         None = 0,
         Group = 1,
         LocalAdmin = 1 << 1,
@@ -27,9 +28,10 @@ namespace SharpHoundCommonLib.Enums {
         WebClientService = 1 << 21,
         SmbInfo = 1 << 22,
         NTLMRegistry = 1 << 23,
+        Backup = 1 << 24,
         //TODO: Re-introduce this when we're ready for Event Log collection
         //EventLogs = 1 << 23,
-        LocalGroups = DCOM | RDP | LocalAdmin | PSRemote,
+        LocalGroups = DCOM | RDP | LocalAdmin | PSRemote | Backup,
         ComputerOnly = LocalGroups | Session | UserRights | CARegistry | DCRegistry | WebClientService | SmbInfo | NTLMRegistry,
         DCOnly = ACL | Container | Group | ObjectProps | Trusts | GPOLocalGroup | CertServices,
 

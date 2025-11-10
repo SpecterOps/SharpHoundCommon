@@ -70,13 +70,16 @@ namespace SharpHoundCommonLib.Processors {
             desiredPrivileges ??= LSAPrivileges.DesiredPrivileges;
 
             SecurityIdentifier machineSid;
-            if (!Cache.GetMachineSid(computerObjectId, out var temp)) {
+            if (!Cache.GetMachineSid(computerObjectId, out var temp))
+            {
                 var getMachineSidResult =
                     await _getLocalDomainInfoAdaptiveTimeout.ExecuteRPCWithTimeout((_) => server.GetLocalDomainInformation());
-                if (getMachineSidResult.IsFailed) {
+                if (getMachineSidResult.IsFailed)
+                {
                     _log.LogWarning("Failed to get machine sid for {Server}: {Status}. Abandoning URA collection",
                         computerName, getMachineSidResult.SError);
-                    await SendComputerStatus(new CSVComputerStatus {
+                    await SendComputerStatus(new CSVComputerStatus
+                    {
                         ComputerName = computerName,
                         Status = getMachineSidResult.SError,
                         Task = "LSAGetMachineSID",
@@ -87,9 +90,14 @@ namespace SharpHoundCommonLib.Processors {
 
                 machineSid = new SecurityIdentifier(getMachineSidResult.Value.Sid);
                 Cache.AddMachineSid(computerObjectId, getMachineSidResult.Value.Sid);
-            } else {
+            }
+            else
+            {
                 machineSid = new SecurityIdentifier(temp);
             }
+
+            // Guard user-rights processor status callback so failed enum reports only once while still yielding per-priv results
+            var enumerateAccountsFailureReported = false;
 
             foreach (var privilege in desiredPrivileges) {
                 _log.LogTrace("Getting principals for privilege {Priv} on computer {ComputerName}", privilege,
@@ -105,12 +113,15 @@ namespace SharpHoundCommonLib.Processors {
                     _log.LogDebug(
                         "LSAEnumerateAccountsWithUserRight failed on {ComputerName} with status {Status} for privilege {Privilege}",
                         computerName, policyOpenResult.Error, privilege);
-                    await SendComputerStatus(new CSVComputerStatus {
-                        ComputerName = computerName,
-                        Status = enumerateAccountsResult.SError,
-                        Task = "LSAEnumerateAccountsWithUserRight",
-                        ObjectId = computerObjectId,
-                    });
+                    if (!enumerateAccountsFailureReported) {
+                        await SendComputerStatus(new CSVComputerStatus {
+                            ComputerName = computerName,
+                            Status = enumerateAccountsResult.SError,
+                            Task = "LSAEnumerateAccountsWithUserRight",
+                            ObjectId = computerObjectId,
+                        });
+                        enumerateAccountsFailureReported = true;
+                    }
                     ret.FailureReason =
                         $"LSAEnumerateAccountsWithUserRights returned {enumerateAccountsResult.SError}";
                     yield return ret;

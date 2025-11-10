@@ -20,11 +20,11 @@ namespace SharpHoundCommonLib.Processors {
             new(@"\[Group Membership\](.*)(?:\[|$)", RegexOptions.Compiled | RegexOptions.Singleline);
 
         private static readonly Regex MemberLeftRegex =
-            new(@"(.*(?:S-1-5-32-544|S-1-5-32-555|S-1-5-32-562|S-1-5-32-580)__Members)", RegexOptions.Compiled |
+            new(@"(.*(?:S-1-5-32-544|S-1-5-32-551|S-1-5-32-555|S-1-5-32-562|S-1-5-32-580)__Members)", RegexOptions.Compiled |
                 RegexOptions.IgnoreCase);
 
         private static readonly Regex MemberRightRegex =
-            new(@"(S-1-5-32-544|S-1-5-32-555|S-1-5-32-562|S-1-5-32-580)", RegexOptions.Compiled |
+            new(@"(S-1-5-32-544|S-1-5-32-551|S-1-5-32-555|S-1-5-32-562|S-1-5-32-580)", RegexOptions.Compiled |
                                                                           RegexOptions.IgnoreCase);
 
         private static readonly Regex ExtractRid =
@@ -35,6 +35,7 @@ namespace SharpHoundCommonLib.Processors {
         private static readonly Dictionary<string, LocalGroupRids> ValidGroupNames =
             new(StringComparer.OrdinalIgnoreCase) {
                 { "Administrators", LocalGroupRids.Administrators },
+                { "Backup Operators", LocalGroupRids.BackupOperators },
                 { "Remote Desktop Users", LocalGroupRids.RemoteDesktopUsers },
                 { "Remote Management Users", LocalGroupRids.PSRemote },
                 { "Distributed COM Users", LocalGroupRids.DcomUsers }
@@ -233,6 +234,9 @@ namespace SharpHoundCommonLib.Processors {
                     case LocalGroupRids.Administrators:
                         ret.LocalAdmins = finalArr;
                         break;
+                    case LocalGroupRids.BackupOperators:
+                        ret.BackupOperators = finalArr;
+                        break;                        
                     case LocalGroupRids.RemoteDesktopUsers:
                         ret.RemoteDesktopUsers = finalArr;
                         break;
@@ -369,8 +373,12 @@ namespace SharpHoundCommonLib.Processors {
                 return await _utils.ResolveAccountName($"{user}$", domain);
             }
 
-            //The element is just a sid, so return it straight
-            return await _utils.ResolveIDAndType(account, domainName);
+            //The element is just a sid, so prefer resolving directly by sid and fall back to a name lookup
+            var resolvedBySid = await _utils.ResolveIDAndType(account, domainName);
+            if (resolvedBySid.Success)
+                return resolvedBySid;
+
+            return await _utils.ResolveAccountName(account, domainName);
         }
 
         /// <summary>
@@ -568,9 +576,11 @@ namespace SharpHoundCommonLib.Processors {
             LocalGroup
         }
 
-        internal enum LocalGroupRids {
+        internal enum LocalGroupRids
+        {
             None = 0,
             Administrators = 544,
+            BackupOperators = 551,
             RemoteDesktopUsers = 555,
             DcomUsers = 562,
             PSRemote = 580
