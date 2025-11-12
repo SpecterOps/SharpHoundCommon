@@ -756,6 +756,17 @@ namespace SharpHoundCommonLib.Processors {
                             IsPermissionForOwnerRightsSid = isPermissionForOwnerRightsSid,
                             IsInheritedPermissionForOwnerRightsSid = isInheritedPermissionForOwnerRightsSid,
                         };
+                    else if (objectType == Label.User && aceType == ACEGuids.WriteLogonScript)
+                        yield return new ACE
+                        {
+                            PrincipalType = resolvedPrincipal.ObjectType,
+                            PrincipalSID = resolvedPrincipal.ObjectIdentifier,
+                            IsInherited = inherited,
+                            RightName = EdgeNames.WriteLogonScript,
+                            InheritanceHash = aceInheritanceHash,
+                            IsPermissionForOwnerRightsSid = isPermissionForOwnerRightsSid,
+                            IsInheritedPermissionForOwnerRightsSid = isInheritedPermissionForOwnerRightsSid,
+                        };
                     else if (objectType == Label.Computer && aceType == ACEGuids.WriteAllowedToAct)
                         yield return new ACE {
                             PrincipalType = resolvedPrincipal.ObjectType,
