@@ -3,8 +3,7 @@ name: Vulnerability Scan
 on:
   pull_request:
     branches:
-      - main
-      - "stage/**"
+      - v*
     types:
       - opened
       - synchronize
