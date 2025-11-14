@@ -39,8 +39,7 @@ namespace SharpHoundCommonLib {
             var remoteKey = await _adaptiveTimeout.ExecuteWithTimeout((_) => RegistryKey.OpenRemoteBaseKey(hive, machineName));
             if (remoteKey.IsSuccess)
                 return new SHRegistryKey(remoteKey.Value);
-            else
-                throw new TimeoutException($"Failed to connect to registry on {machineName}: {remoteKey.Error}");
+            throw new TimeoutException($"Failed to connect to registry on {machineName}: {remoteKey.Error}");
         }
 
         public void Dispose() {
