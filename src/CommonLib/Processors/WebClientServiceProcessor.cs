@@ -88,6 +88,7 @@ namespace SharpHoundCommonLib.Processors {
                 }
             });
 
+            //TODO: Not a big fan of nested result objects. We should look at this later to see if we can simplify the interface
             if (result.IsSuccess) {
                 return result.Value;
             }
