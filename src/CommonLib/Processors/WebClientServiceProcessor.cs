@@ -93,7 +93,7 @@ namespace SharpHoundCommonLib.Processors {
                 return result.Value;
             }
             
-            throw new TimeoutException($"Failed to check pipe on {computerName}: {pipePath}");
+            return APIResult<bool>.Failure($"Failed to check pipe on {computerName} due to timeout: {pipePath}");
         }
     }
 }
