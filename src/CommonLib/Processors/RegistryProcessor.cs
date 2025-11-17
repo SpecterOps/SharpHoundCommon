@@ -15,6 +15,7 @@ public class RegistryProcessor {
     private readonly IPortScanner _portScanner;
     private readonly ICollectionStrategy<RegistryQueryResult, RegistryQuery>[] _strategies;
     private readonly RegistryQuery[] _queries;
+    private readonly AdaptiveTimeout _registryAdaptiveTimeout = new(maxTimeout:TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ReadRegistrySettings)));
 
     public RegistryProcessor(ILogger log, string domain) {
         _log = log ?? Logging.LogProvider.CreateLogger("RegistryProcessor");
@@ -54,9 +55,15 @@ public class RegistryProcessor {
 
         try {
             var registryCollector = new StrategyExecutor();
-            var collectedData = await registryCollector
+            var result = await _registryAdaptiveTimeout.ExecuteWithTimeout(async (_) => await registryCollector
                 .CollectAsync(targetMachine, _queries, _strategies)
-                .ConfigureAwait(false);
+                .ConfigureAwait(false));
+
+            if (!result.IsSuccess) {
+                return APIResult<RegistryData>.Failure($"Timeout when grabbing registry data from {targetMachine}");
+            }
+
+            var collectedData = result.Value;
 
             foreach (var key in collectedData.Results ?? []) {
                 if (!key.ValueExists)
