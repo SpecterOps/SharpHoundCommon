@@ -10980,12 +10980,12 @@ references:
   commentId: T:SharpHoundCommonLib.Processors.LdapPropertyProcessor
   fullName: SharpHoundCommonLib.Processors.LdapPropertyProcessor
   nameWithType: LdapPropertyProcessor
-- uid: SharpHoundCommonLib.Processors.LdapPropertyProcessor.#ctor(SharpHoundCommonLib.ILdapUtils)
-  name: LdapPropertyProcessor(ILdapUtils)
-  href: api/SharpHoundCommonLib.Processors.LdapPropertyProcessor.html#SharpHoundCommonLib_Processors_LdapPropertyProcessor__ctor_SharpHoundCommonLib_ILdapUtils_
-  commentId: M:SharpHoundCommonLib.Processors.LdapPropertyProcessor.#ctor(SharpHoundCommonLib.ILdapUtils)
-  fullName: SharpHoundCommonLib.Processors.LdapPropertyProcessor.LdapPropertyProcessor(SharpHoundCommonLib.ILdapUtils)
-  nameWithType: LdapPropertyProcessor.LdapPropertyProcessor(ILdapUtils)
+- uid: SharpHoundCommonLib.Processors.LdapPropertyProcessor.#ctor(SharpHoundCommonLib.ILdapUtils,ILogger)
+  name: LdapPropertyProcessor(ILdapUtils, ILogger)
+  href: api/SharpHoundCommonLib.Processors.LdapPropertyProcessor.html#SharpHoundCommonLib_Processors_LdapPropertyProcessor__ctor_SharpHoundCommonLib_ILdapUtils_ILogger_
+  commentId: M:SharpHoundCommonLib.Processors.LdapPropertyProcessor.#ctor(SharpHoundCommonLib.ILdapUtils,ILogger)
+  fullName: SharpHoundCommonLib.Processors.LdapPropertyProcessor.LdapPropertyProcessor(SharpHoundCommonLib.ILdapUtils, ILogger)
+  nameWithType: LdapPropertyProcessor.LdapPropertyProcessor(ILdapUtils, ILogger)
 - uid: SharpHoundCommonLib.Processors.LdapPropertyProcessor.#ctor*
   name: LdapPropertyProcessor
   href: api/SharpHoundCommonLib.Processors.LdapPropertyProcessor.html#SharpHoundCommonLib_Processors_LdapPropertyProcessor__ctor_
