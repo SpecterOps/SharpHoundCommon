@@ -23,7 +23,6 @@ namespace SharpHoundCommonLib.Processors
         public delegate Task ComputerStatusDelegate(CSVComputerStatus status);
         public event ComputerStatusDelegate ComputerStatusEvent;
 
-
         public CertAbuseProcessor(ILdapUtils utils, ILogger log = null) {
             _utils = utils;
             _log = log ?? Logging.LogProvider.CreateLogger("CAProc");
@@ -47,9 +46,23 @@ namespace SharpHoundCommonLib.Processors
             data.Collected = aceData.Collected;
             if (!aceData.Collected)
             {
+                await SendComputerStatus(new CSVComputerStatus {
+                    Status = aceData.FailureReason,
+                    Task = nameof(ProcessRegistryEnrollmentPermissions),
+                    ComputerName = caName,
+                    ObjectId = computerObjectId,
+                });
+
                 data.FailureReason = aceData.FailureReason;
                 return data;
             }
+            
+            await SendComputerStatus(new CSVComputerStatus {
+                Status = CSVComputerStatus.StatusSuccess,
+                Task = nameof(ProcessRegistryEnrollmentPermissions),
+                ComputerName = caName,
+                ObjectId = computerObjectId,
+            });
 
             if (aceData.Value == null)
             {
@@ -167,9 +180,23 @@ namespace SharpHoundCommonLib.Processors
             ret.Collected = regData.Collected;
             if (!ret.Collected)
             {
+                await SendComputerStatus(new CSVComputerStatus {
+                    Status = regData.FailureReason,
+                    Task = nameof(ProcessEAPermissions),
+                    ComputerName = caName,
+                    ObjectId = computerObjectId,
+                });
+
                 ret.FailureReason = regData.FailureReason;
                 return ret;
             }
+            
+            await SendComputerStatus(new CSVComputerStatus {
+                Status = CSVComputerStatus.StatusSuccess,
+                Task = nameof(ProcessEAPermissions),
+                ComputerName = caName,
+                ObjectId = computerObjectId,
+            });
 
             if (regData.Value == null)
             {
@@ -251,7 +278,7 @@ namespace SharpHoundCommonLib.Processors
         /// <param name="caName"></param>
         /// <returns></returns>
         [ExcludeFromCodeCoverage]
-        public BoolRegistryAPIResult IsUserSpecifiesSanEnabled(string target, string caName)
+        public async Task<BoolRegistryAPIResult> IsUserSpecifiesSanEnabled(string target, string caName, string hostSid)
         {
             var ret = new BoolRegistryAPIResult();
             var subKey =
@@ -262,9 +289,23 @@ namespace SharpHoundCommonLib.Processors
             ret.Collected = data.Collected;
             if (!data.Collected)
             {
+                await SendComputerStatus(new CSVComputerStatus {
+                    Status = data.FailureReason,
+                    Task = nameof(IsUserSpecifiesSanEnabled),
+                    ComputerName = caName,
+                    ObjectId = hostSid
+                });
+            
                 ret.FailureReason = data.FailureReason;
                 return ret;
             }
+            
+            await SendComputerStatus(new CSVComputerStatus {
+                Status = CSVComputerStatus.StatusSuccess,
+                Task = nameof(IsUserSpecifiesSanEnabled),
+                ComputerName = caName,
+                ObjectId = hostSid
+            });
 
             if (data.Value == null)
             {
@@ -287,7 +328,7 @@ namespace SharpHoundCommonLib.Processors
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
         [ExcludeFromCodeCoverage]
-        public BoolRegistryAPIResult RoleSeparationEnabled(string target, string caName)
+        public async Task<BoolRegistryAPIResult> RoleSeparationEnabled(string target, string caName, string hostSid)
         {
             var ret = new BoolRegistryAPIResult();
             var regSubKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{caName}";
@@ -297,9 +338,23 @@ namespace SharpHoundCommonLib.Processors
             ret.Collected = data.Collected;
             if (!data.Collected)
             {
+                await SendComputerStatus(new CSVComputerStatus {
+                    Status = data.FailureReason,
+                    Task = nameof(RoleSeparationEnabled),
+                    ComputerName = caName,
+                    ObjectId = hostSid
+                });
+
                 ret.FailureReason = data.FailureReason;
                 return ret;
             }
+            
+            await SendComputerStatus(new CSVComputerStatus {
+                Status = CSVComputerStatus.StatusSuccess,
+                Task = nameof(RoleSeparationEnabled),
+                ComputerName = caName,
+                ObjectId = hostSid
+            });
 
             if (data.Value == null)
             {
