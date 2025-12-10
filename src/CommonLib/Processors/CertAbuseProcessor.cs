@@ -248,7 +248,6 @@ namespace SharpHoundCommonLib.Processors
         /// <param name="target"></param>
         /// <param name="caName"></param>
         /// <returns></returns>
-        [ExcludeFromCodeCoverage]
         private RegistryResult GetCASecurity(string target, string caName)
         {
             var regSubKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{caName}";
@@ -264,7 +263,6 @@ namespace SharpHoundCommonLib.Processors
         /// <param name="target"></param>
         /// <param name="caName"></param>
         /// <returns></returns>
-        [ExcludeFromCodeCoverage]
         private RegistryResult GetEnrollmentAgentRights(string target, string caName)
         {
             var regSubKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{caName}";
@@ -282,7 +280,6 @@ namespace SharpHoundCommonLib.Processors
         /// <param name="target"></param>
         /// <param name="caName"></param>
         /// <returns></returns>
-        [ExcludeFromCodeCoverage]
         public async Task<BoolRegistryAPIResult> IsUserSpecifiesSanEnabled(string target, string caName, string hostSid)
         {
             var ret = new BoolRegistryAPIResult();
@@ -333,7 +330,6 @@ namespace SharpHoundCommonLib.Processors
         /// <param name="caName"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        [ExcludeFromCodeCoverage]
         public async Task<BoolRegistryAPIResult> RoleSeparationEnabled(string target, string caName, string hostSid)
         {
             var ret = new BoolRegistryAPIResult();

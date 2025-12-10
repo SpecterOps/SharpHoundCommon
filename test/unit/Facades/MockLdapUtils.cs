@@ -745,9 +745,12 @@ namespace CommonLibTest.Facades
             return (!results.IsNullOrEmpty(), results);
         }
 
-        public Task<(bool Success, TypedPrincipal Principal)> ResolveCertTemplateByProperty(string propValue, string propName, string domainName) {
-            throw new NotImplementedException();
-        }
+        public async Task<(bool Success, TypedPrincipal Principal)> ResolveCertTemplateByProperty(string propValue, string propName, string domainName) =>
+            propValue switch
+            {
+                "ValidCN" => (true, new TypedPrincipal("guid", Label.CertTemplate)),
+                _ => (false, null),
+            };
 
         public async Task<string> ConvertWellKnownPrincipal(string sid, string domain)
         {
