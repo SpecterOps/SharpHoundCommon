@@ -12,7 +12,7 @@ namespace SharpHoundCommonLib {
         private readonly RegistryKey _currentKey;
         private static readonly AdaptiveTimeout _adaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromSeconds(10), Logging.LogProvider.CreateLogger(nameof(SHRegistryKey)));
 
-        private SHRegistryKey(RegistryKey registryKey) {
+        public SHRegistryKey(RegistryKey registryKey) {
             _currentKey = registryKey;
         }
 
@@ -35,6 +35,8 @@ namespace SharpHoundCommonLib {
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="System.Security.SecurityException"></exception>
         /// <exception cref="UnauthorizedAccessException"></exception>
+        /// 
+        //TODO: replace with IRegistryAccessor
         public static async Task<SHRegistryKey> Connect(RegistryHive hive, string machineName) {
             var remoteKey = await _adaptiveTimeout.ExecuteWithTimeout((_) => RegistryKey.OpenRemoteBaseKey(hive, machineName));
             if (remoteKey.IsSuccess)

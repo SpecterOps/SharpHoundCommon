@@ -20,11 +20,14 @@ namespace SharpHoundCommonLib.Processors
         private readonly ILdapUtils _utils;
         private readonly AdaptiveTimeout _getMachineSidAdaptiveTimeout;
         private readonly AdaptiveTimeout _openSamServerAdaptiveTimeout;
+        private readonly IRegistryAccessor _registryAccessor;
+        
         public delegate Task ComputerStatusDelegate(CSVComputerStatus status);
         public event ComputerStatusDelegate ComputerStatusEvent;
 
-        public CertAbuseProcessor(ILdapUtils utils, ILogger log = null) {
+        public CertAbuseProcessor(ILdapUtils utils, IRegistryAccessor registryAccessor, ILogger log = null) {
             _utils = utils;
+            _registryAccessor = registryAccessor;
             _log = log ?? Logging.LogProvider.CreateLogger("CAProc");
             _getMachineSidAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ISAMServer.GetMachineSid)));
             _openSamServerAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(SAMServer.OpenServer)));
@@ -251,7 +254,8 @@ namespace SharpHoundCommonLib.Processors
             var regSubKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{caName}";
             const string regValue = "Security";
         
-            return Helpers.GetRegistryKeyData(target, regSubKey, regValue, _log);
+            return _registryAccessor.GetRegistryKeyData(target, regSubKey, regValue, _log);
+            // return Helpers.GetRegistryKeyData(target, regSubKey, regValue, _log);
         }
 
         /// <summary>
@@ -266,7 +270,8 @@ namespace SharpHoundCommonLib.Processors
             var regSubKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{caName}";
             var regValue = "EnrollmentAgentRights";
 
-            return Helpers.GetRegistryKeyData(target, regSubKey, regValue, _log);
+            return _registryAccessor.GetRegistryKeyData(target, regSubKey, regValue, _log);
+            // return Helpers.GetRegistryKeyData(target, regSubKey, regValue, _log);
         }
 
         /// <summary>
@@ -281,10 +286,11 @@ namespace SharpHoundCommonLib.Processors
         public async Task<BoolRegistryAPIResult> IsUserSpecifiesSanEnabled(string target, string caName, string hostSid)
         {
             var ret = new BoolRegistryAPIResult();
-            var subKey =
+            var regSubKey =
                 $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{caName}\\PolicyModules\\CertificateAuthority_MicrosoftDefault.Policy";
-            const string subValue = "EditFlags";
-            var data = Helpers.GetRegistryKeyData(target, subKey, subValue, _log);
+            const string regValue = "EditFlags";
+            var data = _registryAccessor.GetRegistryKeyData(target, regSubKey, regValue, _log);
+            // var data = Helpers.GetRegistryKeyData(target, subKey, subValue, _log);
 
             ret.Collected = data.Collected;
             if (!data.Collected)
@@ -333,7 +339,8 @@ namespace SharpHoundCommonLib.Processors
             var ret = new BoolRegistryAPIResult();
             var regSubKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{caName}";
             const string regValue = "RoleSeparationEnabled";
-            var data = Helpers.GetRegistryKeyData(target, regSubKey, regValue, _log);
+            var data = _registryAccessor.GetRegistryKeyData(target, regSubKey, regValue, _log);
+            // var data = Helpers.GetRegistryKeyData(target, regSubKey, regValue, _log);
 
             ret.Collected = data.Collected;
             if (!data.Collected)
@@ -518,7 +525,6 @@ namespace SharpHoundCommonLib.Processors
         {
             if (ComputerStatusEvent is not null) await ComputerStatusEvent(status);
         }
-
     }
 
     public class EnrollmentAgentRestriction

@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Security;
 using System.Security.Principal;
 using System.Text;
 using System.Text.RegularExpressions;
 using SharpHoundCommonLib.Enums;
 using Microsoft.Extensions.Logging;
-using System.IO;
-using System.Security;
-using SharpHoundCommonLib.Processors;
-using Microsoft.Win32;
 using System.Threading.Tasks;
+using Microsoft.Win32;
+using SharpHoundCommonLib.Processors;
 
 namespace SharpHoundCommonLib {
     public static class Helpers {
@@ -151,7 +151,7 @@ namespace SharpHoundCommonLib {
         }
 
         /// <summary>
-        /// Converts a domain name to a distinguished name using simple string substitution
+        ///     Converts a domain name to a distinguished name using simple string substitution
         /// </summary>
         /// <param name="domainName"></param>
         /// <returns></returns>
@@ -258,6 +258,7 @@ namespace SharpHoundCommonLib {
             return false;
         }
 
+        //TODO: replace with IRegistryAccessor
         public static RegistryResult GetRegistryKeyData(string target, string subkey, string subvalue, ILogger log) {
             var data = new RegistryResult();
 
@@ -292,6 +293,7 @@ namespace SharpHoundCommonLib {
             return data;
         }
 
+        //TODO: replace with IRegistryAccessor
         public static IRegistryKey OpenRemoteRegistry(string target) {
             return SHRegistryKey.Connect(RegistryHive.LocalMachine, target).GetAwaiter().GetResult();
         }
