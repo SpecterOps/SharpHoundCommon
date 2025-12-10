@@ -254,7 +254,6 @@ namespace SharpHoundCommonLib.Processors
             const string regValue = "Security";
         
             return _registryAccessor.GetRegistryKeyData(target, regSubKey, regValue, _log);
-            // return Helpers.GetRegistryKeyData(target, regSubKey, regValue, _log);
         }
 
         /// <summary>
@@ -269,7 +268,6 @@ namespace SharpHoundCommonLib.Processors
             var regValue = "EnrollmentAgentRights";
 
             return _registryAccessor.GetRegistryKeyData(target, regSubKey, regValue, _log);
-            // return Helpers.GetRegistryKeyData(target, regSubKey, regValue, _log);
         }
 
         /// <summary>
@@ -287,7 +285,6 @@ namespace SharpHoundCommonLib.Processors
                 $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{caName}\\PolicyModules\\CertificateAuthority_MicrosoftDefault.Policy";
             const string regValue = "EditFlags";
             var data = _registryAccessor.GetRegistryKeyData(target, regSubKey, regValue, _log);
-            // var data = Helpers.GetRegistryKeyData(target, subKey, subValue, _log);
 
             ret.Collected = data.Collected;
             if (!data.Collected)
@@ -336,7 +333,6 @@ namespace SharpHoundCommonLib.Processors
             var regSubKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{caName}";
             const string regValue = "RoleSeparationEnabled";
             var data = _registryAccessor.GetRegistryKeyData(target, regSubKey, regValue, _log);
-            // var data = Helpers.GetRegistryKeyData(target, regSubKey, regValue, _log);
 
             ret.Collected = data.Collected;
             if (!data.Collected)
