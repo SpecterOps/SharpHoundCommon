@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using System.Text;
@@ -8,7 +7,6 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using SharpHoundCommonLib.Enums;
 using SharpHoundCommonLib.OutputTypes;
-using SharpHoundRPC;
 using SharpHoundRPC.Wrappers;
 using Encoder = Microsoft.Security.Application.Encoder;
 
@@ -37,9 +35,10 @@ namespace SharpHoundCommonLib.Processors
         /// This function should be called with the security data fetched from <see cref="GetCASecurity"/>.
         /// The resulting ACEs will contain the owner of the CA as well as Management rights.
         /// </summary>
-        /// <param name="security"></param>
+        /// <param name="caName"></param>
         /// <param name="objectDomain"></param>
         /// <param name="computerName"></param>
+        /// <param name="computerObjectId"></param>
         /// <returns></returns>
         public async Task<AceRegistryAPIResult> ProcessRegistryEnrollmentPermissions(string caName, string objectDomain, string computerName, string computerObjectId)
         {
@@ -52,7 +51,7 @@ namespace SharpHoundCommonLib.Processors
                 await SendComputerStatus(new CSVComputerStatus {
                     Status = aceData.FailureReason,
                     Task = nameof(ProcessRegistryEnrollmentPermissions),
-                    ComputerName = caName,
+                    ComputerName = computerName,
                     ObjectId = computerObjectId,
                 });
 
@@ -63,7 +62,7 @@ namespace SharpHoundCommonLib.Processors
             await SendComputerStatus(new CSVComputerStatus {
                 Status = CSVComputerStatus.StatusSuccess,
                 Task = nameof(ProcessRegistryEnrollmentPermissions),
-                ComputerName = caName,
+                ComputerName = computerName,
                 ObjectId = computerObjectId,
             });
 
@@ -186,7 +185,7 @@ namespace SharpHoundCommonLib.Processors
                 await SendComputerStatus(new CSVComputerStatus {
                     Status = regData.FailureReason,
                     Task = nameof(ProcessEAPermissions),
-                    ComputerName = caName,
+                    ComputerName = computerName,
                     ObjectId = computerObjectId,
                 });
 
@@ -197,7 +196,7 @@ namespace SharpHoundCommonLib.Processors
             await SendComputerStatus(new CSVComputerStatus {
                 Status = CSVComputerStatus.StatusSuccess,
                 Task = nameof(ProcessEAPermissions),
-                ComputerName = caName,
+                ComputerName = computerName,
                 ObjectId = computerObjectId,
             });
 
@@ -277,8 +276,9 @@ namespace SharpHoundCommonLib.Processors
         /// <remarks>https://blog.keyfactor.com/hidden-dangers-certificate-subject-alternative-names-sans</remarks>
         /// <param name="target"></param>
         /// <param name="caName"></param>
+        /// <param name="computerObjectId"></param>
         /// <returns></returns>
-        public async Task<BoolRegistryAPIResult> IsUserSpecifiesSanEnabled(string target, string caName, string hostSid)
+        public async Task<BoolRegistryAPIResult> IsUserSpecifiesSanEnabled(string target, string caName, string computerObjectId)
         {
             var ret = new BoolRegistryAPIResult();
             var regSubKey =
@@ -292,8 +292,8 @@ namespace SharpHoundCommonLib.Processors
                 await SendComputerStatus(new CSVComputerStatus {
                     Status = data.FailureReason,
                     Task = nameof(IsUserSpecifiesSanEnabled),
-                    ComputerName = caName,
-                    ObjectId = hostSid
+                    ComputerName = target,
+                    ObjectId = computerObjectId
                 });
             
                 ret.FailureReason = data.FailureReason;
@@ -303,8 +303,8 @@ namespace SharpHoundCommonLib.Processors
             await SendComputerStatus(new CSVComputerStatus {
                 Status = CSVComputerStatus.StatusSuccess,
                 Task = nameof(IsUserSpecifiesSanEnabled),
-                ComputerName = caName,
-                ObjectId = hostSid
+                ComputerName = target,
+                ObjectId = computerObjectId
             });
 
             if (data.Value == null)
@@ -319,15 +319,16 @@ namespace SharpHoundCommonLib.Processors
         }
 
         /// <summary>
-        /// This function checks a registry setting on the target host for the specified CA to see if role seperation is enabled.
+        /// This function checks a registry setting on the target host for the specified CA to see if role separation is enabled.
         /// If enabled, you cannot perform any CA actions if you have both ManageCA and ManageCertificates permissions. Only CA admins can modify the setting.
         /// </summary>
         /// <remarks>https://www.itprotoday.com/security/q-how-can-i-make-sure-given-windows-account-assigned-only-single-certification-authority-ca</remarks>
         /// <param name="target"></param>
         /// <param name="caName"></param>
+        /// <param name="computerObjectId"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public async Task<BoolRegistryAPIResult> RoleSeparationEnabled(string target, string caName, string hostSid)
+        public async Task<BoolRegistryAPIResult> IsRoleSeparationEnabled(string target, string caName, string computerObjectId)
         {
             var ret = new BoolRegistryAPIResult();
             var regSubKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{caName}";
@@ -339,9 +340,9 @@ namespace SharpHoundCommonLib.Processors
             {
                 await SendComputerStatus(new CSVComputerStatus {
                     Status = data.FailureReason,
-                    Task = nameof(RoleSeparationEnabled),
-                    ComputerName = caName,
-                    ObjectId = hostSid
+                    Task = nameof(IsRoleSeparationEnabled),
+                    ComputerName = target,
+                    ObjectId = computerObjectId
                 });
 
                 ret.FailureReason = data.FailureReason;
@@ -350,9 +351,9 @@ namespace SharpHoundCommonLib.Processors
             
             await SendComputerStatus(new CSVComputerStatus {
                 Status = CSVComputerStatus.StatusSuccess,
-                Task = nameof(RoleSeparationEnabled),
-                ComputerName = caName,
-                ObjectId = hostSid
+                Task = nameof(IsRoleSeparationEnabled),
+                ComputerName = target,
+                ObjectId = computerObjectId
             });
 
             if (data.Value == null)

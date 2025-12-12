@@ -1,17 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
-using System.Security;
 using System.Security.Principal;
 using System.Text;
 using System.Text.RegularExpressions;
 using SharpHoundCommonLib.Enums;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
-using Microsoft.Win32;
-using SharpHoundCommonLib.Processors;
 
 namespace SharpHoundCommonLib {
     public static class Helpers {
