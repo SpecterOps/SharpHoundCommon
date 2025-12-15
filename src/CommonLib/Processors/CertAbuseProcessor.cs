@@ -208,6 +208,12 @@ namespace SharpHoundCommonLib.Processors
             var isDomainController = await _utils.IsDomainController(computerObjectId, objectDomain);
             var machineSid = await GetMachineSid(computerName, computerObjectId);
             var descriptor = new RawSecurityDescriptor(regData.Value as byte[], 0);
+            
+            if (descriptor.DiscretionaryAcl is null)
+            {
+                return ret;
+            }
+            
             var enrollmentAgentRestrictions = new List<EnrollmentAgentRestriction>();
             foreach (var genericAce in descriptor.DiscretionaryAcl)
             {
