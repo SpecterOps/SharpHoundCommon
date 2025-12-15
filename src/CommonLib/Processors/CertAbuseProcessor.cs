@@ -460,6 +460,10 @@ namespace SharpHoundCommonLib.Processors
                 computerObjectId, machineSid);
 
             var opaque = ace.GetOpaque();
+            
+            if(opaque is null)
+                return (false, default);
+            
             var sidCount = BitConverter.ToUInt32(opaque, 0);
             index += 4;
 
