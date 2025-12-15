@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using System.Threading.Tasks;
@@ -147,165 +148,57 @@ namespace CommonLibTest
             Assert.Equal(FailureReason, _receivedCompStatus.Status);
             Assert.Equal(TargetDomainSid, _receivedCompStatus.ObjectId);
         }
-        
-        //TODO: mock SAM server for sid lookups instead of fetching from localhost
-        [WindowsOnlyFact]
-        public async Task CertAbuseProcessor_ProcessEAPermissions_ReturnsEmpty_WhenDaclIsNull() {
-            const string subKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{CAName}";
-            const string subValue = "EnrollmentAgentRights";
-            
-            //setup binary security descriptor as registry value
-            var descriptor = new RawSecurityDescriptor(
-                ControlFlags.None,
-                null,
-                null,
-                null,
-                null);
-            
-            var regValue = new byte[descriptor.BinaryLength];
-            descriptor.GetBinaryForm(regValue, 0);
 
-            _mockRegistryAccessor
-                .Setup(ra => ra.GetRegistryKeyData(
-                    "localhost",
-                    subKey,
-                    subValue,
-                    It.IsAny<ILogger>()))
-                .Returns(new RegistryResult { Collected =  true, Value = regValue });
-        
-            var results = await _certAbuseProcessor.ProcessEAPermissions(CAName, DomainName, "localhost", TargetDomainSid);
-        
-            //Validate result
-            Assert.True(results.Collected);
-            Assert.Empty(results.Restrictions);
-            Assert.Null(results.FailureReason);
-        
-            //Validate CompStatus Log
-            Assert.Equal("localhost", _receivedCompStatus.ComputerName);
-            Assert.Equal(nameof(CertAbuseProcessor.ProcessEAPermissions), _receivedCompStatus.Task);
-            Assert.Equal(CSVComputerStatus.StatusSuccess, _receivedCompStatus.Status);
-            Assert.Equal(TargetDomainSid, _receivedCompStatus.ObjectId);
-        }
-        
-        //TODO: mock SAM server for sid lookups instead of fetching from localhost
-        [WindowsOnlyFact]
-        public async Task CertAbuseProcessor_ProcessEAPermissions_ReturnsEmpty_WhenDaclIsEmpty() {
-            const string subKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{CAName}";
-            const string subValue = "EnrollmentAgentRights";
-            
-            //setup binary security descriptor as registry value
-            var dacl = new RawAcl(2, 0); //dacl is empty
-            
-            var descriptor = new RawSecurityDescriptor(
-                ControlFlags.DiscretionaryAclPresent,
-                null,
-                null,
-                null,
-                dacl);
-            
-            byte[] regValue = new byte[descriptor.BinaryLength];
-            descriptor.GetBinaryForm(regValue, 0);
-
-            _mockRegistryAccessor
-                .Setup(ra => ra.GetRegistryKeyData(
-                    "localhost",
-                    subKey,
-                    subValue,
-                    It.IsAny<ILogger>()))
-                .Returns(new RegistryResult { Collected =  true, Value = regValue });
-        
-            var results = await _certAbuseProcessor.ProcessEAPermissions(CAName, DomainName, "localhost", TargetDomainSid);
-        
-            //Validate result
-            Assert.True(results.Collected);
-            Assert.Empty(results.Restrictions);
-            Assert.Null(results.FailureReason);
-        
-            //Validate CompStatus Log
-            Assert.Equal("localhost", _receivedCompStatus.ComputerName);
-            Assert.Equal(nameof(CertAbuseProcessor.ProcessEAPermissions), _receivedCompStatus.Task);
-            Assert.Equal(CSVComputerStatus.StatusSuccess, _receivedCompStatus.Status);
-            Assert.Equal(TargetDomainSid, _receivedCompStatus.ObjectId);
-        }
-        
-        //TODO: mock SAM server for sid lookups instead of fetching from localhost
-        [WindowsOnlyFact]
-        public async Task CertAbuseProcessor_ProcessEAPermissions_ReturnsEmpty_WhenOpaqueIsNull() {
-            const string subKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{CAName}";
-            const string subValue = "EnrollmentAgentRights";
-            
-            //setup binary security descriptor as registry value
-            var ace = new CommonAce(
+        public static IEnumerable<object[]> ProcessEAPermissionsTestData() {
+            var nullOpaqueAce = new CommonAce(
                 AceFlags.None,
                 AceQualifier.AccessAllowed,
-                0x00020089,
+                0x0000,
                 new SecurityIdentifier(WellKnownSidType.BuiltinAdministratorsSid, null),
                 false,
-                null //is callback false, null opaque
+                null
             );
             
-            var dacl = new RawAcl(2, 1);
-            dacl.InsertAce(0, ace);
+            var daclWithNullOpaque = new RawAcl(2, 1);
+            daclWithNullOpaque.InsertAce(0, nullOpaqueAce);
             
-            var descriptor = new RawSecurityDescriptor(
-                ControlFlags.DiscretionaryAclPresent,
-                null,
-                null,
-                null,
-                dacl);
-            
-            byte[] regValue = new byte[descriptor.BinaryLength];
-            descriptor.GetBinaryForm(regValue, 0);
+            var emptyOpaqueAce = new CommonAce(
+                AceFlags.None,
+                AceQualifier.AccessAllowed,
+                0x0000,
+                new SecurityIdentifier(WellKnownSidType.BuiltinAdministratorsSid, null),
+                true,
+                new byte[] { 0, 0, 0, 0 }
+            );
 
-            _mockRegistryAccessor
-                .Setup(ra => ra.GetRegistryKeyData(
-                    "localhost",
-                    subKey,
-                    subValue,
-                    It.IsAny<ILogger>()))
-                .Returns(new RegistryResult { Collected =  true, Value = regValue });
-        
-            var results = await _certAbuseProcessor.ProcessEAPermissions(CAName, DomainName, "localhost", TargetDomainSid);
-        
-            //Validate result
-            Assert.True(results.Collected);
-            Assert.Empty(results.Restrictions);
-            Assert.Null(results.FailureReason);
-        
-            //Validate CompStatus Log
-            Assert.Equal("localhost", _receivedCompStatus.ComputerName);
-            Assert.Equal(nameof(CertAbuseProcessor.ProcessEAPermissions), _receivedCompStatus.Task);
-            Assert.Equal(CSVComputerStatus.StatusSuccess, _receivedCompStatus.Status);
-            Assert.Equal(TargetDomainSid, _receivedCompStatus.ObjectId);
+            var daclWithEmptyOpaque = new RawAcl(2, 1);
+            daclWithEmptyOpaque.InsertAce(0, emptyOpaqueAce);
+            
+            return new List<object[]>
+            {
+                new object[] { null }, //null dacl
+                new object[] { new RawAcl(2, 0) }, //empty dacl
+                new object[] { daclWithNullOpaque }, //dacl is callback false, null opaque
+                new object[] { daclWithEmptyOpaque }, //dacl is callback true, empty opaque
+            };
         }
         
         //TODO: mock SAM server for sid lookups instead of fetching from localhost
-        [WindowsOnlyFact]
-        public async Task CertAbuseProcessor_ProcessEAPermissions_ReturnsEmpty_WhenOpaqueIsEmpty() {
+        [WindowsOnlyTheory]
+        [MemberData(nameof(ProcessEAPermissionsTestData))]
+        public async Task CertAbuseProcessor_ProcessEAPermissions_ReturnsEmpty(RawAcl dacl) {
             const string subKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{CAName}";
             const string subValue = "EnrollmentAgentRights";
             
             //setup binary security descriptor as registry value
-            var ace = new CommonAce(
-                AceFlags.None,
-                AceQualifier.AccessAllowed,
-                0x00020089,
-                new SecurityIdentifier(WellKnownSidType.BuiltinAdministratorsSid, null),
-                true,
-                new byte[] { 0, 0, 0, 0 } //is callback true, empty opaque
-            );
-            
-            var dacl = new RawAcl(2, 1);
-            dacl.InsertAce(0, ace);
-            
             var descriptor = new RawSecurityDescriptor(
                 ControlFlags.DiscretionaryAclPresent,
                 null,
                 null,
                 null,
                 dacl);
-
-            byte[] regValue = new byte[descriptor.BinaryLength];
+            
+            var regValue = new byte[descriptor.BinaryLength];
             descriptor.GetBinaryForm(regValue, 0);
 
             _mockRegistryAccessor
@@ -358,7 +251,7 @@ namespace CommonLibTest
         
         //TODO: mock SAM server for sid lookups instead of fetching from localhost
         [WindowsOnlyFact]
-        public async Task CertAbuseProcessor_ProcessRegistryEnrollmentPermissions_ReturnsEmpty_WhenNoOwnerSidNoRules() {
+        public async Task CertAbuseProcessor_ProcessRegistryEnrollmentPermissions_ReturnsEmpty_WhenNoOwnerAndNoRules() {
             const string subKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{CAName}";
             const string subValue = "Security";
             
