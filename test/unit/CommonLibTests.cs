@@ -58,7 +58,7 @@ public class CommonLibTests
         CommonLib.InitializeCommonLib(logger.Object, cache2);
 
         // Assert
-        Assert.Same(cache1, Cache.GetCacheInstance());
+        Assert.Same(cache1, Cache.GetCacheInstance()); // cache1 should be then one used since lib was already initialized
 
         logger.Verify(x => x.Log(
                 LogLevel.Warning,
