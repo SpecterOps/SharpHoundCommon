@@ -50,8 +50,7 @@ namespace CommonLibTest
                 .Setup(ra => ra.GetRegistryKeyData(
                     TargetName,
                     subKey,
-                    subValue,
-                    It.IsAny<ILogger>()))
+                    subValue))
                 .Returns(new RegistryResult { Collected =  true, Value = editFlags });
 
             var results = await _certAbuseProcessor.IsUserSpecifiesSanEnabled(TargetName, CAName, TargetDomainSid);
@@ -77,8 +76,7 @@ namespace CommonLibTest
                 .Setup(ra => ra.GetRegistryKeyData(
                     TargetName,
                     subKey,
-                    subValue,
-                    It.IsAny<ILogger>()))
+                    subValue))
                 .Returns(new RegistryResult { Collected =  false, FailureReason = FailureReason });
 
             var results = await _certAbuseProcessor.IsUserSpecifiesSanEnabled(TargetName, CAName, TargetDomainSid);
@@ -105,8 +103,7 @@ namespace CommonLibTest
                 .Setup(ra => ra.GetRegistryKeyData(
                     TargetName,
                     subKey,
-                    subValue,
-                    It.IsAny<ILogger>()))
+                    subValue))
                 .Returns(new RegistryResult { Collected =  true, Value = roleSeparationEnabled });
 
             var results = await _certAbuseProcessor.IsRoleSeparationEnabled(TargetName, CAName, TargetDomainSid);
@@ -132,8 +129,7 @@ namespace CommonLibTest
                 .Setup(ra => ra.GetRegistryKeyData(
                     TargetName,
                     subKey,
-                    subValue,
-                    It.IsAny<ILogger>()))
+                    subValue))
                 .Returns(new RegistryResult { Collected =  false, FailureReason = FailureReason });
 
             var results = await _certAbuseProcessor.IsRoleSeparationEnabled(TargetName, CAName, TargetDomainSid);
@@ -183,7 +179,6 @@ namespace CommonLibTest
             };
         }
         
-        //TODO: mock SAM server for sid lookups instead of fetching from localhost
         [WindowsOnlyTheory]
         [MemberData(nameof(ProcessEAPermissionsTestData))]
         public async Task CertAbuseProcessor_ProcessEAPermissions_ReturnsEmpty(RawAcl dacl) {
@@ -205,8 +200,7 @@ namespace CommonLibTest
                 .Setup(ra => ra.GetRegistryKeyData(
                     "localhost",
                     subKey,
-                    subValue,
-                    It.IsAny<ILogger>()))
+                    subValue))
                 .Returns(new RegistryResult { Collected =  true, Value = regValue });
         
             var results = await _certAbuseProcessor.ProcessEAPermissions(CAName, DomainName, "localhost", TargetDomainSid);
@@ -232,8 +226,7 @@ namespace CommonLibTest
                 .Setup(ra => ra.GetRegistryKeyData(
                     TargetName,
                     subKey,
-                    subValue,
-                    It.IsAny<ILogger>()))
+                    subValue))
                 .Returns(new RegistryResult { Collected =  false, FailureReason = FailureReason });
 
             var results = await _certAbuseProcessor.ProcessEAPermissions(CAName, DomainName, TargetName, TargetDomainSid);
@@ -249,7 +242,6 @@ namespace CommonLibTest
             Assert.Equal(TargetDomainSid, _receivedCompStatus.ObjectId);
         }
         
-        //TODO: mock SAM server for sid lookups instead of fetching from localhost
         [WindowsOnlyFact]
         public async Task CertAbuseProcessor_ProcessRegistryEnrollmentPermissions_ReturnsEmpty_WhenNoOwnerAndNoRules() {
             const string subKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{CAName}";
@@ -270,8 +262,7 @@ namespace CommonLibTest
                 .Setup(ra => ra.GetRegistryKeyData(
                     "localhost",
                     subKey,
-                    subValue,
-                    It.IsAny<ILogger>()))
+                    subValue))
                 .Returns(new RegistryResult { Collected =  true, Value = regValue});
         
             //get access rules returns empty
@@ -303,8 +294,7 @@ namespace CommonLibTest
                 .Setup(ra => ra.GetRegistryKeyData(
                     TargetName,
                     subKey,
-                    subValue,
-                    It.IsAny<ILogger>()))
+                    subValue))
                 .Returns(new RegistryResult { Collected =  false, FailureReason = FailureReason });
 
             var results = await _certAbuseProcessor.ProcessRegistryEnrollmentPermissions(CAName, DomainName, TargetName, TargetDomainSid);
@@ -349,7 +339,6 @@ namespace CommonLibTest
         public async Task CertAbuseProcessor_GetRegistryPrincipal_ReturnsFalseForFilteredSID(string sidValue) {
             var sid = new SecurityIdentifier(sidValue);
             
-            //TODO: check inputs
             var results = await _certAbuseProcessor.GetRegistryPrincipal(
                 sid,
                 DomainName,
@@ -382,47 +371,5 @@ namespace CommonLibTest
 
             Assert.Equal((true, new TypedPrincipal(expectedPrincipalSID, expectedPrincipalType)), results);
         }
-        
-        //TODO finish testing GetRegistryPrincipal
-
-        // [Fact]
-        // public void CertAbuseProcessor_GetCASecurity_HappyPath()
-        // {
-        //     var mockProcessor = new Mock<CertAbuseProcessor>(new MockLDAPUtils(), null);
-        //     
-        //     var mockRegistryKey = new Mock<IRegistryKey>();
-        //     mockRegistryKey.Setup(x => x.GetValue(It.IsAny<string>(), It.IsAny<string>()))
-        //         .Returns(new byte[] { 0x20, 0x20 });
-        //     mockProcessor.Setup(x => x.OpenRemoteRegistry(It.IsAny<string>())).Returns(mockRegistryKey.Object);
-        //
-        //     var processor = mockProcessor.Object;
-        //     var results = processor.GetCASecurity("testlab.local", "blah");
-        //     Assert.True(results.Collected);
-        // }
-
-        // [Fact]
-        // public async Task CertAbuseProcessor_ProcessCAPermissions_NullSecurity_ReturnsNull()
-        // {
-        //     var processor = new CertAbuseProcessor(new MockLdapUtils());
-        //     
-        //     CSVComputerStatus capturedStatus = null;
-        //
-        //     processor.ComputerStatusEvent += status =>
-        //     {
-        //       capturedStatus = status;
-        //       return Task.CompletedTask;
-        //     };
-        //
-        //     var results = await processor.ProcessRegistryEnrollmentPermissions(null, "DUMPSTER.FIRE", null, "test");
-        //
-        //     Assert.Equal("Value cannot be null. (Parameter 'machineName')", results.FailureReason);
-        //     Assert.False(results.Collected);
-        //     Assert.Empty(results.Data);
-        //     
-        //     Assert.Equal(null, capturedStatus.ComputerName);
-        //     Assert.Equal("test", capturedStatus.ObjectId);
-        //     Assert.Equal("Value cannot be null. (Parameter 'machineName')", capturedStatus.Status);
-        //     Assert.Equal(nameof(processor.ProcessRegistryEnrollmentPermissions), capturedStatus.Task);
-        // }
     }
 }

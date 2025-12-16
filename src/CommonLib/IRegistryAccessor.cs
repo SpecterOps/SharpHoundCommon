@@ -8,41 +8,47 @@ using SharpHoundCommonLib.Processors;
 
 namespace SharpHoundCommonLib {
     public interface IRegistryAccessor {
-        public RegistryResult GetRegistryKeyData(string target, string subkey, string subvalue, ILogger log);
+        public RegistryResult GetRegistryKeyData(string target, string subkey, string subvalue);
         public IRegistryKey OpenRemoteRegistry(string target);
         public Task<IRegistryKey> Connect(RegistryHive hive, string machineName);
     }
 
     public class RegistryAccessor : IRegistryAccessor {
-        private static readonly AdaptiveTimeout _adaptiveTimeout =
-            new AdaptiveTimeout(maxTimeout: TimeSpan.FromSeconds(10), Logging.LogProvider.CreateLogger(nameof(SHRegistryKey)));
+        private readonly ILogger _log;
+        private readonly AdaptiveTimeout _adaptiveTimeout;
+
+        public RegistryAccessor(ILogger log = null) {
+            _log = log ?? Logging.LogProvider.CreateLogger(nameof(RegistryAccessor));
+            _adaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromSeconds(10), _log);
+        }
         
-        public RegistryResult GetRegistryKeyData(string target, string subkey, string subvalue, ILogger log) {
+        public RegistryResult GetRegistryKeyData(string target, string subkey, string subvalue) {
             var data = new RegistryResult();
 
             try {
-                var baseKey = OpenRemoteRegistry(target);
-                var value = baseKey.GetValue(subkey, subvalue);
-                data.Value = value;
-                data.Collected = true;
+                using (var baseKey = OpenRemoteRegistry(target)) {
+                    var value = baseKey.GetValue(subkey, subvalue);
+                    data.Value = value;
+                    data.Collected = true;
+                }
             } 
             catch (IOException e) {
-                log.LogDebug(e, "Error getting data from registry for {Target}: {RegSubKey}:{RegValue}",
+                _log.LogDebug(e, "Error getting data from registry for {Target}: {RegSubKey}:{RegValue}",
                     target, subkey, subvalue);
                 data.FailureReason = "Target machine was not found or not connectable";
             } 
             catch (SecurityException e) {
-                log.LogDebug(e, "Error getting data from registry for {Target}: {RegSubKey}:{RegValue}",
+                _log.LogDebug(e, "Error getting data from registry for {Target}: {RegSubKey}:{RegValue}",
                   target, subkey, subvalue);
                 data.FailureReason = "User does not have the proper permissions to perform this operation";
             }
             catch (UnauthorizedAccessException e) {
-                log.LogDebug(e, "Error getting data from registry for {Target}: {RegSubKey}:{RegValue}",
+                _log.LogDebug(e, "Error getting data from registry for {Target}: {RegSubKey}:{RegValue}",
                   target, subkey, subvalue);
                 data.FailureReason = "User does not have the necessary registry rights";
             }
             catch (Exception e) {
-                log.LogDebug(e, "Error getting data from registry for {Target}: {RegSubKey}:{RegValue}",
+                _log.LogDebug(e, "Error getting data from registry for {Target}: {RegSubKey}:{RegValue}",
                   target, subkey, subvalue);
                 data.FailureReason = e.Message;
             }

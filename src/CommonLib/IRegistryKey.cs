@@ -25,15 +25,4 @@ namespace SharpHoundCommonLib {
             _currentKey.Dispose();
         }
     }
-
-    // public class MockRegistryKey : IRegistryKey {
-    //     public virtual object GetValue(string subkey, string name) {
-    //         //Unimplemented
-    //         return default;
-    //     }
-    //
-    //     public virtual string[] GetSubKeyNames() {
-    //         throw new NotImplementedException();
-    //     }
-    // }
 }
