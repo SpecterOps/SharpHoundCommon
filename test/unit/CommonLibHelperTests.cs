@@ -303,18 +303,15 @@ namespace CommonLibTest {
             Assert.Equal("DC=test,DC=local", result);
         }
 
-        [Fact]
-        public void ConvertSidToHexSid_ValidSid_MatchesSecurityIdentifierBinaryForm()
+        [Theory]
+        [InlineData("S-1-5-32-544", "\\01\\02\\00\\00\\00\\00\\00\\05\\20\\00\\00\\00\\20\\02\\00\\00")]
+        public void ConvertSidToHexSid_ValidSid_MatchesSecurityIdentifierBinaryForm(string sid, string expectedHexSid)
         {
-            // Arrange
-            var sid = "S-1-5-32-544"; 
-            var expected = BuildExpectedHexSid(sid);
-
-            // Act
+            // Arrange & Act
             var actual = Helpers.ConvertSidToHexSid(sid);
 
             // Assert
-            Assert.Equal(expected, actual);
+            Assert.Equal(expectedHexSid, actual);
             return;
 
             static string BuildExpectedHexSid(string sid)
