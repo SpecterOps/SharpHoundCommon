@@ -295,7 +295,6 @@ namespace CommonLibTest {
             Assert.True(success);
         }
         
-        /// new
         [Fact]
         public void DomainNameToDistinguishedName_DotsBecomeDcComponents()
         {
