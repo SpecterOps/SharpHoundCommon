@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using CommonLibTest.CollectionDefinitons;
 using Microsoft.Extensions.Logging;
 using Moq;
 using SharpHoundCommonLib;
@@ -7,6 +8,7 @@ using Xunit;
 
 namespace CommonLibTest;
 
+[Collection(nameof(CacheTestCollectionDefinition))]
 public class CommonLibTests
 {
 
@@ -70,7 +72,7 @@ public class CommonLibTests
                 It.IsAny<Func<It.IsAnyType, Exception, string>>()),
             Times.Once());
     }
-
+    
     private static void ResetCommonLibState()
     {
         // Reset CommonLib._initialized (private static)
