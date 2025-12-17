@@ -1,6 +1,6 @@
 ﻿using Xunit;
 
-namespace CommonLibTest.CollectionDefinitons;
+namespace CommonLibTest.CollectionDefinitions;
 
 /// <summary>
 /// Test that use cache cannot run in parallel, they can have flaky behavior

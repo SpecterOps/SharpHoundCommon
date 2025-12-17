@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Reflection;
-using CommonLibTest.CollectionDefinitons;
+using CommonLibTest.CollectionDefinitions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using SharpHoundCommonLib;

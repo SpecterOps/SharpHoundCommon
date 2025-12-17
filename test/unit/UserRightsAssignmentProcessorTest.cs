@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
-using CommonLibTest.CollectionDefinitons;
+using CommonLibTest.CollectionDefinitions;
 using CommonLibTest.Facades;
 using CommonLibTest.Facades.LSAMocks.DCMocks;
 using CommonLibTest.Facades.LSAMocks.WorkstationMocks;
@@ -26,7 +27,7 @@ namespace CommonLibTest
         {
             _testOutputHelper = testOutputHelper;
             
-            // reseting cache for tests
+            //reseting cache
             Cache.SetCacheInstance(null);
         }
 
