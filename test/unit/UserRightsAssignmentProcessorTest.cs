@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using CommonLibTest.CollectionDefinitions;
 using CommonLibTest.Facades;
 using CommonLibTest.Facades.LSAMocks.DCMocks;
 using CommonLibTest.Facades.LSAMocks.WorkstationMocks;
@@ -17,6 +18,7 @@ using Xunit.Abstractions;
 
 namespace CommonLibTest
 {
+    [Collection(nameof(CacheTestCollectionDefinition))]
     public class UserRightsAssignmentProcessorTest
     {
         private readonly ITestOutputHelper _testOutputHelper;
@@ -24,6 +26,9 @@ namespace CommonLibTest
         public UserRightsAssignmentProcessorTest(ITestOutputHelper testOutputHelper)
         {
             _testOutputHelper = testOutputHelper;
+            
+            //reseting cache
+            Cache.SetCacheInstance(null);
         }
 
         [WindowsOnlyFact]
