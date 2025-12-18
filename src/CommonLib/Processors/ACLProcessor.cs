@@ -786,7 +786,7 @@ namespace SharpHoundCommonLib.Processors {
                             IsPermissionForOwnerRightsSid = isPermissionForOwnerRightsSid,
                             IsInheritedPermissionForOwnerRightsSid = isInheritedPermissionForOwnerRightsSid,
                         };
-                    else if (objectType == Label.Group && (aceType == ACEGuids.WriteMember || aceType == ACEGuids.WriteMembership))
+                    else if (objectType == Label.Group && (aceType is ACEGuids.WriteMember or ACEGuids.WriteMembership))
                         yield return new ACE {
                             PrincipalType = resolvedPrincipal.ObjectType,
                             PrincipalSID = resolvedPrincipal.ObjectIdentifier,
