@@ -584,7 +584,7 @@ namespace SharpHoundCommonLib.Processors {
                 if (aceRights.HasFlag(ActiveDirectoryRights.Self) &&
                     !aceRights.HasFlag(ActiveDirectoryRights.WriteProperty) &&
                     !aceRights.HasFlag(ActiveDirectoryRights.GenericWrite) && objectType == Label.Group &&
-                    aceType is ACEGuids.WriteMember or ACEGuids.AllGuid)
+                    aceType is ACEGuids.WriteMember or ACEGuids.WriteMembership or ACEGuids.AllGuid)
                     yield return new ACE {
                         PrincipalType = resolvedPrincipal.ObjectType,
                         PrincipalSID = resolvedPrincipal.ObjectIdentifier,
@@ -786,7 +786,7 @@ namespace SharpHoundCommonLib.Processors {
                             IsPermissionForOwnerRightsSid = isPermissionForOwnerRightsSid,
                             IsInheritedPermissionForOwnerRightsSid = isInheritedPermissionForOwnerRightsSid,
                         };
-                    else if (objectType == Label.Group && aceType == ACEGuids.WriteMember)
+                    else if (objectType == Label.Group && (aceType == ACEGuids.WriteMember || aceType == ACEGuids.WriteMembership))
                         yield return new ACE {
                             PrincipalType = resolvedPrincipal.ObjectType,
                             PrincipalSID = resolvedPrincipal.ObjectIdentifier,
