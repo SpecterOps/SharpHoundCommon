@@ -331,13 +331,9 @@ namespace CommonLibTest
             Assert.Contains(invalidCN, results.unresolvedTemplates);
         }
         
-        [WindowsOnlyTheory]
-        [InlineData("S-1-5-80")]
-        [InlineData("S-1-5-82")]
-        [InlineData("S-1-5-90")] 
-        [InlineData("S-1-5-96")]
-        public async Task CertAbuseProcessor_GetRegistryPrincipal_ReturnsFalseForFilteredSID(string sidValue) {
-            var sid = new SecurityIdentifier(sidValue);
+        [WindowsOnlyFact]
+        public async Task CertAbuseProcessor_GetRegistryPrincipal_ReturnsFalseForFilteredSID() {
+            var sid = new SecurityIdentifier("S-1-5-3");
             
             var results = await _certAbuseProcessor.GetRegistryPrincipal(
                 sid,
@@ -345,31 +341,125 @@ namespace CommonLibTest
                 TargetName,
                 true,
                 TargetDomainSid,
-                new SecurityIdentifier("S-1-5-18")
+                null
             );
 
             Assert.Equal((false, null), results);
+            _mockLdapUtils.VerifyNoOtherCalls();
         }
         
         [WindowsOnlyFact]
-        public async Task CertAbuseProcessor_GetRegistryPrincipal_ResolvedDomainController_ReturnsTrue() {
+        public async Task CertAbuseProcessor_GetRegistryPrincipal_CallsResolveIDAndType_ForDomainController() {
             var expectedPrincipalType = Label.Group;
             var expectedPrincipalSID = "S-1-5-21-3130019616-2776909439-2417379446-512";
-            var sid = new SecurityIdentifier(expectedPrincipalSID);
             
             _mockLdapUtils.Setup(x => x.ResolveIDAndType(It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync((true, new TypedPrincipal(expectedPrincipalSID, expectedPrincipalType)));
             
+            var sid = new SecurityIdentifier(expectedPrincipalSID);
+            
             var results = await _certAbuseProcessor.GetRegistryPrincipal(
                 sid,
                 DomainName,
                 TargetName,
                 true,
                 TargetDomainSid,
-                new SecurityIdentifier("S-1-5-18")
+                null
             );
 
             Assert.Equal((true, new TypedPrincipal(expectedPrincipalSID, expectedPrincipalType)), results);
+            
+            _mockLdapUtils.Verify(
+                x => x.ResolveIDAndType(It.IsAny<string>(), It.IsAny<string>()),
+                Times.Once);
+            
+            _mockLdapUtils.VerifyNoOtherCalls();
+        }
+        
+        [WindowsOnlyFact]
+        public async Task CertAbuseProcessor_GetRegistryPrincipal_CallsConvertLocalWellKnownPrincipal_ForNonDomainController() {
+            var expectedPrincipalType = Label.Group;
+            var expectedPrincipalSID = "S-1-5-21-3130019616-2776909439-2417379446-512";
+            
+            _mockLdapUtils.Setup(x => x.ConvertLocalWellKnownPrincipal(It.IsAny<SecurityIdentifier>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync((true, new TypedPrincipal(expectedPrincipalSID, expectedPrincipalType)));
+            
+            var sid = new SecurityIdentifier(expectedPrincipalSID);
+            
+            var results = await _certAbuseProcessor.GetRegistryPrincipal(
+                sid,
+                DomainName,
+                TargetName,
+                false,
+                TargetDomainSid,
+                null
+            );
+
+            Assert.Equal((true, new TypedPrincipal(expectedPrincipalSID, expectedPrincipalType)), results);
+            
+            _mockLdapUtils.Verify(
+                x => x.ConvertLocalWellKnownPrincipal(It.IsAny<SecurityIdentifier>(), It.IsAny<string>(), It.IsAny<string>()),
+                Times.Once);
+            _mockLdapUtils.VerifyNoOtherCalls();
+        }
+        
+        [WindowsOnlyFact]
+        public async Task CertAbuseProcessor_GetRegistryPrincipal_ResolvesToLocalPrincipal_ForLocalSID() {
+            var expectedPrincipalType = Label.LocalGroup;
+            var expectedPrincipalSID = $"{TargetDomainSid}-123";
+            
+            _mockLdapUtils.Setup(x => x.ConvertLocalWellKnownPrincipal(It.IsAny<SecurityIdentifier>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync((false, null));
+            
+            var sid = new SecurityIdentifier(expectedPrincipalSID);
+            
+            var results = await _certAbuseProcessor.GetRegistryPrincipal(
+                sid,
+                DomainName,
+                TargetName,
+                false,
+                TargetDomainSid,
+                new SecurityIdentifier(TargetDomainSid)
+            );
+
+            Assert.Equal((true, new TypedPrincipal(expectedPrincipalSID, expectedPrincipalType)), results);
+            
+            _mockLdapUtils.Verify(
+                x => x.ConvertLocalWellKnownPrincipal(It.IsAny<SecurityIdentifier>(), It.IsAny<string>(), It.IsAny<string>()),
+                Times.Once);
+            _mockLdapUtils.VerifyNoOtherCalls();
+        }
+        
+        [WindowsOnlyFact]
+        public async Task CertAbuseProcessor_GetRegistryPrincipal_ResolvesToDomainPrincipal() {
+            var expectedPrincipalType = Label.Group;
+            var expectedPrincipalSID = "S-1-5-21-3130019616-2776909439-2417379446-512";
+            
+            _mockLdapUtils.Setup(x => x.ConvertLocalWellKnownPrincipal(It.IsAny<SecurityIdentifier>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync((false, null));
+            _mockLdapUtils.Setup(x => x.ResolveIDAndType(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync((true, new TypedPrincipal(expectedPrincipalSID, expectedPrincipalType)));
+            
+            var sid = new SecurityIdentifier(expectedPrincipalSID);
+            
+            var results = await _certAbuseProcessor.GetRegistryPrincipal(
+                sid,
+                DomainName,
+                TargetName,
+                false,
+                TargetDomainSid,
+                null
+            );
+
+            Assert.Equal((true, new TypedPrincipal(expectedPrincipalSID, expectedPrincipalType)), results);
+            
+            _mockLdapUtils.Verify(
+                x => x.ConvertLocalWellKnownPrincipal(It.IsAny<SecurityIdentifier>(), It.IsAny<string>(), It.IsAny<string>()),
+                Times.Once);
+            _mockLdapUtils.Verify(
+                x => x.ResolveIDAndType(It.IsAny<string>(), It.IsAny<string>()),
+                Times.Once);
+            _mockLdapUtils.VerifyNoOtherCalls();
         }
     }
 }
