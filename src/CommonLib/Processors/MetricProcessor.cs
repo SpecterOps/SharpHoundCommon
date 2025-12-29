@@ -24,7 +24,7 @@ public class MetricProcessor(IMetricWriter writer) : IMetricProcessor {
             MetricType.Gauge when value is double v => new Metric.DoubleMetric(name, metricType, v, labels),
             MetricType.Gauge => new Metric.DoubleMetric(name, metricType, -1, labels),
             MetricType.ClassicHistogram when value is IDictionary<string, double> v => new Metric.DictionaryMetric(name, metricType, v, labels),
-            MetricType.ClassicHistogram => new Metric.DictionaryMetric(name, metricType, [], labels),
+            MetricType.ClassicHistogram => new Metric.DictionaryMetric(name, metricType, new Dictionary<string, double>(), labels),
             _ => new Metric.DoubleMetric(name, metricType, -1, labels)
         };
 
@@ -46,12 +46,12 @@ public class MetricProcessor(IMetricWriter writer) : IMetricProcessor {
         if (labels1 != null && labels2 != null) {
              return labels1.Concat(labels2.Where( x=> !labels1.ContainsKey(x.Key))).ToDictionary(x=>x.Key, x=>x.Value);
         }
-        return labels1 ?? labels2 ?? [];
+        return labels1 ?? labels2 ?? new Dictionary<string, string>();
     }
 
     private static IDictionary<string, double> CombineObservations(IDictionary<string, double> observations1 = null,
         IDictionary<string, double> observations2 = null) {
-        if (observations1 == null || observations2 == null) return observations1 ?? observations2 ?? [];
+        if (observations1 == null || observations2 == null) return observations1 ?? observations2 ?? new Dictionary<string, double>();
         foreach (var pair in observations2) {
             if (!observations1.ContainsKey(pair.Key))
                 observations1[pair.Key] = pair.Value;
