@@ -12,13 +12,19 @@ public static class Metrics {
     }
 }
 
+public static class LdapMetrics {
+    public static int InFlightRequests;
+}
+
 
 public static class MetricId {
     public const int InvalidId = -1;
 }
 
-public static class LdapMetrics {
+public static class LdapMetricDefinitions {
     public static int RequestLatency = MetricId.InvalidId;
     public static int ConcurrentRequests = MetricId.InvalidId;
     public static int RequestsTotal = MetricId.InvalidId;
+    public static int FailedRequests = MetricId.InvalidId;
+    public static int UnresolvablePrincipals = MetricId.InvalidId;
 }

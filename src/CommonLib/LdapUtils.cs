@@ -15,9 +15,11 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using SharpHoundCommonLib.DirectoryObjects;
 using SharpHoundCommonLib.Enums;
+using SharpHoundCommonLib.Interfaces;
 using SharpHoundCommonLib.LDAPQueries;
 using SharpHoundCommonLib.OutputTypes;
 using SharpHoundCommonLib.Processors;
+using SharpHoundCommonLib.Static;
 using SharpHoundRPC.NetAPINative;
 using SharpHoundRPC.PortScanner;
 using Domain = System.DirectoryServices.ActiveDirectory.Domain;
@@ -47,6 +49,9 @@ namespace SharpHoundCommonLib {
         private readonly ConcurrentDictionary<string, TypedPrincipal> _distinguishedNameCache =
             new(StringComparer.OrdinalIgnoreCase);
 
+        // Metrics
+        private readonly IMetricRouter _metric;
+            
         private readonly ILogger _log;
         private readonly IPortScanner _portScanner;
         private readonly NativeMethods _nativeMethods;
@@ -77,13 +82,15 @@ namespace SharpHoundCommonLib {
             _nativeMethods = new NativeMethods();
             _portScanner = new PortScanner();
             _log = Logging.LogProvider.CreateLogger("LDAPUtils");
+            _metric = Metrics.Factory.CreateMetricRouter();
             _connectionPool = new ConnectionPoolManager(_ldapConfig, _log);
         }
 
-        public LdapUtils(NativeMethods nativeMethods = null, PortScanner scanner = null, ILogger log = null) {
+        public LdapUtils(NativeMethods nativeMethods = null, PortScanner scanner = null, ILogger log = null, IMetricRouter metric = null) {
             _nativeMethods = nativeMethods ?? new NativeMethods();
             _portScanner = scanner ?? new PortScanner();
             _log = log ?? Logging.LogProvider.CreateLogger("LDAPUtils");
+            _metric = metric ?? Metrics.Factory.CreateMetricRouter();
             _connectionPool = new ConnectionPoolManager(_ldapConfig, scanner: _portScanner);
         }
 
@@ -126,6 +133,7 @@ namespace SharpHoundCommonLib {
                 var result = await LookupSidType(identifier, objectDomain);
                 if (!result.Success) {
                     _unresolvablePrincipals.Add(identifier);
+                    _metric.Observe(LdapMetricDefinitions.UnresolvablePrincipals, 1, [nameof(LdapUtils)]);
                 }
 
                 return (result.Success, new TypedPrincipal(identifier, result.Type));
@@ -134,6 +142,7 @@ namespace SharpHoundCommonLib {
             var (success, type) = await LookupGuidType(identifier, objectDomain);
             if (!success) {
                 _unresolvablePrincipals.Add(identifier);
+                _metric.Observe(LdapMetricDefinitions.UnresolvablePrincipals, 1, [nameof(LdapUtils)]);
             }
 
             return (success, new TypedPrincipal(identifier, type));
@@ -965,6 +974,7 @@ namespace SharpHoundCommonLib {
             }
             catch {
                 _unresolvablePrincipals.Add(distinguishedName);
+                _metric.Observe(LdapMetricDefinitions.UnresolvablePrincipals, 1, [nameof(LdapUtils)]);
                 return (false, default);
             }
         }
@@ -1129,6 +1139,9 @@ namespace SharpHoundCommonLib {
             _domainControllers = new ConcurrentHashSet(StringComparer.OrdinalIgnoreCase);
             _connectionPool?.Dispose();
             _connectionPool = new ConnectionPoolManager(_ldapConfig, scanner: _portScanner);
+            
+            // Metrics
+            LdapMetrics.InFlightRequests = 0;
         }
 
         private IDirectoryObject CreateDirectoryEntry(string path) {

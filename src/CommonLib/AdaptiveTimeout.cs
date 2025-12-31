@@ -75,14 +75,15 @@ public sealed class AdaptiveTimeout : IDisposable {
     /// <typeparam name="T"></typeparam>
     /// <param name="func"></param>
     /// <param name="parentToken"></param>
+    /// <param name="latencyObservation">A method that is used to observe the latency of the request.</param>
     /// <returns>Returns a Fail result if a task runs longer than its budgeted time.</returns>
-    public async Task<Result<T>> ExecuteWithTimeout<T>(Func<CancellationToken, T> func, CancellationToken parentToken = default) {
+    public async Task<Result<T>> ExecuteWithTimeout<T>(Func<CancellationToken, T> func, CancellationToken parentToken = default, Action<double> latencyObservation = null) {
         DateTime startTime = default;
         var result = await Timeout.ExecuteWithTimeout(GetAdaptiveTimeout(), (timeoutToken) =>
             _sampler.SampleExecutionTime(() => {
                 startTime = DateTime.Now; // for ordinal tracking; see use in TimeSpikeSafetyValve
                 return func(timeoutToken);
-            }), parentToken);
+            }, latencyObservation), parentToken);
         TimeSpikeSafetyValve(result.IsSuccess, startTime);
         return result;
     }
@@ -97,14 +98,15 @@ public sealed class AdaptiveTimeout : IDisposable {
     /// </summary>
     /// <param name="func"></param>
     /// <param name="parentToken"></param>
+    /// <param name="latencyObservation">A method that is used to observe the latency of the request.</param>
     /// <returns>Returns a Fail result if a task runs longer than its budgeted time.</returns>
-    public async Task<Result> ExecuteWithTimeout(Action<CancellationToken> func, CancellationToken parentToken = default) {
+    public async Task<Result> ExecuteWithTimeout(Action<CancellationToken> func, CancellationToken parentToken = default, Action<double> latencyObservation = null) {
         DateTime startTime = default;
         var result = await Timeout.ExecuteWithTimeout(GetAdaptiveTimeout(), (timeoutToken) =>
             _sampler.SampleExecutionTime(() => {
                 startTime = DateTime.Now; // for ordinal tracking; see use in TimeSpikeSafetyValve
                 func(timeoutToken);
-            }), parentToken);
+            }, latencyObservation), parentToken);
         TimeSpikeSafetyValve(result.IsSuccess, startTime);
         return result;
     }
@@ -120,14 +122,15 @@ public sealed class AdaptiveTimeout : IDisposable {
     /// <typeparam name="T"></typeparam>
     /// <param name="func"></param>
     /// <param name="parentToken"></param>
+    /// <param name="latencyObservation">A method that is used to observe the latency of the request.</param>
     /// <returns>Returns a Fail result if a task runs longer than its budgeted time.</returns>
-    public async Task<Result<T>> ExecuteWithTimeout<T>(Func<CancellationToken, Task<T>> func, CancellationToken parentToken = default) {
+    public async Task<Result<T>> ExecuteWithTimeout<T>(Func<CancellationToken, Task<T>> func, CancellationToken parentToken = default, Action<double> latencyObservation = null) {
         DateTime startTime = default;
         var result = await Timeout.ExecuteWithTimeout(GetAdaptiveTimeout(), (timeoutToken) =>
             _sampler.SampleExecutionTime(() => {
                 startTime = DateTime.Now; // for ordinal tracking; see use in TimeSpikeSafetyValve
                 return func(timeoutToken);
-            }), parentToken);
+            }, latencyObservation), parentToken);
         TimeSpikeSafetyValve(result.IsSuccess, startTime);
         return result;
     }
@@ -142,14 +145,15 @@ public sealed class AdaptiveTimeout : IDisposable {
     /// </summary>
     /// <param name="func"></param>
     /// <param name="parentToken"></param>
+    /// <param name="latencyObservation">A method that is used to observe the latency of the request.</param>
     /// <returns>Returns a Fail result if a task runs longer than its budgeted time.</returns>
-    public async Task<Result> ExecuteWithTimeout(Func<CancellationToken, Task> func, CancellationToken parentToken = default) {
+    public async Task<Result> ExecuteWithTimeout(Func<CancellationToken, Task> func, CancellationToken parentToken = default, Action<double> latencyObservation = null) {
         DateTime startTime = default;
         var result = await Timeout.ExecuteWithTimeout(GetAdaptiveTimeout(), (timeoutToken) =>
             _sampler.SampleExecutionTime(() => {
                 startTime = DateTime.Now; // for ordinal tracking; see use in TimeSpikeSafetyValve
                 return func(timeoutToken);
-            }), parentToken);
+            }, latencyObservation), parentToken);
         TimeSpikeSafetyValve(result.IsSuccess, startTime);
         return result;
     }

@@ -9,20 +9,32 @@ public static class DefaultMetricRegistry {
         registry.TryRegister(
             new CounterDefinition(
                 Name: "ldap_total_requests",
-                LabelNames: ["processor"]),
-            out LdapMetrics.RequestsTotal);
+                LabelNames: ["location", "identifier"]),
+            out LdapMetricDefinitions.RequestsTotal);
+        
+        registry.TryRegister(
+            new CounterDefinition(
+                Name: "ldap_failed_requests",
+                LabelNames: ["location", "identifier"]),
+            out LdapMetricDefinitions.FailedRequests);
         
         registry.TryRegister(
             new GaugeDefinition(
                 Name: "ldap_concurrent_requests",
-                LabelNames: ["processor"]),
-            out LdapMetrics.ConcurrentRequests);
+                LabelNames: ["location", "identifier"]),
+            out LdapMetricDefinitions.ConcurrentRequests);
          
         registry.TryRegister(
             new CumulativeHistogramDefinition(
                 Name: "ldap_request_duration_seconds",
                 InitBuckets: [0.1, 0.25, 0.5, 1, 2.5, 5],
-                LabelNames: ["processor"]),
-            out LdapMetrics.RequestLatency);
+                LabelNames: ["location", "identifier"]),
+            out LdapMetricDefinitions.RequestLatency);
+        
+        registry.TryRegister(
+            new CounterDefinition(
+                Name: "ldap_total_unresolvable_principals",
+                LabelNames: ["location"]),
+            out LdapMetricDefinitions.UnresolvablePrincipals);
     }
 }
