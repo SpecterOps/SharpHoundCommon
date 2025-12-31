@@ -6,5 +6,5 @@ public abstract record MetricObservation {
     public readonly record struct DoubleMetricObservation(
         int DefinitionId,
         double Value,
-        string[] LabelsValues);
+        LabelValues LabelsValues);
 }

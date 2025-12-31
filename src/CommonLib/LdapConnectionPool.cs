@@ -13,6 +13,7 @@ using SharpHoundCommonLib.Enums;
 using SharpHoundCommonLib.Exceptions;
 using SharpHoundCommonLib.Interfaces;
 using SharpHoundCommonLib.LDAPQueries;
+using SharpHoundCommonLib.Models;
 using SharpHoundCommonLib.Processors;
 using SharpHoundCommonLib.Static;
 using SharpHoundRPC.NetAPINative;
@@ -79,7 +80,8 @@ namespace SharpHoundCommonLib {
             return await GetConnectionAsync();
         }
         
-        private void LatencyObservation(double latency) => _metric.Observe(LdapMetricDefinitions.RequestLatency, latency, [nameof(LdapConnectionPool), _poolIdentifier]);
+        private void LatencyObservation(double latency) => _metric.Observe(LdapMetricDefinitions.RequestLatency, latency,
+            new LabelValues([nameof(LdapConnectionPool), _poolIdentifier]));
 
         public async IAsyncEnumerable<LdapResult<IDirectoryObject>> Query(LdapQueryParameters queryParameters,
             [EnumeratorCancellation] CancellationToken cancellationToken = new()) {
@@ -122,13 +124,15 @@ namespace SharpHoundCommonLib {
                         querySuccess = true;
                     }
                     else if (queryRetryCount == MaxRetries) {
-                        _metric.Observe(LdapMetricDefinitions.FailedRequests, 1, [nameof(LdapConnectionPool), _poolIdentifier]);
+                        _metric.Observe(LdapMetricDefinitions.FailedRequests, 1, 
+                            new LabelValues([nameof(LdapConnectionPool), _poolIdentifier]));
                         tempResult =
                             LdapResult<IDirectoryObject>.Fail($"Failed to get a response after {MaxRetries} attempts",
                                 queryParameters);
                     }
                     else {
-                        _metric.Observe(LdapMetricDefinitions.FailedRequests, 1, [nameof(LdapConnectionPool), _poolIdentifier]);
+                        _metric.Observe(LdapMetricDefinitions.FailedRequests, 1, 
+                            new LabelValues([nameof(LdapConnectionPool), _poolIdentifier]));
                         queryRetryCount++;
                     }
                 }
@@ -144,7 +148,8 @@ namespace SharpHoundCommonLib {
                      * Release our connection in a faulted state since the connection is defunct. Attempt to get a new connection to any server in the domain
                      * since non-paged queries do not require same server connections
                      */
-                    _metric.Observe(LdapMetricDefinitions.FailedRequests, 1, [nameof(LdapConnectionPool), _poolIdentifier]);
+                    _metric.Observe(LdapMetricDefinitions.FailedRequests, 1, 
+                        new LabelValues([nameof(LdapConnectionPool), _poolIdentifier]));
                     queryRetryCount++;
                     _log.LogDebug("Query - Attempting to recover from ServerDown for query {Info} (Attempt {Count})",
                         queryParameters.GetQueryInfo(), queryRetryCount);
@@ -178,7 +183,8 @@ namespace SharpHoundCommonLib {
                      * If we get a busy error, we want to do an exponential backoff, but maintain the current connection
                      * The expectation is that given enough time, the server should stop being busy and service our query appropriately
                      */
-                    _metric.Observe(LdapMetricDefinitions.FailedRequests, 1, [nameof(LdapConnectionPool), _poolIdentifier]);
+                    _metric.Observe(LdapMetricDefinitions.FailedRequests, 1, 
+                        new LabelValues([nameof(LdapConnectionPool), _poolIdentifier]));
                     busyRetryCount++;
                     _log.LogDebug("Query - Executing busy backoff for query {Info} (Attempt {Count})",
                         queryParameters.GetQueryInfo(), busyRetryCount);
@@ -189,7 +195,8 @@ namespace SharpHoundCommonLib {
                     /*
                      * Treat a timeout as a busy error
                      */
-                    _metric.Observe(LdapMetricDefinitions.FailedRequests, 1, [nameof(LdapConnectionPool), _poolIdentifier]);
+                    _metric.Observe(LdapMetricDefinitions.FailedRequests, 1, 
+                        new LabelValues([nameof(LdapConnectionPool), _poolIdentifier]));
                     busyRetryCount++;
                     _log.LogDebug("Query - Timeout: Executing busy backoff for query {Info} (Attempt {Count})",
                         queryParameters.GetQueryInfo(), busyRetryCount);
@@ -200,7 +207,8 @@ namespace SharpHoundCommonLib {
                     /*
                      * This is our fallback catch. If our retry counts have been exhausted this will trigger and break us out of our loop
                      */
-                    _metric.Observe(LdapMetricDefinitions.FailedRequests, 1, [nameof(LdapConnectionPool), _poolIdentifier]);
+                    _metric.Observe(LdapMetricDefinitions.FailedRequests, 1,
+                        new LabelValues([nameof(LdapConnectionPool), _poolIdentifier]));
                     tempResult = LdapResult<IDirectoryObject>.Fail(
                         $"Query - Caught unrecoverable ldap exception: {le.Message} (ServerMessage: {le.ServerErrorMessage}) (ErrorCode: {le.ErrorCode})",
                         queryParameters);
@@ -209,7 +217,8 @@ namespace SharpHoundCommonLib {
                     /*
                      * Generic exception handling for unforeseen circumstances
                      */
-                    _metric.Observe(LdapMetricDefinitions.FailedRequests, 1, [nameof(LdapConnectionPool), _poolIdentifier]);
+                    _metric.Observe(LdapMetricDefinitions.FailedRequests, 1,
+                        new LabelValues([nameof(LdapConnectionPool), _poolIdentifier]));
                     tempResult =
                         LdapResult<IDirectoryObject>.Fail($"Query - Caught unrecoverable exception: {e.Message}",
                             queryParameters);
@@ -295,13 +304,15 @@ namespace SharpHoundCommonLib {
                         queryRetryCount = 0;
                     }
                     else if (queryRetryCount == MaxRetries) {
-                        _metric.Observe(LdapMetricDefinitions.FailedRequests, 1, [nameof(LdapConnectionPool), _poolIdentifier]);
+                        _metric.Observe(LdapMetricDefinitions.FailedRequests, 1,
+                            new LabelValues([nameof(LdapConnectionPool), _poolIdentifier]));
                         tempResult = LdapResult<IDirectoryObject>.Fail(
                             $"PagedQuery - Failed to get a response after {MaxRetries} attempts",
                             queryParameters);
                     }
                     else {
-                        _metric.Observe(LdapMetricDefinitions.FailedRequests, 1, [nameof(LdapConnectionPool), _poolIdentifier]);
+                        _metric.Observe(LdapMetricDefinitions.FailedRequests, 1,
+                            new LabelValues([nameof(LdapConnectionPool), _poolIdentifier]));
                         queryRetryCount++;
                     }
                 }
@@ -316,7 +327,8 @@ namespace SharpHoundCommonLib {
                      * Release our connection in a faulted state since the connection is defunct.
                      * Paged queries require a connection to be made to the same server which we started the paged query on
                      */
-                    _metric.Observe(LdapMetricDefinitions.FailedRequests, 1, [nameof(LdapConnectionPool), _poolIdentifier]);
+                    _metric.Observe(LdapMetricDefinitions.FailedRequests, 1,
+                        new LabelValues([nameof(LdapConnectionPool), _poolIdentifier]));
                     if (serverName == null) {
                         _log.LogError(
                             "PagedQuery - Received server down exception without a known servername. Unable to generate new connection\n{Info}",
@@ -356,7 +368,8 @@ namespace SharpHoundCommonLib {
                      * If we get a busy error, we want to do an exponential backoff, but maintain the current connection
                      * The expectation is that given enough time, the server should stop being busy and service our query appropriately
                      */
-                    _metric.Observe(LdapMetricDefinitions.FailedRequests, 1, [nameof(LdapConnectionPool), _poolIdentifier]);
+                    _metric.Observe(LdapMetricDefinitions.FailedRequests, 1, 
+                        new LabelValues([nameof(LdapConnectionPool), _poolIdentifier]));
                     busyRetryCount++;
                     _log.LogDebug("PagedQuery - Executing busy backoff for query {Info} (Attempt {Count})",
                         queryParameters.GetQueryInfo(), busyRetryCount);
@@ -367,7 +380,8 @@ namespace SharpHoundCommonLib {
                     /*
                      * Treat a timeout as a busy error
                      */
-                    _metric.Observe(LdapMetricDefinitions.FailedRequests, 1, [nameof(LdapConnectionPool), _poolIdentifier]);
+                    _metric.Observe(LdapMetricDefinitions.FailedRequests, 1,
+                        new LabelValues([nameof(LdapConnectionPool), _poolIdentifier]));
                     busyRetryCount++;
                     _log.LogDebug("PagedQuery - Timeout: Executing busy backoff for query {Info} (Attempt {Count})",
                         queryParameters.GetQueryInfo(), busyRetryCount);
@@ -375,13 +389,15 @@ namespace SharpHoundCommonLib {
                     await Task.Delay(backoffDelay, cancellationToken);
                 }
                 catch (LdapException le) {
-                    _metric.Observe(LdapMetricDefinitions.FailedRequests, 1, [nameof(LdapConnectionPool), _poolIdentifier]);
+                    _metric.Observe(LdapMetricDefinitions.FailedRequests, 1,
+                        new LabelValues([nameof(LdapConnectionPool), _poolIdentifier]));
                     tempResult = LdapResult<IDirectoryObject>.Fail(
                         $"PagedQuery - Caught unrecoverable ldap exception: {le.Message} (ServerMessage: {le.ServerErrorMessage}) (ErrorCode: {le.ErrorCode})",
                         queryParameters, le.ErrorCode);
                 }
                 catch (Exception e) {
-                    _metric.Observe(LdapMetricDefinitions.FailedRequests, 1, [nameof(LdapConnectionPool), _poolIdentifier]);
+                    _metric.Observe(LdapMetricDefinitions.FailedRequests, 1,
+                        new LabelValues([nameof(LdapConnectionPool), _poolIdentifier]));
                     tempResult =
                         LdapResult<IDirectoryObject>.Fail($"PagedQuery - Caught unrecoverable exception: {e.Message}",
                             queryParameters);
@@ -521,7 +537,8 @@ namespace SharpHoundCommonLib {
                     response = await SendRequestWithTimeout(connectionWrapper.Connection, searchRequest, _rangedRetrievalAdaptiveTimeout);
                 }
                 catch (LdapException le) when (le.ErrorCode == (int)ResultCode.Busy && busyRetryCount < MaxRetries) {
-                    _metric.Observe(LdapMetricDefinitions.FailedRequests, 1, [nameof(LdapConnectionPool), _poolIdentifier]);
+                    _metric.Observe(LdapMetricDefinitions.FailedRequests, 1,
+                        new LabelValues([nameof(LdapConnectionPool), _poolIdentifier]));
                     busyRetryCount++;
                     _log.LogDebug("RangedRetrieval - Executing busy backoff for query {Info} (Attempt {Count})",
                         queryParameters.GetQueryInfo(), busyRetryCount);
@@ -532,7 +549,8 @@ namespace SharpHoundCommonLib {
                     /*
                      * Treat a timeout as a busy error
                      */
-                    _metric.Observe(LdapMetricDefinitions.FailedRequests, 1, [nameof(LdapConnectionPool), _poolIdentifier]);
+                    _metric.Observe(LdapMetricDefinitions.FailedRequests, 1,
+                        new LabelValues([nameof(LdapConnectionPool), _poolIdentifier]));
                     busyRetryCount++;
                     _log.LogDebug("RangedRetrieval - Timeout: Executing busy backoff for query {Info} (Attempt {Count})",
                         queryParameters.GetQueryInfo(), busyRetryCount);
@@ -541,7 +559,8 @@ namespace SharpHoundCommonLib {
                 }
                 catch (LdapException le) when (le.ErrorCode == (int)LdapErrorCodes.ServerDown &&
                                                  queryRetryCount < MaxRetries) {
-                    _metric.Observe(LdapMetricDefinitions.FailedRequests, 1, [nameof(LdapConnectionPool), _poolIdentifier]);
+                    _metric.Observe(LdapMetricDefinitions.FailedRequests, 1,
+                        new LabelValues([nameof(LdapConnectionPool), _poolIdentifier]));
                     queryRetryCount++;
                     _log.LogDebug(
                         "RangedRetrieval - Attempting to recover from ServerDown for query {Info} (Attempt {Count})",
@@ -573,13 +592,15 @@ namespace SharpHoundCommonLib {
                     }
                 }
                 catch (LdapException le) {
-                    _metric.Observe(LdapMetricDefinitions.FailedRequests, 1, [nameof(LdapConnectionPool), _poolIdentifier]);
+                    _metric.Observe(LdapMetricDefinitions.FailedRequests, 1,
+                        new LabelValues([nameof(LdapConnectionPool), _poolIdentifier]));
                     tempResult = LdapResult<string>.Fail(
                         $"Caught unrecoverable ldap exception: {le.Message} (ServerMessage: {le.ServerErrorMessage}) (ErrorCode: {le.ErrorCode})",
                         queryParameters, le.ErrorCode);
                 }
                 catch (Exception e) {
-                    _metric.Observe(LdapMetricDefinitions.FailedRequests, 1, [nameof(LdapConnectionPool), _poolIdentifier]);
+                    _metric.Observe(LdapMetricDefinitions.FailedRequests, 1,
+                        new LabelValues([nameof(LdapConnectionPool), _poolIdentifier]));
                     tempResult =
                         LdapResult<string>.Fail($"Caught unrecoverable exception: {e.Message}", queryParameters);
                 }
@@ -1077,7 +1098,7 @@ namespace SharpHoundCommonLib {
             // Prerequest metrics
             var concurrentRequests = Interlocked.Increment(ref LdapMetrics.InFlightRequests);
             _metric.Observe(LdapMetricDefinitions.ConcurrentRequests, concurrentRequests, 
-                [nameof(LdapConnectionPool), _poolIdentifier]);
+                new LabelValues([nameof(LdapConnectionPool), _poolIdentifier]));
             
             // Add padding to account for network latency and processing overhead
             const int TimeoutPaddingSeconds = 3;
@@ -1088,9 +1109,9 @@ namespace SharpHoundCommonLib {
             // Postrequest metrics
             concurrentRequests = Interlocked.Decrement(ref LdapMetrics.InFlightRequests);
             _metric.Observe(LdapMetricDefinitions.ConcurrentRequests, concurrentRequests,
-                [nameof(LdapConnectionPool), _poolIdentifier]);
+                new LabelValues([nameof(LdapConnectionPool), _poolIdentifier]));
             _metric.Observe(LdapMetricDefinitions.RequestsTotal, 1,
-                [nameof(LdapConnectionPool), _poolIdentifier]);
+                new LabelValues([nameof(LdapConnectionPool), _poolIdentifier]));
             
             if (result.IsSuccess)
                 return (SearchResponse)result.Value;

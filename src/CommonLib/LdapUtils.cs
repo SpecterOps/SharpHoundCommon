@@ -17,6 +17,7 @@ using SharpHoundCommonLib.DirectoryObjects;
 using SharpHoundCommonLib.Enums;
 using SharpHoundCommonLib.Interfaces;
 using SharpHoundCommonLib.LDAPQueries;
+using SharpHoundCommonLib.Models;
 using SharpHoundCommonLib.OutputTypes;
 using SharpHoundCommonLib.Processors;
 using SharpHoundCommonLib.Static;
@@ -133,7 +134,7 @@ namespace SharpHoundCommonLib {
                 var result = await LookupSidType(identifier, objectDomain);
                 if (!result.Success) {
                     _unresolvablePrincipals.Add(identifier);
-                    _metric.Observe(LdapMetricDefinitions.UnresolvablePrincipals, 1, [nameof(LdapUtils)]);
+                    _metric.Observe(LdapMetricDefinitions.UnresolvablePrincipals, 1, new LabelValues([nameof(LdapUtils)]));
                 }
 
                 return (result.Success, new TypedPrincipal(identifier, result.Type));
@@ -142,7 +143,7 @@ namespace SharpHoundCommonLib {
             var (success, type) = await LookupGuidType(identifier, objectDomain);
             if (!success) {
                 _unresolvablePrincipals.Add(identifier);
-                _metric.Observe(LdapMetricDefinitions.UnresolvablePrincipals, 1, [nameof(LdapUtils)]);
+                _metric.Observe(LdapMetricDefinitions.UnresolvablePrincipals, 1, new LabelValues([nameof(LdapUtils)]));
             }
 
             return (success, new TypedPrincipal(identifier, type));
@@ -974,7 +975,7 @@ namespace SharpHoundCommonLib {
             }
             catch {
                 _unresolvablePrincipals.Add(distinguishedName);
-                _metric.Observe(LdapMetricDefinitions.UnresolvablePrincipals, 1, [nameof(LdapUtils)]);
+                _metric.Observe(LdapMetricDefinitions.UnresolvablePrincipals, 1, new LabelValues([nameof(LdapUtils)]));
                 return (false, default);
             }
         }

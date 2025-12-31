@@ -1,7 +1,32 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace SharpHoundCommonLib.Models;
+
+public readonly record struct LabelValues(string[] Values) {
+    public string ToDisplayString(IReadOnlyList<string> labelNames) {
+        if (labelNames.Count == 0)
+            return string.Empty;
+        
+        if (labelNames.Count != Values.Length)
+            return $"{{Improper Observation Labels, LabelNamesCount: {labelNames.Count}, LabelValuesCount: {Values.Length}}}";
+
+        var sb = new StringBuilder();
+        sb.Append('{');
+        for (var i = 0; i < labelNames.Count; i++) {
+            if (i > 0)
+                sb.Append(',');
+            
+            sb.Append(labelNames[i])
+                .Append(':')
+                .Append(Values[i]);
+        }
+        
+        sb.Append('}');
+        return sb.ToString();
+    }
+};
 
 public abstract record MetricDefinition(
     string Name, 

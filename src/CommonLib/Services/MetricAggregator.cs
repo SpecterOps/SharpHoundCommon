@@ -18,21 +18,21 @@ public static class MetricAggregatorExtensions {
 
 public abstract class MetricAggregator {
     public abstract void Observe(double value);
-    public abstract void Flush(IMetricWriter writer);
+    public abstract object Snapshot();
 }
 
 public sealed class CounterAggregator : MetricAggregator {
     private long _value;
 
     public override void Observe(double value) => Interlocked.Add(ref _value, (long)value);
-    public override void Flush(IMetricWriter writer) => writer.FlushCounter(_value);
+    public override object Snapshot() => _value;
 }
 
 public sealed class GaugeAggregator : MetricAggregator {
     private double _value;
     
     public override void Observe(double value) => _value = value;
-    public override void Flush(IMetricWriter writer) => writer.FlushGauge(_value);
+    public override object Snapshot() => _value;
 }
 
 public sealed class CumulativeHistogramAggregator(double[] bounds) : MetricAggregator {
@@ -52,13 +52,18 @@ public sealed class CumulativeHistogramAggregator(double[] bounds) : MetricAggre
         _sum += value;
     }
 
-    public override void Flush(IMetricWriter writer) {
+    public override object Snapshot() {
         long cumulative = 0;
         var cumulativeValues = new long[_bucketCounts.Length];
         for (var i = 0; i < _bucketCounts.Length; i++) {
             cumulative += _bucketCounts[i];
             cumulativeValues[i] = cumulative;
         }
-        writer.FlushCumulativeHistogram(cumulativeValues, _count, _sum);
+
+        return new {
+            BucketCounts = cumulativeValues,
+            Count = _count,
+            Sum = _sum
+        };
     }
 }
