@@ -19,16 +19,18 @@ namespace SharpHoundCommonLib.Processors
         private readonly AdaptiveTimeout _getMachineSidAdaptiveTimeout;
         private readonly AdaptiveTimeout _openSamServerAdaptiveTimeout;
         private readonly IRegistryAccessor _registryAccessor;
+        private readonly ISAMServerAccessor _samServerAccessor;
         
         public delegate Task ComputerStatusDelegate(CSVComputerStatus status);
         public event ComputerStatusDelegate ComputerStatusEvent;
 
-        public CertAbuseProcessor(ILdapUtils utils, IRegistryAccessor registryAccessor, ILogger log = null) {
+        public CertAbuseProcessor(ILdapUtils utils, IRegistryAccessor registryAccessor, ISAMServerAccessor samServerAccessor, ILogger log = null) {
             _utils = utils;
             _registryAccessor = registryAccessor;
+            _samServerAccessor = samServerAccessor;
             _log = log ?? Logging.LogProvider.CreateLogger("CAProc");
             _getMachineSidAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ISAMServer.GetMachineSid)));
-            _openSamServerAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(SAMServer.OpenServer)));
+            _openSamServerAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ISAMServerAccessor.OpenServer)));
         }
 
         /// <summary>
@@ -411,7 +413,7 @@ namespace SharpHoundCommonLib.Processors
         {
             SecurityIdentifier machineSid = null;
 
-            //Try to get the machine sid for the computer if its not already cached
+            //Try to get the machine sid for the computer if it's not already cached
             if (!Cache.GetMachineSid(computerObjectId, out var tempMachineSid))
             {
                 // Open a handle to the server
@@ -441,7 +443,7 @@ namespace SharpHoundCommonLib.Processors
                         Task = "GetMachineSid",
                         ObjectId = computerObjectId,
                     });
-                    //If we can't get a machine sid, we wont be able to make local principals with unique object ids, or differentiate local/domain objects
+                    //If we can't get a machine sid, we won't be able to make local principals with unique object ids, or differentiate local/domain objects
                     _log.LogWarning("Unable to get machineSid for {Computer}: {Status}", computerName, getMachineSidResult.SError);
                     return null;
                 }
@@ -515,13 +517,7 @@ namespace SharpHoundCommonLib.Processors
 
         public virtual SharpHoundRPC.Result<ISAMServer> OpenSamServer(string computerName)
         {
-            var result = _openSamServerAdaptiveTimeout.ExecuteRPCWithTimeout((_) => SAMServer.OpenServer(computerName)).GetAwaiter().GetResult();
-            if (result.IsFailed)
-            {
-                return SharpHoundRPC.Result<ISAMServer>.Fail(result.SError);
-            }
-
-            return SharpHoundRPC.Result<ISAMServer>.Ok(result.Value);
+            return _openSamServerAdaptiveTimeout.ExecuteRPCWithTimeout((_) => _samServerAccessor.OpenServer(computerName)).GetAwaiter().GetResult();
         }
 
         private async Task SendComputerStatus(CSVComputerStatus status)
