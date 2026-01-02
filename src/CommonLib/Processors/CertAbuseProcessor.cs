@@ -409,7 +409,7 @@ namespace SharpHoundCommonLib.Processors
             return await _utils.ResolveIDAndType(sid.Value, computerDomain);
         }
 
-        private async Task<SecurityIdentifier> GetMachineSid(string computerName, string computerObjectId)
+        internal async Task<SecurityIdentifier> GetMachineSid(string computerName, string computerObjectId)
         {
             SecurityIdentifier machineSid = null;
 
@@ -423,7 +423,7 @@ namespace SharpHoundCommonLib.Processors
                     _log.LogTrace("OpenServer failed on {ComputerName}: {Error}", computerName, openServerResult.SError);
                     await SendComputerStatus(new CSVComputerStatus
                     {
-                        Task = "SamConnect",
+                        Task = nameof(OpenSamServer),
                         ComputerName = computerName,
                         Status = openServerResult.SError,
                         ObjectId = computerObjectId,
@@ -440,7 +440,7 @@ namespace SharpHoundCommonLib.Processors
                     {
                         Status = getMachineSidResult.SError,
                         ComputerName = computerName,
-                        Task = "GetMachineSid",
+                        Task = nameof(GetMachineSid),
                         ObjectId = computerObjectId,
                     });
                     //If we can't get a machine sid, we won't be able to make local principals with unique object ids, or differentiate local/domain objects
@@ -448,6 +448,13 @@ namespace SharpHoundCommonLib.Processors
                     return null;
                 }
 
+                await SendComputerStatus(new CSVComputerStatus {
+                    Status = CSVComputerStatus.StatusSuccess,
+                    Task = nameof(GetMachineSid),
+                    ComputerName = computerName,
+                    ObjectId = computerObjectId
+                });
+                
                 machineSid = getMachineSidResult.Value;
                 Cache.AddMachineSid(computerObjectId, machineSid.Value);
             }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Security.AccessControl;
 using System.Security.Principal;
+using System.Threading;
 using System.Threading.Tasks;
 using Moq;
 using SharpHoundCommonLib;
@@ -39,6 +40,8 @@ namespace CommonLibTest
                 _receivedCompStatus = status;
                 return Task.CompletedTask;
             };
+            
+            Cache.SetCacheInstance(Cache.CreateNewCache());
         }
 
         [Theory]
@@ -515,6 +518,76 @@ namespace CommonLibTest
             
             Assert.True(result.IsSuccess);
             Assert.IsType<SAMServer>(result.Value);
+        }
+        
+        [WindowsOnlyFact]
+        public async Task CertAbuseProcessor_GetMachineSid_ReturnsCachedValue() {
+            Cache.AddMachineSid(TargetDomainSid, TargetDomainSid);
+            
+            var result = await _certAbuseProcessor.GetMachineSid(TargetName, TargetDomainSid);
+            
+            Assert.Equal(TargetDomainSid, result.Value);
+        }
+        
+        [WindowsOnlyFact]
+        public async Task CertAbuseProcessor_GetMachineSid_OpenSAMFailure_ReturnsNull() {
+            var error = "Connection Failed";
+            _mockSAMServerAccessor.Setup(x => x.OpenServer(It.IsAny<string>(), It.IsAny<SAMEnums.SamAccessMasks>()))
+                .Returns(SharpHoundRPC.Result<ISAMServer>.Fail(error));
+            
+            var result = await _certAbuseProcessor.GetMachineSid(TargetName, TargetDomainSid);
+            
+            //Validate result
+            Assert.Null(result);
+            
+            //Validate CompStatus Log
+            Assert.Equal(TargetName, _receivedCompStatus.ComputerName);
+            Assert.Equal(nameof(_certAbuseProcessor.OpenSamServer), _receivedCompStatus.Task);
+            Assert.Equal(error, _receivedCompStatus.Status);
+            Assert.Equal(TargetDomainSid, _receivedCompStatus.ObjectId);
+        }
+        
+        [WindowsOnlyFact]
+        public async Task CertAbuseProcessor_GetMachineSid_GetMachineSidFailure_ReturnsNull() {
+            var mockSamServer = new Mock<ISAMServer>();
+            var error = "Sid Lookup Failed";
+            
+            _mockSAMServerAccessor.Setup(x => x.OpenServer(It.IsAny<string>(), It.IsAny<SAMEnums.SamAccessMasks>()))
+                .Returns(SharpHoundRPC.Result<ISAMServer>.Ok(mockSamServer.Object));
+            mockSamServer.Setup(x => x.GetMachineSid(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .Returns(SharpHoundRPC.Result<SecurityIdentifier>.Fail(error));
+            
+            var result = await _certAbuseProcessor.GetMachineSid(TargetName, TargetDomainSid);
+            
+            //Validate result
+            Assert.Null(result);
+            
+            //Validate CompStatus Log
+            Assert.Equal(TargetName, _receivedCompStatus.ComputerName);
+            Assert.Equal(nameof(_certAbuseProcessor.GetMachineSid), _receivedCompStatus.Task);
+            Assert.Equal(error, _receivedCompStatus.Status);
+            Assert.Equal(TargetDomainSid, _receivedCompStatus.ObjectId);
+        }
+        
+        [WindowsOnlyFact]
+        public async Task CertAbuseProcessor_GetMachineSid_ReturnsSid() {
+            var mockSamServer = new Mock<ISAMServer>();
+            
+            _mockSAMServerAccessor.Setup(x => x.OpenServer(It.IsAny<string>(), It.IsAny<SAMEnums.SamAccessMasks>()))
+                .Returns(SharpHoundRPC.Result<ISAMServer>.Ok(mockSamServer.Object));
+            mockSamServer.Setup(x => x.GetMachineSid(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .Returns(new SecurityIdentifier(TargetDomainSid));
+            
+            var result = await _certAbuseProcessor.GetMachineSid(TargetName, TargetDomainSid);
+            
+            //Validate result
+            Assert.Equal(TargetDomainSid, result.Value);
+            
+            //Validate CompStatus Log
+            Assert.Equal(TargetName, _receivedCompStatus.ComputerName);
+            Assert.Equal(nameof(_certAbuseProcessor.GetMachineSid), _receivedCompStatus.Task);
+            Assert.Equal(ComputerStatus.Success, _receivedCompStatus.Status);
+            Assert.Equal(TargetDomainSid, _receivedCompStatus.ObjectId);
         }
     }
 }
