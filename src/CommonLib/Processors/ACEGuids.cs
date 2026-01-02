@@ -8,6 +8,7 @@
         public const string UserForceChangePassword = "00299570-246d-11d0-a768-00aa006e0529";
         public const string AllGuid = "00000000-0000-0000-0000-000000000000";
         public const string WriteMember = "bf9679c0-0de6-11d0-a285-00aa003049e2";
+        public const string MembershipPropertySet = "bc0ac240-79a9-11d0-9020-00c04fc2d4cf";  // property set https://learn.microsoft.com/en-us/windows/win32/adschema/r-membership
         public const string WriteAllowedToAct = "3f78c3e5-f79a-46bd-a0b8-9d18116ddc79";
         public const string WriteSPN = "f3a64788-5306-11d1-a9c5-0000f80367c1";
         public const string AddKeyPrincipal = "5b47d60f-6090-40b2-9f37-2a4de88f3063";
