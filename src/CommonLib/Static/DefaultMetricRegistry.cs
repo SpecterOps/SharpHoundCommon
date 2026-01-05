@@ -26,8 +26,8 @@ public static class DefaultMetricRegistry {
          
         registry.TryRegister(
             new CumulativeHistogramDefinition(
-                Name: "ldap_request_duration_seconds",
-                InitBuckets: [0.1, 0.25, 0.5, 1, 2.5, 5],
+                Name: "ldap_request_duration_milliseconds",
+                InitBuckets: [100, 250, 500, 1000, 2500, 5000],
                 LabelNames: ["location", "identifier"]),
             out LdapMetricDefinitions.RequestLatency);
         

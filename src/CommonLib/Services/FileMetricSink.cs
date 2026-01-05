@@ -22,7 +22,7 @@ public sealed class FileMetricSink(
     // metric state, using a lock rather than a concurrent dictionary protects both the dictionary,
     // and the aggregators state.
     private readonly MetricDefinition[] _definitions = definitions.ToArray();
-    private readonly Dictionary<(int, LabelValues), MetricAggregator> _states = new();
+    private readonly Dictionary<(int, string[]), MetricAggregator> _states = new();
     private readonly object _lock = new();
 
     public FileMetricSink(
@@ -73,7 +73,7 @@ public sealed class FileMetricSink(
                 _metricWriter.StringBuilderAppendMetric(
                     sb,
                     definition,
-                    labelValues,
+                    new LabelValues(labelValues),
                     aggregator,
                     timestamp);
             }

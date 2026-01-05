@@ -25,5 +25,5 @@ public sealed class MetricRegistry : IMetricRegistry {
         return true;
     }
     
-    internal void Seal() => _sealed = true;
+    public void Seal() => _sealed = true;
 }

@@ -35,6 +35,8 @@ public sealed class GaugeAggregator : MetricAggregator {
     public override object Snapshot() => _value;
 }
 
+public record struct HistogramSnapshot(double[] Bounds, long[] Counts, long TotalCount, double Sum);
+
 public sealed class CumulativeHistogramAggregator(double[] bounds) : MetricAggregator {
     private readonly long[] _bucketCounts = new long[bounds.Length + 1]; // Includes the Inf+ bucket
     private long _count;
@@ -51,19 +53,9 @@ public sealed class CumulativeHistogramAggregator(double[] bounds) : MetricAggre
         _count++;
         _sum += value;
     }
+    
+    public override object Snapshot() => SnapshotHistogram();
 
-    public override object Snapshot() {
-        long cumulative = 0;
-        var cumulativeValues = new long[_bucketCounts.Length];
-        for (var i = 0; i < _bucketCounts.Length; i++) {
-            cumulative += _bucketCounts[i];
-            cumulativeValues[i] = cumulative;
-        }
-
-        return new {
-            BucketCounts = cumulativeValues,
-            Count = _count,
-            Sum = _sum
-        };
-    }
+    public HistogramSnapshot SnapshotHistogram() =>
+        new(bounds, _bucketCounts, _count, _sum);
 }

@@ -5,9 +5,13 @@ using SharpHoundCommonLib.Models;
 
 namespace SharpHoundCommonLib.Services;
 
-public sealed class MetricRouter(IReadOnlyList<MetricDefinition> definitions, IEnumerable<IMetricSink> sinks) : IMetricRouter {
+public sealed class MetricRouter(
+    IReadOnlyList<MetricDefinition> definitions,
+    IEnumerable<IMetricSink> sinks,
+    ILabelValuesCache labelCache) : IMetricRouter {
     private readonly int _definitionCount = definitions.Count;
     private readonly IMetricSink[] _sinks = sinks.ToArray();
+    private readonly ILabelValuesCache _labelCache = labelCache;
     
     // TODO MC: See if this boosts runtime, may need more metrics to see an appreciable difference.
     // In JIT Complication, can remove some of the overhead of calling
@@ -17,7 +21,9 @@ public sealed class MetricRouter(IReadOnlyList<MetricDefinition> definitions, IE
         if ((uint)definitionId >= (uint)_definitionCount)
             return;
         
-        var obs = new MetricObservation.DoubleMetricObservation(definitionId, value, labelValues);
+        var interned = _labelCache.Intern(labelValues.Values);
+        
+        var obs = new MetricObservation.DoubleMetricObservation(definitionId, value, interned);
 
         foreach (var sink in _sinks) 
             sink.Observe(obs);
