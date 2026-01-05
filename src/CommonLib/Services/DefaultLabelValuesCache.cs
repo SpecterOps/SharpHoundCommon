@@ -5,7 +5,7 @@ using SharpHoundCommonLib.Interfaces;
 namespace SharpHoundCommonLib.Services;
 
 public sealed class DefaultLabelValuesCache : ILabelValuesCache {
-    private readonly Dictionary<string, string[]> _cache = new();
+    internal readonly Dictionary<string, string[]> _cache = new();
     
     private readonly object _lock = new();
     private const char Separator = '\u001F'; // ascii unit separator
@@ -28,11 +28,8 @@ public sealed class DefaultLabelValuesCache : ILabelValuesCache {
         }
     }
 
-    private static string MakeKey(string[] values) {
-        if (values.Length == 1)
-            return values[0];
-        
-        return string.Join(Separator.ToString(), values);
+    internal static string MakeKey(string[] values) {
+        return values.Length == 1 ? values[0] : string.Join(Separator.ToString(), values);
     }
 
 

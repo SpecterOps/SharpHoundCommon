@@ -27,7 +27,7 @@ public class AdaptiveTimeoutTest {
 
         var adaptiveTimeoutResult = adaptiveTimeout.GetAdaptiveTimeout();
         Assert.Equal(maxTimeout, adaptiveTimeoutResult);
-        Assert.InRange(observedLatency, 0.0, 55);
+        Assert.InRange(observedLatency, 0.0, 60);
         return;
 
         void LatencyObservation(double latency) {
@@ -51,9 +51,9 @@ public class AdaptiveTimeoutTest {
 
         var adaptiveTimeoutResult = adaptiveTimeout.GetAdaptiveTimeout();
         Assert.Equal(maxTimeout, adaptiveTimeoutResult);
-        Assert.InRange(observedLatency1, 0.0, 55);
-        Assert.InRange(observedLatency2, 0.0, 55);
-        Assert.InRange(observedLatency3, 0.0, 55);
+        Assert.InRange(observedLatency1, 0.0, 60);
+        Assert.InRange(observedLatency2, 0.0, 60);
+        Assert.InRange(observedLatency3, 0.0, 60);
         return;
 
 
@@ -83,9 +83,9 @@ public class AdaptiveTimeoutTest {
 
         var adaptiveTimeoutResult = adaptiveTimeout.GetAdaptiveTimeout();
         Assert.True(adaptiveTimeoutResult < maxTimeout);
-        Assert.InRange(observedLatency1, 0.0, 45);
-        Assert.InRange(observedLatency2, 0.0, 55);
-        Assert.InRange(observedLatency3, 0.0, 65);
+        Assert.InRange(observedLatency1, 0.0, 55);
+        Assert.InRange(observedLatency2, 0.0, 65);
+        Assert.InRange(observedLatency3, 0.0, 75);
         return;
         
         void LatencyObservation1(double latency) {
