@@ -57,6 +57,7 @@ public class ExecutionTimeSampler : IDisposable {
         var stopwatch = Stopwatch.StartNew();
         await func.Invoke();
         stopwatch.Stop();
+        latencyObservation?.Invoke(stopwatch.ElapsedMilliseconds);
         AddTimeSample(stopwatch.Elapsed);
     }
 
