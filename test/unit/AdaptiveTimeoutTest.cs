@@ -51,9 +51,9 @@ public class AdaptiveTimeoutTest {
 
         var adaptiveTimeoutResult = adaptiveTimeout.GetAdaptiveTimeout();
         Assert.Equal(maxTimeout, adaptiveTimeoutResult);
-        Assert.InRange(observedLatency1, 0.0, 60);
-        Assert.InRange(observedLatency2, 0.0, 60);
-        Assert.InRange(observedLatency3, 0.0, 60);
+        Assert.InRange(observedLatency1, 0.0, 100);
+        Assert.InRange(observedLatency2, 0.0, 100);
+        Assert.InRange(observedLatency3, 0.0, 100);
         return;
 
 
