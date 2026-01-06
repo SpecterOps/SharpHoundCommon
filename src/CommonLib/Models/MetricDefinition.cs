@@ -17,14 +17,15 @@ public readonly record struct LabelValues(string[] Values) {
         for (var i = 0; i < labelNames.Count; i++) {
             if (i > 0)
                 sb.Append(',');
-            
+
             sb.Append(labelNames[i])
-                .Append(':')
-                .Append(Values[i]);
+                .Append("=\"")
+                .Append(Values[i])
+                .Append('"');
         }
 
         if (!string.IsNullOrEmpty(additionalName) && !string.IsNullOrEmpty(additionalValue)) {
-            sb.Append(',').Append(additionalName).Append(':').Append(additionalValue);
+            sb.Append(',').Append(additionalName).Append("=\"").Append(additionalValue).Append('"');
         }
         
         sb.Append('}');

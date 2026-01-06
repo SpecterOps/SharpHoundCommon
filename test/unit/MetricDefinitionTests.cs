@@ -55,7 +55,32 @@ public class MetricDefinitionTests {
         var output = labelValues.ToDisplayString(labelNames);
         
         // assert
-        Assert.Equal("{name1:value1,name2:value2,name3:value3}", output);
+        Assert.Equal("{name1=\"value1\",name2=\"value2\",name3=\"value3\"}", output);
+    }
+
+    [Fact]
+    public void LabelValues_ToDisplayString_Additional_Values_Requires_Both() {
+        // setup
+        var labelValues = new LabelValues(["value1", "value2", "value3"]);
+        string[] labelNames = ["name1", "name2", "name3"];
+        
+        // act
+        var output1 = labelValues.ToDisplayString(labelNames, string.Empty);
+        var output2 = labelValues.ToDisplayString(labelNames, "");
+        var output3 = labelValues.ToDisplayString(labelNames, "additional_name");
+        var output4 = labelValues.ToDisplayString(labelNames, additionalValue: string.Empty);
+        var output5 = labelValues.ToDisplayString(labelNames, additionalValue: "");
+        var output6 = labelValues.ToDisplayString(labelNames, additionalValue: "additional_value");
+        var output7 = labelValues.ToDisplayString(labelNames, "additional_name", "additional_value");
+        
+        // assert
+        Assert.Equal("{name1=\"value1\",name2=\"value2\",name3=\"value3\"}", output1);
+        Assert.Equal("{name1=\"value1\",name2=\"value2\",name3=\"value3\"}", output2);
+        Assert.Equal("{name1=\"value1\",name2=\"value2\",name3=\"value3\"}", output3);
+        Assert.Equal("{name1=\"value1\",name2=\"value2\",name3=\"value3\"}", output4);
+        Assert.Equal("{name1=\"value1\",name2=\"value2\",name3=\"value3\"}", output5);
+        Assert.Equal("{name1=\"value1\",name2=\"value2\",name3=\"value3\"}", output6);
+        Assert.Equal("{name1=\"value1\",name2=\"value2\",name3=\"value3\",additional_name=\"additional_value\"}", output7);
     }
 
     [Fact]
