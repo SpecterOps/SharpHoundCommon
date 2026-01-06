@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using SharpHoundCommonLib;
@@ -102,7 +103,7 @@ public class AdaptiveTimeoutTest {
 
     [Fact]
     public async Task AdaptiveTimeout_GetAdaptiveTimeout_TimeSpikeSafetyValve() {
-        var observations = new List<double>();
+        var observations = new ConcurrentBag<double>();
         var tasks = new List<Task>();
         var maxTimeout = TimeSpan.FromSeconds(1);
         var minTimeout = TimeSpan.Zero;
@@ -129,8 +130,8 @@ public class AdaptiveTimeoutTest {
 
     [Fact]
     public async Task AdaptiveTimeout_GetAdaptiveTimeout_TimeSpikeSafetyValve_IgnoreHiccup() {
-        var completedObservations = new List<double>();
-        var timeoutObservations = new List<double>();
+        var completedObservations = new ConcurrentBag<double>();
+        var timeoutObservations = new ConcurrentBag<double>();
         var tasks = new List<Task>();
         var maxTimeout = TimeSpan.FromSeconds(1);
         var minTimeout = TimeSpan.Zero;
