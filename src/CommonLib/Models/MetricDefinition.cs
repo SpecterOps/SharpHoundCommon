@@ -5,7 +5,7 @@ using System.Text;
 namespace SharpHoundCommonLib.Models;
 
 public readonly record struct LabelValues(string[] Values) {
-    public string ToDisplayString(IReadOnlyList<string> labelNames) {
+    public string ToDisplayString(IReadOnlyList<string> labelNames, string additionalName = null, string additionalValue = null) {
         if (labelNames.Count == 0)
             return string.Empty;
         
@@ -21,6 +21,10 @@ public readonly record struct LabelValues(string[] Values) {
             sb.Append(labelNames[i])
                 .Append(':')
                 .Append(Values[i]);
+        }
+
+        if (!string.IsNullOrEmpty(additionalName) && !string.IsNullOrEmpty(additionalValue)) {
+            sb.Append(',').Append(additionalName).Append(':').Append(additionalValue);
         }
         
         sb.Append('}');

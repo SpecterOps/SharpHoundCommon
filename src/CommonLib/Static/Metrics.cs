@@ -1,3 +1,4 @@
+using System.Threading;
 using SharpHoundCommonLib.Interfaces;
 using SharpHoundCommonLib.Services;
 
@@ -13,7 +14,13 @@ public static class Metrics {
 }
 
 public static class LdapMetrics {
-    public static int InFlightRequests;
+    private static int _inFlightRequests;
+    
+    public static int InFlightRequest => _inFlightRequests;
+    
+    public static int IncrementInFlight() => Interlocked.Increment(ref _inFlightRequests);
+    public static int DecrementInFlight() => Interlocked.Decrement(ref _inFlightRequests);
+    public static void ResetInFlight() => Interlocked.Exchange(ref _inFlightRequests, 0);
 }
 
 

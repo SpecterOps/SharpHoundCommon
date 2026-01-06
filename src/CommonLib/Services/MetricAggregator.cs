@@ -41,6 +41,7 @@ public sealed class CumulativeHistogramAggregator(double[] bounds) : MetricAggre
     private readonly long[] _bucketCounts = new long[bounds.Length + 1]; // Includes the Inf+ bucket
     private long _count;
     private double _sum;
+    private readonly object _lock = new();
 
     public override void Observe(double value) {
         // this along with the following line, finds the correct bucket the value should be placed in.
@@ -49,13 +50,18 @@ public sealed class CumulativeHistogramAggregator(double[] bounds) : MetricAggre
         // that compliment if it is what is found.
         var idx = Array.BinarySearch(bounds, value);
         if (idx < 0) idx = ~idx;
-        _bucketCounts[idx]++;
-        _count++;
-        _sum += value;
+        lock (_lock) {
+            _bucketCounts[idx]++;
+            _count++;
+            _sum += value;
+        }
     }
     
     public override object Snapshot() => SnapshotHistogram();
 
-    public HistogramSnapshot SnapshotHistogram() =>
-        new(bounds, _bucketCounts, _count, _sum);
+    public HistogramSnapshot SnapshotHistogram() {
+        lock (_lock) {
+            return new HistogramSnapshot(bounds, (long[])_bucketCounts.Clone(), _count, _sum);
+        }
+    }
 }

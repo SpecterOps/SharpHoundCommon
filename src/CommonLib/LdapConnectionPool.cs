@@ -1096,7 +1096,7 @@ namespace SharpHoundCommonLib {
 
         private async Task<SearchResponse> SendRequestWithTimeout(LdapConnection connection, SearchRequest request, AdaptiveTimeout adaptiveTimeout) {
             // Prerequest metrics
-            var concurrentRequests = Interlocked.Increment(ref LdapMetrics.InFlightRequests);
+            var concurrentRequests = LdapMetrics.IncrementInFlight();
             _metric.Observe(LdapMetricDefinitions.ConcurrentRequests, concurrentRequests, 
                 new LabelValues([nameof(LdapConnectionPool), _poolIdentifier]));
             
@@ -1107,7 +1107,7 @@ namespace SharpHoundCommonLib {
             var result = await adaptiveTimeout.ExecuteWithTimeout((_) => connection.SendRequestAsync(request, timeoutWithPadding), latencyObservation: LatencyObservation);
             
             // Postrequest metrics
-            concurrentRequests = Interlocked.Decrement(ref LdapMetrics.InFlightRequests);
+            concurrentRequests = LdapMetrics.DecrementInFlight();
             _metric.Observe(LdapMetricDefinitions.ConcurrentRequests, concurrentRequests,
                 new LabelValues([nameof(LdapConnectionPool), _poolIdentifier]));
             _metric.Observe(LdapMetricDefinitions.RequestsTotal, 1,

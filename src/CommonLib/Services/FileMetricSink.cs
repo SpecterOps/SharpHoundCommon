@@ -89,6 +89,7 @@ public sealed class FileMetricSink(
     }
     
     public void Dispose() {
+        _textWriter.Flush();
         _textWriter.Dispose();
     }
 }

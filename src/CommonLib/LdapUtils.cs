@@ -1142,7 +1142,7 @@ namespace SharpHoundCommonLib {
             _connectionPool = new ConnectionPoolManager(_ldapConfig, scanner: _portScanner);
             
             // Metrics
-            LdapMetrics.InFlightRequests = 0;
+            LdapMetrics.ResetInFlight();
         }
 
         private IDirectoryObject CreateDirectoryEntry(string path) {

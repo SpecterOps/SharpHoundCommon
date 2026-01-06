@@ -47,7 +47,7 @@ public class MetricAggregatorTests(ITestOutputHelper output) {
         
         // assert
         if (expectedSnapshot is HistogramSnapshot ehs && snapshot is HistogramSnapshot ahs) {
-            Assert.Equal(ehs.TotalCount, ehs.TotalCount);
+            Assert.Equal(ehs.TotalCount, ahs.TotalCount);
             Assert.Equal(ehs.Sum, ahs.Sum);
             Assert.Equal(ehs.Bounds, ahs.Bounds);
             Assert.Equal(ehs.Counts, ahs.Counts);
