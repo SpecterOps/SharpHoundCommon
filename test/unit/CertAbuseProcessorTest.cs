@@ -652,30 +652,32 @@ namespace CommonLibTest
                 new byte[] 
                     {
                         2, 0, 0, 0, //sid count
-                        1, 0, 0, 0, 0, 0, 0, 0, //target sid S-1-0
-                        1, 0, 0, 0, 0, 0, 0, 1  //target sid S-1-1
+                        1, 0, 0, 0, 0, 0, 0, 1, //target sid S-1-1
+                        1, 0, 0, 0, 0, 0, 0, 3  //target sid S-1-3
                     }
             );
             var sid = new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null);
             
-            _mockLdapUtils.Setup(x => x.ResolveIDAndType("S-1-0", It.IsAny<string>()))
-                .ReturnsAsync((true, new TypedPrincipal("S-1-0", Label.User)));
             _mockLdapUtils.Setup(x => x.ResolveIDAndType("S-1-1", It.IsAny<string>()))
                 .ReturnsAsync((true, new TypedPrincipal("S-1-1", Label.User)));
+            _mockLdapUtils.Setup(x => x.ResolveIDAndType("S-1-3", It.IsAny<string>()))
+                .ReturnsAsync((true, new TypedPrincipal("S-1-3", Label.User)));
             
             var result = await _certAbuseProcessor.CreateEnrollmentAgentRestriction(emptyOpaqueAce, nameof(Label.User), DomainName, false, TargetDomainSid, sid);
             
             //Validate result
             Assert.True(result.success);
-            // Assert.Contains("S-1-0", result.restriction.Targets);
             Assert.True(result.restriction.AllTemplates);
             Assert.Null(result.restriction.Template);
+            Assert.Equal(2, result.restriction.Targets.Length);
+            Assert.Contains(result.restriction.Targets, t => t.ObjectIdentifier == "S-1-1");
+            Assert.Contains(result.restriction.Targets, t => t.ObjectIdentifier == "S-1-3");
         }
         
         [WindowsOnlyFact]
-        public async Task CertAbuseProcessor_CreateEnrollmentAgentRestriction_ReturnsTemplate() {
-            var expectedPrincipalType = Label.Group;
-            var expectedPrincipalSID = "S-1-5-21-3130019616-2776909439-2417379446-512";
+        public async Task CertAbuseProcessor_CreateEnrollmentAgentRestriction_WithCanonicalName_ReturnsTemplate() {
+            var expectedPrincipalType = Label.CertTemplate;
+            var templateOID = "E4B7F0B1-27E5-4C0F-A5C9-641A67171D05";
             
             var emptyOpaqueAce = new CommonAce(
                 AceFlags.None,
@@ -692,8 +694,43 @@ namespace CommonLibTest
             );
             var sid = new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null);
             
-            _mockLdapUtils.Setup(x => x.ResolveCertTemplateByProperty(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
-                .ReturnsAsync((true, new TypedPrincipal(expectedPrincipalSID, expectedPrincipalType)));
+            _mockLdapUtils.Setup(x => x.ResolveCertTemplateByProperty(It.IsAny<string>(), LDAPProperties.CanonicalName, It.IsAny<string>()))
+                .ReturnsAsync((true, new TypedPrincipal(templateOID, expectedPrincipalType)));
+            
+            var result = await _certAbuseProcessor.CreateEnrollmentAgentRestriction(emptyOpaqueAce, TargetName, DomainName, false, TargetDomainSid, sid);
+            
+            Assert.True(result.success);
+            Assert.False(result.restriction.AllTemplates);
+            Assert.NotNull(result.restriction.Template);
+            _mockLdapUtils.Verify(
+                x => x.ResolveCertTemplateByProperty(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()),
+                Times.Once);
+        }
+        
+        [WindowsOnlyFact]
+        public async Task CertAbuseProcessor_CreateEnrollmentAgentRestriction_WithCertTemplateOID_ReturnsTemplate() {
+            var expectedPrincipalType = Label.CertTemplate;
+            var templateOID = "E4B7F0B1-27E5-4C0F-A5C9-641A67171D05";
+            
+            var emptyOpaqueAce = new CommonAce(
+                AceFlags.None,
+                AceQualifier.AccessAllowed,
+                0x0000,
+                new SecurityIdentifier(WellKnownSidType.BuiltinAdministratorsSid, null),
+                true,
+                new byte[]
+                {
+                    1, 0, 0, 0, //sid count
+                    1, 0, 0, 0, 0, 0, 0, 0, //target sid
+                    77, 0, 97, 0, 99, 0, 104, 0, 105, 0, 110, 0, 101, 0, 0, 0 //Computer Template
+                }
+            );
+            var sid = new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null);
+            
+            _mockLdapUtils.Setup(x => x.ResolveCertTemplateByProperty(It.IsAny<string>(), LDAPProperties.CanonicalName, It.IsAny<string>()))
+                .ReturnsAsync((false, null));
+            _mockLdapUtils.Setup(x => x.ResolveCertTemplateByProperty(It.IsAny<string>(), LDAPProperties.CertTemplateOID, It.IsAny<string>()))
+                .ReturnsAsync((true, new TypedPrincipal(templateOID, expectedPrincipalType)));
             
             var result = await _certAbuseProcessor.CreateEnrollmentAgentRestriction(emptyOpaqueAce, TargetName, DomainName, false, TargetDomainSid, sid);
             
@@ -701,6 +738,9 @@ namespace CommonLibTest
             Assert.True(result.success);
             Assert.False(result.restriction.AllTemplates);
             Assert.NotNull(result.restriction.Template);
+            _mockLdapUtils.Verify(
+                x => x.ResolveCertTemplateByProperty(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()),
+                Times.Exactly(2));
         }
     }
 }
