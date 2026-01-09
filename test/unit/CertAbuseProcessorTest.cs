@@ -4,6 +4,7 @@ using System.Security.AccessControl;
 using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
+using CommonLibTest.CollectionDefinitions;
 using Moq;
 using SharpHoundCommonLib;
 using SharpHoundCommonLib.Processors;
@@ -15,6 +16,7 @@ using SharpHoundRPC.Wrappers;
 
 namespace CommonLibTest 
 {
+    [Collection(nameof(CacheTestCollectionDefinition))]
     public class CertAbuseProcessorTest
     {
         private readonly Mock<ILdapUtils> _mockLdapUtils;
@@ -507,6 +509,7 @@ namespace CommonLibTest
             var result = _certAbuseProcessor.OpenSamServer(TargetName);
             
             Assert.True(result.IsFailed);
+            Assert.Null(result.Value);
         }
         
         [Fact]
@@ -527,9 +530,10 @@ namespace CommonLibTest
             var result = await _certAbuseProcessor.GetMachineSid(TargetName, TargetDomainSid);
             
             Assert.Equal(TargetDomainSid, result.Value);
+            Assert.Null(_receivedCompStatus);
         }
         
-        [WindowsOnlyFact]
+        [Fact]
         public async Task CertAbuseProcessor_GetMachineSid_OpenSAMFailure_ReturnsNull() {
             var error = "Connection Failed";
             _mockSAMServerAccessor.Setup(x => x.OpenServer(It.IsAny<string>(), It.IsAny<SAMEnums.SamAccessMasks>()))
@@ -588,6 +592,115 @@ namespace CommonLibTest
             Assert.Equal(nameof(_certAbuseProcessor.GetMachineSid), _receivedCompStatus.Task);
             Assert.Equal(ComputerStatus.Success, _receivedCompStatus.Status);
             Assert.Equal(TargetDomainSid, _receivedCompStatus.ObjectId);
+        }
+        
+        [WindowsOnlyFact]
+        public async Task CertAbuseProcessor_CreateEnrollmentAgentRestriction_NullOpaque_ReturnsFalse() {
+            var nullOpaqueAce = new CommonAce(
+                AceFlags.None,
+                AceQualifier.AccessAllowed,
+                0x0000,
+                new SecurityIdentifier(WellKnownSidType.BuiltinAdministratorsSid, null),
+                false,
+                null
+            );
+            var sid = new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null);
+            
+            var result = await _certAbuseProcessor.CreateEnrollmentAgentRestriction(nullOpaqueAce, TargetName, DomainName, false, TargetDomainSid, sid);
+            
+            //Validate result
+            Assert.False(result.success);
+            Assert.Null(result.restriction);
+            _mockLdapUtils.VerifyNoOtherCalls();
+        }
+        
+        [WindowsOnlyFact]
+        public async Task CertAbuseProcessor_CreateEnrollmentAgentRestriction_UnresolvedTemplate_ReturnsFalse() {
+            var emptyOpaqueAce = new CommonAce(
+                AceFlags.None,
+                AceQualifier.AccessAllowed,
+                0x0000,
+                new SecurityIdentifier(WellKnownSidType.BuiltinAdministratorsSid, null),
+                true,
+                new byte[]
+                {
+                    1, 0, 0, 0, //sid count
+                    1, 0, 0, 0, 0, 0, 0, 0, //target sid
+                    0, 0, 0, 0 //template
+                }
+            );
+            var sid = new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null);
+            
+            _mockLdapUtils.Setup(x => x.ResolveCertTemplateByProperty(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync((false, null));
+            
+            var result = await _certAbuseProcessor.CreateEnrollmentAgentRestriction(emptyOpaqueAce, TargetName, DomainName, false, TargetDomainSid, sid);
+            
+            //Validate result
+            Assert.False(result.success);
+            Assert.Null(result.restriction);
+        }
+        
+        [WindowsOnlyFact]
+        public async Task CertAbuseProcessor_CreateEnrollmentAgentRestriction_NoTemplate_ReturnsAllTemplates() {
+            var emptyOpaqueAce = new CommonAce(
+                AceFlags.None,
+                AceQualifier.AccessAllowed,
+                0x0000,
+                new SecurityIdentifier(WellKnownSidType.BuiltinAdministratorsSid, null),
+                true,
+                new byte[] 
+                    {
+                        2, 0, 0, 0, //sid count
+                        1, 0, 0, 0, 0, 0, 0, 0, //target sid S-1-0
+                        1, 0, 0, 0, 0, 0, 0, 1  //target sid S-1-1
+                    }
+            );
+            var sid = new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null);
+            
+            _mockLdapUtils.Setup(x => x.ResolveIDAndType("S-1-0", It.IsAny<string>()))
+                .ReturnsAsync((true, new TypedPrincipal("S-1-0", Label.User)));
+            _mockLdapUtils.Setup(x => x.ResolveIDAndType("S-1-1", It.IsAny<string>()))
+                .ReturnsAsync((true, new TypedPrincipal("S-1-1", Label.User)));
+            
+            var result = await _certAbuseProcessor.CreateEnrollmentAgentRestriction(emptyOpaqueAce, nameof(Label.User), DomainName, false, TargetDomainSid, sid);
+            
+            //Validate result
+            Assert.True(result.success);
+            // Assert.Contains("S-1-0", result.restriction.Targets);
+            Assert.True(result.restriction.AllTemplates);
+            Assert.Null(result.restriction.Template);
+        }
+        
+        [WindowsOnlyFact]
+        public async Task CertAbuseProcessor_CreateEnrollmentAgentRestriction_ReturnsTemplate() {
+            var expectedPrincipalType = Label.Group;
+            var expectedPrincipalSID = "S-1-5-21-3130019616-2776909439-2417379446-512";
+            
+            var emptyOpaqueAce = new CommonAce(
+                AceFlags.None,
+                AceQualifier.AccessAllowed,
+                0x0000,
+                new SecurityIdentifier(WellKnownSidType.BuiltinAdministratorsSid, null),
+                true,
+                new byte[]
+                {
+                    1, 0, 0, 0, //sid count
+                    1, 0, 0, 0, 0, 0, 0, 0, //target sid
+                    77, 0, 97, 0, 99, 0, 104, 0, 105, 0, 110, 0, 101, 0, 0, 0 //Computer Template
+                }
+            );
+            var sid = new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null);
+            
+            _mockLdapUtils.Setup(x => x.ResolveCertTemplateByProperty(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync((true, new TypedPrincipal(expectedPrincipalSID, expectedPrincipalType)));
+            
+            var result = await _certAbuseProcessor.CreateEnrollmentAgentRestriction(emptyOpaqueAce, TargetName, DomainName, false, TargetDomainSid, sid);
+            
+            //Validate result
+            Assert.True(result.success);
+            Assert.False(result.restriction.AllTemplates);
+            Assert.NotNull(result.restriction.Template);
         }
     }
 }

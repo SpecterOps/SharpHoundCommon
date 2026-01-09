@@ -466,26 +466,28 @@ namespace SharpHoundCommonLib.Processors
             return machineSid;
         }
 
-        private async Task<(bool success, EnrollmentAgentRestriction restriction)> CreateEnrollmentAgentRestriction(QualifiedAce ace, string computerDomain, string computerName, bool isDomainController, string computerObjectId, SecurityIdentifier machineSid) {
+        internal async Task<(bool success, EnrollmentAgentRestriction restriction)> CreateEnrollmentAgentRestriction(QualifiedAce ace, string computerDomain, string computerName, bool isDomainController, string computerObjectId, SecurityIdentifier machineSid) 
+        {
+            var opaque = ace.GetOpaque();
+            
+            if(opaque is null)
+                return (false, default);
+            
             var targets = new List<TypedPrincipal>();
             var index = 0;
 
             var accessType = ace.AceType.ToString();
             var agent = await GetRegistryPrincipal(ace.SecurityIdentifier, computerDomain, computerName, isDomainController,
                 computerObjectId, machineSid);
-
-            var opaque = ace.GetOpaque();
-            
-            if(opaque is null)
-                return (false, default);
             
             var sidCount = BitConverter.ToUInt32(opaque, 0);
             index += 4;
 
             for (var i = 0; i < sidCount; i++) {
                 var sid = new SecurityIdentifier(opaque, index);
-                if (await GetRegistryPrincipal(sid, computerDomain, computerName, isDomainController, computerObjectId,
-                        machineSid) is (true, var regPrincipal)) {
+                if (await GetRegistryPrincipal(sid, computerDomain, computerName, isDomainController, computerObjectId, machineSid)
+                    is (true, var regPrincipal))
+                {
                     targets.Add(regPrincipal);
                 }
 
@@ -494,31 +496,41 @@ namespace SharpHoundCommonLib.Processors
 
             var finalTargets = targets.ToArray();
             var allTemplates = index >= opaque.Length;
-            if (index < opaque.Length) {
-                var template = Encoding.Unicode.GetString(opaque, index, opaque.Length - index - 2).Replace("\u0000", string.Empty);
-                if (await _utils.ResolveCertTemplateByProperty(Encoder.LdapFilterEncode(template), LDAPProperties.CanonicalName, computerDomain) is (true, var resolvedTemplate)) {
-                    return (true, new EnrollmentAgentRestriction {
-                        Template = resolvedTemplate,
-                        Agent = agent.Principal,
-                        AllTemplates = allTemplates,
-                        AccessType = accessType,
-                        Targets = finalTargets
-                    });
-                }
-
-                if (await _utils.ResolveCertTemplateByProperty(
-                        Encoder.LdapFilterEncode(template), LDAPProperties.CertTemplateOID, computerDomain) is
-                            (true, var resolvedOidTemplate)) {
-                    return (true, new EnrollmentAgentRestriction {
-                        Template = resolvedOidTemplate,
-                        Agent = agent.Principal,
-                        AllTemplates = allTemplates,
-                        AccessType = accessType,
-                        Targets = finalTargets
-                    });
-                }
+            
+            if (allTemplates) {
+                return (true, new EnrollmentAgentRestriction {
+                    Agent = agent.Principal,
+                    AllTemplates = allTemplates,
+                    AccessType = accessType,
+                    Targets = finalTargets
+                });
+            }
+            
+            var template = Encoding.Unicode.GetString(opaque, index, opaque.Length - index - 2).Replace("\u0000", string.Empty);
+            if (await _utils.ResolveCertTemplateByProperty(Encoder.LdapFilterEncode(template), LDAPProperties.CanonicalName, computerDomain)
+                is (true, var resolvedTemplate)) 
+            {
+                return (true, new EnrollmentAgentRestriction {
+                    Template = resolvedTemplate,
+                    Agent = agent.Principal,
+                    AllTemplates = allTemplates,
+                    AccessType = accessType,
+                    Targets = finalTargets
+                });
             }
 
+            if (await _utils.ResolveCertTemplateByProperty(Encoder.LdapFilterEncode(template), LDAPProperties.CertTemplateOID, computerDomain)
+                is (true, var resolvedOidTemplate))
+            {
+                return (true, new EnrollmentAgentRestriction {
+                    Template = resolvedOidTemplate,
+                    Agent = agent.Principal,
+                    AllTemplates = allTemplates,
+                    AccessType = accessType,
+                    Targets = finalTargets
+                });
+            }
+            
             return (false, default);
         }
 
