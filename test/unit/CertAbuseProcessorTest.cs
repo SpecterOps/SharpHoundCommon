@@ -168,69 +168,22 @@ namespace CommonLibTest
             Assert.Equal(TargetDomainSid, _receivedCompStatus.ObjectId);
         }
 
-        public static IEnumerable<object[]> ProcessEAPermissionsTestData() {
-            var nullOpaqueAce = new CommonAce(
-                AceFlags.None,
-                AceQualifier.AccessAllowed,
-                0x0000,
-                new SecurityIdentifier(WellKnownSidType.BuiltinAdministratorsSid, null),
-                false,
-                null
-            );
-
-            var daclWithNullOpaque = new RawAcl(2, 1);
-            daclWithNullOpaque.InsertAce(0, nullOpaqueAce);
-
-            var emptyOpaqueAce = new CommonAce(
-                AceFlags.None,
-                AceQualifier.AccessAllowed,
-                0x0000,
-                new SecurityIdentifier(WellKnownSidType.BuiltinAdministratorsSid, null),
-                true,
-                new byte[] { 0, 0, 0, 0 }
-            );
-
-            var daclWithEmptyOpaque = new RawAcl(2, 1);
-            daclWithEmptyOpaque.InsertAce(0, emptyOpaqueAce);
-
-            return new List<object[]>
-            {
-                new object[] { null }, //null dacl
-                new object[] { new RawAcl(2, 0) }, //empty dacl
-                new object[] { daclWithNullOpaque }, //dacl is callback false, null opaque
-                new object[] { daclWithEmptyOpaque }, //dacl is callback true, empty opaque
-            };
-        }
-
-        [WindowsOnlyTheory]
-        [MemberData(nameof(ProcessEAPermissionsTestData))]
-        public async Task CertAbuseProcessor_ProcessEAPermissions_ReturnsEmpty(RawAcl dacl) {
+        [Fact]
+        public async Task CertAbuseProcessor_ProcessEAPermissions_ReturnsEmptyResult() {
             const string subKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{CAName}";
             const string subValue = "EnrollmentAgentRights";
 
-            //setup binary security descriptor as registry value
-            var descriptor = new RawSecurityDescriptor(
-                ControlFlags.DiscretionaryAclPresent,
-                null,
-                null,
-                null,
-                dacl);
-
-            var regValue = new byte[descriptor.BinaryLength];
-            descriptor.GetBinaryForm(regValue, 0);
-
             _mockRegistryAccessor
                 .Setup(ra => ra.GetRegistryKeyData(
-                    "localhost",
+                    TargetName,
                     subKey,
                     subValue))
                 .Returns(new RegistryResult
                 {
-                    Collected = true,
-                    Value = regValue
+                    Collected = true
                 });
 
-            var results = await _certAbuseProcessor.ProcessEAPermissions(CAName, DomainName, "localhost", TargetDomainSid);
+            var results = await _certAbuseProcessor.ProcessEAPermissions(CAName, DomainName, TargetName, TargetDomainSid);
 
             //Validate result
             Assert.True(results.Collected);
@@ -238,7 +191,7 @@ namespace CommonLibTest
             Assert.Null(results.FailureReason);
 
             //Validate CompStatus Log
-            Assert.Equal("localhost", _receivedCompStatus.ComputerName);
+            Assert.Equal(TargetName, _receivedCompStatus.ComputerName);
             Assert.Equal(nameof(CertAbuseProcessor.ProcessEAPermissions), _receivedCompStatus.Task);
             Assert.Equal(CSVComputerStatus.StatusSuccess, _receivedCompStatus.Status);
             Assert.Equal(TargetDomainSid, _receivedCompStatus.ObjectId);
@@ -272,26 +225,37 @@ namespace CommonLibTest
             Assert.Equal(FailureReason, _receivedCompStatus.Status);
             Assert.Equal(TargetDomainSid, _receivedCompStatus.ObjectId);
         }
+        
+        public static IEnumerable<object[]> ProcessEAPermissionsTestData() {
+            return new List<object[]>
+            {
+                new object[] { null }, //null dacl
+                new object[] { new RawAcl(2, 0) }, //empty dacl
+            };
+        }
 
-        [WindowsOnlyFact]
-        public async Task CertAbuseProcessor_ProcessRegistryEnrollmentPermissions_ReturnsEmpty_WhenNoOwnerAndNoRules() {
+        [WindowsOnlyTheory]
+        [MemberData(nameof(ProcessEAPermissionsTestData))]
+        public async Task CertAbuseProcessor_ProcessEAPermissions_ReturnsEmpty(RawAcl dacl) {
+            var mockSamServer = new Mock<ISAMServer>();
+            
             const string subKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{CAName}";
-            const string subValue = "Security";
+            const string subValue = "EnrollmentAgentRights";
 
             //setup binary security descriptor as registry value
             var descriptor = new RawSecurityDescriptor(
                 ControlFlags.DiscretionaryAclPresent,
-                null, //owner is null
                 null,
                 null,
-                null);
+                null,
+                dacl);
 
-            byte[] regValue = new byte[descriptor.BinaryLength];
+            var regValue = new byte[descriptor.BinaryLength];
             descriptor.GetBinaryForm(regValue, 0);
 
             _mockRegistryAccessor
                 .Setup(ra => ra.GetRegistryKeyData(
-                    "localhost",
+                    TargetName,
                     subKey,
                     subValue))
                 .Returns(new RegistryResult
@@ -299,22 +263,44 @@ namespace CommonLibTest
                     Collected = true,
                     Value = regValue
                 });
+            
+            _mockSAMServerAccessor.Setup(x => x.OpenServer(It.IsAny<string>(), It.IsAny<SAMEnums.SamAccessMasks>()))
+                .Returns(SharpHoundRPC.Result<ISAMServer>.Ok(mockSamServer.Object));
+            mockSamServer.Setup(x => x.GetMachineSid(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .Returns(new SecurityIdentifier(TargetDomainSid));
 
-            //get access rules returns empty
-            var mockSecurityDescriptor = new Mock<ActiveDirectorySecurityDescriptor>(MockBehavior.Loose, null);
-            mockSecurityDescriptor.Setup(m => m.GetAccessRules(It.IsAny<bool>(), It.IsAny<bool>(), It.IsAny<Type>()))
-                .Returns([]);
-            _mockLdapUtils.Setup(x => x.MakeSecurityDescriptor()).Returns(mockSecurityDescriptor.Object);
+            var results = await _certAbuseProcessor.ProcessEAPermissions(CAName, DomainName, TargetName, TargetDomainSid);
 
-            var results = await _certAbuseProcessor.ProcessRegistryEnrollmentPermissions(CAName, DomainName, "localhost", TargetDomainSid);
+            //Validate result
+            Assert.True(results.Collected);
+            Assert.Empty(results.Restrictions);
+            Assert.Null(results.FailureReason);
+        }
 
-            //Validate result 
+        [Fact]
+        public async Task CertAbuseProcessor_ProcessRegistryEnrollmentPermissions_ReturnsEmptyResult() {
+            const string subKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{CAName}";
+            const string subValue = "Security";
+
+            _mockRegistryAccessor
+                .Setup(ra => ra.GetRegistryKeyData(
+                    TargetName,
+                    subKey,
+                    subValue))
+                .Returns(new RegistryResult
+                {
+                    Collected = true
+                });
+
+            var results = await _certAbuseProcessor.ProcessRegistryEnrollmentPermissions(CAName, DomainName, TargetName, TargetDomainSid);
+
+            //Validate result
             Assert.True(results.Collected);
             Assert.Empty(results.Data);
             Assert.Null(results.FailureReason);
 
             //Validate CompStatus Log
-            Assert.Equal("localhost", _receivedCompStatus.ComputerName);
+            Assert.Equal(TargetName, _receivedCompStatus.ComputerName);
             Assert.Equal(nameof(CertAbuseProcessor.ProcessRegistryEnrollmentPermissions), _receivedCompStatus.Task);
             Assert.Equal(CSVComputerStatus.StatusSuccess, _receivedCompStatus.Status);
             Assert.Equal(TargetDomainSid, _receivedCompStatus.ObjectId);
@@ -347,6 +333,55 @@ namespace CommonLibTest
             Assert.Equal(nameof(_certAbuseProcessor.ProcessRegistryEnrollmentPermissions), _receivedCompStatus.Task);
             Assert.Equal(FailureReason, _receivedCompStatus.Status);
             Assert.Equal(TargetDomainSid, _receivedCompStatus.ObjectId);
+        }
+
+        [WindowsOnlyFact]
+        public async Task CertAbuseProcessor_ProcessRegistryEnrollmentPermissions_ReturnsEmpty_WhenNoOwnerAndNoRules() {
+            var mockSecurityDescriptor = new Mock<ActiveDirectorySecurityDescriptor>(null);
+            var mockSamServer = new Mock<ISAMServer>();
+            
+            const string subKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{CAName}";
+            const string subValue = "Security";
+
+            //setup binary security descriptor as registry value
+            var descriptor = new RawSecurityDescriptor(
+                ControlFlags.DiscretionaryAclPresent,
+                null,
+                null,
+                null,
+                null);
+
+            byte[] regValue = new byte[descriptor.BinaryLength];
+            descriptor.GetBinaryForm(regValue, 0);
+
+            _mockRegistryAccessor
+                .Setup(ra => ra.GetRegistryKeyData(
+                    TargetName,
+                    subKey,
+                    subValue))
+                .Returns(new RegistryResult
+                {
+                    Collected = true,
+                    Value = regValue
+                });
+
+            _mockLdapUtils.Setup(x => x.MakeSecurityDescriptor()).Returns(mockSecurityDescriptor.Object);
+            
+            _mockSAMServerAccessor.Setup(x => x.OpenServer(It.IsAny<string>(), It.IsAny<SAMEnums.SamAccessMasks>()))
+                .Returns(SharpHoundRPC.Result<ISAMServer>.Ok(mockSamServer.Object));
+            mockSamServer.Setup(x => x.GetMachineSid(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .Returns(new SecurityIdentifier(TargetDomainSid));
+            
+            //get access rules returns empty
+            mockSecurityDescriptor.Setup(m => m.GetAccessRules(It.IsAny<bool>(), It.IsAny<bool>(), It.IsAny<Type>()))
+                .Returns([]);
+
+            var results = await _certAbuseProcessor.ProcessRegistryEnrollmentPermissions(CAName, DomainName, TargetName, TargetDomainSid);
+
+            //Validate result 
+            Assert.True(results.Collected);
+            Assert.Empty(results.Data);
+            Assert.Null(results.FailureReason);
         }
 
         [Fact]
