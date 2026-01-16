@@ -19,16 +19,18 @@ namespace SharpHoundCommonLib.Processors
         private readonly AdaptiveTimeout _getMachineSidAdaptiveTimeout;
         private readonly AdaptiveTimeout _openSamServerAdaptiveTimeout;
         private readonly IRegistryAccessor _registryAccessor;
+        private readonly ISAMServerAccessor _samServerAccessor;
         
         public delegate Task ComputerStatusDelegate(CSVComputerStatus status);
         public event ComputerStatusDelegate ComputerStatusEvent;
 
-        public CertAbuseProcessor(ILdapUtils utils, IRegistryAccessor registryAccessor, ILogger log = null) {
+        public CertAbuseProcessor(ILdapUtils utils, IRegistryAccessor registryAccessor, ISAMServerAccessor samServerAccessor, ILogger log = null) {
             _utils = utils;
             _registryAccessor = registryAccessor;
+            _samServerAccessor = samServerAccessor;
             _log = log ?? Logging.LogProvider.CreateLogger("CAProc");
             _getMachineSidAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ISAMServer.GetMachineSid)));
-            _openSamServerAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(SAMServer.OpenServer)));
+            _openSamServerAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ISAMServerAccessor.OpenServer)));
         }
 
         /// <summary>
@@ -407,11 +409,11 @@ namespace SharpHoundCommonLib.Processors
             return await _utils.ResolveIDAndType(sid.Value, computerDomain);
         }
 
-        private async Task<SecurityIdentifier> GetMachineSid(string computerName, string computerObjectId)
+        internal async Task<SecurityIdentifier> GetMachineSid(string computerName, string computerObjectId)
         {
             SecurityIdentifier machineSid = null;
 
-            //Try to get the machine sid for the computer if its not already cached
+            //Try to get the machine sid for the computer if it's not already cached
             if (!Cache.GetMachineSid(computerObjectId, out var tempMachineSid))
             {
                 // Open a handle to the server
@@ -421,7 +423,7 @@ namespace SharpHoundCommonLib.Processors
                     _log.LogTrace("OpenServer failed on {ComputerName}: {Error}", computerName, openServerResult.SError);
                     await SendComputerStatus(new CSVComputerStatus
                     {
-                        Task = "SamConnect",
+                        Task = nameof(OpenSamServer),
                         ComputerName = computerName,
                         Status = openServerResult.SError,
                         ObjectId = computerObjectId,
@@ -438,14 +440,21 @@ namespace SharpHoundCommonLib.Processors
                     {
                         Status = getMachineSidResult.SError,
                         ComputerName = computerName,
-                        Task = "GetMachineSid",
+                        Task = nameof(GetMachineSid),
                         ObjectId = computerObjectId,
                     });
-                    //If we can't get a machine sid, we wont be able to make local principals with unique object ids, or differentiate local/domain objects
+                    //If we can't get a machine sid, we won't be able to make local principals with unique object ids, or differentiate local/domain objects
                     _log.LogWarning("Unable to get machineSid for {Computer}: {Status}", computerName, getMachineSidResult.SError);
                     return null;
                 }
 
+                await SendComputerStatus(new CSVComputerStatus {
+                    Status = CSVComputerStatus.StatusSuccess,
+                    Task = nameof(GetMachineSid),
+                    ComputerName = computerName,
+                    ObjectId = computerObjectId
+                });
+                
                 machineSid = getMachineSidResult.Value;
                 Cache.AddMachineSid(computerObjectId, machineSid.Value);
             }
@@ -457,26 +466,28 @@ namespace SharpHoundCommonLib.Processors
             return machineSid;
         }
 
-        private async Task<(bool success, EnrollmentAgentRestriction restriction)> CreateEnrollmentAgentRestriction(QualifiedAce ace, string computerDomain, string computerName, bool isDomainController, string computerObjectId, SecurityIdentifier machineSid) {
+        internal async Task<(bool success, EnrollmentAgentRestriction restriction)> CreateEnrollmentAgentRestriction(QualifiedAce ace, string computerDomain, string computerName, bool isDomainController, string computerObjectId, SecurityIdentifier machineSid) 
+        {
+            var opaque = ace.GetOpaque();
+            
+            if(opaque is null)
+                return (false, default);
+            
             var targets = new List<TypedPrincipal>();
             var index = 0;
 
             var accessType = ace.AceType.ToString();
             var agent = await GetRegistryPrincipal(ace.SecurityIdentifier, computerDomain, computerName, isDomainController,
                 computerObjectId, machineSid);
-
-            var opaque = ace.GetOpaque();
-            
-            if(opaque is null)
-                return (false, default);
             
             var sidCount = BitConverter.ToUInt32(opaque, 0);
             index += 4;
 
             for (var i = 0; i < sidCount; i++) {
                 var sid = new SecurityIdentifier(opaque, index);
-                if (await GetRegistryPrincipal(sid, computerDomain, computerName, isDomainController, computerObjectId,
-                        machineSid) is (true, var regPrincipal)) {
+                if (await GetRegistryPrincipal(sid, computerDomain, computerName, isDomainController, computerObjectId, machineSid)
+                    is (true, var regPrincipal))
+                {
                     targets.Add(regPrincipal);
                 }
 
@@ -485,43 +496,47 @@ namespace SharpHoundCommonLib.Processors
 
             var finalTargets = targets.ToArray();
             var allTemplates = index >= opaque.Length;
-            if (index < opaque.Length) {
-                var template = Encoding.Unicode.GetString(opaque, index, opaque.Length - index - 2).Replace("\u0000", string.Empty);
-                if (await _utils.ResolveCertTemplateByProperty(Encoder.LdapFilterEncode(template), LDAPProperties.CanonicalName, computerDomain) is (true, var resolvedTemplate)) {
-                    return (true, new EnrollmentAgentRestriction {
-                        Template = resolvedTemplate,
-                        Agent = agent.Principal,
-                        AllTemplates = allTemplates,
-                        AccessType = accessType,
-                        Targets = finalTargets
-                    });
-                }
-
-                if (await _utils.ResolveCertTemplateByProperty(
-                        Encoder.LdapFilterEncode(template), LDAPProperties.CertTemplateOID, computerDomain) is
-                            (true, var resolvedOidTemplate)) {
-                    return (true, new EnrollmentAgentRestriction {
-                        Template = resolvedOidTemplate,
-                        Agent = agent.Principal,
-                        AllTemplates = allTemplates,
-                        AccessType = accessType,
-                        Targets = finalTargets
-                    });
-                }
+            
+            if (allTemplates) {
+                return (true, new EnrollmentAgentRestriction {
+                    Agent = agent.Principal,
+                    AllTemplates = allTemplates,
+                    AccessType = accessType,
+                    Targets = finalTargets
+                });
+            }
+            
+            var template = Encoding.Unicode.GetString(opaque, index, opaque.Length - index - 2).Replace("\u0000", string.Empty);
+            if (await _utils.ResolveCertTemplateByProperty(Encoder.LdapFilterEncode(template), LDAPProperties.CanonicalName, computerDomain)
+                is (true, var resolvedTemplate)) 
+            {
+                return (true, new EnrollmentAgentRestriction {
+                    Template = resolvedTemplate,
+                    Agent = agent.Principal,
+                    AllTemplates = allTemplates,
+                    AccessType = accessType,
+                    Targets = finalTargets
+                });
             }
 
+            if (await _utils.ResolveCertTemplateByProperty(Encoder.LdapFilterEncode(template), LDAPProperties.CertTemplateOID, computerDomain)
+                is (true, var resolvedOidTemplate))
+            {
+                return (true, new EnrollmentAgentRestriction {
+                    Template = resolvedOidTemplate,
+                    Agent = agent.Principal,
+                    AllTemplates = allTemplates,
+                    AccessType = accessType,
+                    Targets = finalTargets
+                });
+            }
+            
             return (false, default);
         }
 
         public virtual SharpHoundRPC.Result<ISAMServer> OpenSamServer(string computerName)
         {
-            var result = _openSamServerAdaptiveTimeout.ExecuteRPCWithTimeout((_) => SAMServer.OpenServer(computerName)).GetAwaiter().GetResult();
-            if (result.IsFailed)
-            {
-                return SharpHoundRPC.Result<ISAMServer>.Fail(result.SError);
-            }
-
-            return SharpHoundRPC.Result<ISAMServer>.Ok(result.Value);
+            return _openSamServerAdaptiveTimeout.ExecuteRPCWithTimeout((_) => _samServerAccessor.OpenServer(computerName)).GetAwaiter().GetResult();
         }
 
         private async Task SendComputerStatus(CSVComputerStatus status)
