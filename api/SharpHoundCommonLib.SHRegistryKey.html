@@ -139,23 +139,22 @@
   <div class="codewrapper">
     <pre><code class="lang-csharp hljs">public class SHRegistryKey : IRegistryKey, IDisposable</code></pre>
   </div>
-  <h3 id="methods">Methods
+  <h3 id="constructors">Constructors
   </h3>
   <span class="small pull-right mobile-hide">
     <span class="divider">|</span>
-    <a href="https://github.com/SpecterOps/SharpHoundCommon/new/25ca2228337a5d91fd2206e97fca33231708212c/apiSpec/new?filename=SharpHoundCommonLib_SHRegistryKey_Connect_Microsoft_Win32_RegistryHive_System_String_.md&amp;value=---%0Auid%3A%20SharpHoundCommonLib.SHRegistryKey.Connect(Microsoft.Win32.RegistryHive%2CSystem.String)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+    <a href="https://github.com/SpecterOps/SharpHoundCommon/new/7a01b9d57e80875a99b0dd58d567f4f7233f4c09/apiSpec/new?filename=SharpHoundCommonLib_SHRegistryKey__ctor_Microsoft_Win32_RegistryKey_.md&amp;value=---%0Auid%3A%20SharpHoundCommonLib.SHRegistryKey.%23ctor(Microsoft.Win32.RegistryKey)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
   </span>
   <span class="small pull-right mobile-hide">
-    <a href="https://github.com/SpecterOps/SharpHoundCommon/blob/25ca2228337a5d91fd2206e97fca33231708212c/src/CommonLib/IRegistryKey.cs/#L38">View Source</a>
+    <a href="https://github.com/SpecterOps/SharpHoundCommon/blob/7a01b9d57e80875a99b0dd58d567f4f7233f4c09/src/CommonLib/IRegistryKey.cs/#L13">View Source</a>
   </span>
-  <a id="SharpHoundCommonLib_SHRegistryKey_Connect_" data-uid="SharpHoundCommonLib.SHRegistryKey.Connect*"></a>
-  <h4 id="SharpHoundCommonLib_SHRegistryKey_Connect_Microsoft_Win32_RegistryHive_System_String_" data-uid="SharpHoundCommonLib.SHRegistryKey.Connect(Microsoft.Win32.RegistryHive,System.String)">Connect(RegistryHive, String)</h4>
-  <div class="markdown level1 summary"><p>Gets a handle to a remote registry.</p>
-</div>
+  <a id="SharpHoundCommonLib_SHRegistryKey__ctor_" data-uid="SharpHoundCommonLib.SHRegistryKey.#ctor*"></a>
+  <h4 id="SharpHoundCommonLib_SHRegistryKey__ctor_Microsoft_Win32_RegistryKey_" data-uid="SharpHoundCommonLib.SHRegistryKey.#ctor(Microsoft.Win32.RegistryKey)">SHRegistryKey(RegistryKey)</h4>
+  <div class="markdown level1 summary"></div>
   <div class="markdown level1 conceptual"></div>
   <h5 class="decalaration">Declaration</h5>
   <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">public static Task&lt;SHRegistryKey&gt; Connect(RegistryHive hive, string machineName)</code></pre>
+    <pre><code class="lang-csharp hljs">public SHRegistryKey(RegistryKey registryKey)</code></pre>
   </div>
   <h5 class="parameters">Parameters</h5>
   <table class="table table-bordered table-striped table-condensed">
@@ -168,73 +167,20 @@
     </thead>
     <tbody>
       <tr>
-        <td><span class="xref">Microsoft.Win32.RegistryHive</span></td>
-        <td><span class="parametername">hive</span></td>
-        <td></td>
-      </tr>
-      <tr>
-        <td><span class="xref">System.String</span></td>
-        <td><span class="parametername">machineName</span></td>
+        <td><span class="xref">Microsoft.Win32.RegistryKey</span></td>
+        <td><span class="parametername">registryKey</span></td>
         <td></td>
       </tr>
     </tbody>
   </table>
-  <h5 class="returns">Returns</h5>
-  <table class="table table-bordered table-striped table-condensed">
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><span class="xref">System.Threading.Tasks.Task</span>&lt;<a class="xref" href="SharpHoundCommonLib.SHRegistryKey.html">SHRegistryKey</a>&gt;</td>
-        <td></td>
-      </tr>
-    </tbody>
-  </table>
-  <h5 class="exceptions">Exceptions</h5>
-  <table class="table table-bordered table-striped table-condensed">
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Condition</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><span class="xref">System.TimeoutException</span></td>
-        <td></td>
-      </tr>
-      <tr>
-        <td><span class="xref">System.ArgumentException</span></td>
-        <td></td>
-      </tr>
-      <tr>
-        <td><span class="xref">System.IO.IOException</span></td>
-        <td></td>
-      </tr>
-      <tr>
-        <td><span class="xref">System.ArgumentNullException</span></td>
-        <td></td>
-      </tr>
-      <tr>
-        <td><span class="xref">System.Security.SecurityException</span></td>
-        <td></td>
-      </tr>
-      <tr>
-        <td><span class="xref">System.UnauthorizedAccessException</span></td>
-        <td></td>
-      </tr>
-    </tbody>
-  </table>
+  <h3 id="methods">Methods
+  </h3>
   <span class="small pull-right mobile-hide">
     <span class="divider">|</span>
-    <a href="https://github.com/SpecterOps/SharpHoundCommon/new/25ca2228337a5d91fd2206e97fca33231708212c/apiSpec/new?filename=SharpHoundCommonLib_SHRegistryKey_Dispose.md&amp;value=---%0Auid%3A%20SharpHoundCommonLib.SHRegistryKey.Dispose%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+    <a href="https://github.com/SpecterOps/SharpHoundCommon/new/7a01b9d57e80875a99b0dd58d567f4f7233f4c09/apiSpec/new?filename=SharpHoundCommonLib_SHRegistryKey_Dispose.md&amp;value=---%0Auid%3A%20SharpHoundCommonLib.SHRegistryKey.Dispose%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
   </span>
   <span class="small pull-right mobile-hide">
-    <a href="https://github.com/SpecterOps/SharpHoundCommon/blob/25ca2228337a5d91fd2206e97fca33231708212c/src/CommonLib/IRegistryKey.cs/#L45">View Source</a>
+    <a href="https://github.com/SpecterOps/SharpHoundCommon/blob/7a01b9d57e80875a99b0dd58d567f4f7233f4c09/src/CommonLib/IRegistryKey.cs/#L24">View Source</a>
   </span>
   <a id="SharpHoundCommonLib_SHRegistryKey_Dispose_" data-uid="SharpHoundCommonLib.SHRegistryKey.Dispose*"></a>
   <h4 id="SharpHoundCommonLib_SHRegistryKey_Dispose" data-uid="SharpHoundCommonLib.SHRegistryKey.Dispose">Dispose()</h4>
@@ -246,10 +192,10 @@
   </div>
   <span class="small pull-right mobile-hide">
     <span class="divider">|</span>
-    <a href="https://github.com/SpecterOps/SharpHoundCommon/new/25ca2228337a5d91fd2206e97fca33231708212c/apiSpec/new?filename=SharpHoundCommonLib_SHRegistryKey_GetSubKeyNames.md&amp;value=---%0Auid%3A%20SharpHoundCommonLib.SHRegistryKey.GetSubKeyNames%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+    <a href="https://github.com/SpecterOps/SharpHoundCommon/new/7a01b9d57e80875a99b0dd58d567f4f7233f4c09/apiSpec/new?filename=SharpHoundCommonLib_SHRegistryKey_GetSubKeyNames.md&amp;value=---%0Auid%3A%20SharpHoundCommonLib.SHRegistryKey.GetSubKeyNames%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
   </span>
   <span class="small pull-right mobile-hide">
-    <a href="https://github.com/SpecterOps/SharpHoundCommon/blob/25ca2228337a5d91fd2206e97fca33231708212c/src/CommonLib/IRegistryKey.cs/#L24">View Source</a>
+    <a href="https://github.com/SpecterOps/SharpHoundCommon/blob/7a01b9d57e80875a99b0dd58d567f4f7233f4c09/src/CommonLib/IRegistryKey.cs/#L22">View Source</a>
   </span>
   <a id="SharpHoundCommonLib_SHRegistryKey_GetSubKeyNames_" data-uid="SharpHoundCommonLib.SHRegistryKey.GetSubKeyNames*"></a>
   <h4 id="SharpHoundCommonLib_SHRegistryKey_GetSubKeyNames" data-uid="SharpHoundCommonLib.SHRegistryKey.GetSubKeyNames">GetSubKeyNames()</h4>
@@ -276,10 +222,10 @@
   </table>
   <span class="small pull-right mobile-hide">
     <span class="divider">|</span>
-    <a href="https://github.com/SpecterOps/SharpHoundCommon/new/25ca2228337a5d91fd2206e97fca33231708212c/apiSpec/new?filename=SharpHoundCommonLib_SHRegistryKey_GetValue_System_String_System_String_.md&amp;value=---%0Auid%3A%20SharpHoundCommonLib.SHRegistryKey.GetValue(System.String%2CSystem.String)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+    <a href="https://github.com/SpecterOps/SharpHoundCommon/new/7a01b9d57e80875a99b0dd58d567f4f7233f4c09/apiSpec/new?filename=SharpHoundCommonLib_SHRegistryKey_GetValue_System_String_System_String_.md&amp;value=---%0Auid%3A%20SharpHoundCommonLib.SHRegistryKey.GetValue(System.String%2CSystem.String)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
   </span>
   <span class="small pull-right mobile-hide">
-    <a href="https://github.com/SpecterOps/SharpHoundCommon/blob/25ca2228337a5d91fd2206e97fca33231708212c/src/CommonLib/IRegistryKey.cs/#L19">View Source</a>
+    <a href="https://github.com/SpecterOps/SharpHoundCommon/blob/7a01b9d57e80875a99b0dd58d567f4f7233f4c09/src/CommonLib/IRegistryKey.cs/#L17">View Source</a>
   </span>
   <a id="SharpHoundCommonLib_SHRegistryKey_GetValue_" data-uid="SharpHoundCommonLib.SHRegistryKey.GetValue*"></a>
   <h4 id="SharpHoundCommonLib_SHRegistryKey_GetValue_System_String_System_String_" data-uid="SharpHoundCommonLib.SHRegistryKey.GetValue(System.String,System.String)">GetValue(String, String)</h4>

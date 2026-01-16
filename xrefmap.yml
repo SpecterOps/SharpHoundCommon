@@ -3693,19 +3693,6 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.Helpers.DumpDirectoryObject
   nameWithType: Helpers.DumpDirectoryObject
-- uid: SharpHoundCommonLib.Helpers.GetRegistryKeyData(System.String,System.String,System.String,ILogger)
-  name: GetRegistryKeyData(String, String, String, ILogger)
-  href: api/SharpHoundCommonLib.Helpers.html#SharpHoundCommonLib_Helpers_GetRegistryKeyData_System_String_System_String_System_String_ILogger_
-  commentId: M:SharpHoundCommonLib.Helpers.GetRegistryKeyData(System.String,System.String,System.String,ILogger)
-  fullName: SharpHoundCommonLib.Helpers.GetRegistryKeyData(System.String, System.String, System.String, ILogger)
-  nameWithType: Helpers.GetRegistryKeyData(String, String, String, ILogger)
-- uid: SharpHoundCommonLib.Helpers.GetRegistryKeyData*
-  name: GetRegistryKeyData
-  href: api/SharpHoundCommonLib.Helpers.html#SharpHoundCommonLib_Helpers_GetRegistryKeyData_
-  commentId: Overload:SharpHoundCommonLib.Helpers.GetRegistryKeyData
-  isSpec: "True"
-  fullName: SharpHoundCommonLib.Helpers.GetRegistryKeyData
-  nameWithType: Helpers.GetRegistryKeyData
 - uid: SharpHoundCommonLib.Helpers.IsSidFiltered(System.String)
   name: IsSidFiltered(String)
   href: api/SharpHoundCommonLib.Helpers.html#SharpHoundCommonLib_Helpers_IsSidFiltered_System_String_
@@ -3719,19 +3706,6 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.Helpers.IsSidFiltered
   nameWithType: Helpers.IsSidFiltered
-- uid: SharpHoundCommonLib.Helpers.OpenRemoteRegistry(System.String)
-  name: OpenRemoteRegistry(String)
-  href: api/SharpHoundCommonLib.Helpers.html#SharpHoundCommonLib_Helpers_OpenRemoteRegistry_System_String_
-  commentId: M:SharpHoundCommonLib.Helpers.OpenRemoteRegistry(System.String)
-  fullName: SharpHoundCommonLib.Helpers.OpenRemoteRegistry(System.String)
-  nameWithType: Helpers.OpenRemoteRegistry(String)
-- uid: SharpHoundCommonLib.Helpers.OpenRemoteRegistry*
-  name: OpenRemoteRegistry
-  href: api/SharpHoundCommonLib.Helpers.html#SharpHoundCommonLib_Helpers_OpenRemoteRegistry_
-  commentId: Overload:SharpHoundCommonLib.Helpers.OpenRemoteRegistry
-  isSpec: "True"
-  fullName: SharpHoundCommonLib.Helpers.OpenRemoteRegistry
-  nameWithType: Helpers.OpenRemoteRegistry
 - uid: SharpHoundCommonLib.Helpers.RemoveDistinguishedNamePrefix(System.String)
   name: RemoveDistinguishedNamePrefix(String)
   href: api/SharpHoundCommonLib.Helpers.html#SharpHoundCommonLib_Helpers_RemoveDistinguishedNamePrefix_System_String_
@@ -4344,6 +4318,51 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.ILdapUtils.TestLdapConnection
   nameWithType: ILdapUtils.TestLdapConnection
+- uid: SharpHoundCommonLib.IRegistryAccessor
+  name: IRegistryAccessor
+  href: api/SharpHoundCommonLib.IRegistryAccessor.html
+  commentId: T:SharpHoundCommonLib.IRegistryAccessor
+  fullName: SharpHoundCommonLib.IRegistryAccessor
+  nameWithType: IRegistryAccessor
+- uid: SharpHoundCommonLib.IRegistryAccessor.Connect(Microsoft.Win32.RegistryHive,System.String)
+  name: Connect(RegistryHive, String)
+  href: api/SharpHoundCommonLib.IRegistryAccessor.html#SharpHoundCommonLib_IRegistryAccessor_Connect_Microsoft_Win32_RegistryHive_System_String_
+  commentId: M:SharpHoundCommonLib.IRegistryAccessor.Connect(Microsoft.Win32.RegistryHive,System.String)
+  fullName: SharpHoundCommonLib.IRegistryAccessor.Connect(Microsoft.Win32.RegistryHive, System.String)
+  nameWithType: IRegistryAccessor.Connect(RegistryHive, String)
+- uid: SharpHoundCommonLib.IRegistryAccessor.Connect*
+  name: Connect
+  href: api/SharpHoundCommonLib.IRegistryAccessor.html#SharpHoundCommonLib_IRegistryAccessor_Connect_
+  commentId: Overload:SharpHoundCommonLib.IRegistryAccessor.Connect
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.IRegistryAccessor.Connect
+  nameWithType: IRegistryAccessor.Connect
+- uid: SharpHoundCommonLib.IRegistryAccessor.GetRegistryKeyData(System.String,System.String,System.String)
+  name: GetRegistryKeyData(String, String, String)
+  href: api/SharpHoundCommonLib.IRegistryAccessor.html#SharpHoundCommonLib_IRegistryAccessor_GetRegistryKeyData_System_String_System_String_System_String_
+  commentId: M:SharpHoundCommonLib.IRegistryAccessor.GetRegistryKeyData(System.String,System.String,System.String)
+  fullName: SharpHoundCommonLib.IRegistryAccessor.GetRegistryKeyData(System.String, System.String, System.String)
+  nameWithType: IRegistryAccessor.GetRegistryKeyData(String, String, String)
+- uid: SharpHoundCommonLib.IRegistryAccessor.GetRegistryKeyData*
+  name: GetRegistryKeyData
+  href: api/SharpHoundCommonLib.IRegistryAccessor.html#SharpHoundCommonLib_IRegistryAccessor_GetRegistryKeyData_
+  commentId: Overload:SharpHoundCommonLib.IRegistryAccessor.GetRegistryKeyData
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.IRegistryAccessor.GetRegistryKeyData
+  nameWithType: IRegistryAccessor.GetRegistryKeyData
+- uid: SharpHoundCommonLib.IRegistryAccessor.OpenRemoteRegistry(System.String)
+  name: OpenRemoteRegistry(String)
+  href: api/SharpHoundCommonLib.IRegistryAccessor.html#SharpHoundCommonLib_IRegistryAccessor_OpenRemoteRegistry_System_String_
+  commentId: M:SharpHoundCommonLib.IRegistryAccessor.OpenRemoteRegistry(System.String)
+  fullName: SharpHoundCommonLib.IRegistryAccessor.OpenRemoteRegistry(System.String)
+  nameWithType: IRegistryAccessor.OpenRemoteRegistry(String)
+- uid: SharpHoundCommonLib.IRegistryAccessor.OpenRemoteRegistry*
+  name: OpenRemoteRegistry
+  href: api/SharpHoundCommonLib.IRegistryAccessor.html#SharpHoundCommonLib_IRegistryAccessor_OpenRemoteRegistry_
+  commentId: Overload:SharpHoundCommonLib.IRegistryAccessor.OpenRemoteRegistry
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.IRegistryAccessor.OpenRemoteRegistry
+  nameWithType: IRegistryAccessor.OpenRemoteRegistry
 - uid: SharpHoundCommonLib.IRegistryKey
   name: IRegistryKey
   href: api/SharpHoundCommonLib.IRegistryKey.html
@@ -6554,38 +6573,6 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.LdapUtils.TestLdapConnection
   nameWithType: LdapUtils.TestLdapConnection
-- uid: SharpHoundCommonLib.MockRegistryKey
-  name: MockRegistryKey
-  href: api/SharpHoundCommonLib.MockRegistryKey.html
-  commentId: T:SharpHoundCommonLib.MockRegistryKey
-  fullName: SharpHoundCommonLib.MockRegistryKey
-  nameWithType: MockRegistryKey
-- uid: SharpHoundCommonLib.MockRegistryKey.GetSubKeyNames
-  name: GetSubKeyNames()
-  href: api/SharpHoundCommonLib.MockRegistryKey.html#SharpHoundCommonLib_MockRegistryKey_GetSubKeyNames
-  commentId: M:SharpHoundCommonLib.MockRegistryKey.GetSubKeyNames
-  fullName: SharpHoundCommonLib.MockRegistryKey.GetSubKeyNames()
-  nameWithType: MockRegistryKey.GetSubKeyNames()
-- uid: SharpHoundCommonLib.MockRegistryKey.GetSubKeyNames*
-  name: GetSubKeyNames
-  href: api/SharpHoundCommonLib.MockRegistryKey.html#SharpHoundCommonLib_MockRegistryKey_GetSubKeyNames_
-  commentId: Overload:SharpHoundCommonLib.MockRegistryKey.GetSubKeyNames
-  isSpec: "True"
-  fullName: SharpHoundCommonLib.MockRegistryKey.GetSubKeyNames
-  nameWithType: MockRegistryKey.GetSubKeyNames
-- uid: SharpHoundCommonLib.MockRegistryKey.GetValue(System.String,System.String)
-  name: GetValue(String, String)
-  href: api/SharpHoundCommonLib.MockRegistryKey.html#SharpHoundCommonLib_MockRegistryKey_GetValue_System_String_System_String_
-  commentId: M:SharpHoundCommonLib.MockRegistryKey.GetValue(System.String,System.String)
-  fullName: SharpHoundCommonLib.MockRegistryKey.GetValue(System.String, System.String)
-  nameWithType: MockRegistryKey.GetValue(String, String)
-- uid: SharpHoundCommonLib.MockRegistryKey.GetValue*
-  name: GetValue
-  href: api/SharpHoundCommonLib.MockRegistryKey.html#SharpHoundCommonLib_MockRegistryKey_GetValue_
-  commentId: Overload:SharpHoundCommonLib.MockRegistryKey.GetValue
-  isSpec: "True"
-  fullName: SharpHoundCommonLib.MockRegistryKey.GetValue
-  nameWithType: MockRegistryKey.GetValue
 - uid: SharpHoundCommonLib.NativeMethods
   name: NativeMethods
   href: api/SharpHoundCommonLib.NativeMethods.html
@@ -9719,6 +9706,12 @@ references:
   commentId: F:SharpHoundCommonLib.Processors.ACEGuids.Enroll
   fullName: SharpHoundCommonLib.Processors.ACEGuids.Enroll
   nameWithType: ACEGuids.Enroll
+- uid: SharpHoundCommonLib.Processors.ACEGuids.MembershipPropertySet
+  name: MembershipPropertySet
+  href: api/SharpHoundCommonLib.Processors.ACEGuids.html#SharpHoundCommonLib_Processors_ACEGuids_MembershipPropertySet
+  commentId: F:SharpHoundCommonLib.Processors.ACEGuids.MembershipPropertySet
+  fullName: SharpHoundCommonLib.Processors.ACEGuids.MembershipPropertySet
+  nameWithType: ACEGuids.MembershipPropertySet
 - uid: SharpHoundCommonLib.Processors.ACEGuids.PKIEnrollmentFlag
   name: PKIEnrollmentFlag
   href: api/SharpHoundCommonLib.Processors.ACEGuids.html#SharpHoundCommonLib_Processors_ACEGuids_PKIEnrollmentFlag
@@ -9980,12 +9973,12 @@ references:
   commentId: T:SharpHoundCommonLib.Processors.CertAbuseProcessor
   fullName: SharpHoundCommonLib.Processors.CertAbuseProcessor
   nameWithType: CertAbuseProcessor
-- uid: SharpHoundCommonLib.Processors.CertAbuseProcessor.#ctor(SharpHoundCommonLib.ILdapUtils,ILogger)
-  name: CertAbuseProcessor(ILdapUtils, ILogger)
-  href: api/SharpHoundCommonLib.Processors.CertAbuseProcessor.html#SharpHoundCommonLib_Processors_CertAbuseProcessor__ctor_SharpHoundCommonLib_ILdapUtils_ILogger_
-  commentId: M:SharpHoundCommonLib.Processors.CertAbuseProcessor.#ctor(SharpHoundCommonLib.ILdapUtils,ILogger)
-  fullName: SharpHoundCommonLib.Processors.CertAbuseProcessor.CertAbuseProcessor(SharpHoundCommonLib.ILdapUtils, ILogger)
-  nameWithType: CertAbuseProcessor.CertAbuseProcessor(ILdapUtils, ILogger)
+- uid: SharpHoundCommonLib.Processors.CertAbuseProcessor.#ctor(SharpHoundCommonLib.ILdapUtils,SharpHoundCommonLib.IRegistryAccessor,SharpHoundRPC.Wrappers.ISAMServerAccessor,ILogger)
+  name: CertAbuseProcessor(ILdapUtils, IRegistryAccessor, ISAMServerAccessor, ILogger)
+  href: api/SharpHoundCommonLib.Processors.CertAbuseProcessor.html#SharpHoundCommonLib_Processors_CertAbuseProcessor__ctor_SharpHoundCommonLib_ILdapUtils_SharpHoundCommonLib_IRegistryAccessor_SharpHoundRPC_Wrappers_ISAMServerAccessor_ILogger_
+  commentId: M:SharpHoundCommonLib.Processors.CertAbuseProcessor.#ctor(SharpHoundCommonLib.ILdapUtils,SharpHoundCommonLib.IRegistryAccessor,SharpHoundRPC.Wrappers.ISAMServerAccessor,ILogger)
+  fullName: SharpHoundCommonLib.Processors.CertAbuseProcessor.CertAbuseProcessor(SharpHoundCommonLib.ILdapUtils, SharpHoundCommonLib.IRegistryAccessor, SharpHoundRPC.Wrappers.ISAMServerAccessor, ILogger)
+  nameWithType: CertAbuseProcessor.CertAbuseProcessor(ILdapUtils, IRegistryAccessor, ISAMServerAccessor, ILogger)
 - uid: SharpHoundCommonLib.Processors.CertAbuseProcessor.#ctor*
   name: CertAbuseProcessor
   href: api/SharpHoundCommonLib.Processors.CertAbuseProcessor.html#SharpHoundCommonLib_Processors_CertAbuseProcessor__ctor_
@@ -10018,12 +10011,25 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.Processors.CertAbuseProcessor.GetRegistryPrincipal
   nameWithType: CertAbuseProcessor.GetRegistryPrincipal
-- uid: SharpHoundCommonLib.Processors.CertAbuseProcessor.IsUserSpecifiesSanEnabled(System.String,System.String)
-  name: IsUserSpecifiesSanEnabled(String, String)
-  href: api/SharpHoundCommonLib.Processors.CertAbuseProcessor.html#SharpHoundCommonLib_Processors_CertAbuseProcessor_IsUserSpecifiesSanEnabled_System_String_System_String_
-  commentId: M:SharpHoundCommonLib.Processors.CertAbuseProcessor.IsUserSpecifiesSanEnabled(System.String,System.String)
-  fullName: SharpHoundCommonLib.Processors.CertAbuseProcessor.IsUserSpecifiesSanEnabled(System.String, System.String)
-  nameWithType: CertAbuseProcessor.IsUserSpecifiesSanEnabled(String, String)
+- uid: SharpHoundCommonLib.Processors.CertAbuseProcessor.IsRoleSeparationEnabled(System.String,System.String,System.String)
+  name: IsRoleSeparationEnabled(String, String, String)
+  href: api/SharpHoundCommonLib.Processors.CertAbuseProcessor.html#SharpHoundCommonLib_Processors_CertAbuseProcessor_IsRoleSeparationEnabled_System_String_System_String_System_String_
+  commentId: M:SharpHoundCommonLib.Processors.CertAbuseProcessor.IsRoleSeparationEnabled(System.String,System.String,System.String)
+  fullName: SharpHoundCommonLib.Processors.CertAbuseProcessor.IsRoleSeparationEnabled(System.String, System.String, System.String)
+  nameWithType: CertAbuseProcessor.IsRoleSeparationEnabled(String, String, String)
+- uid: SharpHoundCommonLib.Processors.CertAbuseProcessor.IsRoleSeparationEnabled*
+  name: IsRoleSeparationEnabled
+  href: api/SharpHoundCommonLib.Processors.CertAbuseProcessor.html#SharpHoundCommonLib_Processors_CertAbuseProcessor_IsRoleSeparationEnabled_
+  commentId: Overload:SharpHoundCommonLib.Processors.CertAbuseProcessor.IsRoleSeparationEnabled
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Processors.CertAbuseProcessor.IsRoleSeparationEnabled
+  nameWithType: CertAbuseProcessor.IsRoleSeparationEnabled
+- uid: SharpHoundCommonLib.Processors.CertAbuseProcessor.IsUserSpecifiesSanEnabled(System.String,System.String,System.String)
+  name: IsUserSpecifiesSanEnabled(String, String, String)
+  href: api/SharpHoundCommonLib.Processors.CertAbuseProcessor.html#SharpHoundCommonLib_Processors_CertAbuseProcessor_IsUserSpecifiesSanEnabled_System_String_System_String_System_String_
+  commentId: M:SharpHoundCommonLib.Processors.CertAbuseProcessor.IsUserSpecifiesSanEnabled(System.String,System.String,System.String)
+  fullName: SharpHoundCommonLib.Processors.CertAbuseProcessor.IsUserSpecifiesSanEnabled(System.String, System.String, System.String)
+  nameWithType: CertAbuseProcessor.IsUserSpecifiesSanEnabled(String, String, String)
 - uid: SharpHoundCommonLib.Processors.CertAbuseProcessor.IsUserSpecifiesSanEnabled*
   name: IsUserSpecifiesSanEnabled
   href: api/SharpHoundCommonLib.Processors.CertAbuseProcessor.html#SharpHoundCommonLib_Processors_CertAbuseProcessor_IsUserSpecifiesSanEnabled_
@@ -10086,19 +10092,6 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.Processors.CertAbuseProcessor.ProcessRegistryEnrollmentPermissions
   nameWithType: CertAbuseProcessor.ProcessRegistryEnrollmentPermissions
-- uid: SharpHoundCommonLib.Processors.CertAbuseProcessor.RoleSeparationEnabled(System.String,System.String)
-  name: RoleSeparationEnabled(String, String)
-  href: api/SharpHoundCommonLib.Processors.CertAbuseProcessor.html#SharpHoundCommonLib_Processors_CertAbuseProcessor_RoleSeparationEnabled_System_String_System_String_
-  commentId: M:SharpHoundCommonLib.Processors.CertAbuseProcessor.RoleSeparationEnabled(System.String,System.String)
-  fullName: SharpHoundCommonLib.Processors.CertAbuseProcessor.RoleSeparationEnabled(System.String, System.String)
-  nameWithType: CertAbuseProcessor.RoleSeparationEnabled(String, String)
-- uid: SharpHoundCommonLib.Processors.CertAbuseProcessor.RoleSeparationEnabled*
-  name: RoleSeparationEnabled
-  href: api/SharpHoundCommonLib.Processors.CertAbuseProcessor.html#SharpHoundCommonLib_Processors_CertAbuseProcessor_RoleSeparationEnabled_
-  commentId: Overload:SharpHoundCommonLib.Processors.CertAbuseProcessor.RoleSeparationEnabled
-  isSpec: "True"
-  fullName: SharpHoundCommonLib.Processors.CertAbuseProcessor.RoleSeparationEnabled
-  nameWithType: CertAbuseProcessor.RoleSeparationEnabled
 - uid: SharpHoundCommonLib.Processors.CertRegistryResult
   name: CertRegistryResult
   href: api/SharpHoundCommonLib.Processors.CertRegistryResult.html
@@ -11769,6 +11762,64 @@ references:
   commentId: T:SharpHoundCommonLib.Processors.WebClientServiceProcessor
   fullName: SharpHoundCommonLib.Processors.WebClientServiceProcessor
   nameWithType: WebClientServiceProcessor
+- uid: SharpHoundCommonLib.RegistryAccessor
+  name: RegistryAccessor
+  href: api/SharpHoundCommonLib.RegistryAccessor.html
+  commentId: T:SharpHoundCommonLib.RegistryAccessor
+  fullName: SharpHoundCommonLib.RegistryAccessor
+  nameWithType: RegistryAccessor
+- uid: SharpHoundCommonLib.RegistryAccessor.#ctor(ILogger)
+  name: RegistryAccessor(ILogger)
+  href: api/SharpHoundCommonLib.RegistryAccessor.html#SharpHoundCommonLib_RegistryAccessor__ctor_ILogger_
+  commentId: M:SharpHoundCommonLib.RegistryAccessor.#ctor(ILogger)
+  fullName: SharpHoundCommonLib.RegistryAccessor.RegistryAccessor(ILogger)
+  nameWithType: RegistryAccessor.RegistryAccessor(ILogger)
+- uid: SharpHoundCommonLib.RegistryAccessor.#ctor*
+  name: RegistryAccessor
+  href: api/SharpHoundCommonLib.RegistryAccessor.html#SharpHoundCommonLib_RegistryAccessor__ctor_
+  commentId: Overload:SharpHoundCommonLib.RegistryAccessor.#ctor
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.RegistryAccessor.RegistryAccessor
+  nameWithType: RegistryAccessor.RegistryAccessor
+- uid: SharpHoundCommonLib.RegistryAccessor.Connect(Microsoft.Win32.RegistryHive,System.String)
+  name: Connect(RegistryHive, String)
+  href: api/SharpHoundCommonLib.RegistryAccessor.html#SharpHoundCommonLib_RegistryAccessor_Connect_Microsoft_Win32_RegistryHive_System_String_
+  commentId: M:SharpHoundCommonLib.RegistryAccessor.Connect(Microsoft.Win32.RegistryHive,System.String)
+  fullName: SharpHoundCommonLib.RegistryAccessor.Connect(Microsoft.Win32.RegistryHive, System.String)
+  nameWithType: RegistryAccessor.Connect(RegistryHive, String)
+- uid: SharpHoundCommonLib.RegistryAccessor.Connect*
+  name: Connect
+  href: api/SharpHoundCommonLib.RegistryAccessor.html#SharpHoundCommonLib_RegistryAccessor_Connect_
+  commentId: Overload:SharpHoundCommonLib.RegistryAccessor.Connect
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.RegistryAccessor.Connect
+  nameWithType: RegistryAccessor.Connect
+- uid: SharpHoundCommonLib.RegistryAccessor.GetRegistryKeyData(System.String,System.String,System.String)
+  name: GetRegistryKeyData(String, String, String)
+  href: api/SharpHoundCommonLib.RegistryAccessor.html#SharpHoundCommonLib_RegistryAccessor_GetRegistryKeyData_System_String_System_String_System_String_
+  commentId: M:SharpHoundCommonLib.RegistryAccessor.GetRegistryKeyData(System.String,System.String,System.String)
+  fullName: SharpHoundCommonLib.RegistryAccessor.GetRegistryKeyData(System.String, System.String, System.String)
+  nameWithType: RegistryAccessor.GetRegistryKeyData(String, String, String)
+- uid: SharpHoundCommonLib.RegistryAccessor.GetRegistryKeyData*
+  name: GetRegistryKeyData
+  href: api/SharpHoundCommonLib.RegistryAccessor.html#SharpHoundCommonLib_RegistryAccessor_GetRegistryKeyData_
+  commentId: Overload:SharpHoundCommonLib.RegistryAccessor.GetRegistryKeyData
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.RegistryAccessor.GetRegistryKeyData
+  nameWithType: RegistryAccessor.GetRegistryKeyData
+- uid: SharpHoundCommonLib.RegistryAccessor.OpenRemoteRegistry(System.String)
+  name: OpenRemoteRegistry(String)
+  href: api/SharpHoundCommonLib.RegistryAccessor.html#SharpHoundCommonLib_RegistryAccessor_OpenRemoteRegistry_System_String_
+  commentId: M:SharpHoundCommonLib.RegistryAccessor.OpenRemoteRegistry(System.String)
+  fullName: SharpHoundCommonLib.RegistryAccessor.OpenRemoteRegistry(System.String)
+  nameWithType: RegistryAccessor.OpenRemoteRegistry(String)
+- uid: SharpHoundCommonLib.RegistryAccessor.OpenRemoteRegistry*
+  name: OpenRemoteRegistry
+  href: api/SharpHoundCommonLib.RegistryAccessor.html#SharpHoundCommonLib_RegistryAccessor_OpenRemoteRegistry_
+  commentId: Overload:SharpHoundCommonLib.RegistryAccessor.OpenRemoteRegistry
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.RegistryAccessor.OpenRemoteRegistry
+  nameWithType: RegistryAccessor.OpenRemoteRegistry
 - uid: SharpHoundCommonLib.ResolvedSearchResult
   name: ResolvedSearchResult
   href: api/SharpHoundCommonLib.ResolvedSearchResult.html
@@ -12256,19 +12307,19 @@ references:
   commentId: T:SharpHoundCommonLib.SHRegistryKey
   fullName: SharpHoundCommonLib.SHRegistryKey
   nameWithType: SHRegistryKey
-- uid: SharpHoundCommonLib.SHRegistryKey.Connect(Microsoft.Win32.RegistryHive,System.String)
-  name: Connect(RegistryHive, String)
-  href: api/SharpHoundCommonLib.SHRegistryKey.html#SharpHoundCommonLib_SHRegistryKey_Connect_Microsoft_Win32_RegistryHive_System_String_
-  commentId: M:SharpHoundCommonLib.SHRegistryKey.Connect(Microsoft.Win32.RegistryHive,System.String)
-  fullName: SharpHoundCommonLib.SHRegistryKey.Connect(Microsoft.Win32.RegistryHive, System.String)
-  nameWithType: SHRegistryKey.Connect(RegistryHive, String)
-- uid: SharpHoundCommonLib.SHRegistryKey.Connect*
-  name: Connect
-  href: api/SharpHoundCommonLib.SHRegistryKey.html#SharpHoundCommonLib_SHRegistryKey_Connect_
-  commentId: Overload:SharpHoundCommonLib.SHRegistryKey.Connect
+- uid: SharpHoundCommonLib.SHRegistryKey.#ctor(Microsoft.Win32.RegistryKey)
+  name: SHRegistryKey(RegistryKey)
+  href: api/SharpHoundCommonLib.SHRegistryKey.html#SharpHoundCommonLib_SHRegistryKey__ctor_Microsoft_Win32_RegistryKey_
+  commentId: M:SharpHoundCommonLib.SHRegistryKey.#ctor(Microsoft.Win32.RegistryKey)
+  fullName: SharpHoundCommonLib.SHRegistryKey.SHRegistryKey(Microsoft.Win32.RegistryKey)
+  nameWithType: SHRegistryKey.SHRegistryKey(RegistryKey)
+- uid: SharpHoundCommonLib.SHRegistryKey.#ctor*
+  name: SHRegistryKey
+  href: api/SharpHoundCommonLib.SHRegistryKey.html#SharpHoundCommonLib_SHRegistryKey__ctor_
+  commentId: Overload:SharpHoundCommonLib.SHRegistryKey.#ctor
   isSpec: "True"
-  fullName: SharpHoundCommonLib.SHRegistryKey.Connect
-  nameWithType: SHRegistryKey.Connect
+  fullName: SharpHoundCommonLib.SHRegistryKey.SHRegistryKey
+  nameWithType: SHRegistryKey.SHRegistryKey
 - uid: SharpHoundCommonLib.SHRegistryKey.Dispose
   name: Dispose()
   href: api/SharpHoundCommonLib.SHRegistryKey.html#SharpHoundCommonLib_SHRegistryKey_Dispose
@@ -18221,6 +18272,25 @@ references:
   isSpec: "True"
   fullName: SharpHoundRPC.Wrappers.ISAMServer.OpenDomain
   nameWithType: ISAMServer.OpenDomain
+- uid: SharpHoundRPC.Wrappers.ISAMServerAccessor
+  name: ISAMServerAccessor
+  href: api/SharpHoundRPC.Wrappers.ISAMServerAccessor.html
+  commentId: T:SharpHoundRPC.Wrappers.ISAMServerAccessor
+  fullName: SharpHoundRPC.Wrappers.ISAMServerAccessor
+  nameWithType: ISAMServerAccessor
+- uid: SharpHoundRPC.Wrappers.ISAMServerAccessor.OpenServer(System.String,SharpHoundRPC.SAMRPCNative.SAMEnums.SamAccessMasks)
+  name: OpenServer(String, SAMEnums.SamAccessMasks)
+  href: api/SharpHoundRPC.Wrappers.ISAMServerAccessor.html#SharpHoundRPC_Wrappers_ISAMServerAccessor_OpenServer_System_String_SharpHoundRPC_SAMRPCNative_SAMEnums_SamAccessMasks_
+  commentId: M:SharpHoundRPC.Wrappers.ISAMServerAccessor.OpenServer(System.String,SharpHoundRPC.SAMRPCNative.SAMEnums.SamAccessMasks)
+  fullName: SharpHoundRPC.Wrappers.ISAMServerAccessor.OpenServer(System.String, SharpHoundRPC.SAMRPCNative.SAMEnums.SamAccessMasks)
+  nameWithType: ISAMServerAccessor.OpenServer(String, SAMEnums.SamAccessMasks)
+- uid: SharpHoundRPC.Wrappers.ISAMServerAccessor.OpenServer*
+  name: OpenServer
+  href: api/SharpHoundRPC.Wrappers.ISAMServerAccessor.html#SharpHoundRPC_Wrappers_ISAMServerAccessor_OpenServer_
+  commentId: Overload:SharpHoundRPC.Wrappers.ISAMServerAccessor.OpenServer
+  isSpec: "True"
+  fullName: SharpHoundRPC.Wrappers.ISAMServerAccessor.OpenServer
+  nameWithType: ISAMServerAccessor.OpenServer
 - uid: SharpHoundRPC.Wrappers.LSABase
   name: LSABase
   href: api/SharpHoundRPC.Wrappers.LSABase.html
@@ -18631,16 +18701,22 @@ references:
   isSpec: "True"
   fullName: SharpHoundRPC.Wrappers.SAMServer.OpenDomain
   nameWithType: SAMServer.OpenDomain
-- uid: SharpHoundRPC.Wrappers.SAMServer.OpenServer(System.String,SharpHoundRPC.SAMRPCNative.SAMEnums.SamAccessMasks)
+- uid: SharpHoundRPC.Wrappers.SAMServerAccessor
+  name: SAMServerAccessor
+  href: api/SharpHoundRPC.Wrappers.SAMServerAccessor.html
+  commentId: T:SharpHoundRPC.Wrappers.SAMServerAccessor
+  fullName: SharpHoundRPC.Wrappers.SAMServerAccessor
+  nameWithType: SAMServerAccessor
+- uid: SharpHoundRPC.Wrappers.SAMServerAccessor.OpenServer(System.String,SharpHoundRPC.SAMRPCNative.SAMEnums.SamAccessMasks)
   name: OpenServer(String, SAMEnums.SamAccessMasks)
-  href: api/SharpHoundRPC.Wrappers.SAMServer.html#SharpHoundRPC_Wrappers_SAMServer_OpenServer_System_String_SharpHoundRPC_SAMRPCNative_SAMEnums_SamAccessMasks_
-  commentId: M:SharpHoundRPC.Wrappers.SAMServer.OpenServer(System.String,SharpHoundRPC.SAMRPCNative.SAMEnums.SamAccessMasks)
-  fullName: SharpHoundRPC.Wrappers.SAMServer.OpenServer(System.String, SharpHoundRPC.SAMRPCNative.SAMEnums.SamAccessMasks)
-  nameWithType: SAMServer.OpenServer(String, SAMEnums.SamAccessMasks)
-- uid: SharpHoundRPC.Wrappers.SAMServer.OpenServer*
+  href: api/SharpHoundRPC.Wrappers.SAMServerAccessor.html#SharpHoundRPC_Wrappers_SAMServerAccessor_OpenServer_System_String_SharpHoundRPC_SAMRPCNative_SAMEnums_SamAccessMasks_
+  commentId: M:SharpHoundRPC.Wrappers.SAMServerAccessor.OpenServer(System.String,SharpHoundRPC.SAMRPCNative.SAMEnums.SamAccessMasks)
+  fullName: SharpHoundRPC.Wrappers.SAMServerAccessor.OpenServer(System.String, SharpHoundRPC.SAMRPCNative.SAMEnums.SamAccessMasks)
+  nameWithType: SAMServerAccessor.OpenServer(String, SAMEnums.SamAccessMasks)
+- uid: SharpHoundRPC.Wrappers.SAMServerAccessor.OpenServer*
   name: OpenServer
-  href: api/SharpHoundRPC.Wrappers.SAMServer.html#SharpHoundRPC_Wrappers_SAMServer_OpenServer_
-  commentId: Overload:SharpHoundRPC.Wrappers.SAMServer.OpenServer
+  href: api/SharpHoundRPC.Wrappers.SAMServerAccessor.html#SharpHoundRPC_Wrappers_SAMServerAccessor_OpenServer_
+  commentId: Overload:SharpHoundRPC.Wrappers.SAMServerAccessor.OpenServer
   isSpec: "True"
-  fullName: SharpHoundRPC.Wrappers.SAMServer.OpenServer
-  nameWithType: SAMServer.OpenServer
+  fullName: SharpHoundRPC.Wrappers.SAMServerAccessor.OpenServer
+  nameWithType: SAMServerAccessor.OpenServer
