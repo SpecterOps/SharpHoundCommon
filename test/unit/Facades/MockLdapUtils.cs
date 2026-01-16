@@ -744,7 +744,7 @@ namespace CommonLibTest.Facades
 
             return (!results.IsNullOrEmpty(), results);
         }
-
+        
         public Task<(bool Success, TypedPrincipal Principal)> ResolveCertTemplateByProperty(string propValue, string propName, string domainName) {
             throw new NotImplementedException();
         }

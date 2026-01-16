@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using System.Text;
@@ -8,7 +7,6 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using SharpHoundCommonLib.Enums;
 using SharpHoundCommonLib.OutputTypes;
-using SharpHoundRPC;
 using SharpHoundRPC.Wrappers;
 using Encoder = Microsoft.Security.Application.Encoder;
 
@@ -20,24 +18,29 @@ namespace SharpHoundCommonLib.Processors
         private readonly ILdapUtils _utils;
         private readonly AdaptiveTimeout _getMachineSidAdaptiveTimeout;
         private readonly AdaptiveTimeout _openSamServerAdaptiveTimeout;
+        private readonly IRegistryAccessor _registryAccessor;
+        private readonly ISAMServerAccessor _samServerAccessor;
+        
         public delegate Task ComputerStatusDelegate(CSVComputerStatus status);
         public event ComputerStatusDelegate ComputerStatusEvent;
 
-
-        public CertAbuseProcessor(ILdapUtils utils, ILogger log = null) {
+        public CertAbuseProcessor(ILdapUtils utils, IRegistryAccessor registryAccessor, ISAMServerAccessor samServerAccessor, ILogger log = null) {
             _utils = utils;
+            _registryAccessor = registryAccessor;
+            _samServerAccessor = samServerAccessor;
             _log = log ?? Logging.LogProvider.CreateLogger("CAProc");
             _getMachineSidAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ISAMServer.GetMachineSid)));
-            _openSamServerAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(SAMServer.OpenServer)));
+            _openSamServerAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ISAMServerAccessor.OpenServer)));
         }
 
         /// <summary>
         /// This function should be called with the security data fetched from <see cref="GetCASecurity"/>.
         /// The resulting ACEs will contain the owner of the CA as well as Management rights.
         /// </summary>
-        /// <param name="security"></param>
+        /// <param name="caName"></param>
         /// <param name="objectDomain"></param>
         /// <param name="computerName"></param>
+        /// <param name="computerObjectId"></param>
         /// <returns></returns>
         public async Task<AceRegistryAPIResult> ProcessRegistryEnrollmentPermissions(string caName, string objectDomain, string computerName, string computerObjectId)
         {
@@ -47,9 +50,23 @@ namespace SharpHoundCommonLib.Processors
             data.Collected = aceData.Collected;
             if (!aceData.Collected)
             {
+                await SendComputerStatus(new CSVComputerStatus {
+                    Status = aceData.FailureReason,
+                    Task = nameof(ProcessRegistryEnrollmentPermissions),
+                    ComputerName = computerName,
+                    ObjectId = computerObjectId,
+                });
+
                 data.FailureReason = aceData.FailureReason;
                 return data;
             }
+            
+            await SendComputerStatus(new CSVComputerStatus {
+                Status = CSVComputerStatus.StatusSuccess,
+                Task = nameof(ProcessRegistryEnrollmentPermissions),
+                ComputerName = computerName,
+                ObjectId = computerObjectId,
+            });
 
             if (aceData.Value == null)
             {
@@ -167,9 +184,23 @@ namespace SharpHoundCommonLib.Processors
             ret.Collected = regData.Collected;
             if (!ret.Collected)
             {
+                await SendComputerStatus(new CSVComputerStatus {
+                    Status = regData.FailureReason,
+                    Task = nameof(ProcessEAPermissions),
+                    ComputerName = computerName,
+                    ObjectId = computerObjectId,
+                });
+
                 ret.FailureReason = regData.FailureReason;
                 return ret;
             }
+            
+            await SendComputerStatus(new CSVComputerStatus {
+                Status = CSVComputerStatus.StatusSuccess,
+                Task = nameof(ProcessEAPermissions),
+                ComputerName = computerName,
+                ObjectId = computerObjectId,
+            });
 
             if (regData.Value == null)
             {
@@ -179,6 +210,12 @@ namespace SharpHoundCommonLib.Processors
             var isDomainController = await _utils.IsDomainController(computerObjectId, objectDomain);
             var machineSid = await GetMachineSid(computerName, computerObjectId);
             var descriptor = new RawSecurityDescriptor(regData.Value as byte[], 0);
+            
+            if (descriptor.DiscretionaryAcl is null)
+            {
+                return ret;
+            }
+            
             var enrollmentAgentRestrictions = new List<EnrollmentAgentRestriction>();
             foreach (var genericAce in descriptor.DiscretionaryAcl)
             {
@@ -218,13 +255,12 @@ namespace SharpHoundCommonLib.Processors
         /// <param name="target"></param>
         /// <param name="caName"></param>
         /// <returns></returns>
-        [ExcludeFromCodeCoverage]
         private RegistryResult GetCASecurity(string target, string caName)
         {
             var regSubKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{caName}";
             const string regValue = "Security";
         
-            return Helpers.GetRegistryKeyData(target, regSubKey, regValue, _log);
+            return _registryAccessor.GetRegistryKeyData(target, regSubKey, regValue);
         }
 
         /// <summary>
@@ -233,13 +269,12 @@ namespace SharpHoundCommonLib.Processors
         /// <param name="target"></param>
         /// <param name="caName"></param>
         /// <returns></returns>
-        [ExcludeFromCodeCoverage]
         private RegistryResult GetEnrollmentAgentRights(string target, string caName)
         {
             var regSubKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{caName}";
             var regValue = "EnrollmentAgentRights";
 
-            return Helpers.GetRegistryKeyData(target, regSubKey, regValue, _log);
+            return _registryAccessor.GetRegistryKeyData(target, regSubKey, regValue);
         }
 
         /// <summary>
@@ -249,22 +284,36 @@ namespace SharpHoundCommonLib.Processors
         /// <remarks>https://blog.keyfactor.com/hidden-dangers-certificate-subject-alternative-names-sans</remarks>
         /// <param name="target"></param>
         /// <param name="caName"></param>
+        /// <param name="computerObjectId"></param>
         /// <returns></returns>
-        [ExcludeFromCodeCoverage]
-        public BoolRegistryAPIResult IsUserSpecifiesSanEnabled(string target, string caName)
+        public async Task<BoolRegistryAPIResult> IsUserSpecifiesSanEnabled(string target, string caName, string computerObjectId)
         {
             var ret = new BoolRegistryAPIResult();
-            var subKey =
+            var regSubKey =
                 $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{caName}\\PolicyModules\\CertificateAuthority_MicrosoftDefault.Policy";
-            const string subValue = "EditFlags";
-            var data = Helpers.GetRegistryKeyData(target, subKey, subValue, _log);
+            const string regValue = "EditFlags";
+            var data = _registryAccessor.GetRegistryKeyData(target, regSubKey, regValue);
 
             ret.Collected = data.Collected;
             if (!data.Collected)
             {
+                await SendComputerStatus(new CSVComputerStatus {
+                    Status = data.FailureReason,
+                    Task = nameof(IsUserSpecifiesSanEnabled),
+                    ComputerName = target,
+                    ObjectId = computerObjectId
+                });
+            
                 ret.FailureReason = data.FailureReason;
                 return ret;
             }
+            
+            await SendComputerStatus(new CSVComputerStatus {
+                Status = CSVComputerStatus.StatusSuccess,
+                Task = nameof(IsUserSpecifiesSanEnabled),
+                ComputerName = target,
+                ObjectId = computerObjectId
+            });
 
             if (data.Value == null)
             {
@@ -278,28 +327,42 @@ namespace SharpHoundCommonLib.Processors
         }
 
         /// <summary>
-        /// This function checks a registry setting on the target host for the specified CA to see if role seperation is enabled.
+        /// This function checks a registry setting on the target host for the specified CA to see if role separation is enabled.
         /// If enabled, you cannot perform any CA actions if you have both ManageCA and ManageCertificates permissions. Only CA admins can modify the setting.
         /// </summary>
         /// <remarks>https://www.itprotoday.com/security/q-how-can-i-make-sure-given-windows-account-assigned-only-single-certification-authority-ca</remarks>
         /// <param name="target"></param>
         /// <param name="caName"></param>
+        /// <param name="computerObjectId"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        [ExcludeFromCodeCoverage]
-        public BoolRegistryAPIResult RoleSeparationEnabled(string target, string caName)
+        public async Task<BoolRegistryAPIResult> IsRoleSeparationEnabled(string target, string caName, string computerObjectId)
         {
             var ret = new BoolRegistryAPIResult();
             var regSubKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{caName}";
             const string regValue = "RoleSeparationEnabled";
-            var data = Helpers.GetRegistryKeyData(target, regSubKey, regValue, _log);
+            var data = _registryAccessor.GetRegistryKeyData(target, regSubKey, regValue);
 
             ret.Collected = data.Collected;
             if (!data.Collected)
             {
+                await SendComputerStatus(new CSVComputerStatus {
+                    Status = data.FailureReason,
+                    Task = nameof(IsRoleSeparationEnabled),
+                    ComputerName = target,
+                    ObjectId = computerObjectId
+                });
+
                 ret.FailureReason = data.FailureReason;
                 return ret;
             }
+            
+            await SendComputerStatus(new CSVComputerStatus {
+                Status = CSVComputerStatus.StatusSuccess,
+                Task = nameof(IsRoleSeparationEnabled),
+                ComputerName = target,
+                ObjectId = computerObjectId
+            });
 
             if (data.Value == null)
             {
@@ -346,11 +409,11 @@ namespace SharpHoundCommonLib.Processors
             return await _utils.ResolveIDAndType(sid.Value, computerDomain);
         }
 
-        private async Task<SecurityIdentifier> GetMachineSid(string computerName, string computerObjectId)
+        internal async Task<SecurityIdentifier> GetMachineSid(string computerName, string computerObjectId)
         {
             SecurityIdentifier machineSid = null;
 
-            //Try to get the machine sid for the computer if its not already cached
+            //Try to get the machine sid for the computer if it's not already cached
             if (!Cache.GetMachineSid(computerObjectId, out var tempMachineSid))
             {
                 // Open a handle to the server
@@ -360,7 +423,7 @@ namespace SharpHoundCommonLib.Processors
                     _log.LogTrace("OpenServer failed on {ComputerName}: {Error}", computerName, openServerResult.SError);
                     await SendComputerStatus(new CSVComputerStatus
                     {
-                        Task = "SamConnect",
+                        Task = nameof(OpenSamServer),
                         ComputerName = computerName,
                         Status = openServerResult.SError,
                         ObjectId = computerObjectId,
@@ -377,14 +440,21 @@ namespace SharpHoundCommonLib.Processors
                     {
                         Status = getMachineSidResult.SError,
                         ComputerName = computerName,
-                        Task = "GetMachineSid",
+                        Task = nameof(GetMachineSid),
                         ObjectId = computerObjectId,
                     });
-                    //If we can't get a machine sid, we wont be able to make local principals with unique object ids, or differentiate local/domain objects
+                    //If we can't get a machine sid, we won't be able to make local principals with unique object ids, or differentiate local/domain objects
                     _log.LogWarning("Unable to get machineSid for {Computer}: {Status}", computerName, getMachineSidResult.SError);
                     return null;
                 }
 
+                await SendComputerStatus(new CSVComputerStatus {
+                    Status = CSVComputerStatus.StatusSuccess,
+                    Task = nameof(GetMachineSid),
+                    ComputerName = computerName,
+                    ObjectId = computerObjectId
+                });
+                
                 machineSid = getMachineSidResult.Value;
                 Cache.AddMachineSid(computerObjectId, machineSid.Value);
             }
@@ -396,22 +466,28 @@ namespace SharpHoundCommonLib.Processors
             return machineSid;
         }
 
-        private async Task<(bool success, EnrollmentAgentRestriction restriction)> CreateEnrollmentAgentRestriction(QualifiedAce ace, string computerDomain, string computerName, bool isDomainController, string computerObjectId, SecurityIdentifier machineSid) {
+        internal async Task<(bool success, EnrollmentAgentRestriction restriction)> CreateEnrollmentAgentRestriction(QualifiedAce ace, string computerDomain, string computerName, bool isDomainController, string computerObjectId, SecurityIdentifier machineSid) 
+        {
+            var opaque = ace.GetOpaque();
+            
+            if(opaque is null)
+                return (false, default);
+            
             var targets = new List<TypedPrincipal>();
             var index = 0;
 
             var accessType = ace.AceType.ToString();
             var agent = await GetRegistryPrincipal(ace.SecurityIdentifier, computerDomain, computerName, isDomainController,
                 computerObjectId, machineSid);
-
-            var opaque = ace.GetOpaque();
+            
             var sidCount = BitConverter.ToUInt32(opaque, 0);
             index += 4;
 
             for (var i = 0; i < sidCount; i++) {
                 var sid = new SecurityIdentifier(opaque, index);
-                if (await GetRegistryPrincipal(sid, computerDomain, computerName, isDomainController, computerObjectId,
-                        machineSid) is (true, var regPrincipal)) {
+                if (await GetRegistryPrincipal(sid, computerDomain, computerName, isDomainController, computerObjectId, machineSid)
+                    is (true, var regPrincipal))
+                {
                     targets.Add(regPrincipal);
                 }
 
@@ -420,50 +496,53 @@ namespace SharpHoundCommonLib.Processors
 
             var finalTargets = targets.ToArray();
             var allTemplates = index >= opaque.Length;
-            if (index < opaque.Length) {
-                var template = Encoding.Unicode.GetString(opaque, index, opaque.Length - index - 2).Replace("\u0000", string.Empty);
-                if (await _utils.ResolveCertTemplateByProperty(Encoder.LdapFilterEncode(template), LDAPProperties.CanonicalName, computerDomain) is (true, var resolvedTemplate)) {
-                    return (true, new EnrollmentAgentRestriction {
-                        Template = resolvedTemplate,
-                        Agent = agent.Principal,
-                        AllTemplates = allTemplates,
-                        AccessType = accessType,
-                        Targets = finalTargets
-                    });
-                }
-
-                if (await _utils.ResolveCertTemplateByProperty(
-                        Encoder.LdapFilterEncode(template), LDAPProperties.CertTemplateOID, computerDomain) is
-                            (true, var resolvedOidTemplate)) {
-                    return (true, new EnrollmentAgentRestriction {
-                        Template = resolvedOidTemplate,
-                        Agent = agent.Principal,
-                        AllTemplates = allTemplates,
-                        AccessType = accessType,
-                        Targets = finalTargets
-                    });
-                }
+            
+            if (allTemplates) {
+                return (true, new EnrollmentAgentRestriction {
+                    Agent = agent.Principal,
+                    AllTemplates = allTemplates,
+                    AccessType = accessType,
+                    Targets = finalTargets
+                });
+            }
+            
+            var template = Encoding.Unicode.GetString(opaque, index, opaque.Length - index - 2).Replace("\u0000", string.Empty);
+            if (await _utils.ResolveCertTemplateByProperty(Encoder.LdapFilterEncode(template), LDAPProperties.CanonicalName, computerDomain)
+                is (true, var resolvedTemplate)) 
+            {
+                return (true, new EnrollmentAgentRestriction {
+                    Template = resolvedTemplate,
+                    Agent = agent.Principal,
+                    AllTemplates = allTemplates,
+                    AccessType = accessType,
+                    Targets = finalTargets
+                });
             }
 
+            if (await _utils.ResolveCertTemplateByProperty(Encoder.LdapFilterEncode(template), LDAPProperties.CertTemplateOID, computerDomain)
+                is (true, var resolvedOidTemplate))
+            {
+                return (true, new EnrollmentAgentRestriction {
+                    Template = resolvedOidTemplate,
+                    Agent = agent.Principal,
+                    AllTemplates = allTemplates,
+                    AccessType = accessType,
+                    Targets = finalTargets
+                });
+            }
+            
             return (false, default);
         }
 
         public virtual SharpHoundRPC.Result<ISAMServer> OpenSamServer(string computerName)
         {
-            var result = _openSamServerAdaptiveTimeout.ExecuteRPCWithTimeout((_) => SAMServer.OpenServer(computerName)).GetAwaiter().GetResult();
-            if (result.IsFailed)
-            {
-                return SharpHoundRPC.Result<ISAMServer>.Fail(result.SError);
-            }
-
-            return SharpHoundRPC.Result<ISAMServer>.Ok(result.Value);
+            return _openSamServerAdaptiveTimeout.ExecuteRPCWithTimeout((_) => _samServerAccessor.OpenServer(computerName)).GetAwaiter().GetResult();
         }
 
         private async Task SendComputerStatus(CSVComputerStatus status)
         {
             if (ComputerStatusEvent is not null) await ComputerStatusEvent(status);
         }
-
     }
 
     public class EnrollmentAgentRestriction
