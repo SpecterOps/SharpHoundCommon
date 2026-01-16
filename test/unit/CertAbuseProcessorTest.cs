@@ -625,7 +625,7 @@ namespace CommonLibTest
             //Validate CompStatus Log
             Assert.Equal(TargetName, _receivedCompStatus.ComputerName);
             Assert.Equal(nameof(_certAbuseProcessor.GetMachineSid), _receivedCompStatus.Task);
-            Assert.Equal(ComputerStatus.Success, _receivedCompStatus.Status);
+            Assert.Equal(CSVComputerStatus.StatusSuccess, _receivedCompStatus.Status);
             Assert.Equal(TargetDomainSid, _receivedCompStatus.ObjectId);
         }
         
