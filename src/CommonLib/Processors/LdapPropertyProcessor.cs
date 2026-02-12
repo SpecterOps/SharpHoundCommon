@@ -53,7 +53,7 @@ namespace SharpHoundCommonLib.Processors {
                 ret["whencreated"] = Helpers.ConvertTimestampToUnixEpoch(wc);
             }
 
-            if (entry.TryGetByteProperty(LDAPProperties.objectguid, out var objectguid)) {
+            if (entry.TryGetByteProperty(LDAPProperties.ObjectGUID, out var objectguid)) {
                 if (objectguid != null && objectguid.Length == 16)
                 {
                     try
