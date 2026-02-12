@@ -302,7 +302,7 @@ namespace CommonLibTest {
             Assert.Equal("DC=test,DC=local", result);
         }
 
-        [Theory]
+        [WindowsOnlyTheory]
         [InlineData("S-1-5-32-544", "\\01\\02\\00\\00\\00\\00\\00\\05\\20\\00\\00\\00\\20\\02\\00\\00")]
         public void ConvertSidToHexSid_ValidSid_MatchesSecurityIdentifierBinaryForm(string sid, string expectedHexSid)
         {
@@ -322,7 +322,7 @@ namespace CommonLibTest {
             }
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public void ConvertSidToHexSid_InvalidSid_Throws()
         {
             Assert.ThrowsAny<ArgumentException>(() => Helpers.ConvertSidToHexSid("NOT-A-SID"));
