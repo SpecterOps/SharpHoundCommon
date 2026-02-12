@@ -59,7 +59,7 @@ namespace SharpHoundCommonLib.Processors {
                     try
                     {
                         var guid = new Guid(objectguid);
-                        ret["objectguid"](LDAPProperties.ObjectGUID, guid.ToString().ToUpper());
+                        ret["objectguid"] = guid.ToString().ToUpperInvariant();
                     }
                     catch
                     {
