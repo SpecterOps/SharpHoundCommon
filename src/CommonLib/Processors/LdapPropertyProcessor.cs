@@ -53,6 +53,21 @@ namespace SharpHoundCommonLib.Processors {
                 ret["whencreated"] = Helpers.ConvertTimestampToUnixEpoch(wc);
             }
 
+            if (entry.TryGetByteProperty(LDAPProperties.objectguid, out var objectguid)) {
+                if (objectguid != null && objectguid.Length == 16)
+                {
+                    try
+                    {
+                        Guid guid = new Guid(objectguid);
+                        ret["objectguid"](LDAPProperties.ObjectGUID, guid.ToString().ToUpper());
+                    }
+                    catch
+                    {
+                        // Skip malformed GUID bytes
+                    }
+                }
+            }
+
             return ret;
         }
 
@@ -438,20 +453,6 @@ namespace SharpHoundCommonLib.Processors {
                 foreach (var dn in hsa) {
                     if (await _utils.ResolveDistinguishedName(dn) is (true, var resolvedPrincipal))
                         smsaPrincipals.Add(resolvedPrincipal);
-                }
-            }
-
-            var objectGuidBytes = entry.GetByteProperty(LDAPProperties.ObjectGUID);
-            if (objectGuidBytes != null && objectGuidBytes.Length == 16)
-            {
-                try
-                {
-                    Guid guid = new Guid(objectGuidBytes);
-                    props.Add(LDAPProperties.ObjectGUID, guid.ToString().ToUpper());
-                }
-                catch
-                {
-                    // Skip malformed GUID bytes
                 }
             }
 
