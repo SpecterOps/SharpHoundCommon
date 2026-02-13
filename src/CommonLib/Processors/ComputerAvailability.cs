@@ -95,11 +95,19 @@ namespace SharpHoundCommonLib.Processors {
                 };
             }
 
-            if (_skipPortScan)
+            if (_skipPortScan) {
+                await SendComputerStatus(new CSVComputerStatus {
+                    Status = CSVComputerStatus.StatusSuccess,
+                    Task = "ComputerAvailability",
+                    ComputerName = computerName,
+                    ObjectId = objectId,
+                });
+            
                 return new ComputerStatus {
                     Connectable = true,
                     Error = null
                 };
+            }
 
             if (!await _scanner.CheckPort(computerName)) {
                 _log.LogTrace("{ComputerName} is not available because port 445 is unavailable", computerName);

@@ -4,7 +4,6 @@ namespace SharpHoundRPC.Registry {
     using System.Collections.Generic;
     using System.Threading.Tasks;
 
-
     public class StrategyExecutor {
         public async Task<StrategyExecutorResult<T>> CollectAsync<T, TQuery>(
             string targetMachine,
@@ -24,9 +23,6 @@ namespace SharpHoundRPC.Registry {
 
                 try {
                     var results = await strategy.ExecuteAsync(targetMachine, queries).ConfigureAwait(false);
-
-                    attempt.WasSuccessful = true;
-                    attempt.Results = results;
 
                     return new StrategyExecutorResult<T> {
                         Results = results,

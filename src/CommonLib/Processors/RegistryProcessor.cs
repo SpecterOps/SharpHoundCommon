@@ -5,12 +5,14 @@ using SharpHoundRPC.PortScanner;
 using SharpHoundRPC.Registry;
 using System;
 using System.Linq;
+using System.Runtime.Serialization.Json;
 using System.Threading.Tasks;
-using static SharpHoundCommonLib.Helpers;
 
 namespace SharpHoundCommonLib.Processors;
 
 public class RegistryProcessor {
+    public delegate Task ComputerStatusDelegate(CSVComputerStatus status);
+    
     private readonly ILogger _log;
     private readonly IPortScanner _portScanner;
     private readonly ICollectionStrategy<RegistryQueryResult, RegistryQuery>[] _strategies;
@@ -50,6 +52,8 @@ public class RegistryProcessor {
         ];
     }
 
+    public event ComputerStatusDelegate ComputerStatusEvent;
+
     public async Task<APIResult<RegistryData>> ReadRegistrySettings(string targetMachine) {
         var output = new RegistryData();
 
@@ -64,6 +68,22 @@ public class RegistryProcessor {
             }
 
             var collectedData = result.Value;
+
+            foreach (var attempt in collectedData.FailureAttempts ?? []) {
+                _log.LogTrace("ReadRegistry failed on {ComputerName} using {Strategy}: {Error}", targetMachine, attempt.StrategyType, attempt.FailureReason);
+                await SendComputerStatus(new CSVComputerStatus
+                {
+                    Status = attempt.FailureReason,
+                    ComputerName = targetMachine,
+                    Task = nameof(ReadRegistrySettings)
+                });
+            }
+
+            if (!collectedData.WasSuccessful) {
+                string msg = string.Join("\n",
+                    collectedData.FailureAttempts.Select(a => $"{a.StrategyType.Name}: {a.FailureReason ?? ""}"));
+                return APIResult<RegistryData>.Failure(msg);
+            }
 
             foreach (var key in collectedData.Results ?? []) {
                 if (!key.ValueExists)
@@ -100,13 +120,14 @@ public class RegistryProcessor {
                         break;
                 }
             }
-
-            // If all strategies failed, need to report errors.
-            if (collectedData.FailureAttempts.Count() == _strategies.Length) {
-                string msg = string.Join("\n",
-                    collectedData.FailureAttempts.Select(a => $"{a.StrategyType.Name}: {a.FailureReason ?? ""}"));
-                return APIResult<RegistryData>.Failure(msg);
-            }
+            
+            await SendComputerStatus(new CSVComputerStatus
+            {
+                Status = CSVComputerStatus.StatusSuccess,
+                ComputerName = targetMachine,
+                Task = nameof(ReadRegistrySettings),
+                // ObjectId = computerObjectId, //TODO: can we get a compId?
+            });
 
             return APIResult<RegistryData>.Success(output);
         } catch (Exception ex) {
@@ -117,5 +138,9 @@ public class RegistryProcessor {
 
             return APIResult<RegistryData>.Failure(ex.ToString());
         }
+    }
+
+    private async Task SendComputerStatus(CSVComputerStatus status) {
+        if (ComputerStatusEvent is not null) await ComputerStatusEvent.Invoke(status);
     }
 }
