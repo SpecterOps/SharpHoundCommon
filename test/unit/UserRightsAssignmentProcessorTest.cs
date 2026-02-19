@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Versioning;
 using System.Threading;
 using System.Threading.Tasks;
 using CommonLibTest.CollectionDefinitions;
@@ -31,6 +32,7 @@ namespace CommonLibTest
             Cache.SetCacheInstance(null);
         }
 
+        [SupportedOSPlatform("windows")]
         [WindowsOnlyFact]
         public async Task UserRightsAssignmentProcessor_TestWorkstation()
         {
@@ -53,6 +55,7 @@ namespace CommonLibTest
             Assert.Equal(Label.LocalGroup, rdpResult.ObjectType);
         }
 
+        [SupportedOSPlatform("windows")]
         [WindowsOnlyFact]
         public async Task UserRightsAssignmentProcessor_TestDC()
         {
@@ -96,6 +99,7 @@ namespace CommonLibTest
         //     Assert.Equal("Timeout", status.Status);
         // }
 
+        [SupportedOSPlatform("windows")]
         [WindowsOnlyFact]
         public async Task UserRightsAssignmentProcessor_TestGetLocalDomainInformationFail()
         {
@@ -122,6 +126,7 @@ namespace CommonLibTest
             Assert.Equal("LSAGetMachineSID", status.Task);
         }
         
+        [SupportedOSPlatform("windows")]
         [WindowsOnlyFact]
         public async Task UserRightsAssignmentProcessor_TestGetResolvedPrincipalsWithPrivilegeFail()
         {

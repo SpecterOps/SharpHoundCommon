@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.Versioning;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using System.Threading;
@@ -226,6 +227,7 @@ namespace CommonLibTest
             Assert.Equal(TargetDomainSid, _receivedCompStatus.ObjectId);
         }
         
+        [SupportedOSPlatform("windows")]
         public static IEnumerable<object[]> ProcessEAPermissionsTestData() {
             return new List<object[]>
             {
@@ -234,6 +236,7 @@ namespace CommonLibTest
             };
         }
 
+        [SupportedOSPlatform("windows")]
         [WindowsOnlyTheory]
         [MemberData(nameof(ProcessEAPermissionsTestData))]
         public async Task CertAbuseProcessor_ProcessEAPermissions_ReturnsEmpty(RawAcl dacl) {
@@ -335,6 +338,7 @@ namespace CommonLibTest
             Assert.Equal(TargetDomainSid, _receivedCompStatus.ObjectId);
         }
 
+        [SupportedOSPlatform("windows")]
         [WindowsOnlyFact]
         public async Task CertAbuseProcessor_ProcessRegistryEnrollmentPermissions_ReturnsEmpty_WhenNoOwnerAndNoRules() {
             var mockSecurityDescriptor = new Mock<ActiveDirectorySecurityDescriptor>(null);
@@ -405,6 +409,7 @@ namespace CommonLibTest
             Assert.Contains(invalidCN, results.unresolvedTemplates);
         }
 
+        [SupportedOSPlatform("windows")]
         [WindowsOnlyFact]
         public async Task CertAbuseProcessor_GetRegistryPrincipal_ReturnsFalseForFilteredSID() {
             var sid = new SecurityIdentifier("S-1-5-3");
@@ -422,6 +427,7 @@ namespace CommonLibTest
             _mockLdapUtils.VerifyNoOtherCalls();
         }
 
+        [SupportedOSPlatform("windows")]
         [WindowsOnlyFact]
         public async Task CertAbuseProcessor_GetRegistryPrincipal_CallsResolveIDAndType_ForDomainController() {
             var expectedPrincipalType = Label.Group;
@@ -450,6 +456,7 @@ namespace CommonLibTest
             _mockLdapUtils.VerifyNoOtherCalls();
         }
 
+        [SupportedOSPlatform("windows")]
         [WindowsOnlyFact]
         public async Task CertAbuseProcessor_GetRegistryPrincipal_CallsConvertLocalWellKnownPrincipal_ForNonDomainController() {
             var expectedPrincipalType = Label.Group;
@@ -477,6 +484,7 @@ namespace CommonLibTest
             _mockLdapUtils.VerifyNoOtherCalls();
         }
 
+        [SupportedOSPlatform("windows")]
         [WindowsOnlyFact]
         public async Task CertAbuseProcessor_GetRegistryPrincipal_ResolvesToLocalPrincipal_ForLocalSID() {
             var expectedPrincipalType = Label.LocalGroup;
@@ -504,6 +512,7 @@ namespace CommonLibTest
             _mockLdapUtils.VerifyNoOtherCalls();
         }
 
+        [SupportedOSPlatform("windows")]
         [WindowsOnlyFact]
         public async Task CertAbuseProcessor_GetRegistryPrincipal_ResolvesToDomainPrincipal() {
             var expectedPrincipalType = Label.Group;
@@ -558,6 +567,7 @@ namespace CommonLibTest
             Assert.IsType<SAMServer>(result.Value);
         }
         
+        [SupportedOSPlatform("windows")]
         [WindowsOnlyFact]
         public async Task CertAbuseProcessor_GetMachineSid_ReturnsCachedValue() {
             Cache.AddMachineSid(TargetDomainSid, TargetDomainSid);
@@ -586,6 +596,7 @@ namespace CommonLibTest
             Assert.Equal(TargetDomainSid, _receivedCompStatus.ObjectId);
         }
         
+        [SupportedOSPlatform("windows")]
         [WindowsOnlyFact]
         public async Task CertAbuseProcessor_GetMachineSid_GetMachineSidFailure_ReturnsNull() {
             var mockSamServer = new Mock<ISAMServer>();
@@ -608,6 +619,7 @@ namespace CommonLibTest
             Assert.Equal(TargetDomainSid, _receivedCompStatus.ObjectId);
         }
         
+        [SupportedOSPlatform("windows")]
         [WindowsOnlyFact]
         public async Task CertAbuseProcessor_GetMachineSid_ReturnsSid() {
             var mockSamServer = new Mock<ISAMServer>();
@@ -629,6 +641,7 @@ namespace CommonLibTest
             Assert.Equal(TargetDomainSid, _receivedCompStatus.ObjectId);
         }
         
+        [SupportedOSPlatform("windows")]
         [WindowsOnlyFact]
         public async Task CertAbuseProcessor_CreateEnrollmentAgentRestriction_NullOpaque_ReturnsFalse() {
             var nullOpaqueAce = new CommonAce(
@@ -649,6 +662,7 @@ namespace CommonLibTest
             _mockLdapUtils.VerifyNoOtherCalls();
         }
         
+        [SupportedOSPlatform("windows")]
         [WindowsOnlyFact]
         public async Task CertAbuseProcessor_CreateEnrollmentAgentRestriction_UnresolvedTemplate_ReturnsFalse() {
             var emptyOpaqueAce = new CommonAce(
@@ -676,6 +690,7 @@ namespace CommonLibTest
             Assert.Null(result.restriction);
         }
         
+        [SupportedOSPlatform("windows")]
         [WindowsOnlyFact]
         public async Task CertAbuseProcessor_CreateEnrollmentAgentRestriction_NoTemplate_ReturnsAllTemplates() {
             var emptyOpaqueAce = new CommonAce(
@@ -709,6 +724,7 @@ namespace CommonLibTest
             Assert.Contains(result.restriction.Targets, t => t.ObjectIdentifier == "S-1-3");
         }
         
+        [SupportedOSPlatform("windows")]
         [WindowsOnlyFact]
         public async Task CertAbuseProcessor_CreateEnrollmentAgentRestriction_WithCanonicalName_ReturnsTemplate() {
             var expectedPrincipalType = Label.CertTemplate;
@@ -742,6 +758,7 @@ namespace CommonLibTest
                 Times.Once);
         }
         
+        [SupportedOSPlatform("windows")]
         [WindowsOnlyFact]
         public async Task CertAbuseProcessor_CreateEnrollmentAgentRestriction_WithCertTemplateOID_ReturnsTemplate() {
             var expectedPrincipalType = Label.CertTemplate;
