@@ -147,7 +147,7 @@ namespace CommonLibTest
             VerifyCompStatusLog(nameof(_registryProcessor.ReadRegistrySettings), TargetName, CSVComputerStatus.StatusSuccess);
         }
 
-        [WindowsOnlyFact]
+        [Fact]
         public async Task RegistryProcessor_ReadRegistrySettings_HandlesException() {
             var exception = new Exception("test exception");
             _mockStrategyExecutor.Setup(se => se.CollectAsync(
