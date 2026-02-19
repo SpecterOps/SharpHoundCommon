@@ -1,5 +1,5 @@
 using System;
-using System.Security.Principal;
+using System.Runtime.Versioning;
 using System.Text;
 using System.Threading.Tasks;
 using SharpHoundCommonLib;
@@ -302,6 +302,7 @@ namespace CommonLibTest {
             Assert.Equal("DC=test,DC=local", result);
         }
 
+        [SupportedOSPlatform("windows")]
         [WindowsOnlyTheory]
         [InlineData("S-1-5-32-544", "\\01\\02\\00\\00\\00\\00\\00\\05\\20\\00\\00\\00\\20\\02\\00\\00")]
         public void ConvertSidToHexSid_ValidSid_MatchesSecurityIdentifierBinaryForm(string sid, string expectedHexSid)
@@ -322,6 +323,7 @@ namespace CommonLibTest {
             }
         }
 
+        [SupportedOSPlatform("windows")]
         [WindowsOnlyFact]
         public void ConvertSidToHexSid_InvalidSid_Throws()
         {
