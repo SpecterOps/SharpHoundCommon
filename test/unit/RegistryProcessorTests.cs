@@ -210,6 +210,29 @@ namespace CommonLibTest
             //Validate logs
             VerifyCompStatusLog(nameof(_registryProcessor.ReadRegistrySettings), TargetName, CSVComputerStatus.StatusSuccess);
         }
+        
+        [Fact]
+        public async Task RegistryProcessor_ReadRegistrySettings_HandlesFailureWithNoAttempts() {
+            _mockStrategyExecutor.Setup(se => se.CollectAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<IEnumerable<RegistryQuery>>(),
+                    It.IsAny<IEnumerable<ICollectionStrategy<RegistryQueryResult, RegistryQuery>>>()))
+                .ReturnsAsync(
+                    new StrategyExecutorResult<RegistryQueryResult> {
+                        WasSuccessful = false
+                    }
+                );
+            
+            var results = await _registryProcessor.ReadRegistrySettings(TargetName);
+
+            //Validate result
+            Assert.False(results.Collected);
+            Assert.Equal("Failed to read registry settings", results.FailureReason);
+            
+            //Validate logs
+            _mockLogger.VerifyNoLogs(LogLevel.Trace);
+            Assert.Empty(_receivedCompStatuses);
+        }
 
         private void VerifyFailureLog<TStrategy>(string target, string reason) {
             var expected = $"ReadRegistry failed on {target} using {typeof(TStrategy)}: {reason}"; 

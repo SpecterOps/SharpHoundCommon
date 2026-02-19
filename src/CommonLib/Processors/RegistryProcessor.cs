@@ -79,10 +79,13 @@ public class RegistryProcessor {
                     Status = attempt.StrategyType.Name + " Failed: " + attempt.FailureReason
                 });
             }
-
+            
             if (!collectedData.WasSuccessful) {
-                string msg = string.Join("\n",
-                    collectedData.FailureAttempts.Select(a => $"{a.StrategyType.Name}: {a.FailureReason ?? ""}"));
+                var msg = collectedData.FailureAttempts is null 
+                    ? "Failed to read registry settings"
+                    : string.Join("\n",
+                        collectedData.FailureAttempts.Select(a => $"{a.StrategyType.Name}: {a.FailureReason ?? ""}"));
+                
                 return APIResult<RegistryData>.Failure(msg);
             }
             

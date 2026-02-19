@@ -26,7 +26,6 @@ namespace SharpHoundRPC.Registry {
         /// </summary>
         public bool UseKerberos { get; set; } = true;
 
-
         /// <summary>
         /// Creates a new WMI registry strategy
         /// </summary>
