@@ -32,4 +32,16 @@ public static class MockExtentions
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once);
     }
+    
+    public static void VerifyNoLogs<T>(this Mock<ILogger<T>> mockLogger, LogLevel logLevel)
+    {
+        mockLogger.Verify(
+            x => x.Log(
+                logLevel,
+                It.IsAny<EventId>(),
+                It.IsAny<It.IsAnyType>(),
+                It.IsAny<Exception>(),
+                It.IsAny<Func<It.IsAnyType, Exception, string>>()),
+            Times.Never);
+    }
 }

@@ -5,7 +5,6 @@ using SharpHoundRPC.PortScanner;
 using SharpHoundRPC.Registry;
 using System;
 using System.Linq;
-using System.Runtime.Serialization.Json;
 using System.Threading.Tasks;
 
 namespace SharpHoundCommonLib.Processors;
@@ -15,13 +14,16 @@ public class RegistryProcessor {
     
     private readonly ILogger _log;
     private readonly IPortScanner _portScanner;
+    private readonly IStrategyExecutor _registryCollector; 
+    private readonly AdaptiveTimeout _registryAdaptiveTimeout = new(maxTimeout:TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ReadRegistrySettings)));
     private readonly ICollectionStrategy<RegistryQueryResult, RegistryQuery>[] _strategies;
     private readonly RegistryQuery[] _queries;
-    private readonly AdaptiveTimeout _registryAdaptiveTimeout = new(maxTimeout:TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ReadRegistrySettings)));
 
-    public RegistryProcessor(ILogger log, string domain) {
+    public RegistryProcessor(ILogger log, IStrategyExecutor registryCollector, string domain) {
         _log = log ?? Logging.LogProvider.CreateLogger("RegistryProcessor");
         _portScanner = new PortScanner();
+        _registryCollector = registryCollector;
+        
         _strategies = [
             // Higher priority at the top of the list
             new DotNetWmiRegistryStrategy(_portScanner, domain),
@@ -58,8 +60,7 @@ public class RegistryProcessor {
         var output = new RegistryData();
 
         try {
-            var registryCollector = new StrategyExecutor();
-            var result = await _registryAdaptiveTimeout.ExecuteWithTimeout(async (_) => await registryCollector
+            var result = await _registryAdaptiveTimeout.ExecuteWithTimeout(async (_) => await _registryCollector
                 .CollectAsync(targetMachine, _queries, _strategies)
                 .ConfigureAwait(false));
 
@@ -73,9 +74,9 @@ public class RegistryProcessor {
                 _log.LogTrace("ReadRegistry failed on {ComputerName} using {Strategy}: {Error}", targetMachine, attempt.StrategyType, attempt.FailureReason);
                 await SendComputerStatus(new CSVComputerStatus
                 {
-                    Status = attempt.FailureReason,
+                    Task = nameof(ReadRegistrySettings),
                     ComputerName = targetMachine,
-                    Task = nameof(ReadRegistrySettings)
+                    Status = attempt.StrategyType.Name + " Failed: " + attempt.FailureReason
                 });
             }
 
@@ -84,6 +85,13 @@ public class RegistryProcessor {
                     collectedData.FailureAttempts.Select(a => $"{a.StrategyType.Name}: {a.FailureReason ?? ""}"));
                 return APIResult<RegistryData>.Failure(msg);
             }
+            
+            await SendComputerStatus(new CSVComputerStatus
+            {
+                Task = nameof(ReadRegistrySettings),
+                ComputerName = targetMachine,
+                Status = CSVComputerStatus.StatusSuccess
+            });
 
             foreach (var key in collectedData.Results ?? []) {
                 if (!key.ValueExists)
@@ -120,14 +128,6 @@ public class RegistryProcessor {
                         break;
                 }
             }
-            
-            await SendComputerStatus(new CSVComputerStatus
-            {
-                Status = CSVComputerStatus.StatusSuccess,
-                ComputerName = targetMachine,
-                Task = nameof(ReadRegistrySettings),
-                // ObjectId = computerObjectId, //TODO: can we get a compId?
-            });
 
             return APIResult<RegistryData>.Success(output);
         } catch (Exception ex) {

@@ -4,7 +4,15 @@ namespace SharpHoundRPC.Registry {
     using System.Collections.Generic;
     using System.Threading.Tasks;
 
-    public class StrategyExecutor {
+    public interface IStrategyExecutor
+    {
+        Task<StrategyExecutorResult<T>> CollectAsync<T, TQuery>(
+            string targetMachine,
+            IEnumerable<TQuery> queries,
+            IEnumerable<ICollectionStrategy<T, TQuery>> strategies);
+    }
+    
+    public class StrategyExecutor : IStrategyExecutor {
         public async Task<StrategyExecutorResult<T>> CollectAsync<T, TQuery>(
             string targetMachine,
             IEnumerable<TQuery> queries,
