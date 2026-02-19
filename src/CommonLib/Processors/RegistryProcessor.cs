@@ -74,9 +74,9 @@ public class RegistryProcessor {
                 _log.LogTrace("ReadRegistry failed on {ComputerName} using {Strategy}: {Error}", targetMachine, attempt.StrategyType, attempt.FailureReason);
                 await SendComputerStatus(new CSVComputerStatus
                 {
-                    Task = nameof(ReadRegistrySettings),
+                    Task = $"{nameof(ReadRegistrySettings)} - {attempt.StrategyType.Name}",
                     ComputerName = targetMachine,
-                    Status = attempt.StrategyType.Name + " Failed: " + attempt.FailureReason
+                    Status = attempt.FailureReason
                 });
             }
             

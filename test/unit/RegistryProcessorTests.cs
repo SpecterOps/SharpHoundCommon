@@ -36,7 +36,7 @@ namespace CommonLibTest
         }
 
         [Fact]
-        public async Task RegistryProcessor_ReadRegistrySettings_CollectionNotSuccessful() {
+        public async Task RegistryProcessor_ReadRegistrySettings_CollectionFailed() {
             const string failureReason = "No such host is known.";
             var attempts = new List<StrategyResult<RegistryQueryResult>>
             {
@@ -73,7 +73,7 @@ namespace CommonLibTest
             VerifyFailureLog<RemoteRegistryStrategy>(TargetName, failureReason);
             Assert.Equal(2, _receivedCompStatuses.Count);
             foreach (var attempt in attempts) {
-                VerifyCompStatusLog(nameof(_registryProcessor.ReadRegistrySettings), TargetName, $"{attempt.StrategyType.Name} Failed: {failureReason}");
+                VerifyCompStatusLog($"{nameof(_registryProcessor.ReadRegistrySettings)} - {attempt.StrategyType.Name}", TargetName, failureReason);
             }
         }
 
@@ -143,7 +143,7 @@ namespace CommonLibTest
             //Validate logs
             VerifyFailureLog<DotNetWmiRegistryStrategy>(TargetName, failureReason);
             Assert.Equal(2, _receivedCompStatuses.Count);
-            VerifyCompStatusLog(nameof(_registryProcessor.ReadRegistrySettings), TargetName, $"{attempts[0].StrategyType.Name} Failed: {failureReason}");
+            VerifyCompStatusLog($"{nameof(_registryProcessor.ReadRegistrySettings)} - {attempts[0].StrategyType.Name}", TargetName, failureReason);
             VerifyCompStatusLog(nameof(_registryProcessor.ReadRegistrySettings), TargetName, CSVComputerStatus.StatusSuccess);
         }
 
