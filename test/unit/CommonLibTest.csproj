@@ -6,7 +6,7 @@
         <CollectCoverage>true</CollectCoverage>
         <CoverletOutput>..\..\docfx\coverage\</CoverletOutput>
         <CoverletOutputFormat>OpenCover</CoverletOutputFormat>
-        //Suppress cross-targeting warning when referencing net472 SharpHound projects in net8.0 tests
+        <!-- Suppress cross-targeting warning when referencing net472 SharpHound projects in net8.0 tests -->
         <NoWarn>$(NoWarn);NU1702</NoWarn> 
     </PropertyGroup>
 
