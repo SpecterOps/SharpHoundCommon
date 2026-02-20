@@ -312,15 +312,6 @@ namespace CommonLibTest {
 
             // Assert
             Assert.Equal(expectedHexSid, actual);
-            return;
-
-            static string BuildExpectedHexSid(string sid)
-            {
-                var securityIdentifier = new SecurityIdentifier(sid);
-                var sidBytes = new byte[securityIdentifier.BinaryLength];
-                securityIdentifier.GetBinaryForm(sidBytes, 0);
-                return $"\\{BitConverter.ToString(sidBytes).Replace('-', '\\')}";
-            }
         }
 
         [SupportedOSPlatform("windows")]

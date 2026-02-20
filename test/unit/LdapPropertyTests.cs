@@ -1358,7 +1358,7 @@ namespace CommonLibTest
             Assert.Contains("rdpman/win10", atd);
 
             var atdr = test.AllowedToDelegate;
-            Assert.Equal(1, atdr.Length);
+            Assert.Single(atdr);
             var expected = new TypedPrincipal[]
             {
                 new()
