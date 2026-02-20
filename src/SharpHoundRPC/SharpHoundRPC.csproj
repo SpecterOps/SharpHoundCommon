@@ -8,7 +8,7 @@
         <Company>SpecterOps</Company>
         <PackageDescription>SAM/LSA Wrapper for C# BloodHound tasks</PackageDescription>
         <PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
-        <Version>4.5.2</Version>
+        <Version>4.5.3</Version>
         <AssemblyName>SharpHoundRPC</AssemblyName>
         <RootNamespace>SharpHoundRPC</RootNamespace>
     </PropertyGroup>
