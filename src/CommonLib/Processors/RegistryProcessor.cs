@@ -91,7 +91,7 @@ public class RegistryProcessor {
             
             await SendComputerStatus(new CSVComputerStatus
             {
-                Task = nameof(ReadRegistrySettings),
+                Task = $"{nameof(ReadRegistrySettings)} - {_strategies[collectedData.FailureAttempts?.Count() ?? 0].GetType().Name}",
                 ComputerName = targetMachine,
                 Status = CSVComputerStatus.StatusSuccess
             });

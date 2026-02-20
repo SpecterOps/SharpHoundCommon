@@ -104,7 +104,8 @@ namespace CommonLibTest
             
             //Validate logs
             _mockLogger.VerifyNoLogs(LogLevel.Trace);
-            VerifyCompStatusLog(nameof(_registryProcessor.ReadRegistrySettings), TargetName, CSVComputerStatus.StatusSuccess);
+            const string task = $"{nameof(_registryProcessor.ReadRegistrySettings)} - {nameof(DotNetWmiRegistryStrategy)}";
+            VerifyCompStatusLog(task, TargetName, CSVComputerStatus.StatusSuccess);
         }
 
         [WindowsOnlyFact]
@@ -144,7 +145,8 @@ namespace CommonLibTest
             VerifyFailureLog<DotNetWmiRegistryStrategy>(TargetName, failureReason);
             Assert.Equal(2, _receivedCompStatuses.Count);
             VerifyCompStatusLog($"{nameof(_registryProcessor.ReadRegistrySettings)} - {attempts[0].StrategyType.Name}", TargetName, failureReason);
-            VerifyCompStatusLog(nameof(_registryProcessor.ReadRegistrySettings), TargetName, CSVComputerStatus.StatusSuccess);
+            const string task = $"{nameof(_registryProcessor.ReadRegistrySettings)} - {nameof(RemoteRegistryStrategy)}";
+            VerifyCompStatusLog(task, TargetName, CSVComputerStatus.StatusSuccess);
         }
 
         [Fact]
@@ -208,7 +210,8 @@ namespace CommonLibTest
             Assert.Equal(keyValue, results.Result.EnableSecuritySignature);
             
             //Validate logs
-            VerifyCompStatusLog(nameof(_registryProcessor.ReadRegistrySettings), TargetName, CSVComputerStatus.StatusSuccess);
+            const string task = $"{nameof(_registryProcessor.ReadRegistrySettings)} - {nameof(DotNetWmiRegistryStrategy)}";
+            VerifyCompStatusLog(task, TargetName, CSVComputerStatus.StatusSuccess);
         }
         
         [Fact]
