@@ -35,7 +35,8 @@ namespace SharpHoundRPC.Registry {
                     return new StrategyExecutorResult<T> {
                         Results = results,
                         FailureAttempts = attempts,
-                        WasSuccessful = true
+                        WasSuccessful = true,
+                        SuccessfulStrategy =  strategy.GetType(),
                     };
                 } catch (Exception ex) {
                     attempt.FailureReason = $"Collector failed: {ex.Message}.\nInner Exception: {ex.InnerException}";

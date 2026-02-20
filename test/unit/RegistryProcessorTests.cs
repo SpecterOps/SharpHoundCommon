@@ -38,28 +38,25 @@ namespace CommonLibTest
         [Fact]
         public async Task RegistryProcessor_ReadRegistrySettings_CollectionFailed() {
             const string failureReason = "No such host is known.";
-            var attempts = new List<StrategyResult<RegistryQueryResult>>
-            {
-                new(typeof(DotNetWmiRegistryStrategy))
-                {
+            
+            var attempts = new List<StrategyResult<RegistryQueryResult>> {
+                new(typeof(DotNetWmiRegistryStrategy)) {
                     FailureReason = failureReason
                 },
-                new(typeof(RemoteRegistryStrategy))
-                {
+                new(typeof(RemoteRegistryStrategy)) {
                     FailureReason = failureReason
                 }
+            };
+            var executorResult = new StrategyExecutorResult<RegistryQueryResult> {
+                FailureAttempts = attempts,
+                WasSuccessful = false
             };
             
             _mockStrategyExecutor.Setup(se => se.CollectAsync(
                     It.IsAny<string>(),
                     It.IsAny<IEnumerable<RegistryQuery>>(),
                     It.IsAny<IEnumerable<ICollectionStrategy<RegistryQueryResult, RegistryQuery>>>()))
-                .ReturnsAsync(
-                    new StrategyExecutorResult<RegistryQueryResult> {
-                        FailureAttempts = attempts,
-                        WasSuccessful = false
-                    }
-                );
+                .ReturnsAsync(executorResult);
             
             var results = await _registryProcessor.ReadRegistrySettings(TargetName);
 
@@ -81,19 +78,20 @@ namespace CommonLibTest
         public async Task RegistryProcessor_ReadRegistrySettings_FirstStrategySuccessful() {
             const uint minClientSecValue = 536870912;
             
+            var executorResult = new StrategyExecutorResult<RegistryQueryResult> {
+                Results = [
+                    new RegistryQueryResult(@"SYSTEM\CurrentControlSet\Control\Lsa\MSV1_0", "ClientAllowedNTLMServers", null, null, false),
+                    new RegistryQueryResult(@"SYSTEM\CurrentControlSet\Control\Lsa\MSV1_0", "NtlmMinClientSec", minClientSecValue, RegistryValueKind.DWord, true)
+                ],
+                WasSuccessful = true,
+                SuccessfulStrategy = typeof(DotNetWmiRegistryStrategy)
+            };
+            
             _mockStrategyExecutor.Setup(se => se.CollectAsync(
                     It.IsAny<string>(),
                     It.IsAny<IEnumerable<RegistryQuery>>(),
                     It.IsAny<IEnumerable<ICollectionStrategy<RegistryQueryResult, RegistryQuery>>>()))
-                .ReturnsAsync(
-                    new StrategyExecutorResult<RegistryQueryResult> {
-                        Results = [
-                            new RegistryQueryResult(@"SYSTEM\CurrentControlSet\Control\Lsa\MSV1_0", "ClientAllowedNTLMServers", null, null, false),
-                            new RegistryQueryResult(@"SYSTEM\CurrentControlSet\Control\Lsa\MSV1_0", "NtlmMinClientSec", minClientSecValue, RegistryValueKind.DWord, true)
-                        ],
-                        WasSuccessful = true,
-                    }
-                );
+                .ReturnsAsync(executorResult);
             
             var results = await _registryProcessor.ReadRegistrySettings(TargetName);
         
@@ -113,27 +111,25 @@ namespace CommonLibTest
             const string failureReason = "No such host is known.";
             const uint minClientSecValue = 536870912;
             
-            var attempts = new List<StrategyResult<RegistryQueryResult>>
-            {
-                new(typeof(DotNetWmiRegistryStrategy))
-                {
+            var attempts = new List<StrategyResult<RegistryQueryResult>> {
+                new(typeof(DotNetWmiRegistryStrategy)) {
                     FailureReason = failureReason
                 }
+            };
+            var executorResult = new StrategyExecutorResult<RegistryQueryResult> {
+                FailureAttempts = attempts,
+                Results = [
+                    new RegistryQueryResult(@"SYSTEM\CurrentControlSet\Control\Lsa\MSV1_0", "NtlmMinClientSec", minClientSecValue, RegistryValueKind.DWord, true)
+                ],
+                WasSuccessful = true,
+                SuccessfulStrategy = typeof(RemoteRegistryStrategy)
             };
             
             _mockStrategyExecutor.Setup(se => se.CollectAsync(
                     It.IsAny<string>(),
                     It.IsAny<IEnumerable<RegistryQuery>>(),
                     It.IsAny<IEnumerable<ICollectionStrategy<RegistryQueryResult, RegistryQuery>>>()))
-                .ReturnsAsync(
-                    new StrategyExecutorResult<RegistryQueryResult> {
-                        FailureAttempts = attempts,
-                        Results = [
-                            new RegistryQueryResult(@"SYSTEM\CurrentControlSet\Control\Lsa\MSV1_0", "NtlmMinClientSec", minClientSecValue, RegistryValueKind.DWord, true)
-                        ],
-                        WasSuccessful = true
-                    }
-                );
+                .ReturnsAsync(executorResult);
             
             var results = await _registryProcessor.ReadRegistrySettings(TargetName);
 
@@ -152,6 +148,7 @@ namespace CommonLibTest
         [Fact]
         public async Task RegistryProcessor_ReadRegistrySettings_HandlesException() {
             var exception = new Exception("test exception");
+            
             _mockStrategyExecutor.Setup(se => se.CollectAsync(
                     It.IsAny<string>(),
                     It.IsAny<IEnumerable<RegistryQuery>>(),
@@ -162,7 +159,7 @@ namespace CommonLibTest
 
             //Validate result
             Assert.False(results.Collected);
-            Assert.Equal(results.FailureReason, exception.ToString());
+            Assert.Equal(exception.ToString(), results.FailureReason);
             
             //Validate logs
             _mockLogger.VerifyLogContains(LogLevel.Error, $"Unhandled Registry Processor exception {TargetName}: {exception}");
@@ -173,27 +170,28 @@ namespace CommonLibTest
         public async Task RegistryProcessor_ReadRegistrySettings_SetsAllValues() {
             var allowedServers = new[] {"server"};
             const uint keyValue = 1;
+
+            var executorResult = new StrategyExecutorResult<RegistryQueryResult> {
+                Results = [
+                    new RegistryQueryResult(@"SYSTEM\CurrentControlSet\Control\Lsa\MSV1_0", "ClientAllowedNTLMServers", allowedServers, RegistryValueKind.MultiString, true),
+                    new RegistryQueryResult(@"SYSTEM\CurrentControlSet\Control\Lsa\MSV1_0", "NtlmMinClientSec", keyValue, RegistryValueKind.DWord, true),
+                    new RegistryQueryResult(@"SYSTEM\CurrentControlSet\Control\Lsa\MSV1_0", "NtlmMinServerSec", keyValue, RegistryValueKind.DWord, true),
+                    new RegistryQueryResult(@"SYSTEM\CurrentControlSet\Control\Lsa\MSV1_0", "RestrictSendingNTLMTraffic", keyValue, RegistryValueKind.DWord, true),
+                    new RegistryQueryResult(@"SYSTEM\CurrentControlSet\Control\Lsa\MSV1_0", "RestrictReceivingNTLMTraffic", keyValue, RegistryValueKind.DWord, true),
+                    new RegistryQueryResult(@"SYSTEM\CurrentControlSet\Control\Lsa\", "LMCompatibilityLevel", keyValue, RegistryValueKind.DWord, true),
+                    new RegistryQueryResult(@"SYSTEM\CurrentControlSet\Control\Lsa\", "UseMachineId", keyValue, RegistryValueKind.DWord, true),
+                    new RegistryQueryResult(@"SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters", "RequireSecuritySignature", keyValue, RegistryValueKind.DWord, true),
+                    new RegistryQueryResult(@"SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters", "EnableSecuritySignature", keyValue, RegistryValueKind.DWord, true),
+                ],
+                WasSuccessful = true,
+                SuccessfulStrategy = typeof(DotNetWmiRegistryStrategy)
+            };
             
             _mockStrategyExecutor.Setup(se => se.CollectAsync(
                     It.IsAny<string>(),
                     It.IsAny<IEnumerable<RegistryQuery>>(),
                     It.IsAny<IEnumerable<ICollectionStrategy<RegistryQueryResult, RegistryQuery>>>()))
-                .ReturnsAsync(
-                    new StrategyExecutorResult<RegistryQueryResult> {
-                        Results = [
-                            new RegistryQueryResult(@"SYSTEM\CurrentControlSet\Control\Lsa\MSV1_0", "ClientAllowedNTLMServers", allowedServers, RegistryValueKind.MultiString, true),
-                            new RegistryQueryResult(@"SYSTEM\CurrentControlSet\Control\Lsa\MSV1_0", "NtlmMinClientSec", keyValue, RegistryValueKind.DWord, true),
-                            new RegistryQueryResult(@"SYSTEM\CurrentControlSet\Control\Lsa\MSV1_0", "NtlmMinServerSec", keyValue, RegistryValueKind.DWord, true),
-                            new RegistryQueryResult(@"SYSTEM\CurrentControlSet\Control\Lsa\MSV1_0", "RestrictSendingNTLMTraffic", keyValue, RegistryValueKind.DWord, true),
-                            new RegistryQueryResult(@"SYSTEM\CurrentControlSet\Control\Lsa\MSV1_0", "RestrictReceivingNTLMTraffic", keyValue, RegistryValueKind.DWord, true),
-                            new RegistryQueryResult(@"SYSTEM\CurrentControlSet\Control\Lsa\", "LMCompatibilityLevel", keyValue, RegistryValueKind.DWord, true),
-                            new RegistryQueryResult(@"SYSTEM\CurrentControlSet\Control\Lsa\", "UseMachineId", keyValue, RegistryValueKind.DWord, true),
-                            new RegistryQueryResult(@"SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters", "RequireSecuritySignature", keyValue, RegistryValueKind.DWord, true),
-                            new RegistryQueryResult(@"SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters", "EnableSecuritySignature", keyValue, RegistryValueKind.DWord, true),
-                        ],
-                        WasSuccessful = true,
-                    }
-                );
+                .ReturnsAsync(executorResult);
             
             var results = await _registryProcessor.ReadRegistrySettings(TargetName);
         
@@ -216,15 +214,15 @@ namespace CommonLibTest
         
         [Fact]
         public async Task RegistryProcessor_ReadRegistrySettings_HandlesFailureWithNoAttempts() {
+            var executorResult = new StrategyExecutorResult<RegistryQueryResult> {
+                WasSuccessful = false
+            };
+            
             _mockStrategyExecutor.Setup(se => se.CollectAsync(
                     It.IsAny<string>(),
                     It.IsAny<IEnumerable<RegistryQuery>>(),
                     It.IsAny<IEnumerable<ICollectionStrategy<RegistryQueryResult, RegistryQuery>>>()))
-                .ReturnsAsync(
-                    new StrategyExecutorResult<RegistryQueryResult> {
-                        WasSuccessful = false
-                    }
-                );
+                .ReturnsAsync(executorResult);
             
             var results = await _registryProcessor.ReadRegistrySettings(TargetName);
 
