@@ -71,7 +71,7 @@ public class RegistryProcessor {
             var collectedData = result.Value;
 
             foreach (var attempt in collectedData.FailureAttempts ?? []) {
-                _log.LogTrace("ReadRegistry failed on {ComputerName} using {Strategy}: {Error}", targetMachine, attempt.StrategyType, attempt.FailureReason);
+                _log.LogTrace("ReadRegistry failed on {ComputerName} using {Strategy}: {Error}", targetMachine, attempt.StrategyType.Name, attempt.FailureReason);
                 await SendComputerStatus(new CSVComputerStatus
                 {
                     Task = $"{nameof(ReadRegistrySettings)} - {attempt.StrategyType.Name}",

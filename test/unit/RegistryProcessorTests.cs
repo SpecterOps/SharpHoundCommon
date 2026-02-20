@@ -238,7 +238,7 @@ namespace CommonLibTest
         }
 
         private void VerifyFailureLog<TStrategy>(string target, string reason) {
-            var expected = $"ReadRegistry failed on {target} using {typeof(TStrategy)}: {reason}"; 
+            var expected = $"ReadRegistry failed on {target} using {typeof(TStrategy).Name}: {reason}"; 
             _mockLogger.VerifyLogContains(LogLevel.Trace, expected);
         }
         
