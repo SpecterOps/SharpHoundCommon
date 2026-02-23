@@ -36,18 +36,22 @@ namespace SharpHoundRPC.Registry {
                         Results = results,
                         FailureAttempts = attempts,
                         WasSuccessful = true,
-                        SuccessfulStrategy =  strategy.GetType(),
+                        SuccessfulStrategy =  strategy.GetType()
                     };
                 } catch (Exception ex) {
-                    attempt.FailureReason = $"Collector failed: {ex.Message}.\nInner Exception: {ex.InnerException}";
+                    var innerException = ex.InnerException != null
+                        ? $"\nInner Exception: {ex.InnerException}"
+                        : string.Empty;
+
+                    attempt.FailureReason = $"Collector failed: {ex.Message}.{innerException}";
                 }
 
                 attempts.Add(attempt);
             }
 
             return new StrategyExecutorResult<T> {
-                Results = null,
-                FailureAttempts = attempts
+                FailureAttempts = attempts,
+                WasSuccessful = false,
             };
         }
     }
