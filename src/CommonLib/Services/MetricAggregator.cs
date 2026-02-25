@@ -1,6 +1,5 @@
 using System;
 using System.Threading;
-using SharpHoundCommonLib.Interfaces;
 using SharpHoundCommonLib.Models;
 
 namespace SharpHoundCommonLib.Services;
@@ -18,26 +17,29 @@ public static class MetricAggregatorExtensions {
 
 public abstract class MetricAggregator {
     public abstract void Observe(double value);
-    public abstract object Snapshot();
 }
 
-public sealed class CounterAggregator : MetricAggregator {
+public abstract class MetricAggregator<T> : MetricAggregator {
+    public abstract T Snapshot();
+}
+
+public sealed class CounterAggregator : MetricAggregator<long> {
     private long _value;
 
     public override void Observe(double value) => Interlocked.Add(ref _value, (long)value);
-    public override object Snapshot() => _value;
+    public override long Snapshot() => _value;
 }
 
-public sealed class GaugeAggregator : MetricAggregator {
+public sealed class GaugeAggregator : MetricAggregator<double> {
     private double _value;
     
     public override void Observe(double value) => _value = value;
-    public override object Snapshot() => _value;
+    public override double Snapshot() => _value;
 }
 
 public record struct HistogramSnapshot(double[] Bounds, long[] Counts, long TotalCount, double Sum);
 
-public sealed class CumulativeHistogramAggregator(double[] bounds) : MetricAggregator {
+public sealed class CumulativeHistogramAggregator(double[] bounds) : MetricAggregator<HistogramSnapshot> {
     private readonly long[] _bucketCounts = new long[bounds.Length + 1]; // Includes the Inf+ bucket
     private long _count;
     private double _sum;
@@ -57,7 +59,7 @@ public sealed class CumulativeHistogramAggregator(double[] bounds) : MetricAggre
         }
     }
     
-    public override object Snapshot() => SnapshotHistogram();
+    public override HistogramSnapshot Snapshot() => SnapshotHistogram();
 
     public HistogramSnapshot SnapshotHistogram() {
         lock (_lock) {

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace SharpHoundCommonLib.Models;
@@ -30,6 +31,25 @@ public readonly record struct LabelValues(string[] Values) {
         
         sb.Append('}');
         return sb.ToString();
+    }
+
+    public Dictionary<string, string> ToDictionary(IReadOnlyList<string> labelNames,
+        IReadOnlyList<string> additionalLabelNames = null, IReadOnlyList<string> additionalLabelValues = null) {
+        if (labelNames.Count == 0)
+            return new Dictionary<string, string>();
+        
+        if (labelNames.Count != Values.Length)
+            return new Dictionary<string, string>{{"invalid_labels", "label_name_and_count_do_not_match"}};
+
+        if (additionalLabelNames == null || additionalLabelValues == null ||
+            additionalLabelNames.Count != additionalLabelValues.Count)
+            return labelNames.Zip(Values, (name, value) => new { name, value }).ToDictionary(x => x.name, x => x.value);
+        
+        var names = new List<string>(labelNames);
+        var values = new List<string>(Values);
+        names.AddRange(additionalLabelNames);
+        values.AddRange(additionalLabelValues);
+        return names.Zip(values, (name, value) => new {name, value}).ToDictionary(x => x.name, x => x.value);
     }
 };
 

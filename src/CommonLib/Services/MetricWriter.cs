@@ -1,19 +1,31 @@
 using System;
 using System.Globalization;
 using System.Text;
+using Microsoft.Extensions.Logging;
 using SharpHoundCommonLib.Interfaces;
 using SharpHoundCommonLib.Models;
 
 namespace SharpHoundCommonLib.Services;
 
-public class MetricWriter : IMetricWriter {
+public class MetricWriter(ILogger log = null) : IMetricWriter {
     public void StringBuilderAppendMetric(StringBuilder builder, MetricDefinition definition, LabelValues labelValues,
         MetricAggregator aggregator, DateTimeOffset timestamp, string timestampOutputString = "yyyy-MM-dd HH:mm:ss.fff") {
-        var labelText = labelValues.ToDisplayString(definition.LabelNames);
-        if (aggregator is CumulativeHistogramAggregator cha) {
-            CumulativeHistogramAppend(builder, definition, labelValues, cha, timestamp, timestampOutputString);
-        } else {
-            DefaultAppend(builder, definition, labelValues.ToDisplayString(definition.LabelNames), aggregator, timestamp, timestampOutputString);
+        switch (aggregator) {
+            case GaugeAggregator g:
+                DefaultAppend(builder, definition, labelValues.ToDisplayString(definition.LabelNames),
+                    g, timestamp, timestampOutputString);
+                break;
+            case CounterAggregator c:
+                DefaultAppend(builder, definition,
+                    labelValues.ToDisplayString(definition.LabelNames), c, timestamp, timestampOutputString);
+                break;
+            case CumulativeHistogramAggregator cha:
+                CumulativeHistogramAppend(builder, definition, labelValues, cha,
+                    timestamp, timestampOutputString);
+                break;
+            default: 
+                log?.LogWarning($"No implementation of this Aggregator in {nameof(StringBuilderAppendMetric)}.");
+                break;
         }
     }
 
@@ -81,7 +93,17 @@ public class MetricWriter : IMetricWriter {
         StringBuilder builder, 
         MetricDefinition definition, 
         string labelText, 
-        MetricAggregator aggregator, 
+        MetricAggregator<double> aggregator, 
+        DateTimeOffset timestamp, 
+        string timestampOutputString) => 
+        builder.AppendFormat("{0} {1}{2} = {{{3}}}\n", timestamp.ToString(timestampOutputString),
+            definition.Name, labelText, aggregator.Snapshot());
+    
+    private static void DefaultAppend(
+        StringBuilder builder, 
+        MetricDefinition definition, 
+        string labelText, 
+        MetricAggregator<long> aggregator, 
         DateTimeOffset timestamp, 
         string timestampOutputString) => 
         builder.AppendFormat("{0} {1}{2} = {{{3}}}\n", timestamp.ToString(timestampOutputString),

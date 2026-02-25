@@ -12,10 +12,27 @@ namespace CommonLibTest;
 
 public class SimpleMetricWriter : IMetricWriter {
     public void StringBuilderAppendMetric(StringBuilder builder, MetricDefinition definition, LabelValues labelValues,
-        MetricAggregator aggregator, DateTimeOffset timestamp, string timestampOutputString = "yyyy-MM-dd HH:mm:ss.fff") => 
-        builder.AppendFormat(
-            "DefinitionType: {0}, DefinitionName: {1}, AggregatorType: {2}, AggregatorSnapshotType: {3}\n",
-            definition.GetType(), definition.Name, aggregator.GetType(), aggregator.Snapshot().GetType());
+        MetricAggregator aggregator, DateTimeOffset timestamp,
+        string timestampOutputString = "yyyy-MM-dd HH:mm:ss.fff") {
+        switch (aggregator) {
+            case GaugeAggregator g:
+                builder.Append(
+                    $"DefinitionType: {definition.GetType()}, DefinitionName: {definition.Name}, AggregatorType: {aggregator.GetType()}, AggregatorSnapshotType: {g.Snapshot().GetType()}\n");
+                break;
+            case CounterAggregator c:
+                builder.Append(
+                    $"DefinitionType: {definition.GetType()}, DefinitionName: {definition.Name}, AggregatorType: {aggregator.GetType()}, AggregatorSnapshotType: {c.Snapshot().GetType()}\n");
+                break;
+            case CumulativeHistogramAggregator cha:
+                builder.Append(
+                    $"DefinitionType: {definition.GetType()}, DefinitionName: {definition.Name}, AggregatorType: {aggregator.GetType()}, AggregatorSnapshotType: {cha.Snapshot().GetType()}\n");
+                break;
+            default:
+                builder.Append(
+                    $"DefinitionType: {definition.GetType()}, DefinitionName: {definition.Name}, AggregatorType: {aggregator.GetType()}, AggregatorSnapshotType: Unknown Aggregator Type\n");
+                break;
+        }
+    }
 }
 
 public class FileMetricSinkTests {
@@ -66,14 +83,14 @@ public class FileMetricSinkTests {
         MetricDefinition[] definitions = [new CounterDefinition("counter_definition", ["name"])];
         var observation = new MetricObservation.DoubleMetricObservation(0, 1, ["value"]);
         var sink = new FileMetricSink(definitions, writerMoq.Object, metricWriter, sinkOptions);
-            
+        
         // act
         sink.Observe(observation);
         sink.Flush();
         
         // assert
         writerMoq.Verify(w => w.Write(It.IsAny<string>()), Times.Once);
-        if (autoFlush) 
+        if (autoFlush)
             writerMoq.Verify(w => w.Flush(), Times.Once);
         else
             writerMoq.Verify(w => w.Flush(), Times.Never);

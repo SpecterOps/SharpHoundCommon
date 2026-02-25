@@ -35,7 +35,7 @@ public class MetricAggregatorTests(ITestOutputHelper output) {
     [Theory]
     [MemberData(nameof(MetricAggregatorTestData.ObserveAndSnapshotTests),
         MemberType = typeof(MetricAggregatorTestData))]
-    public void MetricAggregator_Observe_and_Snapshot_Tests(MetricAggregator aggregator,
+    public void MetricAggregator_Observe_and_Snapshot_Tests<T>(MetricAggregator<T> aggregator,
        double[] observations, object expectedSnapshot) {
         // setup
         foreach (var observation in observations) {
