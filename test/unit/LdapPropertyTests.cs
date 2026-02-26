@@ -730,6 +730,45 @@ namespace CommonLibTest
             Assert.Contains("basicconstraintpathlength", keys);
         }
 
+        [Theory]
+        [MemberData(nameof(EmptyCertBytes))]
+        public void LDAPPropertyProcessor_ReadAIACAProperties_NoCACertificate(byte[] CACertBytes) {
+            var mock = new MockDirectoryObject(
+                "CN\u003dDUMPSTER-DC01-CA,CN\u003dAIA,CN\u003dPUBLIC KEY SERVICES,CN\u003dSERVICES,CN\u003dCONFIGURATION,DC\u003dDUMPSTER,DC\u003dFIRE",
+                new Dictionary<string, object>
+                {
+                    {"description", null},
+                    {"domain", "DUMPSTER.FIRE"},
+                    {"name", "DUMPSTER-DC01-CA@DUMPSTER.FIRE"},
+                    {"domainsid", "S-1-5-21-2697957641-2271029196-387917394"},
+                    {"whencreated", 1683986131},
+                    {"hascrosscertificatepair", true},
+                    {LDAPProperties.CACertificate, CACertBytes}
+                }, "","2F9F3630-F46A-49BF-B186-6629994EBCF9");
+
+            var test = LdapPropertyProcessor.ReadAIACAProperties(mock);
+            var keys = test.Keys;
+
+            //These are cert derived properties
+            Assert.DoesNotContain("certthumbprint", keys);
+            Assert.DoesNotContain("certname", keys);
+            Assert.DoesNotContain("certchain", keys);
+            Assert.DoesNotContain("hasbasicconstraints", keys);
+            Assert.DoesNotContain("basicconstraintpathlength", keys);
+
+            Assert.Contains("whencreated", keys);
+            Assert.Contains("crosscertificatepair", keys);
+            Assert.Contains("hascrosscertificatepair", keys);
+        }
+        
+        public static IEnumerable<object[]> EmptyCertBytes =>
+            new List<object[]>
+            {
+                new object[] { null },
+                new object[] { Array.Empty<byte>() },
+                new object[] { new byte[] { 0x00 } }
+            };
+
         [Fact]
         public void LDAPPropertyProcessor_ReadNTAuthStoreProperties()
         {

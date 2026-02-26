@@ -498,7 +498,7 @@ namespace SharpHoundCommonLib.Processors {
             props.Add("hascrosscertificatepair", hasCrossCertificatePair);
 
             // Certificate
-            if (entry.TryGetByteProperty(LDAPProperties.CACertificate, out var rawCertificate)) {
+            if (entry.TryGetByteProperty(LDAPProperties.CACertificate, out var rawCertificate) && HasBytes(rawCertificate)) {
                 var cert = new ParsedCertificate(rawCertificate);
                 props.Add("certthumbprint", cert.Thumbprint);
                 props.Add("certname", cert.Name);
@@ -508,6 +508,11 @@ namespace SharpHoundCommonLib.Processors {
             }
 
             return props;
+        }
+        
+        private static bool HasBytes(byte[] data) {
+            return data.Length > 0
+                   && !(data.Length == 1 && data[0] == 0x00);
         }
 
         public static Dictionary<string, object> ReadEnterpriseCAProperties(IDirectoryObject entry) {
