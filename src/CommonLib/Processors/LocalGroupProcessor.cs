@@ -23,7 +23,6 @@ namespace SharpHoundCommonLib.Processors
         private readonly AdaptiveTimeout _openDomainAdaptiveTimeout;
         private readonly AdaptiveTimeout _getAliasesAdaptiveTimeout;
         private readonly AdaptiveTimeout _openAliasAdaptiveTimeout;
-        private readonly AdaptiveTimeout _getMembersAdaptiveTimeout;
         private readonly AdaptiveTimeout _lookupPrincipalBySidAdaptiveTimeout;
 
         public LocalGroupProcessor(ILdapUtils utils, ILogger log = null) {
@@ -36,7 +35,6 @@ namespace SharpHoundCommonLib.Processors
             _openDomainAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ISAMServer.OpenDomain)));
             _getAliasesAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ISAMDomain.GetAliases)));
             _openAliasAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ISAMDomain.OpenAlias)));
-            _getMembersAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ISAMAlias.GetMembers)));
             _lookupPrincipalBySidAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ISAMServer.LookupPrincipalBySid)));
         }
 
@@ -214,7 +212,7 @@ namespace SharpHoundCommonLib.Processors
                     
                     var localGroup = openAliasResult.Value;
                     //Call GetMembersInAlias to get raw group members
-                    var getMembersResult = await _getMembersAdaptiveTimeout.ExecuteRPCWithTimeout((_) => localGroup.GetMembers());
+                    var getMembersResult = await Timeout.ExecuteRPCWithTimeout(TimeSpan.FromMinutes(2), (_) => localGroup.GetMembers());
                     if (getMembersResult.IsFailed)
                     {
                         _log.LogTrace("Failed to get members in alias {Alias} with RID {Rid} in domain {Domain} on computer {ComputerName}: {Error}", alias.Name, alias.Rid, domainResult.Name, computerName, openAliasResult.Error);
