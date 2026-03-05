@@ -112,7 +112,11 @@ namespace CommonLibTest
             string[] servicePrincipalNames = {"MSSQLSvc/PRIMARY.TESTLAB.LOCAL:2345"};
             const string distinguishedName = "cn=policies,cn=system,DC=testlab,DC=local";
             var receivedStatus = new List<CSVComputerStatus>();
-            processor.ComputerStatusEvent += async status => { receivedStatus.Add(status); };
+            processor.ComputerStatusEvent += status => 
+            {
+                receivedStatus.Add(status); 
+                return Task.CompletedTask;
+            };
 
             var expected = new SPNPrivilege
             {

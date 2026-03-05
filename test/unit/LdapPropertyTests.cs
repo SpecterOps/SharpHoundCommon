@@ -232,7 +232,11 @@ namespace CommonLibTest
 
             var processor = new LdapPropertyProcessor(new MockLdapUtils());
             var receivedStatus = new List<CSVComputerStatus>();
-            processor.ComputerStatusEvent += async status => { receivedStatus.Add(status); };
+            processor.ComputerStatusEvent += status =>
+            { 
+                receivedStatus.Add(status); 
+                return Task.CompletedTask;
+            };
             var test = await processor.ReadUserProperties(mock, "testlab.local");
             var props = test.Props;
             var keys = props.Keys;
@@ -477,7 +481,11 @@ namespace CommonLibTest
 
             var processor = new LdapPropertyProcessor(new MockLdapUtils());
             var receivedStatus = new List<CSVComputerStatus>();
-            processor.ComputerStatusEvent += async status => { receivedStatus.Add(status); };
+            processor.ComputerStatusEvent += status =>
+            {
+                receivedStatus.Add(status);
+                return Task.CompletedTask;
+            };
             var test = await processor.ReadComputerProperties(mock, "testlab.local");
             var props = test.Props;
             var keys = props.Keys;
