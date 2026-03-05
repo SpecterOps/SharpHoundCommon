@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Runtime.Versioning;
 using System.Threading;
 using System.Threading.Tasks;
 using CommonLibTest.Facades;
@@ -53,6 +54,7 @@ namespace CommonLibTest
             Assert.Null(result);
         }
 
+        [SupportedOSPlatform("windows")]
         [WindowsOnlyFact]
         public void GroupProcessor_GetPrimaryGroupInfo_ReturnsCorrectSID()
         {
@@ -104,6 +106,7 @@ namespace CommonLibTest
             Assert.Equal(expected, results);
         }
 
+        [SupportedOSPlatform("windows")]
         [WindowsOnlyFact]
         public async Task GroupProcessor_ReadGroupMembers_ReturnsCorrectMembers()
         {

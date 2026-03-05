@@ -1,4 +1,5 @@
-﻿
+﻿#nullable enable
+
 using Microsoft.Extensions.Logging;
 using SharpHoundCommonLib.Enums;
 using System;
@@ -86,3 +87,5 @@ public class LdapTransport(ILogger logger, Uri ldapEndpoint) : INtlmTransport, I
         }
     }
 }
+
+#nullable disable

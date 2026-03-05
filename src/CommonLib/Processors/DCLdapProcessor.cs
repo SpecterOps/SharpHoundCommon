@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿#nullable enable
+
+using Microsoft.Extensions.Logging;
 using SharpHoundCommonLib.Enums;
 using SharpHoundCommonLib.Ntlm;
 using SharpHoundCommonLib.OutputTypes;
@@ -33,7 +35,7 @@ public class DCLdapProcessor {
     private readonly string SEC_E_BAD_BINDINGS = "80090346";
 
 
-    public DCLdapProcessor(int connectionTimeoutMs, string dcHostname, ILogger log = null) {
+    public DCLdapProcessor(int connectionTimeoutMs, string dcHostname, ILogger? log = null) {
         _log = log ?? Logging.LogProvider.CreateLogger("DCLdapProcessor");
         _scanner = new PortScanner(maxTimeout: connectionTimeoutMs);
         _ldapTimeout = connectionTimeoutMs / 1000;
@@ -43,7 +45,7 @@ public class DCLdapProcessor {
         _checkIsChannelBindingDisabledAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(1), Logging.LogProvider.CreateLogger(nameof(CheckIsChannelBindingDisabled)));
     }
     
-    public event ComputerStatusDelegate ComputerStatusEvent;
+    public event ComputerStatusDelegate? ComputerStatusEvent;
 
     public async Task<LdapService> Scan(string computerName, string computerObjectId) {
         var hasLdap = await TestLdapPort();
@@ -173,7 +175,7 @@ public class DCLdapProcessor {
     /// <param name="endpoint"></param>
     /// <param name="options"></param>
     /// <returns></returns>
-    protected internal virtual async Task<bool> Authenticate(Uri endpoint, LdapAuthOptions options, NtlmAuthenticationHandler ntlmAuth = null, LdapTransport ldapTransport = null, CancellationToken cancellationToken = default) {
+    protected internal virtual async Task<bool> Authenticate(Uri endpoint, LdapAuthOptions options, NtlmAuthenticationHandler? ntlmAuth = null, LdapTransport? ldapTransport = null, CancellationToken cancellationToken = default) {
         var host = endpoint.Host;
         var auth = ntlmAuth ?? new NtlmAuthenticationHandler($"LDAP/{host.ToUpper()}") {
             Options = options
@@ -230,3 +232,5 @@ public class DCLdapProcessor {
         if (ComputerStatusEvent is not null) await ComputerStatusEvent.Invoke(status);
     }
 }
+
+#nullable disable

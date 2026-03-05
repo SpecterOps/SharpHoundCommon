@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.DirectoryServices;
+using System.Runtime.Versioning;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
@@ -174,6 +175,7 @@ namespace CommonLibTest
             Assert.False((bool)test["admincount"]);
         }
 
+        [SupportedOSPlatform("windows")]
         [WindowsOnlyFact]
         public async Task LDAPPropertyProcessor_ReadGroupProperties_Returns_HasSIDHistory()
         {
@@ -230,7 +232,11 @@ namespace CommonLibTest
 
             var processor = new LdapPropertyProcessor(new MockLdapUtils());
             var receivedStatus = new List<CSVComputerStatus>();
-            processor.ComputerStatusEvent += async status => { receivedStatus.Add(status); };
+            processor.ComputerStatusEvent += status =>
+            { 
+                receivedStatus.Add(status); 
+                return Task.CompletedTask;
+            };
             var test = await processor.ReadUserProperties(mock, "testlab.local");
             var props = test.Props;
             var keys = props.Keys;
@@ -300,6 +306,7 @@ namespace CommonLibTest
             Assert.False((bool)props["admincount"]);
         }
 
+        [SupportedOSPlatform("windows")]
         [WindowsOnlyFact]
         public async Task LDAPPropertyProcessor_ReadUserProperties_HappyPath()
         {
@@ -427,6 +434,7 @@ namespace CommonLibTest
             Assert.DoesNotContain("trustedtoauth", keys);
         }
 
+        [SupportedOSPlatform("windows")]
         [WindowsOnlyFact]
         public async Task LDAPPropertyProcessor_ReadComputerProperties_HappyPath()
         {
@@ -473,7 +481,11 @@ namespace CommonLibTest
 
             var processor = new LdapPropertyProcessor(new MockLdapUtils());
             var receivedStatus = new List<CSVComputerStatus>();
-            processor.ComputerStatusEvent += async status => { receivedStatus.Add(status); };
+            processor.ComputerStatusEvent += status =>
+            {
+                receivedStatus.Add(status);
+                return Task.CompletedTask;
+            };
             var test = await processor.ReadComputerProperties(mock, "testlab.local");
             var props = test.Props;
             var keys = props.Keys;
@@ -1155,6 +1167,7 @@ namespace CommonLibTest
             Assert.Equal("\u0000", UTF8.GetString(usercert as byte[]));
         }
 
+        [SupportedOSPlatform("windows")]
         [WindowsOnlyFact]
         public void LDAPPropertyProcessor_ParseAllProperties_CollectionCountOne_SID() {
             var creatorSIDExpected = "S-1-5-21-2697957641-2271029196-387917394";
@@ -1474,7 +1487,7 @@ namespace CommonLibTest
             Assert.Contains("rdpman/win10", atd);
 
             var atdr = test.AllowedToDelegate;
-            Assert.Equal(1, atdr.Length);
+            Assert.Single(atdr);
             var expected = new TypedPrincipal[]
             {
                 new()
@@ -1485,6 +1498,8 @@ namespace CommonLibTest
             };
             Assert.Equal(expected, atdr);
         }
+        
+        [SupportedOSPlatform("windows")]
         [WindowsOnlyFact]
         public async Task LDAPPropertyProcessor_ReadComputerProperties_TestDelegatesNull()
         {
@@ -1549,6 +1564,7 @@ namespace CommonLibTest
             Assert.Equal("A6F75BA4-F1AE-4B47-A606-E3A0A69AEC83", props["objectguid"]);
         }
         
+        [SupportedOSPlatform("windows")]
         [WindowsOnlyFact]
         public async Task LDAPPropertyProcessor_ReadComputerProperties_AllowedToActOnBehalfOfOtherIdentity()
         {

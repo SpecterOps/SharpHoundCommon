@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.DirectoryServices.ActiveDirectory;
+using System.Runtime.Versioning;
 using System.Threading.Tasks;
 using CommonLibTest.Facades;
 using Moq;
@@ -258,6 +259,7 @@ namespace CommonLibTest {
             Assert.False(success);
         }
 
+        [SupportedOSPlatform("windows")]
         [WindowsOnlyFact]
         public async Task EnterpriseDomainControllersGroup_CorrectValues() {
             var utilsMock = new Mock<LdapUtils>();
