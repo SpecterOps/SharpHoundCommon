@@ -778,7 +778,7 @@ namespace CommonLibTest
             Assert.Contains("certname", keys);
             Assert.Contains("certchain", keys);
             Assert.Contains("hasbasicconstraints", keys);
-            Assert.Contains("basicconstraintpathlength", keys);;
+            Assert.Contains("basicconstraintpathlength", keys);
             
             //AIA CA Properties
             Assert.Contains("crosscertificatepair", keys);
