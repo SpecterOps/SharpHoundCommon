@@ -679,12 +679,16 @@ namespace CommonLibTest
             Assert.Equal(2, testDumpSMSAPassword.Length);
             Assert.Equal(expected, testDumpSMSAPassword);
         }
-
+        
         [Fact]
-        public void LDAPPropertyProcessor_ReadRootCAProperties()
-        {
+        public void LDAPPropertyProcessor_ReadRootCAProperties() {
+            var ecdsa = ECDsa.Create();
+            var req = new CertificateRequest("cn=foobar", ecdsa, HashAlgorithmName.SHA256);
+            var cert = req.CreateSelfSigned(DateTimeOffset.Now, DateTimeOffset.Now.AddYears(5));
+
+            var bytes = cert.Export(X509ContentType.Cert, "abc");
             var mock = new MockDirectoryObject(
-                "CN\u003dDUMPSTER-DC01-CA,CN\u003dCERTIFICATION AUTHORITIES,CN\u003dPUBLIC KEY SERVICES,CN\u003dSERVICES,CN\u003dCONFIGURATION,DC\u003dDUMPSTER,DC\u003dFIRE",
+                "CN\u003dDUMPSTER-DC01-CA,CN\u003dAIA,CN\u003dPUBLIC KEY SERVICES,CN\u003dSERVICES,CN\u003dCONFIGURATION,DC\u003dDUMPSTER,DC\u003dFIRE",
                 new Dictionary<string, object>
                 {
                     {"description", null},
@@ -692,6 +696,7 @@ namespace CommonLibTest
                     {"name", "DUMPSTER-DC01-CA@DUMPSTER.FIRE"},
                     {"domainsid", "S-1-5-21-2697957641-2271029196-387917394"},
                     {"whencreated", 1683986131},
+                    {LDAPProperties.CACertificate, bytes}
                 }, "","2F9F3630-F46A-49BF-B186-6629994EBCF9");
 
             var test = LdapPropertyProcessor.ReadRootCAProperties(mock);
@@ -701,6 +706,40 @@ namespace CommonLibTest
             Assert.DoesNotContain("domain", keys);
             Assert.DoesNotContain("name", keys);
             Assert.DoesNotContain("domainsid", keys);
+
+            //CA Properties
+            Assert.Contains("whencreated", keys);
+            Assert.Contains("certthumbprint", keys);
+            Assert.Contains("certname", keys);
+            Assert.Contains("certchain", keys);
+            Assert.Contains("hasbasicconstraints", keys);
+            Assert.Contains("basicconstraintpathlength", keys);
+        }
+
+        [Theory]
+        [MemberData(nameof(EmptyCertBytes))]
+        public void LDAPPropertyProcessor_ReadRootCAProperties_NoCACertificate(byte[] CACertBytes) {
+            var mock = new MockDirectoryObject(
+                "CN\u003dDUMPSTER-DC01-CA,CN\u003dAIA,CN\u003dPUBLIC KEY SERVICES,CN\u003dSERVICES,CN\u003dCONFIGURATION,DC\u003dDUMPSTER,DC\u003dFIRE",
+                new Dictionary<string, object>
+                {
+                    {"description", null},
+                    {"domain", "DUMPSTER.FIRE"},
+                    {"name", "DUMPSTER-DC01-CA@DUMPSTER.FIRE"},
+                    {"domainsid", "S-1-5-21-2697957641-2271029196-387917394"},
+                    {"whencreated", 1683986131},
+                    {LDAPProperties.CACertificate, CACertBytes}
+                }, "","2F9F3630-F46A-49BF-B186-6629994EBCF9");
+
+            var test = LdapPropertyProcessor.ReadRootCAProperties(mock);
+            var keys = test.Keys;
+
+            //These are cert derived properties
+            Assert.DoesNotContain("certthumbprint", keys);
+            Assert.DoesNotContain("certname", keys);
+            Assert.DoesNotContain("certchain", keys);
+            Assert.DoesNotContain("hasbasicconstraints", keys);
+            Assert.DoesNotContain("basicconstraintpathlength", keys);
 
             Assert.Contains("whencreated", keys);
         }
@@ -733,14 +772,131 @@ namespace CommonLibTest
             Assert.DoesNotContain("name", keys);
             Assert.DoesNotContain("domainsid", keys);
 
+            //CA Properties
             Assert.Contains("whencreated", keys);
-            Assert.Contains("crosscertificatepair", keys);
             Assert.Contains("certthumbprint", keys);
             Assert.Contains("certname", keys);
             Assert.Contains("certchain", keys);
             Assert.Contains("hasbasicconstraints", keys);
             Assert.Contains("basicconstraintpathlength", keys);
+            
+            //AIA CA Properties
+            Assert.Contains("crosscertificatepair", keys);
+            Assert.Contains("hascrosscertificatepair", keys);
         }
+
+        [Theory]
+        [MemberData(nameof(EmptyCertBytes))]
+        public void LDAPPropertyProcessor_ReadAIACAProperties_NoCACertificate(byte[] CACertBytes) {
+            var mock = new MockDirectoryObject(
+                "CN\u003dDUMPSTER-DC01-CA,CN\u003dAIA,CN\u003dPUBLIC KEY SERVICES,CN\u003dSERVICES,CN\u003dCONFIGURATION,DC\u003dDUMPSTER,DC\u003dFIRE",
+                new Dictionary<string, object>
+                {
+                    {"description", null},
+                    {"domain", "DUMPSTER.FIRE"},
+                    {"name", "DUMPSTER-DC01-CA@DUMPSTER.FIRE"},
+                    {"domainsid", "S-1-5-21-2697957641-2271029196-387917394"},
+                    {"whencreated", 1683986131},
+                    {"hascrosscertificatepair", true},
+                    {LDAPProperties.CACertificate, CACertBytes}
+                }, "","2F9F3630-F46A-49BF-B186-6629994EBCF9");
+
+            var test = LdapPropertyProcessor.ReadAIACAProperties(mock);
+            var keys = test.Keys;
+
+            //These are cert derived properties
+            Assert.DoesNotContain("certthumbprint", keys);
+            Assert.DoesNotContain("certname", keys);
+            Assert.DoesNotContain("certchain", keys);
+            Assert.DoesNotContain("hasbasicconstraints", keys);
+            Assert.DoesNotContain("basicconstraintpathlength", keys);
+
+            Assert.Contains("whencreated", keys);
+            Assert.Contains("crosscertificatepair", keys);
+            Assert.Contains("hascrosscertificatepair", keys);
+        }
+        
+        [Fact]
+        public void LDAPPropertyProcessor_ReadEnterpriseCAProperties() {
+            var ecdsa = ECDsa.Create();
+            var req = new CertificateRequest("cn=foobar", ecdsa, HashAlgorithmName.SHA256);
+            var cert = req.CreateSelfSigned(DateTimeOffset.Now, DateTimeOffset.Now.AddYears(5));
+
+            var bytes = cert.Export(X509ContentType.Cert, "abc");
+            var mock = new MockDirectoryObject(
+                "CN\u003dDUMPSTER-DC01-CA,CN\u003dAIA,CN\u003dPUBLIC KEY SERVICES,CN\u003dSERVICES,CN\u003dCONFIGURATION,DC\u003dDUMPSTER,DC\u003dFIRE",
+                new Dictionary<string, object>
+                {
+                    {"description", null},
+                    {"domain", "DUMPSTER.FIRE"},
+                    {"name", "DUMPSTER-DC01-CA@DUMPSTER.FIRE"},
+                    {"domainsid", "S-1-5-21-2697957641-2271029196-387917394"},
+                    {"whencreated", 1683986131},
+                    {LDAPProperties.CACertificate, bytes},
+                    {"flags", 1}
+                }, "","2F9F3630-F46A-49BF-B186-6629994EBCF9");
+
+            var test = LdapPropertyProcessor.ReadEnterpriseCAProperties(mock);
+            var keys = test.Keys;
+
+            //These are not common properties
+            Assert.DoesNotContain("domain", keys);
+            Assert.DoesNotContain("name", keys);
+            Assert.DoesNotContain("domainsid", keys);
+
+            //CA properties
+            Assert.Contains("whencreated", keys);
+            Assert.Contains("certthumbprint", keys);
+            Assert.Contains("certname", keys);
+            Assert.Contains("certchain", keys);
+            Assert.Contains("hasbasicconstraints", keys);
+            Assert.Contains("basicconstraintpathlength", keys);
+            
+            //Enterprise CA Properties
+            Assert.Contains("flags", keys);
+            Assert.Contains("caname", keys);
+            Assert.Contains("dnshostname", keys);
+        }
+
+        [Theory]
+        [MemberData(nameof(EmptyCertBytes))]
+        public void LDAPPropertyProcessor_ReadEnterpriseCAProperties_NoCACertificate(byte[] CACertBytes) {
+            var mock = new MockDirectoryObject(
+                "CN\u003dDUMPSTER-DC01-CA,CN\u003dAIA,CN\u003dPUBLIC KEY SERVICES,CN\u003dSERVICES,CN\u003dCONFIGURATION,DC\u003dDUMPSTER,DC\u003dFIRE",
+                new Dictionary<string, object>
+                {
+                    {"description", null},
+                    {"domain", "DUMPSTER.FIRE"},
+                    {"name", "DUMPSTER-DC01-CA@DUMPSTER.FIRE"},
+                    {"domainsid", "S-1-5-21-2697957641-2271029196-387917394"},
+                    {"whencreated", 1683986131},
+                    {LDAPProperties.CACertificate, CACertBytes},
+                    {"flags", 1}
+                }, "","2F9F3630-F46A-49BF-B186-6629994EBCF9");
+
+            var test = LdapPropertyProcessor.ReadEnterpriseCAProperties(mock);
+            var keys = test.Keys;
+
+            //These are cert derived properties
+            Assert.DoesNotContain("certthumbprint", keys);
+            Assert.DoesNotContain("certname", keys);
+            Assert.DoesNotContain("certchain", keys);
+            Assert.DoesNotContain("hasbasicconstraints", keys);
+            Assert.DoesNotContain("basicconstraintpathlength", keys);
+
+            Assert.Contains("whencreated", keys);
+            Assert.Contains("flags", keys);
+            Assert.Contains("caname", keys);
+            Assert.Contains("dnshostname", keys);
+        }
+        
+        public static IEnumerable<object[]> EmptyCertBytes =>
+            new List<object[]>
+            {
+                new object[] { null },
+                new object[] { Array.Empty<byte>() },
+                new object[] { new byte[] { 0x00 } }
+            };
 
         [Fact]
         public void LDAPPropertyProcessor_ReadNTAuthStoreProperties()
@@ -1046,41 +1202,6 @@ namespace CommonLibTest
             var hasGuid = props.TryGetValue("guid", out var guidActual);
             Assert.True(hasGuid);
             Assert.Equal(guidExpected.ToString(), guidActual);
-        }
-        
-        [Fact]
-        public void LDAPPropertyProcessor_ReadACAProperties() {
-            var ecdsa = ECDsa.Create();
-            var req = new CertificateRequest("cn=foobar", ecdsa, HashAlgorithmName.SHA256);
-            var cert = req.CreateSelfSigned(DateTimeOffset.Now, DateTimeOffset.Now.AddYears(5));
-
-            var bytes = cert.Export(X509ContentType.Cert, "abc");
-            var mock = new MockDirectoryObject(
-                "CN\u003dDUMPSTER-DC01-CA,CN\u003dAIA,CN\u003dPUBLIC KEY SERVICES,CN\u003dSERVICES,CN\u003dCONFIGURATION,DC\u003dDUMPSTER,DC\u003dFIRE",
-                new Dictionary<string, object>
-                {
-                    {"description", null},
-                    {"domain", "DUMPSTER.FIRE"},
-                    {"name", "DUMPSTER-DC01-CA@DUMPSTER.FIRE"},
-                    {"domainsid", "S-1-5-21-2697957641-2271029196-387917394"},
-                    {"whencreated", 1683986131},
-                    {LDAPProperties.CACertificate, bytes}
-                }, "","2F9F3630-F46A-49BF-B186-6629994EBCF9");
-
-            var test = LdapPropertyProcessor.ReadRootCAProperties(mock);
-            var keys = test.Keys;
-
-            //These are not common properties
-            Assert.DoesNotContain("domain", keys);
-            Assert.DoesNotContain("name", keys);
-            Assert.DoesNotContain("domainsid", keys);
-
-            Assert.Contains("whencreated", keys);
-            Assert.Contains("certthumbprint", keys);
-            Assert.Contains("certname", keys);
-            Assert.Contains("certchain", keys);
-            Assert.Contains("hasbasicconstraints", keys);
-            Assert.Contains("basicconstraintpathlength", keys);
         }
 
         [Theory]

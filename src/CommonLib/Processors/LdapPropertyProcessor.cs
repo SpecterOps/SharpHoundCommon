@@ -472,7 +472,7 @@ namespace SharpHoundCommonLib.Processors {
             var props = GetCommonProps(entry);
 
             // Certificate
-            if (entry.TryGetByteProperty(LDAPProperties.CACertificate, out var rawCertificate)) {
+            if (entry.TryGetByteProperty(LDAPProperties.CACertificate, out var rawCertificate) && HasBytes(rawCertificate)) {
                 var cert = new ParsedCertificate(rawCertificate);
                 props.Add("certthumbprint", cert.Thumbprint);
                 props.Add("certname", cert.Name);
@@ -498,7 +498,7 @@ namespace SharpHoundCommonLib.Processors {
             props.Add("hascrosscertificatepair", hasCrossCertificatePair);
 
             // Certificate
-            if (entry.TryGetByteProperty(LDAPProperties.CACertificate, out var rawCertificate)) {
+            if (entry.TryGetByteProperty(LDAPProperties.CACertificate, out var rawCertificate) && HasBytes(rawCertificate)) {
                 var cert = new ParsedCertificate(rawCertificate);
                 props.Add("certthumbprint", cert.Thumbprint);
                 props.Add("certname", cert.Name);
@@ -510,6 +510,11 @@ namespace SharpHoundCommonLib.Processors {
             return props;
         }
 
+        /// <summary>
+        /// Returns the properties associated with the EnterpriseCA
+        /// </summary>
+        /// <param name="entry"></param>
+        /// <returns>Returns a dictionary with the common properties and the caname, hostname, and flags properties of the EnterpriseCA</returns>
         public static Dictionary<string, object> ReadEnterpriseCAProperties(IDirectoryObject entry) {
             var props = GetCommonProps(entry);
             if (entry.TryGetLongProperty("flags", out var flags))
@@ -518,7 +523,7 @@ namespace SharpHoundCommonLib.Processors {
             props.Add("dnshostname", entry.GetProperty(LDAPProperties.DNSHostName));
 
             // Certificate
-            if (entry.TryGetByteProperty(LDAPProperties.CACertificate, out var rawCertificate)) {
+            if (entry.TryGetByteProperty(LDAPProperties.CACertificate, out var rawCertificate) && HasBytes(rawCertificate)) {
                 var cert = new ParsedCertificate(rawCertificate);
                 props.Add("certthumbprint", cert.Thumbprint);
                 props.Add("certname", cert.Name);
@@ -931,6 +936,11 @@ namespace SharpHoundCommonLib.Processors {
             {
                 return "Unknown";
             }
+        }
+        
+        private static bool HasBytes(byte[] data) {
+            return data.Length > 0
+                   && !(data.Length == 1 && data[0] == 0x00);
         }
 
         [DllImport("Advapi32", SetLastError = false)]
