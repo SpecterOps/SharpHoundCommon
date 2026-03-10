@@ -24,7 +24,8 @@ namespace SharpHoundCommonLib.Processors
         public delegate Task ComputerStatusDelegate(CSVComputerStatus status);
         public event ComputerStatusDelegate ComputerStatusEvent;
 
-        public CertAbuseProcessor(ILdapUtils utils, IRegistryAccessor registryAccessor, ISAMServerAccessor samServerAccessor, ILogger log = null) {
+        //TODO: temp change to test github build pipeline
+        public CertAbuseProcessor(ILdapUtils utils, IRegistryAccessor registryAccessor, ISAMServerAccessor samServerAccessor, String test, ILogger log = null) {
             _utils = utils;
             _registryAccessor = registryAccessor;
             _samServerAccessor = samServerAccessor;

@@ -37,7 +37,8 @@ namespace CommonLibTest
             _mockLdapUtils = new Mock<ILdapUtils>();
             _mockRegistryAccessor = new Mock<IRegistryAccessor>();
             _mockSAMServerAccessor = new Mock<ISAMServerAccessor>();
-            _certAbuseProcessor = new CertAbuseProcessor(_mockLdapUtils.Object, _mockRegistryAccessor.Object, _mockSAMServerAccessor.Object);
+            //TODO: temp change to test github build pipeline
+            _certAbuseProcessor = new CertAbuseProcessor(_mockLdapUtils.Object, _mockRegistryAccessor.Object, _mockSAMServerAccessor.Object, "");
 
             _certAbuseProcessor.ComputerStatusEvent += status => {
                 _receivedCompStatus = status;
