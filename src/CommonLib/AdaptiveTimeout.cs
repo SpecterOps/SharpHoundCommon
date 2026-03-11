@@ -14,10 +14,12 @@ public sealed class AdaptiveTimeout : IDisposable {
     private readonly ConcurrentQueue<DateTime> _latestSuccessTimestamps;
     private readonly ILogger _log;
     private readonly TimeSpan _maxTimeout;
+    private readonly TimeSpan _minTimeout;
     private readonly bool _useAdaptiveTimeout;
     private readonly int _minSamplesForAdaptiveTimeout;
     private readonly bool _throwIfExcessiveTimeouts;
     private int _timeSpikeDecay;
+    private readonly TimeSpan _defaultMinTimeout = TimeSpan.FromSeconds(1);
     private const int TimeSpikePenalty = 2;
     private const int TimeSpikeForgiveness = 1;
     private const int TimeSpikeThreshold = 3;
@@ -37,6 +39,7 @@ public sealed class AdaptiveTimeout : IDisposable {
         if (log == null)
             throw new ArgumentNullException(nameof(log));
 
+        _minTimeout = _defaultMinTimeout;
         _sampler = new ExecutionTimeSampler(log, sampleCount, logFrequency);
         _latestSuccessTimestamps = new ConcurrentQueue<DateTime>();
         _log = log;
@@ -44,6 +47,16 @@ public sealed class AdaptiveTimeout : IDisposable {
         _minSamplesForAdaptiveTimeout = minSamplesForAdaptiveTimeout;
         _useAdaptiveTimeout = useAdaptiveTimeout;
         _throwIfExcessiveTimeouts = throwIfExcessiveTimeouts;
+    }
+
+    public AdaptiveTimeout(TimeSpan maxTimeout, TimeSpan minTimeout, ILogger log, int sampleCount = 100, int logFrequency = 1000, int minSamplesForAdaptiveTimeout = 30, bool useAdaptiveTimeout = true, bool throwIfExcessiveTimeouts = false)
+            : this(maxTimeout, log, sampleCount, logFrequency, minSamplesForAdaptiveTimeout, useAdaptiveTimeout, throwIfExcessiveTimeouts) {
+        if (minTimeout < TimeSpan.Zero)
+            throw new ArgumentException("minTimeout must be non-negative", nameof(minTimeout));
+        if (minTimeout >= maxTimeout)
+            throw new ArgumentException("minTimeout must be less than maxTimeout", nameof(minTimeout));
+
+        _minTimeout = minTimeout;
     }
 
     public void ClearSamples() {
@@ -214,11 +227,11 @@ public sealed class AdaptiveTimeout : IDisposable {
         _sampler.Dispose();
     }
 
-    // Within 5 standard deviations will have a conservative lower bound of catching 96% of executions (1 - 1/5^2),
+    // Within 7 standard deviations will have a conservative lower bound of catching 98% of executions (1 - 1/7^2),
     // regardless of sample shape
     // so long as those samples are independent and identically distributed
     // (and if they're not, our TimeSpikeSafetyValve should provide us with some adaptability)
-    // But the effective collection rate is probably closer to 98+%
+    // But the effective collection rate is probably closer to 99+%
     // (in part because we don't need to filter out "too fast" outliers)
     // But we'll cap at configured maximum timeout
     // https://modelassist.epixanalytics.com/space/EA/26574957/Tchebysheffs+Rule
@@ -231,6 +244,7 @@ public sealed class AdaptiveTimeout : IDisposable {
             var stdDev = _sampler.StandardDeviation();
             var adaptiveTimeoutMs = _sampler.Average() + (stdDev * StdDevMultiplier);
             var cappedTimeoutMS = Math.Min(adaptiveTimeoutMs, _maxTimeout.TotalMilliseconds);
+            cappedTimeoutMS = Math.Max(cappedTimeoutMS, _minTimeout.TotalMilliseconds);
             return TimeSpan.FromMilliseconds(cappedTimeoutMS);
         }
         catch (Exception ex) {
