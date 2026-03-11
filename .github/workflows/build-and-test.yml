@@ -1,9 +1,8 @@
-name: Build
+name: Build and Test
 
 on:
   pull_request:
     branches: [ v4 ]
-    types: [opened, synchronize]
 
 jobs:
   build:
