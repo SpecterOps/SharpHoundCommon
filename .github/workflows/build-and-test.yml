@@ -1,15 +1,19 @@
 name: Build
 
-on: pull_request
+on:
+  pull_request:
+    branches: [ v4 ]
+    types: [opened, synchronize]
 
 jobs:
   build:
     runs-on: windows-latest
+    
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v6
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v5
       with:
         dotnet-version: |
           7.0.x
@@ -19,7 +23,7 @@ jobs:
       run: dotnet restore
 
     - name: Build
-      run: dotnet build
+      run: dotnet build --no-restore
 
     - name: Test
-      run: dotnet test
+      run: dotnet test --no-build
