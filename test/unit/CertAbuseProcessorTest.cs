@@ -54,9 +54,6 @@ namespace CommonLibTest
         public async Task CertAbuseProcessor_IsUserSpecifiesSanEnabled_ReturnsResult(int editFlags, bool expectedResult) {
             const string subKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{CAName}\\PolicyModules\\CertificateAuthority_MicrosoftDefault.Policy";
             const string subValue = "EditFlags";
-
-            //TODO: temp change to test github build pipeline
-            Assert.True(false);
             
             _mockRegistryAccessor
                 .Setup(ra => ra.GetRegistryKeyData(
