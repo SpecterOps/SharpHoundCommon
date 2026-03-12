@@ -36,7 +36,8 @@ namespace SharpHoundCommonLib.Processors
             _openDomainAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ISAMServer.OpenDomain)));
             _getAliasesAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ISAMDomain.GetAliases)));
             _openAliasAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ISAMDomain.OpenAlias)));
-            _getMembersAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ISAMAlias.GetMembers)));
+            // Disabling adaptive timeout for GetMembers as it can be very chatty and we don't want timeouts to cause us to miss groups entirely. We can re-enable adaptive timeouts here in the future if we find a good way to handle timeouts without losing entire groups
+            _getMembersAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ISAMAlias.GetMembers)), useAdaptiveTimeout: false);
             _lookupPrincipalBySidAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ISAMServer.LookupPrincipalBySid)));
         }
 
