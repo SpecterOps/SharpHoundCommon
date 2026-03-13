@@ -1,7 +1,7 @@
 ﻿#nullable enable
 namespace SharpHoundRPC.Registry {
     using Microsoft.Win32;
-    using SharpHoundRPC.PortScanner;
+    using PortScanner;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -37,7 +37,6 @@ namespace SharpHoundRPC.Registry {
 
             if (queries == null || !queries.Any())
                 throw new ArgumentException("Queries cannot be null or empty", nameof(queries));
-
 
             return await Task.Run(() => {
                 var results = new List<RegistryQueryResult>();
