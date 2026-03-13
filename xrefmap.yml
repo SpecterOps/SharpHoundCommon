@@ -396,6 +396,12 @@ references:
   commentId: M:SharpHoundCommonLib.AdaptiveTimeout.#ctor(System.TimeSpan,ILogger,System.Int32,System.Int32,System.Int32,System.Boolean,System.Boolean)
   fullName: SharpHoundCommonLib.AdaptiveTimeout.AdaptiveTimeout(System.TimeSpan, ILogger, System.Int32, System.Int32, System.Int32, System.Boolean, System.Boolean)
   nameWithType: AdaptiveTimeout.AdaptiveTimeout(TimeSpan, ILogger, Int32, Int32, Int32, Boolean, Boolean)
+- uid: SharpHoundCommonLib.AdaptiveTimeout.#ctor(System.TimeSpan,System.TimeSpan,ILogger,System.Int32,System.Int32,System.Int32,System.Boolean,System.Boolean)
+  name: AdaptiveTimeout(TimeSpan, TimeSpan, ILogger, Int32, Int32, Int32, Boolean, Boolean)
+  href: api/SharpHoundCommonLib.AdaptiveTimeout.html#SharpHoundCommonLib_AdaptiveTimeout__ctor_System_TimeSpan_System_TimeSpan_ILogger_System_Int32_System_Int32_System_Int32_System_Boolean_System_Boolean_
+  commentId: M:SharpHoundCommonLib.AdaptiveTimeout.#ctor(System.TimeSpan,System.TimeSpan,ILogger,System.Int32,System.Int32,System.Int32,System.Boolean,System.Boolean)
+  fullName: SharpHoundCommonLib.AdaptiveTimeout.AdaptiveTimeout(System.TimeSpan, System.TimeSpan, ILogger, System.Int32, System.Int32, System.Int32, System.Boolean, System.Boolean)
+  nameWithType: AdaptiveTimeout.AdaptiveTimeout(TimeSpan, TimeSpan, ILogger, Int32, Int32, Int32, Boolean, Boolean)
 - uid: SharpHoundCommonLib.AdaptiveTimeout.#ctor*
   name: AdaptiveTimeout
   href: api/SharpHoundCommonLib.AdaptiveTimeout.html#SharpHoundCommonLib_AdaptiveTimeout__ctor_
@@ -10442,12 +10448,15 @@ references:
   commentId: T:SharpHoundCommonLib.Processors.DCLdapProcessor
   fullName: SharpHoundCommonLib.Processors.DCLdapProcessor
   nameWithType: DCLdapProcessor
-- uid: SharpHoundCommonLib.Processors.DCLdapProcessor.#ctor(System.Int32,System.String,ILogger)
-  name: DCLdapProcessor(Int32, String, ILogger)
-  href: api/SharpHoundCommonLib.Processors.DCLdapProcessor.html#SharpHoundCommonLib_Processors_DCLdapProcessor__ctor_System_Int32_System_String_ILogger_
-  commentId: M:SharpHoundCommonLib.Processors.DCLdapProcessor.#ctor(System.Int32,System.String,ILogger)
-  fullName: SharpHoundCommonLib.Processors.DCLdapProcessor.DCLdapProcessor(System.Int32, System.String, ILogger)
-  nameWithType: DCLdapProcessor.DCLdapProcessor(Int32, String, ILogger)
+- uid: SharpHoundCommonLib.Processors.DCLdapProcessor.#ctor(System.Int32,System.String,System.Nullable{ILogger})
+  name: DCLdapProcessor(Int32, String, Nullable<ILogger>)
+  href: api/SharpHoundCommonLib.Processors.DCLdapProcessor.html#SharpHoundCommonLib_Processors_DCLdapProcessor__ctor_System_Int32_System_String_System_Nullable_ILogger__
+  commentId: M:SharpHoundCommonLib.Processors.DCLdapProcessor.#ctor(System.Int32,System.String,System.Nullable{ILogger})
+  name.vb: DCLdapProcessor(Int32, String, Nullable(Of ILogger))
+  fullName: SharpHoundCommonLib.Processors.DCLdapProcessor.DCLdapProcessor(System.Int32, System.String, System.Nullable<ILogger>)
+  fullName.vb: SharpHoundCommonLib.Processors.DCLdapProcessor.DCLdapProcessor(System.Int32, System.String, System.Nullable(Of ILogger))
+  nameWithType: DCLdapProcessor.DCLdapProcessor(Int32, String, Nullable<ILogger>)
+  nameWithType.vb: DCLdapProcessor.DCLdapProcessor(Int32, String, Nullable(Of ILogger))
 - uid: SharpHoundCommonLib.Processors.DCLdapProcessor.#ctor*
   name: DCLdapProcessor
   href: api/SharpHoundCommonLib.Processors.DCLdapProcessor.html#SharpHoundCommonLib_Processors_DCLdapProcessor__ctor_
@@ -11418,12 +11427,12 @@ references:
   commentId: T:SharpHoundCommonLib.Processors.RegistryProcessor
   fullName: SharpHoundCommonLib.Processors.RegistryProcessor
   nameWithType: RegistryProcessor
-- uid: SharpHoundCommonLib.Processors.RegistryProcessor.#ctor(ILogger,System.String)
-  name: RegistryProcessor(ILogger, String)
-  href: api/SharpHoundCommonLib.Processors.RegistryProcessor.html#SharpHoundCommonLib_Processors_RegistryProcessor__ctor_ILogger_System_String_
-  commentId: M:SharpHoundCommonLib.Processors.RegistryProcessor.#ctor(ILogger,System.String)
-  fullName: SharpHoundCommonLib.Processors.RegistryProcessor.RegistryProcessor(ILogger, System.String)
-  nameWithType: RegistryProcessor.RegistryProcessor(ILogger, String)
+- uid: SharpHoundCommonLib.Processors.RegistryProcessor.#ctor(ILogger,SharpHoundRPC.Registry.IStrategyExecutor,System.String)
+  name: RegistryProcessor(ILogger, IStrategyExecutor, String)
+  href: api/SharpHoundCommonLib.Processors.RegistryProcessor.html#SharpHoundCommonLib_Processors_RegistryProcessor__ctor_ILogger_SharpHoundRPC_Registry_IStrategyExecutor_System_String_
+  commentId: M:SharpHoundCommonLib.Processors.RegistryProcessor.#ctor(ILogger,SharpHoundRPC.Registry.IStrategyExecutor,System.String)
+  fullName: SharpHoundCommonLib.Processors.RegistryProcessor.RegistryProcessor(ILogger, SharpHoundRPC.Registry.IStrategyExecutor, System.String)
+  nameWithType: RegistryProcessor.RegistryProcessor(ILogger, IStrategyExecutor, String)
 - uid: SharpHoundCommonLib.Processors.RegistryProcessor.#ctor*
   name: RegistryProcessor
   href: api/SharpHoundCommonLib.Processors.RegistryProcessor.html#SharpHoundCommonLib_Processors_RegistryProcessor__ctor_
@@ -11431,6 +11440,18 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.Processors.RegistryProcessor.RegistryProcessor
   nameWithType: RegistryProcessor.RegistryProcessor
+- uid: SharpHoundCommonLib.Processors.RegistryProcessor.ComputerStatusDelegate
+  name: RegistryProcessor.ComputerStatusDelegate
+  href: api/SharpHoundCommonLib.Processors.RegistryProcessor.ComputerStatusDelegate.html
+  commentId: T:SharpHoundCommonLib.Processors.RegistryProcessor.ComputerStatusDelegate
+  fullName: SharpHoundCommonLib.Processors.RegistryProcessor.ComputerStatusDelegate
+  nameWithType: RegistryProcessor.ComputerStatusDelegate
+- uid: SharpHoundCommonLib.Processors.RegistryProcessor.ComputerStatusEvent
+  name: ComputerStatusEvent
+  href: api/SharpHoundCommonLib.Processors.RegistryProcessor.html#SharpHoundCommonLib_Processors_RegistryProcessor_ComputerStatusEvent
+  commentId: E:SharpHoundCommonLib.Processors.RegistryProcessor.ComputerStatusEvent
+  fullName: SharpHoundCommonLib.Processors.RegistryProcessor.ComputerStatusEvent
+  nameWithType: RegistryProcessor.ComputerStatusEvent
 - uid: SharpHoundCommonLib.Processors.RegistryProcessor.ReadRegistrySettings(System.String)
   name: ReadRegistrySettings(String)
   href: api/SharpHoundCommonLib.Processors.RegistryProcessor.html#SharpHoundCommonLib_Processors_RegistryProcessor_ReadRegistrySettings_System_String_
@@ -16757,6 +16778,28 @@ references:
   fullName.vb: SharpHoundRPC.Registry.ICollectionStrategy(Of T, TQuery).ExecuteAsync
   nameWithType: ICollectionStrategy<T, TQuery>.ExecuteAsync
   nameWithType.vb: ICollectionStrategy(Of T, TQuery).ExecuteAsync
+- uid: SharpHoundRPC.Registry.IStrategyExecutor
+  name: IStrategyExecutor
+  href: api/SharpHoundRPC.Registry.IStrategyExecutor.html
+  commentId: T:SharpHoundRPC.Registry.IStrategyExecutor
+  fullName: SharpHoundRPC.Registry.IStrategyExecutor
+  nameWithType: IStrategyExecutor
+- uid: SharpHoundRPC.Registry.IStrategyExecutor.CollectAsync*
+  name: CollectAsync
+  href: api/SharpHoundRPC.Registry.IStrategyExecutor.html#SharpHoundRPC_Registry_IStrategyExecutor_CollectAsync_
+  commentId: Overload:SharpHoundRPC.Registry.IStrategyExecutor.CollectAsync
+  isSpec: "True"
+  fullName: SharpHoundRPC.Registry.IStrategyExecutor.CollectAsync
+  nameWithType: IStrategyExecutor.CollectAsync
+- uid: SharpHoundRPC.Registry.IStrategyExecutor.CollectAsync``2(System.String,System.Collections.Generic.IEnumerable{``1},System.Collections.Generic.IEnumerable{SharpHoundRPC.Registry.ICollectionStrategy{``0,``1}})
+  name: CollectAsync<T, TQuery>(String, IEnumerable<TQuery>, IEnumerable<ICollectionStrategy<T, TQuery>>)
+  href: api/SharpHoundRPC.Registry.IStrategyExecutor.html#SharpHoundRPC_Registry_IStrategyExecutor_CollectAsync__2_System_String_System_Collections_Generic_IEnumerable___1__System_Collections_Generic_IEnumerable_SharpHoundRPC_Registry_ICollectionStrategy___0___1___
+  commentId: M:SharpHoundRPC.Registry.IStrategyExecutor.CollectAsync``2(System.String,System.Collections.Generic.IEnumerable{``1},System.Collections.Generic.IEnumerable{SharpHoundRPC.Registry.ICollectionStrategy{``0,``1}})
+  name.vb: CollectAsync(Of T, TQuery)(String, IEnumerable(Of TQuery), IEnumerable(Of ICollectionStrategy(Of T, TQuery)))
+  fullName: SharpHoundRPC.Registry.IStrategyExecutor.CollectAsync<T, TQuery>(System.String, System.Collections.Generic.IEnumerable<TQuery>, System.Collections.Generic.IEnumerable<SharpHoundRPC.Registry.ICollectionStrategy<T, TQuery>>)
+  fullName.vb: SharpHoundRPC.Registry.IStrategyExecutor.CollectAsync(Of T, TQuery)(System.String, System.Collections.Generic.IEnumerable(Of TQuery), System.Collections.Generic.IEnumerable(Of SharpHoundRPC.Registry.ICollectionStrategy(Of T, TQuery)))
+  nameWithType: IStrategyExecutor.CollectAsync<T, TQuery>(String, IEnumerable<TQuery>, IEnumerable<ICollectionStrategy<T, TQuery>>)
+  nameWithType.vb: IStrategyExecutor.CollectAsync(Of T, TQuery)(String, IEnumerable(Of TQuery), IEnumerable(Of ICollectionStrategy(Of T, TQuery)))
 - uid: SharpHoundRPC.Registry.NativeUtils
   name: NativeUtils
   href: api/SharpHoundRPC.Registry.NativeUtils.html
@@ -17155,6 +17198,23 @@ references:
   fullName.vb: SharpHoundRPC.Registry.StrategyExecutorResult(Of T).Results
   nameWithType: StrategyExecutorResult<T>.Results
   nameWithType.vb: StrategyExecutorResult(Of T).Results
+- uid: SharpHoundRPC.Registry.StrategyExecutorResult`1.SuccessfulStrategy
+  name: SuccessfulStrategy
+  href: api/SharpHoundRPC.Registry.StrategyExecutorResult-1.html#SharpHoundRPC_Registry_StrategyExecutorResult_1_SuccessfulStrategy
+  commentId: P:SharpHoundRPC.Registry.StrategyExecutorResult`1.SuccessfulStrategy
+  fullName: SharpHoundRPC.Registry.StrategyExecutorResult<T>.SuccessfulStrategy
+  fullName.vb: SharpHoundRPC.Registry.StrategyExecutorResult(Of T).SuccessfulStrategy
+  nameWithType: StrategyExecutorResult<T>.SuccessfulStrategy
+  nameWithType.vb: StrategyExecutorResult(Of T).SuccessfulStrategy
+- uid: SharpHoundRPC.Registry.StrategyExecutorResult`1.SuccessfulStrategy*
+  name: SuccessfulStrategy
+  href: api/SharpHoundRPC.Registry.StrategyExecutorResult-1.html#SharpHoundRPC_Registry_StrategyExecutorResult_1_SuccessfulStrategy_
+  commentId: Overload:SharpHoundRPC.Registry.StrategyExecutorResult`1.SuccessfulStrategy
+  isSpec: "True"
+  fullName: SharpHoundRPC.Registry.StrategyExecutorResult<T>.SuccessfulStrategy
+  fullName.vb: SharpHoundRPC.Registry.StrategyExecutorResult(Of T).SuccessfulStrategy
+  nameWithType: StrategyExecutorResult<T>.SuccessfulStrategy
+  nameWithType.vb: StrategyExecutorResult(Of T).SuccessfulStrategy
 - uid: SharpHoundRPC.Registry.StrategyExecutorResult`1.WasSuccessful
   name: WasSuccessful
   href: api/SharpHoundRPC.Registry.StrategyExecutorResult-1.html#SharpHoundRPC_Registry_StrategyExecutorResult_1_WasSuccessful

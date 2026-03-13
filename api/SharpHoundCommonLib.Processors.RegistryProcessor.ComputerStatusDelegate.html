@@ -6,10 +6,10 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <title>Interface IRegistryKey
+    <title>Delegate RegistryProcessor.ComputerStatusDelegate
    </title>
     <meta name="viewport" content="width=device-width">
-    <meta name="title" content="Interface IRegistryKey
+    <meta name="title" content="Delegate RegistryProcessor.ComputerStatusDelegate
    ">
     <meta name="generator" content="docfx 2.56.7.0">
     
@@ -92,71 +92,18 @@
                           </div>
                         </div>
 
-                    <article class="content wrap" id="_content" data-uid="SharpHoundCommonLib.IRegistryKey">
+                    <article class="content wrap" id="_content" data-uid="SharpHoundCommonLib.Processors.RegistryProcessor.ComputerStatusDelegate">
   
   
-  <h1 id="SharpHoundCommonLib_IRegistryKey" data-uid="SharpHoundCommonLib.IRegistryKey" class="text-break">Interface IRegistryKey
+  <h1 id="SharpHoundCommonLib_Processors_RegistryProcessor_ComputerStatusDelegate" data-uid="SharpHoundCommonLib.Processors.RegistryProcessor.ComputerStatusDelegate" class="text-break">Delegate RegistryProcessor.ComputerStatusDelegate
   </h1>
   <div class="markdown level0 summary"></div>
   <div class="markdown level0 conceptual"></div>
-  <div class="inheritedMembers">
-    <h5>Inherited Members</h5>
-    <div>
-      <span class="xref">System.IDisposable.Dispose()</span>
-    </div>
-  </div>
-  <h6><strong>Namespace</strong>: <a class="xref" href="SharpHoundCommonLib.html">SharpHoundCommonLib</a></h6>
+  <h6><strong>Namespace</strong>: <a class="xref" href="SharpHoundCommonLib.Processors.html">SharpHoundCommonLib.Processors</a></h6>
   <h6><strong>Assembly</strong>: SharpHoundCommonLib.dll</h6>
-  <h5 id="SharpHoundCommonLib_IRegistryKey_syntax">Syntax</h5>
+  <h5 id="SharpHoundCommonLib_Processors_RegistryProcessor_ComputerStatusDelegate_syntax">Syntax</h5>
   <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">public interface IRegistryKey : IDisposable</code></pre>
-  </div>
-  <h3 id="methods">Methods
-  </h3>
-  <span class="small pull-right mobile-hide">
-    <span class="divider">|</span>
-    <a href="https://github.com/SpecterOps/SharpHoundCommon/new/a89ab138978e1b61b0bcbfa525efcb08ff580a8e/apiSpec/new?filename=SharpHoundCommonLib_IRegistryKey_GetSubKeyNames.md&amp;value=---%0Auid%3A%20SharpHoundCommonLib.IRegistryKey.GetSubKeyNames%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
-  </span>
-  <span class="small pull-right mobile-hide">
-    <a href="https://github.com/SpecterOps/SharpHoundCommon/blob/a89ab138978e1b61b0bcbfa525efcb08ff580a8e/src/CommonLib/IRegistryKey.cs/#L7">View Source</a>
-  </span>
-  <a id="SharpHoundCommonLib_IRegistryKey_GetSubKeyNames_" data-uid="SharpHoundCommonLib.IRegistryKey.GetSubKeyNames*"></a>
-  <h4 id="SharpHoundCommonLib_IRegistryKey_GetSubKeyNames" data-uid="SharpHoundCommonLib.IRegistryKey.GetSubKeyNames">GetSubKeyNames()</h4>
-  <div class="markdown level1 summary"></div>
-  <div class="markdown level1 conceptual"></div>
-  <h5 class="decalaration">Declaration</h5>
-  <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">string[] GetSubKeyNames()</code></pre>
-  </div>
-  <h5 class="returns">Returns</h5>
-  <table class="table table-bordered table-striped table-condensed">
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><span class="xref">System.String</span>[]</td>
-        <td></td>
-      </tr>
-    </tbody>
-  </table>
-  <span class="small pull-right mobile-hide">
-    <span class="divider">|</span>
-    <a href="https://github.com/SpecterOps/SharpHoundCommon/new/a89ab138978e1b61b0bcbfa525efcb08ff580a8e/apiSpec/new?filename=SharpHoundCommonLib_IRegistryKey_GetValue_System_String_System_String_.md&amp;value=---%0Auid%3A%20SharpHoundCommonLib.IRegistryKey.GetValue(System.String%2CSystem.String)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
-  </span>
-  <span class="small pull-right mobile-hide">
-    <a href="https://github.com/SpecterOps/SharpHoundCommon/blob/a89ab138978e1b61b0bcbfa525efcb08ff580a8e/src/CommonLib/IRegistryKey.cs/#L6">View Source</a>
-  </span>
-  <a id="SharpHoundCommonLib_IRegistryKey_GetValue_" data-uid="SharpHoundCommonLib.IRegistryKey.GetValue*"></a>
-  <h4 id="SharpHoundCommonLib_IRegistryKey_GetValue_System_String_System_String_" data-uid="SharpHoundCommonLib.IRegistryKey.GetValue(System.String,System.String)">GetValue(String, String)</h4>
-  <div class="markdown level1 summary"></div>
-  <div class="markdown level1 conceptual"></div>
-  <h5 class="decalaration">Declaration</h5>
-  <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">object GetValue(string subkey, string name)</code></pre>
+    <pre><code class="lang-csharp hljs">public delegate Task ComputerStatusDelegate(CSVComputerStatus status);</code></pre>
   </div>
   <h5 class="parameters">Parameters</h5>
   <table class="table table-bordered table-striped table-condensed">
@@ -169,13 +116,8 @@
     </thead>
     <tbody>
       <tr>
-        <td><span class="xref">System.String</span></td>
-        <td><span class="parametername">subkey</span></td>
-        <td></td>
-      </tr>
-      <tr>
-        <td><span class="xref">System.String</span></td>
-        <td><span class="parametername">name</span></td>
+        <td><a class="xref" href="SharpHoundCommonLib.CSVComputerStatus.html">CSVComputerStatus</a></td>
+        <td><span class="parametername">status</span></td>
         <td></td>
       </tr>
     </tbody>
@@ -190,7 +132,7 @@
     </thead>
     <tbody>
       <tr>
-        <td><span class="xref">System.Object</span></td>
+        <td><span class="xref">System.Threading.Tasks.Task</span></td>
         <td></td>
       </tr>
     </tbody>
