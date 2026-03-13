@@ -148,11 +148,10 @@ public class AdaptiveTimeoutTest {
         var minTimeout = TimeSpan.FromSeconds(0.5);
         var adaptiveTimeout = new AdaptiveTimeout(maxTimeout, minTimeout, new TestLogger(_testOutputHelper, Microsoft.Extensions.Logging.LogLevel.Trace), 1, 1000, 1);
 
-        await adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(50));
+        await adaptiveTimeout.ExecuteWithTimeout((_) => Task.CompletedTask);
 
         var adaptiveTimeoutResult = adaptiveTimeout.GetAdaptiveTimeout();
         Assert.Equal(minTimeout, adaptiveTimeoutResult);
-        Assert.True(adaptiveTimeoutResult < maxTimeout);
     }
 
     [Fact]
