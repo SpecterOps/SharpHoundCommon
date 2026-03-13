@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.DirectoryServices;
 using System.Linq;
+using System.Runtime.Versioning;
 using System.Security.AccessControl;
 using System.Threading;
 using System.Threading.Tasks;
@@ -60,6 +61,7 @@ namespace CommonLibTest {
             Assert.False(result);
         }
 
+        [SupportedOSPlatform("windows")]
         [WindowsOnlyFact]
         public async Task ACLProcessor_TestKnownDataAddMember() {
             var mockLdapUtils = new MockLdapUtils();
@@ -1421,6 +1423,7 @@ namespace CommonLibTest {
             Assert.False(result);
         }
 
+        [SupportedOSPlatform("windows")]
         [WindowsOnlyFact]
         public void ACLProcessor_CalculateImplicitACLHash_ValidInput_ReturnsCorrectHash()
         {
@@ -1439,6 +1442,7 @@ namespace CommonLibTest {
             Assert.Equal(expectedHash, result);
         }
 
+        [SupportedOSPlatform("windows")]
         [WindowsOnlyFact]
         public void ACLProcessor_CalculateImplicitACLHash_DifferentInputs_ProducesUniqueHashes()
         {
@@ -1458,6 +1462,7 @@ namespace CommonLibTest {
             Assert.NotEqual(protectedResult, adminsdResult);
         }
 
+        [SupportedOSPlatform("windows")]
         [WindowsOnlyFact]
         public void ACLProcessor_NullAdminSDHolderHash_Returns_Null_Bool()
         {
@@ -1476,6 +1481,7 @@ namespace CommonLibTest {
         }
 
 
+        [SupportedOSPlatform("windows")]
         [WindowsOnlyFact]
         public void ACLProcessor_AdminSDHolderHash_Returns_Match()
         {

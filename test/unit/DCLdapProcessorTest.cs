@@ -138,7 +138,6 @@ namespace CommonLibTest {
 
         [Fact]
         public async Task DCLdapProcessor_Authenticate_InvalidCredentialsException_SEC_E_UNSUPPORTED_FUNCTION() {
-            var exception = "ErrorTest";
             var endpoint = "http://primary.testlab.local/";
             var expected = $"LDAP endpoint '{endpoint}' does not support NTLM";
 
@@ -153,7 +152,6 @@ namespace CommonLibTest {
 
         [Fact]
         public async Task DCLdapProcessor_Authenticate_InvalidCredentialsException_SEC_E_BAD_BINDINGS() {
-            var exception = "ErrorTest";
             var endpoint = "http://primary.testlab.local/";
             var expected = $"Bad bindings with the LDAPS endpoint '{endpoint}'. Server error: {SEC_E_BAD_BINDINGS}";
 

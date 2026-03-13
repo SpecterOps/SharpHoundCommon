@@ -18,7 +18,8 @@ public class AdaptiveTimeoutTest {
     [Fact]
     public async Task AdaptiveTimeout_GetAdaptiveTimeout_NotEnoughSamplesAsync() {
         var maxTimeout = TimeSpan.FromSeconds(1);
-        var adaptiveTimeout = new AdaptiveTimeout(maxTimeout, new TestLogger(_testOutputHelper, Microsoft.Extensions.Logging.LogLevel.Trace), 10, 1000, 3);
+        var minTimeout = TimeSpan.Zero;
+        var adaptiveTimeout = new AdaptiveTimeout(maxTimeout, minTimeout, new TestLogger(_testOutputHelper, Microsoft.Extensions.Logging.LogLevel.Trace), 10, 1000, 3);
 
         await adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(50));
 
@@ -29,7 +30,8 @@ public class AdaptiveTimeoutTest {
     [Fact]
     public async Task AdaptiveTimeout_GetAdaptiveTimeout_AdaptiveDisabled() {
         var maxTimeout = TimeSpan.FromSeconds(1);
-        var adaptiveTimeout = new AdaptiveTimeout(maxTimeout, new TestLogger(_testOutputHelper, Microsoft.Extensions.Logging.LogLevel.Trace), 10, 1000, 3, false);
+        var minTimeout = TimeSpan.Zero;
+        var adaptiveTimeout = new AdaptiveTimeout(maxTimeout, minTimeout, new TestLogger(_testOutputHelper, Microsoft.Extensions.Logging.LogLevel.Trace), 10, 1000, 3, false);
 
         await adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(50));
         await adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(50));
@@ -42,7 +44,8 @@ public class AdaptiveTimeoutTest {
     [Fact]
     public async Task AdaptiveTimeout_GetAdaptiveTimeout() {
         var maxTimeout = TimeSpan.FromSeconds(1);
-        var adaptiveTimeout = new AdaptiveTimeout(maxTimeout, new TestLogger(_testOutputHelper, Microsoft.Extensions.Logging.LogLevel.Trace), 10, 1000, 3);
+        var minTimeout = TimeSpan.Zero;
+        var adaptiveTimeout = new AdaptiveTimeout(maxTimeout, minTimeout, new TestLogger(_testOutputHelper, Microsoft.Extensions.Logging.LogLevel.Trace), 10, 1000, 3);
 
         await adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(40));
         await adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(50));
@@ -56,8 +59,9 @@ public class AdaptiveTimeoutTest {
     public async Task AdaptiveTimeout_GetAdaptiveTimeout_TimeSpikeSafetyValve() {
         var tasks = new List<Task>();
         var maxTimeout = TimeSpan.FromSeconds(1);
+        var minTimeout = TimeSpan.Zero;
         var numSamples = 30;
-        var adaptiveTimeout = new AdaptiveTimeout(maxTimeout, new TestLogger(_testOutputHelper, Microsoft.Extensions.Logging.LogLevel.Trace), numSamples, 1000, 10);
+        var adaptiveTimeout = new AdaptiveTimeout(maxTimeout, minTimeout, new TestLogger(_testOutputHelper, Microsoft.Extensions.Logging.LogLevel.Trace), numSamples, 1000, 10);
 
         for (int i = 0; i < numSamples; i++)
             tasks.Add(adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(10)));
@@ -75,8 +79,9 @@ public class AdaptiveTimeoutTest {
     public async Task AdaptiveTimeout_GetAdaptiveTimeout_TimeSpikeSafetyValve_IgnoreHiccup() {
         var tasks = new List<Task>();
         var maxTimeout = TimeSpan.FromSeconds(1);
+        var minTimeout = TimeSpan.Zero;
         var numSamples = 5;
-        var adaptiveTimeout = new AdaptiveTimeout(maxTimeout, new TestLogger(_testOutputHelper, Microsoft.Extensions.Logging.LogLevel.Trace), numSamples, 1000, 2);
+        var adaptiveTimeout = new AdaptiveTimeout(maxTimeout, minTimeout, new TestLogger(_testOutputHelper, Microsoft.Extensions.Logging.LogLevel.Trace), numSamples, 1000, 2);
 
         // Prepare our successful samples
         for (int i = 0; i < numSamples; i++)
@@ -103,8 +108,9 @@ public class AdaptiveTimeoutTest {
     public async Task AdaptiveTimeout_GetAdaptiveTimeout_ThrowWhenExcessiveTimeouts() {
         var tasks = new List<Task>();
         var maxTimeout = TimeSpan.FromMilliseconds(500);
+        var minTimeout = TimeSpan.Zero;
         var numSamples = 5;
-        var adaptiveTimeout = new AdaptiveTimeout(maxTimeout, new TestLogger(_testOutputHelper, Microsoft.Extensions.Logging.LogLevel.Trace), numSamples, 1000, 2, throwIfExcessiveTimeouts: true);
+        var adaptiveTimeout = new AdaptiveTimeout(maxTimeout, minTimeout, new TestLogger(_testOutputHelper, Microsoft.Extensions.Logging.LogLevel.Trace), numSamples, 1000, 2, throwIfExcessiveTimeouts: true);
 
         for (int i = 0; i < numSamples; i++)
             tasks.Add(adaptiveTimeout.ExecuteWithTimeout((_) => Task.CompletedTask));
@@ -121,8 +127,9 @@ public class AdaptiveTimeoutTest {
     public async Task AdaptiveTimeout_GetAdaptiveTimeout_DoNotThrowWhenExcessiveTimeouts() {
         var tasks = new List<Task>();
         var maxTimeout = TimeSpan.FromMilliseconds(500);
+        var minTimeout = TimeSpan.Zero;
         var numSamples = 5;
-        var adaptiveTimeout = new AdaptiveTimeout(maxTimeout, new TestLogger(_testOutputHelper, Microsoft.Extensions.Logging.LogLevel.Trace), numSamples, 1000, 2, throwIfExcessiveTimeouts: false);
+        var adaptiveTimeout = new AdaptiveTimeout(maxTimeout, minTimeout, new TestLogger(_testOutputHelper, Microsoft.Extensions.Logging.LogLevel.Trace), numSamples, 1000, 2, throwIfExcessiveTimeouts: false);
 
         for (int i = 0; i < numSamples; i++)
             tasks.Add(adaptiveTimeout.ExecuteWithTimeout((_) => Task.CompletedTask));
@@ -133,6 +140,19 @@ public class AdaptiveTimeoutTest {
             tasks.Add(adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(1000)));
 
         await Task.WhenAll(tasks);
+    }
+
+    [Fact]
+    public async Task AdaptiveTimeout_GetAdaptiveTimeout_MinTimeout() {
+        var maxTimeout = TimeSpan.FromSeconds(1);
+        var minTimeout = TimeSpan.FromSeconds(0.5);
+        var adaptiveTimeout = new AdaptiveTimeout(maxTimeout, minTimeout, new TestLogger(_testOutputHelper, Microsoft.Extensions.Logging.LogLevel.Trace), 1, 1000, 1);
+
+        await adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(50));
+
+        var adaptiveTimeoutResult = adaptiveTimeout.GetAdaptiveTimeout();
+        Assert.Equal(minTimeout, adaptiveTimeoutResult);
+        Assert.True(adaptiveTimeoutResult < maxTimeout);
     }
 
     [Fact]
