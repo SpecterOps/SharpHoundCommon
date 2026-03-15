@@ -30,6 +30,9 @@ namespace SharpHoundCommonLib {
         private static ConcurrentDictionary<string, Domain> _domainCache = new();
         private static ConcurrentHashSet _domainControllers = new(StringComparer.OrdinalIgnoreCase);
         private static ConcurrentHashSet _unresolvablePrincipals = new(StringComparer.OrdinalIgnoreCase);
+        
+        // Tracks Domains we know we've determined we shouldn't try to connect to
+        private static ConcurrentHashSet _excludedDomains = new(StringComparer.OrdinalIgnoreCase);
 
         private static readonly ConcurrentDictionary<string, string> DomainToForestCache =
             new(StringComparer.OrdinalIgnoreCase);
@@ -50,7 +53,7 @@ namespace SharpHoundCommonLib {
         private readonly ILogger _log;
         private readonly IPortScanner _portScanner;
         private readonly NativeMethods _nativeMethods;
-        private readonly string _nullCacheKey = Guid.NewGuid().ToString();
+        private static readonly string _nullCacheKey = Guid.NewGuid().ToString();
         private static readonly Regex SIDRegex = new(@"^(S-\d+-\d+-\d+-\d+-\d+-\d+)(-\d+)?$");
 
         private readonly string[] _translateNames = { "Administrator", "admin" };
@@ -506,12 +509,14 @@ namespace SharpHoundCommonLib {
                         : new DirectoryContext(DirectoryContextType.Domain);
 
                 // Blocking External Call
-                domain = Domain.GetDomain(context);
+                domain = Helpers.RetryOnException<ActiveDirectoryObjectNotFoundException, Domain>(() => Domain.GetDomain(context), 2).GetAwaiter().GetResult();
                 if (domain == null) return false;
                 _domainCache.TryAdd(cacheKey, domain);
                 return true;
             }
             catch (Exception e) {
+                // The Static GetDomain Function ran into an issue requiring to exclude a domain as it would continuously 
+                // try to connect to a domain that it could not connect to. This method may also need the same logic. 
                 _log.LogDebug(e, "GetDomain call failed for domain name {Name}", domainName);
                 domain = null;
                 return false;
@@ -519,7 +524,13 @@ namespace SharpHoundCommonLib {
         }
 
         public static bool GetDomain(string domainName, LdapConfig ldapConfig, out Domain domain) {
+            var cacheKey = domainName ?? _nullCacheKey;
             if (_domainCache.TryGetValue(domainName, out domain)) return true;
+            if (IsExcludedDomain(domainName)) {
+                Logging.Logger.LogDebug("Domain: {DomainName} has been excluded for collection. Skipping", domainName);
+                domain = null;
+                return false;
+            }
 
             try {
                 DirectoryContext context;
@@ -535,14 +546,17 @@ namespace SharpHoundCommonLib {
                         : new DirectoryContext(DirectoryContextType.Domain);
 
                 // Blocking External Call
-                domain = Domain.GetDomain(context);
+                domain = Helpers.RetryOnException<ActiveDirectoryObjectNotFoundException, Domain>(() => Domain.GetDomain(context), 2).GetAwaiter().GetResult();
                 if (domain == null) return false;
-                _domainCache.TryAdd(domainName, domain);
+                _domainCache.TryAdd(cacheKey, domain);
                 return true;
             }
             catch (Exception e) {
-                Logging.Logger.LogDebug("Static GetDomain call failed for domain {DomainName}: {Error}", domainName,
+                Logging.Logger.LogDebug("Static GetDomain call failed, adding to exclusion, for domain {DomainName}: {Error}", domainName,
                     e.Message);
+                // If a domain cannot be contacted, this will exclude the domain so that it does not continuously try to connect, and 
+                // cause more timeouts. 
+                AddExcludedDomain(cacheKey);
                 domain = null;
                 return false;
             }
@@ -565,11 +579,13 @@ namespace SharpHoundCommonLib {
                     : new DirectoryContext(DirectoryContextType.Domain);
 
                 // Blocking External Call
-                domain = Domain.GetDomain(context);
+                domain = Helpers.RetryOnException<ActiveDirectoryObjectNotFoundException, Domain>(() => Domain.GetDomain(context), 2).GetAwaiter().GetResult();
                 _domainCache.TryAdd(_nullCacheKey, domain);
                 return true;
             }
             catch (Exception e) {
+                // The Static GetDomain Function ran into an issue requiring to exclude a domain as it would continuously 
+                // try to connect to a domain that it could not connect to. This method may also need the same logic. 
                 _log.LogDebug(e, "GetDomain call failed for blank domain");
                 domain = null;
                 return false;
@@ -1129,6 +1145,7 @@ namespace SharpHoundCommonLib {
             _domainControllers = new ConcurrentHashSet(StringComparer.OrdinalIgnoreCase);
             _connectionPool?.Dispose();
             _connectionPool = new ConnectionPoolManager(_ldapConfig, scanner: _portScanner);
+            _excludedDomains = new ConcurrentHashSet(StringComparer.OrdinalIgnoreCase);
         }
 
         private IDirectoryObject CreateDirectoryEntry(string path) {
@@ -1142,6 +1159,9 @@ namespace SharpHoundCommonLib {
         public void Dispose() {
             _connectionPool?.Dispose();
         }
+
+        public static bool IsExcludedDomain(string domain) => _excludedDomains.Contains(domain);
+        public static void AddExcludedDomain(string domain) => _excludedDomains.Add(domain);
 
         internal static bool ResolveLabel(string objectIdentifier, string distinguishedName, string samAccountType,
             string[] objectClasses, int flags, out Label type) {

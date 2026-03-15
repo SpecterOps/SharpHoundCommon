@@ -251,4 +251,21 @@ public class TimeoutTests {
         Assert.False(result.IsSuccess);
         Assert.Equal("Cancellation requested", result.Error);
     }
+    
+    [Theory]
+    [InlineData(0, 2, 30, 2, 6)]
+    [InlineData(5, 2, 200, 1, 192)]
+    [InlineData(5, 5, 500, 5, 480)]
+    [InlineData(0, 2, 1, 1, 1)]
+    [InlineData(5, 2, 1, 1, 1)]
+    [InlineData(5, 2, 2, 2, 2)]
+    [InlineData(5, 30, 30, 30, 30)]
+    public void DecorrelatedTimeSpan_BetweenExpected(int attempt, int baseDelayValue, int maxDelayValue, double expectedLowerBound, double expectedUpperBound) {
+        var baseDelay = TimeSpan.FromTicks(baseDelayValue);
+        var maxDelay = TimeSpan.FromTicks(maxDelayValue);
+        for (var trials = 0; trials < 500; trials++) {
+            var delay = SharpHoundCommonLib.Helpers.BackoffWithDecorrelatedJitter(attempt, baseDelay, maxDelay);
+            Assert.InRange(delay.Ticks, expectedLowerBound, expectedUpperBound);
+        }
+    }
 }

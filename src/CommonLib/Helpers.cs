@@ -8,12 +8,14 @@ using System.Text.RegularExpressions;
 using SharpHoundCommonLib.Enums;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace SharpHoundCommonLib {
     public static class Helpers {
         private static readonly HashSet<string> Groups = new() { "268435456", "268435457", "536870912", "536870913" };
         private static readonly HashSet<string> Computers = new() { "805306369" };
         private static readonly HashSet<string> Users = new() { "805306368", "805306370" };
+        private static readonly double MaxTimeSpanTicks = (double)TimeSpan.MaxValue.Ticks - 1_000;
 
         private static readonly Regex DCReplaceRegex = new("DC=", RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private static readonly Regex SPNRegex = new(@".*\/.*", RegexOptions.Compiled);
@@ -276,15 +278,28 @@ namespace SharpHoundCommonLib {
             return builder.ToString();
         }
 
+        public static TimeSpan BackoffWithDecorrelatedJitter(int attempt, TimeSpan baseDelay, TimeSpan maxDelay) {
+            // Decorrelated Jitter Backoff - see https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/
+            var temp = Math.Min(maxDelay.Ticks, baseDelay.Ticks * (attempt * attempt));
+            temp = temp / 2 + RandomUtils.Between(0, temp / 2);
+            var ticksToDelay = Math.Min(maxDelay.Ticks, RandomUtils.Between(baseDelay.Ticks, temp * 3));
+            
+            // This ensures that a TimeSpan can be created with the ticks amount as TimeSpan uses a long.
+            return double.IsInfinity(ticksToDelay) ? TimeSpan.FromTicks((long)MaxTimeSpanTicks) :
+                TimeSpan.FromTicks((long)Math.Min(MaxTimeSpanTicks, ticksToDelay));
+        }
+
         /// <summary>
         /// Attempt an action a number of times, quietly eating a specific exception until the last attempt if it throws.
         /// </summary>
         /// <param name="action"></param>
         /// <param name="retryCount"></param>
         /// <param name="logger"></param>
-        public static async Task RetryOnException<T>(Func<Task> action, int retryCount, ILogger logger = null) where T : Exception {
+        public static async Task RetryOnException<T>(Func<Task> action, int retryCount, TimeSpan? baseDelay = null, TimeSpan? maxDelay = null, ILogger logger = null) where T : Exception {
             int attempt = 0;
             bool success = false;
+            baseDelay ??= TimeSpan.FromSeconds(1);
+            maxDelay ??= TimeSpan.FromSeconds(30);
             do {
                 try {
                     await action();
@@ -295,8 +310,32 @@ namespace SharpHoundCommonLib {
                     logger?.LogDebug(e, "Exception caught, retrying attempt {Attempt}", attempt);
                     if (attempt >= retryCount)
                         throw;
+
+                    var delay = BackoffWithDecorrelatedJitter(attempt, baseDelay.Value, maxDelay.Value);
+                    await Task.Delay(delay);
                 }
             } while (!success && attempt < retryCount);
+        }
+
+        public static async Task<U> RetryOnException<T, U>(Func<U> action, int retryCount, TimeSpan? baseDelay = null, TimeSpan? maxDelay = null, ILogger logger = null) where T : Exception {
+            int attempt = 0;
+            baseDelay ??= TimeSpan.FromSeconds(1);
+            maxDelay ??= TimeSpan.FromSeconds(30);
+            do {
+                try {
+                    return action();
+                }
+                catch (T e) {
+                    attempt++;
+                    logger?.LogDebug(e, "Exception caught, retrying attempt {Attempt}", attempt);
+                    if (attempt >= retryCount)
+                        throw;
+                    var delay = BackoffWithDecorrelatedJitter(attempt, baseDelay.Value, maxDelay.Value);
+                    await Task.Delay(delay);
+                }
+            } while (attempt < retryCount);
+
+            throw new InvalidOperationException($"You really shouldn't be here, {nameof(RetryOnException)} isn't working as intended.");
         }
     }
 
