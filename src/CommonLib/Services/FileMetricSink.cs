@@ -24,6 +24,7 @@ public sealed class FileMetricSink(
     private readonly MetricDefinition[] _definitions = definitions.ToArray();
     private readonly Dictionary<(int, string[]), MetricAggregator> _states = new();
     private readonly object _lock = new();
+    private readonly object _writeLock = new();
 
     public FileMetricSink(
         IReadOnlyList<MetricDefinition> definitions,
@@ -38,6 +39,9 @@ public sealed class FileMetricSink(
         options) {}
 
     public void Observe(in MetricObservation.DoubleMetricObservation observation) {
+        if ((uint)observation.DefinitionId >= _definitions.Length)
+            return; 
+        
         var key = (observation.DefinitionId, observation.LabelsValues);
 
         lock (_lock) {
@@ -75,21 +79,26 @@ public sealed class FileMetricSink(
                     definition,
                     new LabelValues(labelValues),
                     aggregator,
-                    timestamp);
+                    timestamp,
+                    _options.TimestampFormat);
             }
 
             sb.Append('=', 40).AppendLine().AppendLine().AppendLine().AppendLine().AppendLine();
             output = sb.ToString();
         }
-        
-        _textWriter.Write(output);
 
-        if (_options.FlushWriter) 
-            _textWriter.Flush();
+        lock (_writeLock) {
+            _textWriter.Write(output);
+
+            if (_options.FlushWriter) 
+                _textWriter.Flush();
+        }
     }
     
     public void Dispose() {
         Flush();
-        _textWriter.Dispose();
+        lock (_writeLock) {
+            _textWriter.Dispose();
+        }
     }
 }
