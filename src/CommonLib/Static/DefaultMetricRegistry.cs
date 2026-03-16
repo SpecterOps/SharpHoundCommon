@@ -36,5 +36,11 @@ public static class DefaultMetricRegistry {
                 Name: "ldap_total_unresolvable_principals",
                 LabelNames: ["location"]),
             out LdapMetricDefinitions.UnresolvablePrincipals);
+        
+        registry.TryRegister(
+            new CounterDefinition(
+                Name: "adaptive_timeouts_total",
+                LabelNames: ["location"]),
+            out AdaptiveTimeoutDefinitions.TimeoutsTotal);
     }
 }

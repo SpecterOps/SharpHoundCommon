@@ -35,3 +35,7 @@ public static class LdapMetricDefinitions {
     public static int FailedRequests = MetricId.InvalidId;
     public static int UnresolvablePrincipals = MetricId.InvalidId;
 }
+
+public static class AdaptiveTimeoutDefinitions {
+    public static int TimeoutsTotal = MetricId.InvalidId;
+}
