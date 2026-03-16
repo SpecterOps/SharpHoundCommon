@@ -40,6 +40,7 @@ public sealed class GaugeAggregator : MetricAggregator<double> {
 public record struct HistogramSnapshot(double[] Bounds, long[] Counts, long TotalCount, double Sum);
 
 public sealed class CumulativeHistogramAggregator(double[] bounds) : MetricAggregator<HistogramSnapshot> {
+    private readonly double[] _bounds = (double[])bounds.Clone();
     private readonly long[] _bucketCounts = new long[bounds.Length + 1]; // Includes the Inf+ bucket
     private long _count;
     private double _sum;
@@ -50,7 +51,7 @@ public sealed class CumulativeHistogramAggregator(double[] bounds) : MetricAggre
         // If the value is defined as a specific bucket, binary search returns it. If it is not found,
         // it returns the compliment of the position it should be at. with a simple check we can undo
         // that compliment if it is what is found.
-        var idx = Array.BinarySearch(bounds, value);
+        var idx = Array.BinarySearch(_bounds, value);
         if (idx < 0) idx = ~idx;
         lock (_lock) {
             _bucketCounts[idx]++;
@@ -63,7 +64,7 @@ public sealed class CumulativeHistogramAggregator(double[] bounds) : MetricAggre
 
     public HistogramSnapshot SnapshotHistogram() {
         lock (_lock) {
-            return new HistogramSnapshot(bounds, (long[])_bucketCounts.Clone(), _count, _sum);
+            return new HistogramSnapshot((double[])_bounds.Clone(), (long[])_bucketCounts.Clone(), _count, _sum);
         }
     }
 }

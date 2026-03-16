@@ -45,14 +45,14 @@ public class MetricWriter(ILogger log = null) : IMetricWriter {
                 cumulativeValue += snapshot.Counts[i];
 
                 if (labelValues.Values.Length > 0) {
-                    builder.AppendFormat("{0} {1}{2} = {3}\n",
-                        timestamp.ToString(timestampOutputString),
+                    builder.AppendFormat(CultureInfo.InvariantCulture, "{0} {1}{2} = {3}\n",
+                        timestamp.ToString(timestampOutputString, CultureInfo.InvariantCulture),
                         definition.Name + "_bucket",
                         labelValues.ToDisplayString(definition.LabelNames, "le", snapshot.Bounds[i].ToString(CultureInfo.InvariantCulture)),
                         cumulativeValue);
                 } else {
-                    builder.AppendFormat("{0} {1}{2}{{le=\"{3}\"}} = {4}\n",
-                        timestamp.ToString(timestampOutputString),
+                    builder.AppendFormat(CultureInfo.InvariantCulture, "{0} {1}{2}{{le=\"{3}\"}} = {4}\n",
+                        timestamp.ToString(timestampOutputString, CultureInfo.InvariantCulture),
                         definition.Name + "_bucket",
                         defaultLabelText,
                         snapshot.Bounds[i],
@@ -61,28 +61,28 @@ public class MetricWriter(ILogger log = null) : IMetricWriter {
             }
 
             if (labelValues.Values.Length > 0) {
-                    builder.AppendFormat("{0} {1}{2} = {3}\n",
-                        timestamp.ToString(timestampOutputString),
+                    builder.AppendFormat(CultureInfo.InvariantCulture, "{0} {1}{2} = {3}\n",
+                        timestamp.ToString(timestampOutputString, CultureInfo.InvariantCulture),
                         definition.Name + "_bucket",
                         labelValues.ToDisplayString(definition.LabelNames, "le", "+Inf"),
                         snapshot.TotalCount);
                 
             } else {
-                    builder.AppendFormat("{0} {1}{2}{{le=\"+Inf\"}} = {3}\n",
-                        timestamp.ToString(timestampOutputString),
+                    builder.AppendFormat(CultureInfo.InvariantCulture, "{0} {1}{2}{{le=\"+Inf\"}} = {3}\n",
+                        timestamp.ToString(timestampOutputString, CultureInfo.InvariantCulture),
                         definition.Name + "_bucket",
                         defaultLabelText,
                         snapshot.TotalCount);
             }
 
-            builder.AppendFormat("{0} {1}{2} = {3}\n",
-                timestamp.ToString(timestampOutputString),
+            builder.AppendFormat(CultureInfo.InvariantCulture, "{0} {1}{2} = {3}\n",
+                timestamp.ToString(timestampOutputString, CultureInfo.InvariantCulture),
                 definition.Name + "_sum",
                 defaultLabelText,
                 snapshot.Sum);
 
-            builder.AppendFormat("{0} {1}{2} = {3}\n",
-                timestamp.ToString(timestampOutputString),
+            builder.AppendFormat(CultureInfo.InvariantCulture, "{0} {1}{2} = {3}\n",
+                timestamp.ToString(timestampOutputString, CultureInfo.InvariantCulture),
                 definition.Name + "_count",
                 defaultLabelText,
                 snapshot.TotalCount);
@@ -96,7 +96,7 @@ public class MetricWriter(ILogger log = null) : IMetricWriter {
         MetricAggregator<double> aggregator, 
         DateTimeOffset timestamp, 
         string timestampOutputString) => 
-        builder.AppendFormat("{0} {1}{2} = {{{3}}}\n", timestamp.ToString(timestampOutputString),
+        builder.AppendFormat(CultureInfo.InvariantCulture, "{0} {1}{2} = {{{3}}}\n", timestamp.ToString(timestampOutputString, CultureInfo.InvariantCulture),
             definition.Name, labelText, aggregator.Snapshot());
     
     private static void DefaultAppend(
@@ -106,6 +106,6 @@ public class MetricWriter(ILogger log = null) : IMetricWriter {
         MetricAggregator<long> aggregator, 
         DateTimeOffset timestamp, 
         string timestampOutputString) => 
-        builder.AppendFormat("{0} {1}{2} = {{{3}}}\n", timestamp.ToString(timestampOutputString),
+        builder.AppendFormat(CultureInfo.InvariantCulture, "{0} {1}{2} = {{{3}}}\n", timestamp.ToString(timestampOutputString, CultureInfo.InvariantCulture),
             definition.Name, labelText, aggregator.Snapshot());
 }
