@@ -7,7 +7,8 @@ namespace SharpHoundCommonLib.Models;
 
 public readonly record struct LabelValues(string[] Values) {
     public string ToDisplayString(IReadOnlyList<string> labelNames, string additionalName = null, string additionalValue = null) {
-        if (labelNames.Count == 0)
+        var hasAdditional = !string.IsNullOrEmpty(additionalName) && !string.IsNullOrEmpty(additionalValue);
+        if (labelNames.Count == 0 && !hasAdditional)
             return string.Empty;
         
         if (labelNames.Count != Values.Length)
@@ -25,7 +26,7 @@ public readonly record struct LabelValues(string[] Values) {
                 .Append('"');
         }
 
-        if (!string.IsNullOrEmpty(additionalName) && !string.IsNullOrEmpty(additionalValue)) {
+        if (hasAdditional) {
             sb.Append(',').Append(additionalName).Append("=\"").Append(additionalValue).Append('"');
         }
         
@@ -35,8 +36,17 @@ public readonly record struct LabelValues(string[] Values) {
 
     public Dictionary<string, string> ToDictionary(IReadOnlyList<string> labelNames,
         IReadOnlyList<string> additionalLabelNames = null, IReadOnlyList<string> additionalLabelValues = null) {
-        if (labelNames.Count == 0)
+        if (labelNames.Count == 0) {
+            if (additionalLabelNames != null && additionalLabelValues != null &&
+                additionalLabelNames.Count == additionalLabelValues.Count) {
+                return additionalLabelNames?
+                    .Zip(additionalLabelValues, (name, value) => new { name, value })
+                    .ToDictionary(x => x.name, x => x.value) ?? new Dictionary<string, string>();
+                
+            }
             return new Dictionary<string, string>();
+        }
+            
         
         if (labelNames.Count != Values.Length)
             return new Dictionary<string, string>{{"invalid_labels", "label_name_and_count_do_not_match"}};
@@ -70,8 +80,11 @@ public sealed record CumulativeHistogramDefinition(string Name, double[] InitBuc
         var copy = (double[])buckets.Clone();
         Array.Sort(copy);
 
-        for (var i = 1; i < copy.Length; i++) {
-            if (copy[i] <= copy[i - 1])
+        for (var i = 0; i < copy.Length; i++) {
+            if (double.IsNaN(copy[i]) || double.IsInfinity(copy[i]))
+                throw new ArgumentException("Histogram buckets cannot contain NaN or Infinity");
+            
+            if (i > 0 && copy[i] <= copy[i - 1])
                 throw new ArgumentException("Histogram buckets must be strictly increasing");
         }
 
