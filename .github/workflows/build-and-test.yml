@@ -2,27 +2,26 @@ name: Build and Test
 
 on:
   pull_request:
-    branches: [ v4 ]
+    branches:
+      - v4
 
 jobs:
   build-and-test:
     runs-on: windows-latest
-    
     steps:
-    - uses: actions/checkout@v6
-
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v5
-      with:
-        dotnet-version: |
-          7.0.x
-          5.0.x
-
-    - name: Restore dependencies
-      run: dotnet restore
-
-    - name: Build
-      run: dotnet build --no-restore
-
-    - name: Test
-      run: dotnet test --no-build
+      - name: Checkout Code
+        uses: actions/checkout@v6
+  
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 8.0.x
+  
+      - name: Restore Dependencies
+        run: dotnet restore
+  
+      - name: Build
+        run: dotnet build --no-restore
+  
+      - name: Test
+        run: dotnet test --no-build
