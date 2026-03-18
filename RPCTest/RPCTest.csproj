@@ -5,6 +5,8 @@
         <LangVersion>latest</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <!-- Suppress cross-targeting warning when referencing net472 projects in net8.0 tests -->
+        <NoWarn>$(NoWarn);NU1702</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>
