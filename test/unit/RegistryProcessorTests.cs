@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Versioning;
 using System.Threading.Tasks;
 using CommonLibTest.Facades;
 using Microsoft.Extensions.Logging;
@@ -74,6 +75,7 @@ namespace CommonLibTest
             }
         }
 
+        [SupportedOSPlatform("windows")]
         [WindowsOnlyFact]
         public async Task RegistryProcessor_ReadRegistrySettings_FirstStrategySuccessful() {
             const uint minClientSecValue = 536870912;
@@ -106,6 +108,7 @@ namespace CommonLibTest
             VerifyCompStatusLog(task, TargetName, CSVComputerStatus.StatusSuccess);
         }
 
+        [SupportedOSPlatform("windows")]
         [WindowsOnlyFact]
         public async Task RegistryProcessor_ReadRegistrySettings_SecondStrategySuccessful() {
             const string failureReason = "No such host is known.";
@@ -166,6 +169,7 @@ namespace CommonLibTest
             Assert.Empty(_receivedCompStatuses);
         }
 
+        [SupportedOSPlatform("windows")]
         [WindowsOnlyFact]
         public async Task RegistryProcessor_ReadRegistrySettings_SetsAllValues() {
             var allowedServers = new[] {"server"};
