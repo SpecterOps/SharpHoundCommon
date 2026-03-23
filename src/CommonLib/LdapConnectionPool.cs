@@ -307,6 +307,7 @@ namespace SharpHoundCommonLib {
                         yield break;
                     }
 
+                    queryRetryCount++;
                     _log.LogDebug(
                         "PagedQuery - Attempting to recover from ServerDown for query {Info} (Attempt {Count})",
                         queryParameters.GetQueryInfo(), queryRetryCount);
@@ -431,7 +432,6 @@ namespace SharpHoundCommonLib {
             if (connectionWrapper.Connection == null) {
                 result.Success = false;
                 result.Message = "Connection object is null";
-                ReleaseConnection(connectionWrapper);
                 return result;
             }
 
