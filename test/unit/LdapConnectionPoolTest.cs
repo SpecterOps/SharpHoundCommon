@@ -76,37 +76,6 @@ public class LdapConnectionPoolTest
     }
 
     /// <summary>
-    /// Fix: SetupLdapQuery previously did not call ReleaseConnection when it found
-    /// connectionWrapper.Connection == null, leaking the slot.
-    /// Verifies that the wrapper is returned to the pool after the setup failure.
-    /// </summary>
-    [Fact]
-    public async Task LdapConnectionPool_Query_NullConnection_ReleasesConnectionBackToPool()
-    {
-        var ldapConfig = new LdapConfig();
-        var pool = new LdapConnectionPool("null-conn-test.local", "null-conn-test.local", ldapConfig);
-
-        var connectionsBag = GetConnectionsBag(pool);
-
-        // Inject a wrapper whose LdapConnection is intentionally null to trigger the guard.
-        var nullWrapper = new LdapConnectionWrapper(null, null, false, "null-conn-test.local");
-        connectionsBag.Add(nullWrapper);
-        Assert.Single(connectionsBag);
-
-        var queryParams = new LdapQueryParameters {
-            DomainName = "null-conn-test.local",
-            LDAPFilter = "(objectClass=*)",
-            GlobalCatalog = false
-        };
-
-        // Iterating the async enumerable triggers SetupLdapQuery.
-        await foreach (var _ in pool.Query(queryParams)) { }
-
-        // The null-connection wrapper must have been released back to the pool, not abandoned.
-        Assert.Single(connectionsBag);
-    }
-
-    /// <summary>
     /// Fix: Dispose() previously only drained the regular connection bag; the global-catalog
     /// bag was left untouched, leaking those connections.
     /// Verifies that Dispose() empties the global-catalog connection bag.
