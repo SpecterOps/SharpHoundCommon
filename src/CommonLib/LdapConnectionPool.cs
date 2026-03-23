@@ -288,7 +288,7 @@ namespace SharpHoundCommonLib {
                         queryRetryCount++;
                     }
                 }
-                catch (LdapException le) when (le.ErrorCode == (int)LdapErrorCodes.ServerDown) {
+                catch (LdapException le) when (le.ErrorCode == (int)LdapErrorCodes.ServerDown && queryRetryCount < MaxRetries) {
                     /*
                      * A ServerDown exception indicates that our connection is no longer valid for one of many reasons.
                      * We'll want to release our connection back to the pool, but dispose it. We need a new connection,
@@ -396,6 +396,8 @@ namespace SharpHoundCommonLib {
                     continue;
                 }
 
+                busyRetryCount = 0;
+
                 foreach (SearchResultEntry entry in response.Entries) {
                     if (cancellationToken.IsCancellationRequested) {
                         ReleaseConnection(connectionWrapper);
@@ -429,6 +431,7 @@ namespace SharpHoundCommonLib {
             if (connectionWrapper.Connection == null) {
                 result.Success = false;
                 result.Message = "Connection object is null";
+                ReleaseConnection(connectionWrapper);
                 return result;
             }
 
@@ -578,6 +581,10 @@ namespace SharpHoundCommonLib {
 
                     yield return tempResult;
                     yield break;
+                }
+                
+                if (response == null) {
+                    continue;
                 }
 
                 if (response?.Entries.Count == 1) {
@@ -760,6 +767,10 @@ namespace SharpHoundCommonLib {
 
         public void Dispose() {
             while (_connections.TryTake(out var wrapper)) {
+                wrapper.Connection.Dispose();
+            }
+            
+            while (_globalCatalogConnection.TryTake(out var wrapper)) {
                 wrapper.Connection.Dispose();
             }
         }
@@ -1031,7 +1042,7 @@ namespace SharpHoundCommonLib {
             else {
                 if (await _portScanner.CheckPort(target, _ldapConfig.GetPort(true)) || (!_ldapConfig.ForceSSL &&
                         await _portScanner.CheckPort(target, _ldapConfig.GetPort(false))))
-                    return await CreateLdapConnection(target, true);
+                    return await CreateLdapConnection(target, false);
             }
 
             return (false, null);
