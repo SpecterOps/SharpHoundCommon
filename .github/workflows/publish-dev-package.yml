@@ -25,9 +25,8 @@ jobs:
           SHORT_SHA=$(git rev-parse --short HEAD)
           mkdir pkgs
           dotnet pack --no-restore -c Release \
-            -p:PackageVersion=0.0.0-dev.${SHORT_SHA} \
+            -p:PackageVersion=0.0.0-dev.$env:SHORT_SHA \
             -o ./pkgs
-          ls pkgs
       - name: Publish to SpecterOps Packages
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
@@ -35,4 +34,4 @@ jobs:
         run: |
           dotnet tool install -g sleet
 #          sleet push ./pkgs --force
-          sleet retention prune --stable 0 --prerelease 2 --release-labels 1 --dry-run
+          sleet retention prune --prerelease 2 --release-labels 1 --dry-run
