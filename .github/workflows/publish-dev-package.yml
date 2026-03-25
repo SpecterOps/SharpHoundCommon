@@ -27,12 +27,7 @@ jobs:
           dotnet pack --no-restore -c Release \
             -p:PackageVersion=0.0.0-dev.${SHORT_SHA} \
             -o ./pkgs
-
-      - name: Echo pkgs directory contents
-        run: |
-          echo "Contents of ./pkgs directory:"
-          ls ./pkgs
-
+          ls pkgs
       - name: Publish to SpecterOps Packages
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
