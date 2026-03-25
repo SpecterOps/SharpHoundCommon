@@ -31,7 +31,7 @@ jobs:
       - name: Echo pkgs directory contents
         run: |
           echo "Contents of ./pkgs directory:"
-          ls -lah ./pkgs
+          ls ./pkgs
 
       - name: Publish to SpecterOps Packages
         env:
