@@ -26,7 +26,7 @@ jobs:
         run: |
           $DATE_STAMP=$(date +%Y%m%d%H%M)
           mkdir pkgs
-          dotnet pack --no-restore -c Release -p:PackageVersion=0.0.0-dev.DATE_STAMP -o ./pkgs
+          dotnet pack --no-restore -c Release -p:PackageVersion=0.0.0-dev.$DATE_STAMP -o ./pkgs
           ls pkgs
 
       - name: Publish to SpecterOps Packages
