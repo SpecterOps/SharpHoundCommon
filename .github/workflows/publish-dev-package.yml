@@ -25,9 +25,13 @@ jobs:
           SHORT_SHA=$(git rev-parse --short HEAD)
           mkdir pkgs
           dotnet pack --no-restore -c Release \
-            -p:PackageVersion=0.0.0-dev.$SHORT_SHA \
+            -p:PackageVersion=0.0.0-dev.${SHORT_SHA} \
             -o ./pkgs
-          ls -la ./pkgs
+
+      - name: Echo pkgs directory contents
+        run: |
+          echo "Contents of ./pkgs directory:"
+          ls -lah ./pkgs
 
       - name: Publish to SpecterOps Packages
         env:
