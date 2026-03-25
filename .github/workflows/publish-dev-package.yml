@@ -24,7 +24,7 @@ jobs:
         run: |
           $SHORT_SHA = git rev-parse --short HEAD
           mkdir pkgs
-          dotnet pack --no-restore -c Release -p:PackageVersion=0.0.0-dev.$(SHORT_SHA) -o ./pkgs
+          dotnet pack --no-restore -c Release -p:PackageVersion=0.0.0-dev -o ./pkgs
           ls pkgs
 
       - name: Publish to SpecterOps Packages
