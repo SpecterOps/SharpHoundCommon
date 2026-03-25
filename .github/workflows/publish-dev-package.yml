@@ -1,12 +1,14 @@
+name: Publish
 name: Publish Dev Package
 
 on:
   push:
-    branches: [ lfalslev/bed-7214 ]
-    #branches: [ v4 ]
+    branches:
+      - "lfalslev/bed-7214"
 
 jobs:
   update-dev-package:
+    name: update-dev-package
     runs-on: windows-latest
     steps:
       - name: Checkout Code
@@ -20,12 +22,11 @@ jobs:
       - name: Restore Dependencies
         run: dotnet restore
 
-#      - name: Pack
-#        run: |
-##          $SHORT_SHA = git rev-parse --short HEAD
-#          mkdir pkgs
-##          dotnet pack --no-restore -c Release -p:PackageVersion=0.0.0-dev -o ./pkgs
-#          ls pkgs
+      - name: Pack
+        run: |
+          mkdir pkgs
+          dotnet pack --no-restore -c Release -p:PackageVersion=0.0.0-dev -o ./pkgs
+          ls pkgs
 
       - name: Publish to SpecterOps Packages
         env:
@@ -33,5 +34,4 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
         run: |
           dotnet tool install -g sleet
-#          sleet push ./pkgs --force
           sleet retention prune --prerelease 2 --release-labels 1 --dry-run
