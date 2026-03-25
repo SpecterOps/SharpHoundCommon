@@ -26,7 +26,7 @@ namespace CommonLibTest {
         public void Dispose() {
         }
     
-        [Fact]
+        [WindowsOnlyFact]
         public async Task WebClientServiceProcessorTest_TestPathExists()
         {
             var processor = new WebClientServiceProcessor();
