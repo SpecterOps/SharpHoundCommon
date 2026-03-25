@@ -27,7 +27,6 @@ jobs:
           $DATE_STAMP=$(date +%Y%m%d%H%M)
           mkdir pkgs
           dotnet pack --no-restore -c Release -p:PackageVersion=0.0.0-dev.$DATE_STAMP -o ./pkgs
-          ls pkgs
 
       - name: Publish to SpecterOps Packages
         env:
@@ -35,4 +34,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
         run: |
           dotnet tool install -g sleet
-          sleet retention prune --package SharpHoundCommon --package SharpHoundRPC --stable 999 --prerelease 2 --release-labels 1 --dry-run
+          sleet push ./pkgs
+        #group by v.v.v-label, keep 3 latest of each label, to avoid -dev package clutter
+          sleet retention prune --package SharpHoundCommon --package SharpHoundRPC `
+               --stable 999 --prerelease 3 --release-labels 1 --dry-run
