@@ -11,7 +11,7 @@ public class LdapConnectionPoolTest
 {
     private static void AddExclusionDomain(string identifier) {
         var excludedDomainsField = typeof(LdapConnectionPool)
-            .GetField("_excludedDomains", BindingFlags.Static | BindingFlags.NonPublic);
+            .GetField("ExcludedDomains", BindingFlags.Static | BindingFlags.NonPublic);
 
         var excludedDomains = (ConcurrentHashSet)excludedDomainsField.GetValue(null);
 
