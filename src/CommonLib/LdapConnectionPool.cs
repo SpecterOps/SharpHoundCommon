@@ -20,7 +20,6 @@ namespace SharpHoundCommonLib {
     internal class LdapConnectionPool : IDisposable {
         private readonly ConcurrentBag<LdapConnectionWrapper> _connections;
         private readonly ConcurrentBag<LdapConnectionWrapper> _globalCatalogConnection;
-        private readonly SemaphoreSlim _semaphore = null;
         private readonly string _identifier;
         private readonly string _poolIdentifier;
         private readonly LdapConfig _ldapConfig;
@@ -38,20 +37,12 @@ namespace SharpHoundCommonLib {
         private static readonly ConcurrentDictionary<string, NetAPIStructs.DomainControllerInfo?> DCInfoCache = new();
 
         // Tracks domains we know we've determined we shouldn't try to connect to
-        private static readonly ConcurrentHashSet _excludedDomains = new();
+        private static readonly ConcurrentHashSet ExcludedDomains = new();
 
         public LdapConnectionPool(string identifier, string poolIdentifier, LdapConfig config,
             IPortScanner scanner = null, NativeMethods nativeMethods = null, ILogger log = null) {
-            _connections = new ConcurrentBag<LdapConnectionWrapper>();
-            _globalCatalogConnection = new ConcurrentBag<LdapConnectionWrapper>();
-            //TODO: Re-enable this once we track down the semaphore deadlock
-            // if (config.MaxConcurrentQueries > 0) {
-            //     _semaphore = new SemaphoreSlim(config.MaxConcurrentQueries, config.MaxConcurrentQueries);    
-            // } else {
-            //     //If MaxConcurrentQueries is 0, we'll just disable the semaphore entirely
-            //     _semaphore = null;
-            // }
-
+            _connections = [];
+            _globalCatalogConnection = [];
             _identifier = identifier;
             _poolIdentifier = poolIdentifier;
             _ldapConfig = config;
@@ -93,32 +84,29 @@ namespace SharpHoundCommonLib {
 
             var queryRetryCount = 0;
             var busyRetryCount = 0;
-            LdapResult<IDirectoryObject> tempResult = null;
+            LdapResult<IDirectoryObject> errorResult = null;
             var querySuccess = false;
             SearchResponse response = null;
-            while (!cancellationToken.IsCancellationRequested) {
-                //Grab our semaphore here to take one of our query slots
-                if (_semaphore != null) {
-                    _log.LogTrace("Query entering semaphore with {Count} remaining for query {Info}",
-                        _semaphore.CurrentCount, queryParameters.GetQueryInfo());
-                    await _semaphore.WaitAsync(cancellationToken);
-                    _log.LogTrace("Query entered semaphore with {Count} remaining for query {Info}",
-                        _semaphore.CurrentCount, queryParameters.GetQueryInfo());
-                }
 
+            /*
+             * Retry loop structure:
+             *   queryRetryCount — tracks connection-level failures (null response, ServerDown). On ServerDown,
+             *     an inner retry loop attempts to establish a new connection before the outer loop continues.
+             *   busyRetryCount — tracks server-busy/timeout conditions. The same connection is reused after
+             *     an exponential backoff delay, since the server is expected to become available again.
+             */
+            while (!cancellationToken.IsCancellationRequested) {
                 try {
                     _log.LogTrace("Sending ldap request - {Info}", queryParameters.GetQueryInfo());
                     response = await SendRequestWithTimeout(connectionWrapper.Connection, searchRequest, _queryAdaptiveTimeout);
 
                     if (response != null) {
                         querySuccess = true;
-                    }
-                    else if (queryRetryCount == MaxRetries) {
-                        tempResult =
+                    } else if (queryRetryCount == MaxRetries) {
+                        errorResult =
                             LdapResult<IDirectoryObject>.Fail($"Failed to get a response after {MaxRetries} attempts",
                                 queryParameters);
-                    }
-                    else {
+                    } else {
                         queryRetryCount++;
                     }
                 }
@@ -137,8 +125,10 @@ namespace SharpHoundCommonLib {
                     queryRetryCount++;
                     _log.LogDebug("Query - Attempting to recover from ServerDown for query {Info} (Attempt {Count})",
                         queryParameters.GetQueryInfo(), queryRetryCount);
+                    //Call ReleaseConnection with faulted = true
                     ReleaseConnection(connectionWrapper, true);
 
+                    //Try MaxRetries times to get a new connection
                     for (var retryCount = 0; retryCount < MaxRetries; retryCount++) {
                         var backoffDelay = GetNextBackoff(retryCount);
                         await Task.Delay(backoffDelay, cancellationToken);
@@ -152,13 +142,14 @@ namespace SharpHoundCommonLib {
                             break;
                         }
 
-                        //If we hit our max retries for making a new connection, set tempResult so we can yield it after this logic
+                        //If we hit our max retries for making a new connection, set errorResult so we can yield it after this logic
                         if (retryCount == MaxRetries - 1) {
                             _log.LogError("Query - Failed to get a new connection after ServerDown.\n{Info}",
                                 queryParameters.GetQueryInfo());
-                            tempResult =
+                            errorResult =
                                 LdapResult<IDirectoryObject>.Fail(
-                                    "Query - Failed to get a new connection after ServerDown.", queryParameters);
+                                    "Query - Failed to get a new connection after ServerDown.", queryParameters,
+                                    le.ErrorCode);
                         }
                     }
                 }
@@ -187,7 +178,7 @@ namespace SharpHoundCommonLib {
                     /*
                      * This is our fallback catch. If our retry counts have been exhausted this will trigger and break us out of our loop
                      */
-                    tempResult = LdapResult<IDirectoryObject>.Fail(
+                    errorResult = LdapResult<IDirectoryObject>.Fail(
                         $"Query - Caught unrecoverable ldap exception: {le.Message} (ServerMessage: {le.ServerErrorMessage}) (ErrorCode: {le.ErrorCode})",
                         queryParameters);
                 }
@@ -195,31 +186,21 @@ namespace SharpHoundCommonLib {
                     /*
                      * Generic exception handling for unforeseen circumstances
                      */
-                    tempResult =
+                    errorResult =
                         LdapResult<IDirectoryObject>.Fail($"Query - Caught unrecoverable exception: {e.Message}",
                             queryParameters);
                 }
-                finally {
-                    // Always release our semaphore to prevent deadlocks
-                    if (_semaphore != null) {
-                        _log.LogTrace("Query releasing semaphore with {Count} remaining for query {Info}",
-                            _semaphore.CurrentCount, queryParameters.GetQueryInfo());
-                        _semaphore.Release();
-                        _log.LogTrace("Query released semaphore with {Count} remaining for query {Info}",
-                            _semaphore.CurrentCount, queryParameters.GetQueryInfo());
-                    }
-                }
 
-                //If we have a tempResult set it means we hit an error we couldn't recover from, so yield that result and then break out of the function
-                if (tempResult != null) {
-                    if (tempResult.ErrorCode == (int)LdapErrorCodes.ServerDown) {
+                //If we have a errorResult set it means we hit an error we couldn't recover from, so yield that result and then break out of the function
+                if (errorResult != null) {
+                    if (errorResult.ErrorCode == (int)LdapErrorCodes.ServerDown) {
                         ReleaseConnection(connectionWrapper, true);
                     }
                     else {
                         ReleaseConnection(connectionWrapper);
                     }
 
-                    yield return tempResult;
+                    yield return errorResult;
                     yield break;
                 }
 
@@ -259,17 +240,20 @@ namespace SharpHoundCommonLib {
             PageResultResponseControl pageResponse = null;
             var busyRetryCount = 0;
             var queryRetryCount = 0;
-            LdapResult<IDirectoryObject> tempResult = null;
+            
+            LdapResult<IDirectoryObject> errorResult = null;
 
+            /*
+             * Retry loop structure:
+             *   queryRetryCount — tracks connection-level failures (null response, ServerDown). On ServerDown,
+             *     an inner retry loop attempts to establish a new connection to the same server before the
+             *     outer loop continues. Same-server reconnection is required because the LDAP server holds
+             *     paging state (the cookie) per-connection; switching servers would invalidate that state.
+             *   busyRetryCount — tracks server-busy/timeout conditions. The same connection is reused after
+             *     an exponential backoff delay, since the server is expected to become available again.
+             *     This counter resets to 0 after each successful page to give every page a fresh budget.
+             */
             while (!cancellationToken.IsCancellationRequested) {
-                if (_semaphore != null) {
-                    _log.LogTrace("PagedQuery entering semaphore with {Count} remaining for query {Info}",
-                        _semaphore.CurrentCount, queryParameters.GetQueryInfo());
-                    await _semaphore.WaitAsync(cancellationToken);
-                    _log.LogTrace("PagedQuery entered semaphore with {Count} remaining for query {Info}",
-                        _semaphore.CurrentCount, queryParameters.GetQueryInfo());
-                }
-
                 SearchResponse response = null;
                 try {
                     _log.LogTrace("Sending paged ldap request - {Info}", queryParameters.GetQueryInfo());
@@ -277,29 +261,29 @@ namespace SharpHoundCommonLib {
                     if (response != null) {
                         pageResponse = (PageResultResponseControl)response.Controls
                             .Where(x => x is PageResultResponseControl).DefaultIfEmpty(null).FirstOrDefault();
+                        // Reset retry counter on a successful response so the next page gets a fresh budget
                         queryRetryCount = 0;
-                    }
-                    else if (queryRetryCount == MaxRetries) {
-                        tempResult = LdapResult<IDirectoryObject>.Fail(
+                    } else if (queryRetryCount == MaxRetries) {
+                        errorResult = LdapResult<IDirectoryObject>.Fail(
                             $"PagedQuery - Failed to get a response after {MaxRetries} attempts",
                             queryParameters);
-                    }
-                    else {
+                    } else {
                         queryRetryCount++;
                     }
                 }
                 catch (LdapException le) when (le.ErrorCode == (int)LdapErrorCodes.ServerDown && queryRetryCount < MaxRetries) {
                     /*
                      * A ServerDown exception indicates that our connection is no longer valid for one of many reasons.
-                     * We'll want to release our connection back to the pool, but dispose it. We need a new connection,
-                     * and because this is not a paged query, we can get this connection from anywhere.
+                     * We'll want to release our connection back to the pool, but dispose it. We need a new connection.
                      *
-                     * We use queryRetryCount here to prevent an infinite retry loop from occurring
+                     * Unlike non-paged queries, paged queries MUST reconnect to the same server because the server
+                     * maintains paging state (the cookie) per-connection. Connecting to a different server would
+                     * invalidate the cookie and the query would have to restart from scratch.
                      *
-                     * Release our connection in a faulted state since the connection is defunct.
-                     * Paged queries require a connection to be made to the same server which we started the paged query on
+                     * We use queryRetryCount here to prevent an infinite retry loop from occurring.
                      */
                     if (serverName == null) {
+                        // Because we MUST connect back to the original server, if we don't have the server to connect too, we just have to exit out here
                         _log.LogError(
                             "PagedQuery - Received server down exception without a known servername. Unable to generate new connection\n{Info}",
                             queryParameters.GetQueryInfo());
@@ -328,8 +312,9 @@ namespace SharpHoundCommonLib {
                         if (retryCount == MaxRetries - 1) {
                             _log.LogError("PagedQuery - Failed to get a new connection after ServerDown.\n{Info}",
                                 queryParameters.GetQueryInfo());
-                            tempResult =
-                                LdapResult<IDirectoryObject>.Fail("Failed to get a new connection after serverdown",
+                            errorResult =
+                                LdapResult<IDirectoryObject>.Fail(
+                                    "PagedQuery - Failed to get a new connection after ServerDown.",
                                     queryParameters, le.ErrorCode);
                         }
                     }
@@ -356,34 +341,25 @@ namespace SharpHoundCommonLib {
                     await Task.Delay(backoffDelay, cancellationToken);
                 }
                 catch (LdapException le) {
-                    tempResult = LdapResult<IDirectoryObject>.Fail(
+                    errorResult = LdapResult<IDirectoryObject>.Fail(
                         $"PagedQuery - Caught unrecoverable ldap exception: {le.Message} (ServerMessage: {le.ServerErrorMessage}) (ErrorCode: {le.ErrorCode})",
                         queryParameters, le.ErrorCode);
                 }
                 catch (Exception e) {
-                    tempResult =
+                    errorResult =
                         LdapResult<IDirectoryObject>.Fail($"PagedQuery - Caught unrecoverable exception: {e.Message}",
                             queryParameters);
                 }
-                finally {
-                    if (_semaphore != null) {
-                        _log.LogTrace("PagedQuery releasing semaphore with {Count} remaining for query {Info}",
-                            _semaphore.CurrentCount, queryParameters.GetQueryInfo());
-                        _semaphore.Release();
-                        _log.LogTrace("PagedQuery released semaphore with {Count} remaining for query {Info}",
-                            _semaphore.CurrentCount, queryParameters.GetQueryInfo());
-                    }
-                }
 
-                if (tempResult != null) {
-                    if (tempResult.ErrorCode == (int)LdapErrorCodes.ServerDown) {
+                if (errorResult != null) {
+                    if (errorResult.ErrorCode == (int)LdapErrorCodes.ServerDown) {
                         ReleaseConnection(connectionWrapper, true);
                     }
                     else {
                         ReleaseConnection(connectionWrapper);
                     }
 
-                    yield return tempResult;
+                    yield return errorResult;
                     yield break;
                 }
 
@@ -397,6 +373,7 @@ namespace SharpHoundCommonLib {
                     continue;
                 }
 
+                // Reset busy retry count after a successfully delivered page so each page starts with a fresh budget
                 busyRetryCount = 0;
 
                 foreach (SearchResultEntry entry in response.Entries) {
@@ -486,45 +463,52 @@ namespace SharpHoundCommonLib {
             var queryRetryCount = 0;
             var busyRetryCount = 0;
 
-            LdapResult<string> tempResult = null;
+            LdapResult<string> errorResult = null;
 
+            /*
+             * Retry loop structure:
+             *   queryRetryCount — tracks connection-level failures (null response, ServerDown). On ServerDown,
+             *     an inner retry loop attempts to establish a new connection before the outer loop continues.
+             *     This counter resets to 0 after each successful range chunk to give subsequent chunks a fresh budget.
+             *   busyRetryCount — tracks server-busy/timeout conditions. The same connection is reused after
+             *     an exponential backoff delay, since the server is expected to become available again.
+             *     This counter resets to 0 after each successful range chunk to give subsequent chunks a fresh budget.
+             */
             while (!cancellationToken.IsCancellationRequested) {
                 SearchResponse response = null;
-                if (_semaphore != null) {
-                    _log.LogTrace("RangedRetrieval entering semaphore with {Count} remaining for query {Info}",
-                        _semaphore.CurrentCount, queryParameters.GetQueryInfo());
-                    await _semaphore.WaitAsync(cancellationToken);
-                    _log.LogTrace("RangedRetrieval entered semaphore with {Count} remaining for query {Info}",
-                        _semaphore.CurrentCount, queryParameters.GetQueryInfo());
-                }
 
                 try {
                     response = await SendRequestWithTimeout(connectionWrapper.Connection, searchRequest, _rangedRetrievalAdaptiveTimeout);
-                }
-                catch (LdapException le) when (le.ErrorCode == (int)ResultCode.Busy && busyRetryCount < MaxRetries) {
-                    busyRetryCount++;
-                    _log.LogDebug("RangedRetrieval - Executing busy backoff for query {Info} (Attempt {Count})",
-                        queryParameters.GetQueryInfo(), busyRetryCount);
-                    var backoffDelay = GetNextBackoff(busyRetryCount);
-                    await Task.Delay(backoffDelay, cancellationToken);
-                }
-                catch (TimeoutException) when (busyRetryCount < MaxRetries) {
-                    /*
-                     * Treat a timeout as a busy error
-                     */
-                    busyRetryCount++;
-                    _log.LogDebug("RangedRetrieval - Timeout: Executing busy backoff for query {Info} (Attempt {Count})",
-                        queryParameters.GetQueryInfo(), busyRetryCount);
-                    var backoffDelay = GetNextBackoff(busyRetryCount);
-                    await Task.Delay(backoffDelay, cancellationToken);
+                    if (response != null) {
+                        // Reset retry counters on a successful response so the next range chunk starts with a fresh budget
+                        queryRetryCount = 0;
+                        busyRetryCount = 0;
+                    }
+                    else if (queryRetryCount == MaxRetries) {
+                        errorResult = LdapResult<string>.Fail(
+                            $"RangedRetrieval - Failed to get a response after {MaxRetries} attempts",
+                            queryParameters);
+                    }
+                    else {
+                        queryRetryCount++;
+                    }
                 }
                 catch (LdapException le) when (le.ErrorCode == (int)LdapErrorCodes.ServerDown &&
                                                  queryRetryCount < MaxRetries) {
+                    /*
+                     * A ServerDown exception indicates that our connection is no longer valid for one of many reasons.
+                     * We'll want to release our connection back to the pool, but dispose it. We need a new connection,
+                     * and because ranged retrieval does not use paging state, we can connect to any server in the domain.
+                     *
+                     * We use queryRetryCount here to prevent an infinite retry loop from occurring.
+                     */
                     queryRetryCount++;
                     _log.LogDebug(
                         "RangedRetrieval - Attempting to recover from ServerDown for query {Info} (Attempt {Count})",
                         queryParameters.GetQueryInfo(), queryRetryCount);
+                    //Call ReleaseConnection with faulted = true
                     ReleaseConnection(connectionWrapper, true);
+                    
                     for (var retryCount = 0; retryCount < MaxRetries; retryCount++) {
                         var backoffDelay = GetNextBackoff(retryCount);
                         await Task.Delay(backoffDelay, cancellationToken);
@@ -543,47 +527,67 @@ namespace SharpHoundCommonLib {
                             _log.LogError(
                                 "RangedRetrieval - Failed to get a new connection after ServerDown for path {Path}",
                                 distinguishedName);
-                            tempResult =
+                            errorResult =
                                 LdapResult<string>.Fail(
                                     "RangedRetrieval - Failed to get a new connection after ServerDown.",
                                     queryParameters, le.ErrorCode);
                         }
                     }
                 }
+                catch (LdapException le) when (le.ErrorCode == (int)ResultCode.Busy && busyRetryCount < MaxRetries) {
+                    /*
+                     * If we get a busy error, we want to do an exponential backoff, but maintain the current connection.
+                     * The expectation is that given enough time, the server should stop being busy and service our query appropriately.
+                     */
+                    busyRetryCount++;
+                    _log.LogDebug("RangedRetrieval - Executing busy backoff for query {Info} (Attempt {Count})",
+                        queryParameters.GetQueryInfo(), busyRetryCount);
+                    var backoffDelay = GetNextBackoff(busyRetryCount);
+                    await Task.Delay(backoffDelay, cancellationToken);
+                }
+                catch (TimeoutException) when (busyRetryCount < MaxRetries) {
+                    /*
+                     * Treat a timeout as a busy error
+                     */
+                    busyRetryCount++;
+                    _log.LogDebug("RangedRetrieval - Timeout: Executing busy backoff for query {Info} (Attempt {Count})",
+                        queryParameters.GetQueryInfo(), busyRetryCount);
+                    var backoffDelay = GetNextBackoff(busyRetryCount);
+                    await Task.Delay(backoffDelay, cancellationToken);
+                }
                 catch (LdapException le) {
-                    tempResult = LdapResult<string>.Fail(
-                        $"Caught unrecoverable ldap exception: {le.Message} (ServerMessage: {le.ServerErrorMessage}) (ErrorCode: {le.ErrorCode})",
+                    /*
+                     * This is our fallback catch. If our retry counts have been exhausted this will trigger and break us out of our loop
+                     */
+                    errorResult = LdapResult<string>.Fail(
+                        $"RangedRetrieval - Caught unrecoverable ldap exception: {le.Message} (ServerMessage: {le.ServerErrorMessage}) (ErrorCode: {le.ErrorCode})",
                         queryParameters, le.ErrorCode);
                 }
                 catch (Exception e) {
-                    tempResult =
-                        LdapResult<string>.Fail($"Caught unrecoverable exception: {e.Message}", queryParameters);
-                }
-                finally {
-                    if (_semaphore != null) {
-                        _log.LogTrace("RangedRetrieval releasing semaphore with {Count} remaining for query {Info}",
-                            _semaphore.CurrentCount, queryParameters.GetQueryInfo());
-                        _semaphore.Release();
-                        _log.LogTrace("RangedRetrieval released semaphore with {Count} remaining for query {Info}",
-                            _semaphore.CurrentCount, queryParameters.GetQueryInfo());
-                    }
+                    /*
+                     * Generic exception handling for unforeseen circumstances
+                     */
+                    errorResult =
+                        LdapResult<string>.Fail($"RangedRetrieval - Caught unrecoverable exception: {e.Message}", queryParameters);
                 }
 
-                //If we have a tempResult set it means we hit an error we couldn't recover from, so yield that result and then break out of the function
+                //If we have a errorResult set it means we hit an error we couldn't recover from, so yield that result and then break out of the function
                 //We handle connection release in the relevant exception blocks
-                if (tempResult != null) {
-                    if (tempResult.ErrorCode == (int)LdapErrorCodes.ServerDown) {
+                if (errorResult != null) {
+                    if (errorResult.ErrorCode == (int)LdapErrorCodes.ServerDown) {
                         ReleaseConnection(connectionWrapper, true);
                     }
                     else {
                         ReleaseConnection(connectionWrapper);
                     }
 
-                    yield return tempResult;
+                    yield return errorResult;
                     yield break;
                 }
                 
                 if (response == null) {
+                    // response is null when queryRetryCount has been incremented but MaxRetries not yet reached;
+                    // the outer while loop will retry automatically
                     continue;
                 }
 
@@ -700,7 +704,7 @@ namespace SharpHoundCommonLib {
 
         public async Task<(bool Success, LdapConnectionWrapper ConnectionWrapper, string Message)>
             GetConnectionAsync() {
-            if (_excludedDomains.Contains(_identifier)) {
+            if (ExcludedDomains.Contains(_identifier)) {
                 return (false, null, $"Identifier {_identifier} excluded for connection attempt");
             }
 
@@ -734,7 +738,7 @@ namespace SharpHoundCommonLib {
 
         public async Task<(bool Success, LdapConnectionWrapper ConnectionWrapper, string Message)>
             GetGlobalCatalogConnectionAsync() {
-            if (_excludedDomains.Contains(_identifier)) {
+            if (ExcludedDomains.Contains(_identifier)) {
                 return (false, null, $"Identifier {_identifier} excluded for connection attempt");
             }
 
@@ -824,7 +828,7 @@ namespace SharpHoundCommonLib {
                     _log.LogDebug(
                         "Could not get domain object from GetDomain, unable to create ldap connection for domain {Domain}",
                         _identifier);
-                    _excludedDomains.Add(_identifier);
+                    ExcludedDomains.Add(_identifier);
                     return (false, null, "Unable to get domain object for further strategies");
                 }
 
@@ -863,7 +867,7 @@ namespace SharpHoundCommonLib {
             catch (Exception e) {
                 _log.LogInformation(e, "We will not be able to connect to domain {Domain} by any strategy, leaving it.",
                     _identifier);
-                _excludedDomains.Add(_identifier);
+                ExcludedDomains.Add(_identifier);
             }
 
             return (false, null, "All attempted connections failed");
