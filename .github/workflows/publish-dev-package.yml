@@ -22,11 +22,12 @@ jobs:
 
       - name: Pack
         run: |
-          SHORT_SHA=$(git rev-parse --short HEAD)
+          $SHORT_SHA = git rev-parse --short HEAD
           mkdir pkgs
           dotnet pack --no-restore -c Release \
-            -p:PackageVersion=0.0.0-dev.$env:SHORT_SHA \
+            -p:PackageVersion=0.0.0-dev.$SHORT_SHA \
             -o ./pkgs
+          ls pkgs
       - name: Publish to SpecterOps Packages
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
