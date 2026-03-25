@@ -1,4 +1,3 @@
-name: Publish
 name: Publish Dev Package
 
 on:
