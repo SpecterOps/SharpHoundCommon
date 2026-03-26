@@ -811,17 +811,17 @@ namespace SharpHoundCommonLib {
                 }
             }
             else {
-                connectionWrapper.Connection.Dispose();
+                connectionWrapper.Connection?.Dispose();
             }
         }
 
         public void Dispose() {
             while (_connections.TryTake(out var wrapper)) {
-                wrapper.Connection.Dispose();
+                wrapper.Connection?.Dispose();
             }
             
             while (_globalCatalogConnection.TryTake(out var wrapper)) {
-                wrapper.Connection.Dispose();
+                wrapper.Connection?.Dispose();
             }
         }
 

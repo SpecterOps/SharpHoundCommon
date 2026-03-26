@@ -23,7 +23,7 @@ public class LdapConnectionPoolTest
             .GetField("_connections", BindingFlags.Instance | BindingFlags.NonPublic);
         return (ConcurrentBag<LdapConnectionWrapper>)field.GetValue(pool);
     }
-
+ 
     private static ConcurrentBag<LdapConnectionWrapper> GetGlobalCatalogConnectionsBag(LdapConnectionPool pool) {
         var field = typeof(LdapConnectionPool)
             .GetField("_globalCatalogConnection", BindingFlags.Instance | BindingFlags.NonPublic);
