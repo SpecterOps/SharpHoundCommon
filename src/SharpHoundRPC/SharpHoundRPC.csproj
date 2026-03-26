@@ -2,6 +2,7 @@
     <PropertyGroup>
         <PackageId>SharpHoundRPC</PackageId>
         <PackageDescription>SAM/LSA Wrapper for C# BloodHound tasks</PackageDescription>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
         <AssemblyName>SharpHoundRPC</AssemblyName>
         <RootNamespace>SharpHoundRPC</RootNamespace>
     </PropertyGroup>
@@ -14,6 +15,9 @@
     </ItemGroup>
     <ItemGroup>
         <Folder Include="Properties"/>
+    </ItemGroup>
+    <ItemGroup>
+        <None Include="README.md" Pack="true" PackagePath="" />
     </ItemGroup>
     <ItemGroup>
         <Reference Include="System.Management" />
