@@ -412,14 +412,14 @@ namespace SharpHoundCommonLib {
 
             result = await Query(new LdapQueryParameters {
                 DomainName = domain.Name,
-                Attributes = new[] { LDAPProperties.DistinguishedName },
+                Attributes = new[] { LDAPProperties.DistinguishedName, LDAPProperties.Name },
                 GlobalCatalog = true,
                 LDAPFilter = new LdapFilter().AddFilter("(objectclass=trusteddomain)", true)
                     .AddFilter($"(securityidentifier={Helpers.ConvertSidToHexSid(domainSid)})", true).GetFilter()
             }).DefaultIfEmpty(LdapResult<IDirectoryObject>.Fail()).FirstOrDefaultAsync();
 
-            if (result.IsSuccess && result.Value.TryGetDistinguishedName(out distinguishedName)) {
-                return (true, Helpers.DistinguishedNameToDomain(distinguishedName));
+            if (result.IsSuccess && result.Value.TryGetProperty(LDAPProperties.Name, out var domainName)) {
+                return (true, domainName.ToUpper());
             }
 
             result = await Query(new LdapQueryParameters {
