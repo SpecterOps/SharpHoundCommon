@@ -14,12 +14,9 @@
         <PackageReference Include="System.ValueTuple" Version="4.5.0"/>
     </ItemGroup>
     <ItemGroup>
-        <Folder Include="Properties"/>
+        <Reference Include="System.Management" />
     </ItemGroup>
     <ItemGroup>
         <None Include="README.md" Pack="true" PackagePath="" />
-    </ItemGroup>
-    <ItemGroup>
-        <Reference Include="System.Management" />
     </ItemGroup>
 </Project>

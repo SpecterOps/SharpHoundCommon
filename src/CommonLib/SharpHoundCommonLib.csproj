@@ -23,12 +23,9 @@
         <Reference Include="System.Net.Http" />
     </ItemGroup>
     <ItemGroup>
-        <Folder Include="Properties" />
+        <ProjectReference Include="..\SharpHoundRPC\SharpHoundRPC.csproj" />
     </ItemGroup>
     <ItemGroup>
         <None Include="README.md" Pack="true" PackagePath="" />
-    </ItemGroup>
-    <ItemGroup>
-        <ProjectReference Include="..\SharpHoundRPC\SharpHoundRPC.csproj" />
     </ItemGroup>
 </Project>
