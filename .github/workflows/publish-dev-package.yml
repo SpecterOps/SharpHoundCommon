@@ -11,7 +11,7 @@ jobs:
     name: update-dev-package
     runs-on: windows-latest
     steps:
-      - name: Checkout Code
+      - name: Checkout repository
         uses: actions/checkout@v6
 
       - name: Setup .NET
@@ -19,7 +19,7 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
-      - name: Restore Dependencies
+      - name: Restore dependencies
         run: dotnet restore
 
       - name: Pack
@@ -28,7 +28,7 @@ jobs:
           mkdir pkgs
           dotnet pack --no-restore -c Release -p:PackageVersion=0.0.0-dev.$DATE_STAMP -o ./pkgs
 
-      #prune groups packages by -label, keeps 3 latest of each label, to avoid -dev package clutter
+      #prune groups packages by -label, keeps the 5 latest of each pre-release label (-rc1, -rc2, -dev) to avoid -dev package clutter
       - name: Publish to SpecterOps Packages
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
@@ -37,4 +37,4 @@ jobs:
           dotnet tool install -g sleet
           sleet push ./pkgs
           sleet retention prune --package SharpHoundCommon --package SharpHoundRPC `
-               --stable 999 --prerelease 3 --release-labels 1 --dry-run
+               --stable 999 --prerelease 5 --release-labels 1 --dry-run
