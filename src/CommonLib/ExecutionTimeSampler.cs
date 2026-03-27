@@ -43,35 +43,39 @@ public class ExecutionTimeSampler : IDisposable {
 
     public double Average() => _samples.Average();
 
-    public async Task<T> SampleExecutionTime<T>(Func<Task<T>> func) {
+    public async Task<T> SampleExecutionTime<T>(Func<Task<T>> func, Action<double> latencyObservation = null) {
         var stopwatch = Stopwatch.StartNew();
         var result = await func.Invoke();
         stopwatch.Stop();
+        latencyObservation?.Invoke(stopwatch.ElapsedMilliseconds);
         AddTimeSample(stopwatch.Elapsed);
 
         return result;
     }
 
-    public async Task SampleExecutionTime(Func<Task> func) {
+    public async Task SampleExecutionTime(Func<Task> func, Action<double> latencyObservation = null) {
         var stopwatch = Stopwatch.StartNew();
         await func.Invoke();
         stopwatch.Stop();
+        latencyObservation?.Invoke(stopwatch.ElapsedMilliseconds);
         AddTimeSample(stopwatch.Elapsed);
     }
 
-    public T SampleExecutionTime<T>(Func<T> func) {
+    public T SampleExecutionTime<T>(Func<T> func, Action<double> latencyObservation = null) {
         var stopwatch = Stopwatch.StartNew();
         var result = func.Invoke();
         stopwatch.Stop();
+        latencyObservation?.Invoke(stopwatch.ElapsedMilliseconds);
         AddTimeSample(stopwatch.Elapsed);
 
         return result;
     }
 
-    public void SampleExecutionTime(Action func) {
+    public void SampleExecutionTime(Action func, Action<double> latencyObservation = null) {
         var stopwatch = Stopwatch.StartNew();
         func.Invoke();
         stopwatch.Stop();
+        latencyObservation?.Invoke(stopwatch.ElapsedMilliseconds);
         AddTimeSample(stopwatch.Elapsed);
     }
 
