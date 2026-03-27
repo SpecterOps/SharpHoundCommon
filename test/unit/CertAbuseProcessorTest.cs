@@ -37,8 +37,7 @@ namespace CommonLibTest
             _mockLdapUtils = new Mock<ILdapUtils>();
             _mockRegistryAccessor = new Mock<IRegistryAccessor>();
             _mockSAMServerAccessor = new Mock<ISAMServerAccessor>();
-            //TODO: temp change to test github build pipeline
-            _certAbuseProcessor = new CertAbuseProcessor(_mockLdapUtils.Object, _mockRegistryAccessor.Object, _mockSAMServerAccessor.Object, "");
+            _certAbuseProcessor = new CertAbuseProcessor(_mockLdapUtils.Object, _mockRegistryAccessor.Object, _mockSAMServerAccessor.Object);
 
             _certAbuseProcessor.ComputerStatusEvent += status => {
                 _receivedCompStatus = status;
@@ -54,7 +53,7 @@ namespace CommonLibTest
         public async Task CertAbuseProcessor_IsUserSpecifiesSanEnabled_ReturnsResult(int editFlags, bool expectedResult) {
             const string subKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{CAName}\\PolicyModules\\CertificateAuthority_MicrosoftDefault.Policy";
             const string subValue = "EditFlags";
-            
+
             _mockRegistryAccessor
                 .Setup(ra => ra.GetRegistryKeyData(
                     TargetName,
