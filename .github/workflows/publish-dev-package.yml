@@ -23,9 +23,9 @@ jobs:
         id: version
         shell: pwsh
         run: |
-          $BASE_VERSION = dotnet msbuild .\src\CommonLib\SharpHoundCommonLib.csproj --getProperty:Version
-          $DATE_STAMP = Get-Date -Format 'yyyyMMddHHmm'
-          "dev_version=$base-dev.$stamp" >> $env:GITHUB_OUTPUT
+          $base_version = dotnet msbuild .\src\CommonLib\SharpHoundCommonLib.csproj --getProperty:Version
+          $date_stamp = Get-Date -Format 'yyyyMMddHHmm'
+          "dev_version=$base_version-dev.$date_stamp" >> $env:GITHUB_OUTPUT
 
       - name: Restore dependencies
         run: dotnet restore
@@ -43,6 +43,6 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
         run: |
           dotnet tool install -g sleet
-          sleet push ./pkgs
+#          sleet push ./pkgs
           sleet retention prune --package SharpHoundCommon --package SharpHoundRPC `
                --prerelease 5 --release-labels 1 --dry-run
