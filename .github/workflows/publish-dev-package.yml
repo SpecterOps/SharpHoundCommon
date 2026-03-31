@@ -43,6 +43,5 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
         run: |
           dotnet tool install -g sleet
-#          sleet push ./pkgs
           sleet retention prune --package SharpHoundCommon --package SharpHoundRPC `
                --prerelease 5 --release-labels 1 --dry-run
