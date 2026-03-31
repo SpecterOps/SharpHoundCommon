@@ -3,7 +3,8 @@ name: Publish Dev Package
 on:
   push:
     branches:
-      - "v4"
+      - "lfalslev/bed-7214"
+#      - "v4"
 
 jobs:
   update-dev-package:
@@ -18,14 +19,22 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
+      - name: Compute dev version
+        id: version
+        shell: pwsh
+        run: |
+          $BASE_VERSION = dotnet msbuild .\src\CommonLib\SharpHoundCommonLib.csproj --getProperty:Version
+#          $BASE_VERSION = dotnet msbuild Directory.Build.props --getProperty:Version
+          $DATE_STAMP = Get-Date -Format 'yyyyMMddHHmm'
+          "dev_version=$base-dev.$stamp" >> $env:GITHUB_OUTPUT
+
       - name: Restore dependencies
         run: dotnet restore
 
       - name: Pack
         run: |
-          $DATE_STAMP=$(date +%Y%m%d%H%M)
           mkdir pkgs
-          dotnet pack --no-restore -c Release -p:PackageVersion=0.0.0-dev.$DATE_STAMP -o ./pkgs
+          dotnet pack --no-restore -c Release -p:PackageVersion=${{ steps.version.outputs.dev_version }} -o ./pkgs
 
       #the prune command deletes older package versions to avoid -dev package clutter
       #it groups packages by -label, and keeps the 5 latest of each pre-release label (-rc1, -rc2, -dev, etc)
@@ -37,4 +46,4 @@ jobs:
           dotnet tool install -g sleet
           sleet push ./pkgs
           sleet retention prune --package SharpHoundCommon --package SharpHoundRPC `
-               --stable 999 --prerelease 5 --release-labels 1
+               --prerelease 5 --release-labels 1 --dry-run
