@@ -23,7 +23,7 @@ jobs:
         id: version
         shell: pwsh
         run: |
-          $base_version = dotnet msbuild .\src\CommonLib\SharpHoundCommonLib.csproj --getProperty:Version
+          $base_version = dotnet msbuild Directory.Build.props --getProperty:Version
           $date_stamp = Get-Date -Format 'yyyyMMddHHmm'
           "dev_version=$base_version-dev.$date_stamp" >> $env:GITHUB_OUTPUT
 
