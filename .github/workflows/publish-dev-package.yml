@@ -47,10 +47,10 @@ jobs:
       - name: Prune old -dev packages
         shell: pwsh
         run: |
-          $dryRun = $true
+          $dryRun = $false
           $packageIndexUrl = 'https://s3.amazonaws.com/bloodhound-ad/sleet.packageindex.json'
           $packageIds = @('SharpHoundCommons', 'SharpHoundRPC')
-          $maxDevVersions = 2
+          $maxDevVersions = 7
           
           $packageIndex = Invoke-RestMethod -Uri $packageIndexUrl
           
@@ -78,7 +78,7 @@ jobs:
               }
               else {
                 Write-Host "Deleting $($_.PackageId) $($_.Version)"; 
-                #sleet delete --id $_.PackageId --version $_.Version --reason "Prune old dev build"
+                sleet delete --id $_.PackageId --version $_.Version --reason "Prune old dev build"
               }
             }
           }
