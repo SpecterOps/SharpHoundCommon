@@ -45,4 +45,4 @@ jobs:
           dotnet tool install -g sleet
           sleet push ./pkgs
           sleet retention prune --package SharpHoundCommon --package SharpHoundRPC `
-            --stable 999 --prerelease 5 --release-labels 1
+            --release-labels 1 --dry-run
