@@ -41,6 +41,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
         run: |
           dotnet tool install -g sleet
+          sleet push ./pkgs
 
       #the prune command deletes older -dev package versions to avoid clutter
       #it deletes any versions of the $packageIds with "-dev" that are older than the first $maxDevVersions
@@ -85,7 +86,6 @@ jobs:
                 Write-Host "[DRY RUN] sleet delete --id $($_.PackageId) --version $($_.Version)"
               }
               else {
-                Write-Host "Deleting $($_.PackageId) $($_.Version)"; 
                 sleet delete --id $_.PackageId --version $_.Version --reason "Prune old dev build"
               }
             }
