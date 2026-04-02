@@ -7,9 +7,5 @@
       "region": "us-east-1",
       "bucketName": "bloodhound-ad"
     }
-  ],
-  "retention": {
-    "maxStableVersions": -1,
-    "maxPrereleaseVersions": 5
-  }
+  ]
 }
