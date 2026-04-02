@@ -35,14 +35,50 @@ jobs:
           mkdir pkgs
           dotnet pack --no-restore -c Release -p:PackageVersion=${{ steps.version.outputs.dev_version }} -o ./pkgs
 
-      #the prune command deletes older package versions to avoid -dev package clutter
-      #it groups packages by -label, and keeps the 5 latest of each pre-release label (-rc1, -rc2, -dev, etc)
       - name: Publish to SpecterOps Packages
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
         run: |
           dotnet tool install -g sleet
-          sleet push ./pkgs
-          sleet retention prune --package SharpHoundCommon --package SharpHoundRPC `
-            --stable -1 --prerelease 5 --release-labels 1 --dry-run
+
+      #the prune command deletes older -dev package versions to avoid clutter
+      #it deletes any versions of the $packageIds with "-dev" that are older than the first $maxDevVersions
+      - name: Prune old -dev packages
+        shell: pwsh
+        run: |
+          $dryRun = $true
+          $packageIndexUrl = 'https://s3.amazonaws.com/bloodhound-ad/sleet.packageindex.json'
+          $packageIds = @('SharpHoundCommons', 'SharpHoundRPC')
+          $maxDevVersions = 2
+          
+          $packageIndex = Invoke-RestMethod -Uri $packageIndexUrl
+          
+          foreach ($packageId in $packageIds) {
+            $devPackages = @(
+              foreach ($version in ($packageIndex.packages.$packageId | Where-Object { $_ -like '*-dev.*' })) {
+                try {
+                  [pscustomobject]@{
+                    PackageId = $packageId
+                    Version   = $version
+                    SemVer    = [System.Management.Automation.SemanticVersion]$version
+                  }
+                } catch {
+                  Write-Warning "Skipping unparseable version: $packageId $version"
+                }
+              }
+            ) | Sort-Object SemVer -Descending
+              
+            Write-Host "Current $packageId -dev versions in feed:"
+            $devPackages | Format-Table -AutoSize
+            
+            $devPackages | Select-Object -Skip $maxDevVersions | ForEach-Object {
+              if ($dryRun) {
+                Write-Host "[DRY RUN] sleet delete --id $($_.PackageId) --version $($_.Version)"
+              }
+              else {
+                Write-Host "Deleting $($_.PackageId) $($_.Version)"; 
+                #sleet delete --id $_.PackageId --version $_.Version --reason "Prune old dev build"
+              }
+            }
+          }
