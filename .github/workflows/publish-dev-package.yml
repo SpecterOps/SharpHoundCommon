@@ -45,6 +45,9 @@ jobs:
       #the prune command deletes older -dev package versions to avoid clutter
       #it deletes any versions of the $packageIds with "-dev" that are older than the first $maxDevVersions
       - name: Prune old -dev packages
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
         shell: pwsh
         run: |
           $dryRun = $false
