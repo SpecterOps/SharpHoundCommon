@@ -50,10 +50,10 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
         shell: pwsh
         run: |
-          $dryRun = $false
+          $dryRun = $true
           $packageIndexUrl = 'https://s3.amazonaws.com/bloodhound-ad/sleet.packageindex.json'
-          $packageIds = @('SharpHoundCommons', 'SharpHoundRPC')
-          $maxDevVersions = 7
+          $packageIds = @('SharpHoundCommon', 'SharpHoundRPC')
+          $maxDevVersions = 5
           
           $packageIndex = Invoke-RestMethod -Uri $packageIndexUrl
           
@@ -72,9 +72,11 @@ jobs:
               }
             ) | Sort-Object SemVer -Descending
               
-            Write-Host "Current $packageId -dev versions in feed:"
+            Write-Host "All $packageId -dev versions in feed:"
             $devPackages | Format-Table -AutoSize
             
+            Write-Host "Beginning prune:"
+          
             $devPackages | Select-Object -Skip $maxDevVersions | ForEach-Object {
               if ($dryRun) {
                 Write-Host "[DRY RUN] sleet delete --id $($_.PackageId) --version $($_.Version)"
