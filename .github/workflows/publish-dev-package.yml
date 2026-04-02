@@ -44,13 +44,14 @@ jobs:
 
       #the prune command deletes older -dev package versions to avoid clutter
       #it deletes any versions of the $packageIds with "-dev" that are older than the first $maxDevVersions
+      #set $dryRun to true for debugging without deleting any packages
       - name: Prune old -dev packages
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
         shell: pwsh
         run: |
-          $dryRun = $true
+          $dryRun = $false
           $packageIndexUrl = 'https://s3.amazonaws.com/bloodhound-ad/sleet.packageindex.json'
           $packageIds = @('SharpHoundCommon', 'SharpHoundRPC')
           $maxDevVersions = 5
@@ -58,6 +59,7 @@ jobs:
           $packageIndex = Invoke-RestMethod -Uri $packageIndexUrl
           
           foreach ($packageId in $packageIds) {
+            #get all -dev packages sorted by descending versions
             $devPackages = @(
               foreach ($version in ($packageIndex.packages.$packageId | Where-Object { $_ -like '*-dev.*' })) {
                 try {
@@ -72,11 +74,12 @@ jobs:
               }
             ) | Sort-Object SemVer -Descending
               
-            Write-Host "All $packageId -dev versions in feed:"
+            Write-Host "($($devPackages.Length)) $packageId -dev versions in feed:"
             $devPackages | Format-Table -AutoSize
             
             Write-Host "Beginning prune:"
           
+            #skip $maxDevVersions and delete remaining -dev packages
             $devPackages | Select-Object -Skip $maxDevVersions | ForEach-Object {
               if ($dryRun) {
                 Write-Host "[DRY RUN] sleet delete --id $($_.PackageId) --version $($_.Version)"
