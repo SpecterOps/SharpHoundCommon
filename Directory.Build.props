@@ -1,5 +1,12 @@
 <Project>
     <PropertyGroup>
+        <TargetFramework>net472</TargetFramework>
+        <OutputType>library</OutputType>
+        <LangVersion>default</LangVersion>
+        <Authors>Rohan Vazarkar</Authors>
+        <Company>SpecterOps</Company>
+        <PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
+        <RepositoryUrl>https://github.com/SpecterOps/SharpHoundCommon</RepositoryUrl>
         <Version>4.6.0</Version>
     </PropertyGroup>
     <ItemGroup>
