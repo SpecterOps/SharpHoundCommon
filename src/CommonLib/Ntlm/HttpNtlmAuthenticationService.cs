@@ -15,14 +15,14 @@ namespace SharpHoundCommonLib.Ntlm;
 /// </summary>
 public class HttpNtlmAuthenticationService {
     private readonly ILogger _logger;
-    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly INtlmHttpClientFactory _ntlmHttpClientFactory;
     private readonly AdaptiveTimeout _getSupportedNTLMAuthSchemesAdaptiveTimeout;
     private readonly AdaptiveTimeout _ntlmAuthAdaptiveTimeout;
     private readonly AdaptiveTimeout _authWithChannelBindingAdaptiveTimeout;
 
-    public HttpNtlmAuthenticationService(IHttpClientFactory httpClientFactory, ILogger logger = null) {
+    public HttpNtlmAuthenticationService(INtlmHttpClientFactory ntlmHttpClientFactory, ILogger logger = null) {
         _logger = logger ?? Logging.LogProvider.CreateLogger(nameof(HttpNtlmAuthenticationService));
-        _httpClientFactory = httpClientFactory;
+        _ntlmHttpClientFactory = ntlmHttpClientFactory;
         _getSupportedNTLMAuthSchemesAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(GetSupportedNtlmAuthSchemesAsync)));
         _ntlmAuthAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(NtlmAuthenticationHandler.PerformNtlmAuthenticationAsync)));
         _authWithChannelBindingAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(AuthWithBadChannelBindingsAsync)));
@@ -57,7 +57,7 @@ public class HttpNtlmAuthenticationService {
     }
 
     private async Task<string[]> GetSupportedNtlmAuthSchemesAsync(Uri url) {
-        var httpClient = _httpClientFactory.CreateUnauthenticatedClient();
+        var httpClient = _ntlmHttpClientFactory.CreateUnauthenticatedClient();
         using var getRequest = new HttpRequestMessage(HttpMethod.Get, url);
 
         var result = await _getSupportedNTLMAuthSchemesAdaptiveTimeout.ExecuteWithTimeout(async (timeoutToken) => {
@@ -105,7 +105,7 @@ public class HttpNtlmAuthenticationService {
     }
 
     private async Task AuthWithBadChannelBindingsAsync(Uri url, string authScheme, NtlmAuthenticationHandler ntlmAuth = null) {
-        var httpClient = _httpClientFactory.CreateUnauthenticatedClient();
+        var httpClient = _ntlmHttpClientFactory.CreateUnauthenticatedClient();
         var transport = new HttpTransport(httpClient, url, authScheme, _logger);
         var ntlmAuthHandler = ntlmAuth ?? new NtlmAuthenticationHandler($"HTTP/{url.Host}");
 
@@ -143,18 +143,7 @@ public class HttpNtlmAuthenticationService {
     }
 
     private async Task<bool> AuthWithChannelBindingAsync(Uri url, string authScheme) {
-        var handler = new HttpClientHandler {
-            ServerCertificateCustomValidationCallback = (httpRequestMessage, cert, cetChain, policyErrors) => true,
-        };
-
-        var credentialCache = new CredentialCache {
-            { url, authScheme, CredentialCache.DefaultNetworkCredentials }
-        };
-
-        handler.Credentials = credentialCache;
-        handler.PreAuthenticate = true;
-
-        using var client = new HttpClient(handler);
+        using var client = _ntlmHttpClientFactory.CreateAuthenticatedHttpClient(url, authScheme);
 
         var result = await _authWithChannelBindingAdaptiveTimeout.ExecuteWithTimeout(async (timeoutToken) => {
             try {

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
+using System.Security.Authentication;
 using System.Threading.Tasks;
 
 namespace SharpHoundCommonLib.Processors {
@@ -18,13 +19,10 @@ namespace SharpHoundCommonLib.Processors {
         private readonly string _caName;
         private readonly ILogger _logger;
 
-        public CAEnrollmentProcessor(string caDnsHostname, string caName, ILogger log = null) {
-            ServicePointManager.SecurityProtocol |=
-                SecurityProtocolType.Ssl3
-                | SecurityProtocolType.Tls12
-                | SecurityProtocolType.Tls11
-                | SecurityProtocolType.Tls;
+        private const SslProtocols CaEnrollmentSslProtocols = 
+            SslProtocols.Ssl3 | SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Tls12;
 
+        public CAEnrollmentProcessor(string caDnsHostname, string caName, ILogger log = null) {
             _caDnsHostname = caDnsHostname;
             _caName = caName;
             _logger = log ?? Logging.LogProvider.CreateLogger("CAEnrollmentProcessor");
@@ -126,7 +124,7 @@ namespace SharpHoundCommonLib.Processors {
         private async Task<APIResult<CAEnrollmentEndpoint>> GetNtlmEndpoint(Uri url, bool? useBadChannelBinding,
             CAEnrollmentEndpointType type, CAEnrollmentEndpointScanResult scanResult) {
             var authService = new HttpNtlmAuthenticationService(
-                new HttpClientFactory()
+                new NtlmHttpClientFactory(CaEnrollmentSslProtocols)
             );
 
             var output = new CAEnrollmentEndpoint(url, type, scanResult);
