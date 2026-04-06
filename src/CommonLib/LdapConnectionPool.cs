@@ -529,6 +529,8 @@ namespace SharpHoundCommonLib {
                             queryParameters);
                     }
                     else {
+                        _metric.Observe(LdapMetricDefinitions.FailedRequests, 1,
+                            new LabelValues([nameof(LdapConnectionPool), _poolIdentifier]));
                         queryRetryCount++;
                     }
                 }
