@@ -203,7 +203,7 @@ namespace SharpHoundCommonLib {
                         new LabelValues([nameof(LdapConnectionPool), _poolIdentifier]));
                     errorResult = LdapResult<IDirectoryObject>.Fail(
                         $"Query - Caught unrecoverable ldap exception: {le.Message} (ServerMessage: {le.ServerErrorMessage}) (ErrorCode: {le.ErrorCode})",
-                        queryParameters);
+                        queryParameters, le.ErrorCode);
                 }
                 catch (Exception e) {
                     /*
@@ -791,7 +791,6 @@ namespace SharpHoundCommonLib {
             if (!_globalCatalogConnection.TryTake(out var connectionWrapper)) {
                 var (success, connection, message) = await CreateNewConnection(true);
                 if (!success) {
-                    //If we didn't get a connection, immediately release the semaphore so we don't have hanging ones
                     return (false, null, message);
                 }
 

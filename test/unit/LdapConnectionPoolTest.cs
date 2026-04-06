@@ -18,6 +18,15 @@ public class LdapConnectionPoolTest
         excludedDomains.Add(identifier);
     }
 
+    private static void ResetExclusionDomain() {
+        var excludedDomainsField = typeof(LdapConnectionPool)
+            .GetField("ExcludedDomains", BindingFlags.Static | BindingFlags.NonPublic);
+
+        var excludedDomains = (ConcurrentHashSet)excludedDomainsField.GetValue(null);
+
+        excludedDomains.Clear();
+    }
+
     private static ConcurrentBag<LdapConnectionWrapper> GetConnectionsBag(LdapConnectionPool pool) {
         var field = typeof(LdapConnectionPool)
             .GetField("_connections", BindingFlags.Instance | BindingFlags.NonPublic);
@@ -33,6 +42,7 @@ public class LdapConnectionPoolTest
     [Fact]
     public async Task LdapConnectionPool_ExcludedDomains_ShouldExitEarly()
     {
+        ResetExclusionDomain();
         var mockLogger = new Mock<ILogger>();
         var ldapConfig = new LdapConfig();
         var connectionPool = new ConnectionPoolManager(ldapConfig, mockLogger.Object);
@@ -47,6 +57,7 @@ public class LdapConnectionPoolTest
     [Fact]
     public async Task LdapConnectionPool_ExcludedDomains_NonExcludedShouldntExit()
     {
+        ResetExclusionDomain();
         var mockLogger = new Mock<ILogger>();
         var ldapConfig = new LdapConfig();
         var connectionPool = new ConnectionPoolManager(ldapConfig, mockLogger.Object);
@@ -64,6 +75,7 @@ public class LdapConnectionPoolTest
     [Fact]
     public async Task LdapConnectionPool_ExcludedDomains_GlobalCatalog_ShouldExitEarly()
     {
+        ResetExclusionDomain();
         var mockLogger = new Mock<ILogger>();
         var ldapConfig = new LdapConfig();
         var connectionPool = new ConnectionPoolManager(ldapConfig, mockLogger.Object);
