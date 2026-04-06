@@ -286,8 +286,6 @@ namespace SharpHoundCommonLib {
                     if (response != null) {
                         pageResponse = (PageResultResponseControl)response.Controls
                             .Where(x => x is PageResultResponseControl).DefaultIfEmpty(null).FirstOrDefault();
-                        // Reset retry counter on a successful response so the next page gets a fresh budget
-                        queryRetryCount = 0;
                     } else if (queryRetryCount == MaxRetries) {
                         _metric.Observe(LdapMetricDefinitions.FailedRequests, 1,
                             new LabelValues([nameof(LdapConnectionPool), _poolIdentifier]));
@@ -413,8 +411,9 @@ namespace SharpHoundCommonLib {
                     continue;
                 }
 
-                // Reset busy retry count after a successfully delivered page so each page starts with a fresh budget
+                // Reset busy and query retry count after a successfully delivered page so each page starts with a fresh budget
                 busyRetryCount = 0;
+                queryRetryCount = 0;
 
                 foreach (SearchResultEntry entry in response.Entries) {
                     if (cancellationToken.IsCancellationRequested) {
@@ -581,6 +580,8 @@ namespace SharpHoundCommonLib {
                      * If we get a busy error, we want to do an exponential backoff, but maintain the current connection.
                      * The expectation is that given enough time, the server should stop being busy and service our query appropriately.
                      */
+                    _metric.Observe(LdapMetricDefinitions.FailedRequests, 1,
+                        new LabelValues([nameof(LdapConnectionPool), _poolIdentifier]));
                     busyRetryCount++;
                     _log.LogDebug("RangedRetrieval - Executing busy backoff for query {Info} (Attempt {Count})",
                         queryParameters.GetQueryInfo(), busyRetryCount);
@@ -591,6 +592,8 @@ namespace SharpHoundCommonLib {
                     /*
                      * Treat a timeout as a busy error
                      */
+                    _metric.Observe(LdapMetricDefinitions.FailedRequests, 1,
+                        new LabelValues([nameof(LdapConnectionPool), _poolIdentifier]));
                     busyRetryCount++;
                     _log.LogDebug("RangedRetrieval - Timeout: Executing busy backoff for query {Info} (Attempt {Count})",
                         queryParameters.GetQueryInfo(), busyRetryCount);

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Concurrent;
 using System.DirectoryServices.Protocols;
 using System.Reflection;
@@ -7,8 +8,12 @@ using Moq;
 using SharpHoundCommonLib;
 using Xunit;
 
-public class LdapConnectionPoolTest
+public class LdapConnectionPoolTest : IDisposable
 {
+    public void Dispose() {
+        ResetExclusionDomain();
+    }
+
     private static void AddExclusionDomain(string identifier) {
         var excludedDomainsField = typeof(LdapConnectionPool)
             .GetField("ExcludedDomains", BindingFlags.Static | BindingFlags.NonPublic);

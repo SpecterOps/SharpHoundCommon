@@ -54,12 +54,11 @@ public class ConcurrentHashSet : IDisposable{
     }
 
     public void Clear() {
-        _backingDictionary.Clear();
+        _backingDictionary?.Clear();
     }
 
     public void Dispose() {
         _backingDictionary = null;
         GC.SuppressFinalize(this);
     }
-    
 }
