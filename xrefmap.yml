@@ -492,24 +492,24 @@ references:
   fullName.vb: SharpHoundCommonLib.AdaptiveTimeout.ExecuteRPCWithTimeout(Of T)(System.Func(Of System.Threading.CancellationToken, System.Threading.Tasks.Task(Of SharpHoundRPC.Result(Of T))), System.Threading.CancellationToken)
   nameWithType: AdaptiveTimeout.ExecuteRPCWithTimeout<T>(Func<CancellationToken, Task<Result<T>>>, CancellationToken)
   nameWithType.vb: AdaptiveTimeout.ExecuteRPCWithTimeout(Of T)(Func(Of CancellationToken, Task(Of Result(Of T))), CancellationToken)
-- uid: SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout(System.Action{System.Threading.CancellationToken},System.Threading.CancellationToken)
-  name: ExecuteWithTimeout(Action<CancellationToken>, CancellationToken)
-  href: api/SharpHoundCommonLib.AdaptiveTimeout.html#SharpHoundCommonLib_AdaptiveTimeout_ExecuteWithTimeout_System_Action_System_Threading_CancellationToken__System_Threading_CancellationToken_
-  commentId: M:SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout(System.Action{System.Threading.CancellationToken},System.Threading.CancellationToken)
-  name.vb: ExecuteWithTimeout(Action(Of CancellationToken), CancellationToken)
-  fullName: SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout(System.Action<System.Threading.CancellationToken>, System.Threading.CancellationToken)
-  fullName.vb: SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout(System.Action(Of System.Threading.CancellationToken), System.Threading.CancellationToken)
-  nameWithType: AdaptiveTimeout.ExecuteWithTimeout(Action<CancellationToken>, CancellationToken)
-  nameWithType.vb: AdaptiveTimeout.ExecuteWithTimeout(Action(Of CancellationToken), CancellationToken)
-- uid: SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout(System.Func{System.Threading.CancellationToken,System.Threading.Tasks.Task},System.Threading.CancellationToken)
-  name: ExecuteWithTimeout(Func<CancellationToken, Task>, CancellationToken)
-  href: api/SharpHoundCommonLib.AdaptiveTimeout.html#SharpHoundCommonLib_AdaptiveTimeout_ExecuteWithTimeout_System_Func_System_Threading_CancellationToken_System_Threading_Tasks_Task__System_Threading_CancellationToken_
-  commentId: M:SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout(System.Func{System.Threading.CancellationToken,System.Threading.Tasks.Task},System.Threading.CancellationToken)
-  name.vb: ExecuteWithTimeout(Func(Of CancellationToken, Task), CancellationToken)
-  fullName: SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout(System.Func<System.Threading.CancellationToken, System.Threading.Tasks.Task>, System.Threading.CancellationToken)
-  fullName.vb: SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout(System.Func(Of System.Threading.CancellationToken, System.Threading.Tasks.Task), System.Threading.CancellationToken)
-  nameWithType: AdaptiveTimeout.ExecuteWithTimeout(Func<CancellationToken, Task>, CancellationToken)
-  nameWithType.vb: AdaptiveTimeout.ExecuteWithTimeout(Func(Of CancellationToken, Task), CancellationToken)
+- uid: SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout(System.Action{System.Threading.CancellationToken},System.Threading.CancellationToken,System.Action{System.Double})
+  name: ExecuteWithTimeout(Action<CancellationToken>, CancellationToken, Action<Double>)
+  href: api/SharpHoundCommonLib.AdaptiveTimeout.html#SharpHoundCommonLib_AdaptiveTimeout_ExecuteWithTimeout_System_Action_System_Threading_CancellationToken__System_Threading_CancellationToken_System_Action_System_Double__
+  commentId: M:SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout(System.Action{System.Threading.CancellationToken},System.Threading.CancellationToken,System.Action{System.Double})
+  name.vb: ExecuteWithTimeout(Action(Of CancellationToken), CancellationToken, Action(Of Double))
+  fullName: SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout(System.Action<System.Threading.CancellationToken>, System.Threading.CancellationToken, System.Action<System.Double>)
+  fullName.vb: SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout(System.Action(Of System.Threading.CancellationToken), System.Threading.CancellationToken, System.Action(Of System.Double))
+  nameWithType: AdaptiveTimeout.ExecuteWithTimeout(Action<CancellationToken>, CancellationToken, Action<Double>)
+  nameWithType.vb: AdaptiveTimeout.ExecuteWithTimeout(Action(Of CancellationToken), CancellationToken, Action(Of Double))
+- uid: SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout(System.Func{System.Threading.CancellationToken,System.Threading.Tasks.Task},System.Threading.CancellationToken,System.Action{System.Double})
+  name: ExecuteWithTimeout(Func<CancellationToken, Task>, CancellationToken, Action<Double>)
+  href: api/SharpHoundCommonLib.AdaptiveTimeout.html#SharpHoundCommonLib_AdaptiveTimeout_ExecuteWithTimeout_System_Func_System_Threading_CancellationToken_System_Threading_Tasks_Task__System_Threading_CancellationToken_System_Action_System_Double__
+  commentId: M:SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout(System.Func{System.Threading.CancellationToken,System.Threading.Tasks.Task},System.Threading.CancellationToken,System.Action{System.Double})
+  name.vb: ExecuteWithTimeout(Func(Of CancellationToken, Task), CancellationToken, Action(Of Double))
+  fullName: SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout(System.Func<System.Threading.CancellationToken, System.Threading.Tasks.Task>, System.Threading.CancellationToken, System.Action<System.Double>)
+  fullName.vb: SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout(System.Func(Of System.Threading.CancellationToken, System.Threading.Tasks.Task), System.Threading.CancellationToken, System.Action(Of System.Double))
+  nameWithType: AdaptiveTimeout.ExecuteWithTimeout(Func<CancellationToken, Task>, CancellationToken, Action<Double>)
+  nameWithType.vb: AdaptiveTimeout.ExecuteWithTimeout(Func(Of CancellationToken, Task), CancellationToken, Action(Of Double))
 - uid: SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout*
   name: ExecuteWithTimeout
   href: api/SharpHoundCommonLib.AdaptiveTimeout.html#SharpHoundCommonLib_AdaptiveTimeout_ExecuteWithTimeout_
@@ -517,24 +517,24 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout
   nameWithType: AdaptiveTimeout.ExecuteWithTimeout
-- uid: SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout``1(System.Func{System.Threading.CancellationToken,``0},System.Threading.CancellationToken)
-  name: ExecuteWithTimeout<T>(Func<CancellationToken, T>, CancellationToken)
-  href: api/SharpHoundCommonLib.AdaptiveTimeout.html#SharpHoundCommonLib_AdaptiveTimeout_ExecuteWithTimeout__1_System_Func_System_Threading_CancellationToken___0__System_Threading_CancellationToken_
-  commentId: M:SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout``1(System.Func{System.Threading.CancellationToken,``0},System.Threading.CancellationToken)
-  name.vb: ExecuteWithTimeout(Of T)(Func(Of CancellationToken, T), CancellationToken)
-  fullName: SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout<T>(System.Func<System.Threading.CancellationToken, T>, System.Threading.CancellationToken)
-  fullName.vb: SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout(Of T)(System.Func(Of System.Threading.CancellationToken, T), System.Threading.CancellationToken)
-  nameWithType: AdaptiveTimeout.ExecuteWithTimeout<T>(Func<CancellationToken, T>, CancellationToken)
-  nameWithType.vb: AdaptiveTimeout.ExecuteWithTimeout(Of T)(Func(Of CancellationToken, T), CancellationToken)
-- uid: SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout``1(System.Func{System.Threading.CancellationToken,System.Threading.Tasks.Task{``0}},System.Threading.CancellationToken)
-  name: ExecuteWithTimeout<T>(Func<CancellationToken, Task<T>>, CancellationToken)
-  href: api/SharpHoundCommonLib.AdaptiveTimeout.html#SharpHoundCommonLib_AdaptiveTimeout_ExecuteWithTimeout__1_System_Func_System_Threading_CancellationToken_System_Threading_Tasks_Task___0___System_Threading_CancellationToken_
-  commentId: M:SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout``1(System.Func{System.Threading.CancellationToken,System.Threading.Tasks.Task{``0}},System.Threading.CancellationToken)
-  name.vb: ExecuteWithTimeout(Of T)(Func(Of CancellationToken, Task(Of T)), CancellationToken)
-  fullName: SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout<T>(System.Func<System.Threading.CancellationToken, System.Threading.Tasks.Task<T>>, System.Threading.CancellationToken)
-  fullName.vb: SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout(Of T)(System.Func(Of System.Threading.CancellationToken, System.Threading.Tasks.Task(Of T)), System.Threading.CancellationToken)
-  nameWithType: AdaptiveTimeout.ExecuteWithTimeout<T>(Func<CancellationToken, Task<T>>, CancellationToken)
-  nameWithType.vb: AdaptiveTimeout.ExecuteWithTimeout(Of T)(Func(Of CancellationToken, Task(Of T)), CancellationToken)
+- uid: SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout``1(System.Func{System.Threading.CancellationToken,``0},System.Threading.CancellationToken,System.Action{System.Double})
+  name: ExecuteWithTimeout<T>(Func<CancellationToken, T>, CancellationToken, Action<Double>)
+  href: api/SharpHoundCommonLib.AdaptiveTimeout.html#SharpHoundCommonLib_AdaptiveTimeout_ExecuteWithTimeout__1_System_Func_System_Threading_CancellationToken___0__System_Threading_CancellationToken_System_Action_System_Double__
+  commentId: M:SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout``1(System.Func{System.Threading.CancellationToken,``0},System.Threading.CancellationToken,System.Action{System.Double})
+  name.vb: ExecuteWithTimeout(Of T)(Func(Of CancellationToken, T), CancellationToken, Action(Of Double))
+  fullName: SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout<T>(System.Func<System.Threading.CancellationToken, T>, System.Threading.CancellationToken, System.Action<System.Double>)
+  fullName.vb: SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout(Of T)(System.Func(Of System.Threading.CancellationToken, T), System.Threading.CancellationToken, System.Action(Of System.Double))
+  nameWithType: AdaptiveTimeout.ExecuteWithTimeout<T>(Func<CancellationToken, T>, CancellationToken, Action<Double>)
+  nameWithType.vb: AdaptiveTimeout.ExecuteWithTimeout(Of T)(Func(Of CancellationToken, T), CancellationToken, Action(Of Double))
+- uid: SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout``1(System.Func{System.Threading.CancellationToken,System.Threading.Tasks.Task{``0}},System.Threading.CancellationToken,System.Action{System.Double})
+  name: ExecuteWithTimeout<T>(Func<CancellationToken, Task<T>>, CancellationToken, Action<Double>)
+  href: api/SharpHoundCommonLib.AdaptiveTimeout.html#SharpHoundCommonLib_AdaptiveTimeout_ExecuteWithTimeout__1_System_Func_System_Threading_CancellationToken_System_Threading_Tasks_Task___0___System_Threading_CancellationToken_System_Action_System_Double__
+  commentId: M:SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout``1(System.Func{System.Threading.CancellationToken,System.Threading.Tasks.Task{``0}},System.Threading.CancellationToken,System.Action{System.Double})
+  name.vb: ExecuteWithTimeout(Of T)(Func(Of CancellationToken, Task(Of T)), CancellationToken, Action(Of Double))
+  fullName: SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout<T>(System.Func<System.Threading.CancellationToken, System.Threading.Tasks.Task<T>>, System.Threading.CancellationToken, System.Action<System.Double>)
+  fullName.vb: SharpHoundCommonLib.AdaptiveTimeout.ExecuteWithTimeout(Of T)(System.Func(Of System.Threading.CancellationToken, System.Threading.Tasks.Task(Of T)), System.Threading.CancellationToken, System.Action(Of System.Double))
+  nameWithType: AdaptiveTimeout.ExecuteWithTimeout<T>(Func<CancellationToken, Task<T>>, CancellationToken, Action<Double>)
+  nameWithType.vb: AdaptiveTimeout.ExecuteWithTimeout(Of T)(Func(Of CancellationToken, Task(Of T)), CancellationToken, Action(Of Double))
 - uid: SharpHoundCommonLib.AdaptiveTimeout.GetAdaptiveTimeout
   name: GetAdaptiveTimeout()
   href: api/SharpHoundCommonLib.AdaptiveTimeout.html#SharpHoundCommonLib_AdaptiveTimeout_GetAdaptiveTimeout
@@ -3322,21 +3322,24 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.ExecutionTimeSampler.Dispose
   nameWithType: ExecutionTimeSampler.Dispose
-- uid: SharpHoundCommonLib.ExecutionTimeSampler.SampleExecutionTime(System.Action)
-  name: SampleExecutionTime(Action)
-  href: api/SharpHoundCommonLib.ExecutionTimeSampler.html#SharpHoundCommonLib_ExecutionTimeSampler_SampleExecutionTime_System_Action_
-  commentId: M:SharpHoundCommonLib.ExecutionTimeSampler.SampleExecutionTime(System.Action)
-  fullName: SharpHoundCommonLib.ExecutionTimeSampler.SampleExecutionTime(System.Action)
-  nameWithType: ExecutionTimeSampler.SampleExecutionTime(Action)
-- uid: SharpHoundCommonLib.ExecutionTimeSampler.SampleExecutionTime(System.Func{System.Threading.Tasks.Task})
-  name: SampleExecutionTime(Func<Task>)
-  href: api/SharpHoundCommonLib.ExecutionTimeSampler.html#SharpHoundCommonLib_ExecutionTimeSampler_SampleExecutionTime_System_Func_System_Threading_Tasks_Task__
-  commentId: M:SharpHoundCommonLib.ExecutionTimeSampler.SampleExecutionTime(System.Func{System.Threading.Tasks.Task})
-  name.vb: SampleExecutionTime(Func(Of Task))
-  fullName: SharpHoundCommonLib.ExecutionTimeSampler.SampleExecutionTime(System.Func<System.Threading.Tasks.Task>)
-  fullName.vb: SharpHoundCommonLib.ExecutionTimeSampler.SampleExecutionTime(System.Func(Of System.Threading.Tasks.Task))
-  nameWithType: ExecutionTimeSampler.SampleExecutionTime(Func<Task>)
-  nameWithType.vb: ExecutionTimeSampler.SampleExecutionTime(Func(Of Task))
+- uid: SharpHoundCommonLib.ExecutionTimeSampler.SampleExecutionTime(System.Action,System.Action{System.Double})
+  name: SampleExecutionTime(Action, Action<Double>)
+  href: api/SharpHoundCommonLib.ExecutionTimeSampler.html#SharpHoundCommonLib_ExecutionTimeSampler_SampleExecutionTime_System_Action_System_Action_System_Double__
+  commentId: M:SharpHoundCommonLib.ExecutionTimeSampler.SampleExecutionTime(System.Action,System.Action{System.Double})
+  name.vb: SampleExecutionTime(Action, Action(Of Double))
+  fullName: SharpHoundCommonLib.ExecutionTimeSampler.SampleExecutionTime(System.Action, System.Action<System.Double>)
+  fullName.vb: SharpHoundCommonLib.ExecutionTimeSampler.SampleExecutionTime(System.Action, System.Action(Of System.Double))
+  nameWithType: ExecutionTimeSampler.SampleExecutionTime(Action, Action<Double>)
+  nameWithType.vb: ExecutionTimeSampler.SampleExecutionTime(Action, Action(Of Double))
+- uid: SharpHoundCommonLib.ExecutionTimeSampler.SampleExecutionTime(System.Func{System.Threading.Tasks.Task},System.Action{System.Double})
+  name: SampleExecutionTime(Func<Task>, Action<Double>)
+  href: api/SharpHoundCommonLib.ExecutionTimeSampler.html#SharpHoundCommonLib_ExecutionTimeSampler_SampleExecutionTime_System_Func_System_Threading_Tasks_Task__System_Action_System_Double__
+  commentId: M:SharpHoundCommonLib.ExecutionTimeSampler.SampleExecutionTime(System.Func{System.Threading.Tasks.Task},System.Action{System.Double})
+  name.vb: SampleExecutionTime(Func(Of Task), Action(Of Double))
+  fullName: SharpHoundCommonLib.ExecutionTimeSampler.SampleExecutionTime(System.Func<System.Threading.Tasks.Task>, System.Action<System.Double>)
+  fullName.vb: SharpHoundCommonLib.ExecutionTimeSampler.SampleExecutionTime(System.Func(Of System.Threading.Tasks.Task), System.Action(Of System.Double))
+  nameWithType: ExecutionTimeSampler.SampleExecutionTime(Func<Task>, Action<Double>)
+  nameWithType.vb: ExecutionTimeSampler.SampleExecutionTime(Func(Of Task), Action(Of Double))
 - uid: SharpHoundCommonLib.ExecutionTimeSampler.SampleExecutionTime*
   name: SampleExecutionTime
   href: api/SharpHoundCommonLib.ExecutionTimeSampler.html#SharpHoundCommonLib_ExecutionTimeSampler_SampleExecutionTime_
@@ -3344,24 +3347,24 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.ExecutionTimeSampler.SampleExecutionTime
   nameWithType: ExecutionTimeSampler.SampleExecutionTime
-- uid: SharpHoundCommonLib.ExecutionTimeSampler.SampleExecutionTime``1(System.Func{``0})
-  name: SampleExecutionTime<T>(Func<T>)
-  href: api/SharpHoundCommonLib.ExecutionTimeSampler.html#SharpHoundCommonLib_ExecutionTimeSampler_SampleExecutionTime__1_System_Func___0__
-  commentId: M:SharpHoundCommonLib.ExecutionTimeSampler.SampleExecutionTime``1(System.Func{``0})
-  name.vb: SampleExecutionTime(Of T)(Func(Of T))
-  fullName: SharpHoundCommonLib.ExecutionTimeSampler.SampleExecutionTime<T>(System.Func<T>)
-  fullName.vb: SharpHoundCommonLib.ExecutionTimeSampler.SampleExecutionTime(Of T)(System.Func(Of T))
-  nameWithType: ExecutionTimeSampler.SampleExecutionTime<T>(Func<T>)
-  nameWithType.vb: ExecutionTimeSampler.SampleExecutionTime(Of T)(Func(Of T))
-- uid: SharpHoundCommonLib.ExecutionTimeSampler.SampleExecutionTime``1(System.Func{System.Threading.Tasks.Task{``0}})
-  name: SampleExecutionTime<T>(Func<Task<T>>)
-  href: api/SharpHoundCommonLib.ExecutionTimeSampler.html#SharpHoundCommonLib_ExecutionTimeSampler_SampleExecutionTime__1_System_Func_System_Threading_Tasks_Task___0___
-  commentId: M:SharpHoundCommonLib.ExecutionTimeSampler.SampleExecutionTime``1(System.Func{System.Threading.Tasks.Task{``0}})
-  name.vb: SampleExecutionTime(Of T)(Func(Of Task(Of T)))
-  fullName: SharpHoundCommonLib.ExecutionTimeSampler.SampleExecutionTime<T>(System.Func<System.Threading.Tasks.Task<T>>)
-  fullName.vb: SharpHoundCommonLib.ExecutionTimeSampler.SampleExecutionTime(Of T)(System.Func(Of System.Threading.Tasks.Task(Of T)))
-  nameWithType: ExecutionTimeSampler.SampleExecutionTime<T>(Func<Task<T>>)
-  nameWithType.vb: ExecutionTimeSampler.SampleExecutionTime(Of T)(Func(Of Task(Of T)))
+- uid: SharpHoundCommonLib.ExecutionTimeSampler.SampleExecutionTime``1(System.Func{``0},System.Action{System.Double})
+  name: SampleExecutionTime<T>(Func<T>, Action<Double>)
+  href: api/SharpHoundCommonLib.ExecutionTimeSampler.html#SharpHoundCommonLib_ExecutionTimeSampler_SampleExecutionTime__1_System_Func___0__System_Action_System_Double__
+  commentId: M:SharpHoundCommonLib.ExecutionTimeSampler.SampleExecutionTime``1(System.Func{``0},System.Action{System.Double})
+  name.vb: SampleExecutionTime(Of T)(Func(Of T), Action(Of Double))
+  fullName: SharpHoundCommonLib.ExecutionTimeSampler.SampleExecutionTime<T>(System.Func<T>, System.Action<System.Double>)
+  fullName.vb: SharpHoundCommonLib.ExecutionTimeSampler.SampleExecutionTime(Of T)(System.Func(Of T), System.Action(Of System.Double))
+  nameWithType: ExecutionTimeSampler.SampleExecutionTime<T>(Func<T>, Action<Double>)
+  nameWithType.vb: ExecutionTimeSampler.SampleExecutionTime(Of T)(Func(Of T), Action(Of Double))
+- uid: SharpHoundCommonLib.ExecutionTimeSampler.SampleExecutionTime``1(System.Func{System.Threading.Tasks.Task{``0}},System.Action{System.Double})
+  name: SampleExecutionTime<T>(Func<Task<T>>, Action<Double>)
+  href: api/SharpHoundCommonLib.ExecutionTimeSampler.html#SharpHoundCommonLib_ExecutionTimeSampler_SampleExecutionTime__1_System_Func_System_Threading_Tasks_Task___0___System_Action_System_Double__
+  commentId: M:SharpHoundCommonLib.ExecutionTimeSampler.SampleExecutionTime``1(System.Func{System.Threading.Tasks.Task{``0}},System.Action{System.Double})
+  name.vb: SampleExecutionTime(Of T)(Func(Of Task(Of T)), Action(Of Double))
+  fullName: SharpHoundCommonLib.ExecutionTimeSampler.SampleExecutionTime<T>(System.Func<System.Threading.Tasks.Task<T>>, System.Action<System.Double>)
+  fullName.vb: SharpHoundCommonLib.ExecutionTimeSampler.SampleExecutionTime(Of T)(System.Func(Of System.Threading.Tasks.Task(Of T)), System.Action(Of System.Double))
+  nameWithType: ExecutionTimeSampler.SampleExecutionTime<T>(Func<Task<T>>, Action<Double>)
+  nameWithType.vb: ExecutionTimeSampler.SampleExecutionTime(Of T)(Func(Of Task(Of T)), Action(Of Double))
 - uid: SharpHoundCommonLib.ExecutionTimeSampler.StandardDeviation
   name: StandardDeviation()
   href: api/SharpHoundCommonLib.ExecutionTimeSampler.html#SharpHoundCommonLib_ExecutionTimeSampler_StandardDeviation
@@ -4324,6 +4327,174 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.ILdapUtils.TestLdapConnection
   nameWithType: ILdapUtils.TestLdapConnection
+- uid: SharpHoundCommonLib.Interfaces
+  name: SharpHoundCommonLib.Interfaces
+  href: api/SharpHoundCommonLib.Interfaces.html
+  commentId: N:SharpHoundCommonLib.Interfaces
+  fullName: SharpHoundCommonLib.Interfaces
+  nameWithType: SharpHoundCommonLib.Interfaces
+- uid: SharpHoundCommonLib.Interfaces.ILabelValuesCache
+  name: ILabelValuesCache
+  href: api/SharpHoundCommonLib.Interfaces.ILabelValuesCache.html
+  commentId: T:SharpHoundCommonLib.Interfaces.ILabelValuesCache
+  fullName: SharpHoundCommonLib.Interfaces.ILabelValuesCache
+  nameWithType: ILabelValuesCache
+- uid: SharpHoundCommonLib.Interfaces.ILabelValuesCache.Intern(System.String[])
+  name: Intern(String[])
+  href: api/SharpHoundCommonLib.Interfaces.ILabelValuesCache.html#SharpHoundCommonLib_Interfaces_ILabelValuesCache_Intern_System_String___
+  commentId: M:SharpHoundCommonLib.Interfaces.ILabelValuesCache.Intern(System.String[])
+  name.vb: Intern(String())
+  fullName: SharpHoundCommonLib.Interfaces.ILabelValuesCache.Intern(System.String[])
+  fullName.vb: SharpHoundCommonLib.Interfaces.ILabelValuesCache.Intern(System.String())
+  nameWithType: ILabelValuesCache.Intern(String[])
+  nameWithType.vb: ILabelValuesCache.Intern(String())
+- uid: SharpHoundCommonLib.Interfaces.ILabelValuesCache.Intern*
+  name: Intern
+  href: api/SharpHoundCommonLib.Interfaces.ILabelValuesCache.html#SharpHoundCommonLib_Interfaces_ILabelValuesCache_Intern_
+  commentId: Overload:SharpHoundCommonLib.Interfaces.ILabelValuesCache.Intern
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Interfaces.ILabelValuesCache.Intern
+  nameWithType: ILabelValuesCache.Intern
+- uid: SharpHoundCommonLib.Interfaces.IMetricFactory
+  name: IMetricFactory
+  href: api/SharpHoundCommonLib.Interfaces.IMetricFactory.html
+  commentId: T:SharpHoundCommonLib.Interfaces.IMetricFactory
+  fullName: SharpHoundCommonLib.Interfaces.IMetricFactory
+  nameWithType: IMetricFactory
+- uid: SharpHoundCommonLib.Interfaces.IMetricFactory.CreateMetricRouter
+  name: CreateMetricRouter()
+  href: api/SharpHoundCommonLib.Interfaces.IMetricFactory.html#SharpHoundCommonLib_Interfaces_IMetricFactory_CreateMetricRouter
+  commentId: M:SharpHoundCommonLib.Interfaces.IMetricFactory.CreateMetricRouter
+  fullName: SharpHoundCommonLib.Interfaces.IMetricFactory.CreateMetricRouter()
+  nameWithType: IMetricFactory.CreateMetricRouter()
+- uid: SharpHoundCommonLib.Interfaces.IMetricFactory.CreateMetricRouter*
+  name: CreateMetricRouter
+  href: api/SharpHoundCommonLib.Interfaces.IMetricFactory.html#SharpHoundCommonLib_Interfaces_IMetricFactory_CreateMetricRouter_
+  commentId: Overload:SharpHoundCommonLib.Interfaces.IMetricFactory.CreateMetricRouter
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Interfaces.IMetricFactory.CreateMetricRouter
+  nameWithType: IMetricFactory.CreateMetricRouter
+- uid: SharpHoundCommonLib.Interfaces.IMetricRegistry
+  name: IMetricRegistry
+  href: api/SharpHoundCommonLib.Interfaces.IMetricRegistry.html
+  commentId: T:SharpHoundCommonLib.Interfaces.IMetricRegistry
+  fullName: SharpHoundCommonLib.Interfaces.IMetricRegistry
+  nameWithType: IMetricRegistry
+- uid: SharpHoundCommonLib.Interfaces.IMetricRegistry.Definitions
+  name: Definitions
+  href: api/SharpHoundCommonLib.Interfaces.IMetricRegistry.html#SharpHoundCommonLib_Interfaces_IMetricRegistry_Definitions
+  commentId: P:SharpHoundCommonLib.Interfaces.IMetricRegistry.Definitions
+  fullName: SharpHoundCommonLib.Interfaces.IMetricRegistry.Definitions
+  nameWithType: IMetricRegistry.Definitions
+- uid: SharpHoundCommonLib.Interfaces.IMetricRegistry.Definitions*
+  name: Definitions
+  href: api/SharpHoundCommonLib.Interfaces.IMetricRegistry.html#SharpHoundCommonLib_Interfaces_IMetricRegistry_Definitions_
+  commentId: Overload:SharpHoundCommonLib.Interfaces.IMetricRegistry.Definitions
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Interfaces.IMetricRegistry.Definitions
+  nameWithType: IMetricRegistry.Definitions
+- uid: SharpHoundCommonLib.Interfaces.IMetricRegistry.TryRegister(MetricDefinition,System.Int32@)
+  name: TryRegister(MetricDefinition, out Int32)
+  href: api/SharpHoundCommonLib.Interfaces.IMetricRegistry.html#SharpHoundCommonLib_Interfaces_IMetricRegistry_TryRegister_MetricDefinition_System_Int32__
+  commentId: M:SharpHoundCommonLib.Interfaces.IMetricRegistry.TryRegister(MetricDefinition,System.Int32@)
+  name.vb: TryRegister(MetricDefinition, ByRef Int32)
+  fullName: SharpHoundCommonLib.Interfaces.IMetricRegistry.TryRegister(MetricDefinition, out System.Int32)
+  fullName.vb: SharpHoundCommonLib.Interfaces.IMetricRegistry.TryRegister(MetricDefinition, ByRef System.Int32)
+  nameWithType: IMetricRegistry.TryRegister(MetricDefinition, out Int32)
+  nameWithType.vb: IMetricRegistry.TryRegister(MetricDefinition, ByRef Int32)
+- uid: SharpHoundCommonLib.Interfaces.IMetricRegistry.TryRegister*
+  name: TryRegister
+  href: api/SharpHoundCommonLib.Interfaces.IMetricRegistry.html#SharpHoundCommonLib_Interfaces_IMetricRegistry_TryRegister_
+  commentId: Overload:SharpHoundCommonLib.Interfaces.IMetricRegistry.TryRegister
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Interfaces.IMetricRegistry.TryRegister
+  nameWithType: IMetricRegistry.TryRegister
+- uid: SharpHoundCommonLib.Interfaces.IMetricRouter
+  name: IMetricRouter
+  href: api/SharpHoundCommonLib.Interfaces.IMetricRouter.html
+  commentId: T:SharpHoundCommonLib.Interfaces.IMetricRouter
+  fullName: SharpHoundCommonLib.Interfaces.IMetricRouter
+  nameWithType: IMetricRouter
+- uid: SharpHoundCommonLib.Interfaces.IMetricRouter.Flush
+  name: Flush()
+  href: api/SharpHoundCommonLib.Interfaces.IMetricRouter.html#SharpHoundCommonLib_Interfaces_IMetricRouter_Flush
+  commentId: M:SharpHoundCommonLib.Interfaces.IMetricRouter.Flush
+  fullName: SharpHoundCommonLib.Interfaces.IMetricRouter.Flush()
+  nameWithType: IMetricRouter.Flush()
+- uid: SharpHoundCommonLib.Interfaces.IMetricRouter.Flush*
+  name: Flush
+  href: api/SharpHoundCommonLib.Interfaces.IMetricRouter.html#SharpHoundCommonLib_Interfaces_IMetricRouter_Flush_
+  commentId: Overload:SharpHoundCommonLib.Interfaces.IMetricRouter.Flush
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Interfaces.IMetricRouter.Flush
+  nameWithType: IMetricRouter.Flush
+- uid: SharpHoundCommonLib.Interfaces.IMetricRouter.Observe(System.Int32,System.Double,SharpHoundCommonLib.Models.LabelValues)
+  name: Observe(Int32, Double, LabelValues)
+  href: api/SharpHoundCommonLib.Interfaces.IMetricRouter.html#SharpHoundCommonLib_Interfaces_IMetricRouter_Observe_System_Int32_System_Double_SharpHoundCommonLib_Models_LabelValues_
+  commentId: M:SharpHoundCommonLib.Interfaces.IMetricRouter.Observe(System.Int32,System.Double,SharpHoundCommonLib.Models.LabelValues)
+  fullName: SharpHoundCommonLib.Interfaces.IMetricRouter.Observe(System.Int32, System.Double, SharpHoundCommonLib.Models.LabelValues)
+  nameWithType: IMetricRouter.Observe(Int32, Double, LabelValues)
+- uid: SharpHoundCommonLib.Interfaces.IMetricRouter.Observe*
+  name: Observe
+  href: api/SharpHoundCommonLib.Interfaces.IMetricRouter.html#SharpHoundCommonLib_Interfaces_IMetricRouter_Observe_
+  commentId: Overload:SharpHoundCommonLib.Interfaces.IMetricRouter.Observe
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Interfaces.IMetricRouter.Observe
+  nameWithType: IMetricRouter.Observe
+- uid: SharpHoundCommonLib.Interfaces.IMetricSink
+  name: IMetricSink
+  href: api/SharpHoundCommonLib.Interfaces.IMetricSink.html
+  commentId: T:SharpHoundCommonLib.Interfaces.IMetricSink
+  fullName: SharpHoundCommonLib.Interfaces.IMetricSink
+  nameWithType: IMetricSink
+- uid: SharpHoundCommonLib.Interfaces.IMetricSink.Flush
+  name: Flush()
+  href: api/SharpHoundCommonLib.Interfaces.IMetricSink.html#SharpHoundCommonLib_Interfaces_IMetricSink_Flush
+  commentId: M:SharpHoundCommonLib.Interfaces.IMetricSink.Flush
+  fullName: SharpHoundCommonLib.Interfaces.IMetricSink.Flush()
+  nameWithType: IMetricSink.Flush()
+- uid: SharpHoundCommonLib.Interfaces.IMetricSink.Flush*
+  name: Flush
+  href: api/SharpHoundCommonLib.Interfaces.IMetricSink.html#SharpHoundCommonLib_Interfaces_IMetricSink_Flush_
+  commentId: Overload:SharpHoundCommonLib.Interfaces.IMetricSink.Flush
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Interfaces.IMetricSink.Flush
+  nameWithType: IMetricSink.Flush
+- uid: SharpHoundCommonLib.Interfaces.IMetricSink.Observe(MetricObservation.DoubleMetricObservation@)
+  name: Observe(MetricObservation.DoubleMetricObservation)
+  href: api/SharpHoundCommonLib.Interfaces.IMetricSink.html#SharpHoundCommonLib_Interfaces_IMetricSink_Observe_MetricObservation_DoubleMetricObservation__
+  commentId: M:SharpHoundCommonLib.Interfaces.IMetricSink.Observe(MetricObservation.DoubleMetricObservation@)
+  name.vb: Observe(ByRef MetricObservation.DoubleMetricObservation)
+  fullName: SharpHoundCommonLib.Interfaces.IMetricSink.Observe(MetricObservation.DoubleMetricObservation)
+  fullName.vb: SharpHoundCommonLib.Interfaces.IMetricSink.Observe(ByRef MetricObservation.DoubleMetricObservation)
+  nameWithType: IMetricSink.Observe(MetricObservation.DoubleMetricObservation)
+  nameWithType.vb: IMetricSink.Observe(ByRef MetricObservation.DoubleMetricObservation)
+- uid: SharpHoundCommonLib.Interfaces.IMetricSink.Observe*
+  name: Observe
+  href: api/SharpHoundCommonLib.Interfaces.IMetricSink.html#SharpHoundCommonLib_Interfaces_IMetricSink_Observe_
+  commentId: Overload:SharpHoundCommonLib.Interfaces.IMetricSink.Observe
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Interfaces.IMetricSink.Observe
+  nameWithType: IMetricSink.Observe
+- uid: SharpHoundCommonLib.Interfaces.IMetricWriter
+  name: IMetricWriter
+  href: api/SharpHoundCommonLib.Interfaces.IMetricWriter.html
+  commentId: T:SharpHoundCommonLib.Interfaces.IMetricWriter
+  fullName: SharpHoundCommonLib.Interfaces.IMetricWriter
+  nameWithType: IMetricWriter
+- uid: SharpHoundCommonLib.Interfaces.IMetricWriter.StringBuilderAppendMetric(System.Text.StringBuilder,MetricDefinition,SharpHoundCommonLib.Models.LabelValues,SharpHoundCommonLib.Services.MetricAggregator,System.DateTimeOffset,System.String)
+  name: StringBuilderAppendMetric(StringBuilder, MetricDefinition, LabelValues, MetricAggregator, DateTimeOffset, String)
+  href: api/SharpHoundCommonLib.Interfaces.IMetricWriter.html#SharpHoundCommonLib_Interfaces_IMetricWriter_StringBuilderAppendMetric_System_Text_StringBuilder_MetricDefinition_SharpHoundCommonLib_Models_LabelValues_SharpHoundCommonLib_Services_MetricAggregator_System_DateTimeOffset_System_String_
+  commentId: M:SharpHoundCommonLib.Interfaces.IMetricWriter.StringBuilderAppendMetric(System.Text.StringBuilder,MetricDefinition,SharpHoundCommonLib.Models.LabelValues,SharpHoundCommonLib.Services.MetricAggregator,System.DateTimeOffset,System.String)
+  fullName: SharpHoundCommonLib.Interfaces.IMetricWriter.StringBuilderAppendMetric(System.Text.StringBuilder, MetricDefinition, SharpHoundCommonLib.Models.LabelValues, SharpHoundCommonLib.Services.MetricAggregator, System.DateTimeOffset, System.String)
+  nameWithType: IMetricWriter.StringBuilderAppendMetric(StringBuilder, MetricDefinition, LabelValues, MetricAggregator, DateTimeOffset, String)
+- uid: SharpHoundCommonLib.Interfaces.IMetricWriter.StringBuilderAppendMetric*
+  name: StringBuilderAppendMetric
+  href: api/SharpHoundCommonLib.Interfaces.IMetricWriter.html#SharpHoundCommonLib_Interfaces_IMetricWriter_StringBuilderAppendMetric_
+  commentId: Overload:SharpHoundCommonLib.Interfaces.IMetricWriter.StringBuilderAppendMetric
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Interfaces.IMetricWriter.StringBuilderAppendMetric
+  nameWithType: IMetricWriter.StringBuilderAppendMetric
 - uid: SharpHoundCommonLib.IRegistryAccessor
   name: IRegistryAccessor
   href: api/SharpHoundCommonLib.IRegistryAccessor.html
@@ -6201,12 +6372,12 @@ references:
   commentId: M:SharpHoundCommonLib.LdapUtils.#ctor
   fullName: SharpHoundCommonLib.LdapUtils.LdapUtils()
   nameWithType: LdapUtils.LdapUtils()
-- uid: SharpHoundCommonLib.LdapUtils.#ctor(SharpHoundCommonLib.NativeMethods,SharpHoundCommonLib.Processors.PortScanner,ILogger)
-  name: LdapUtils(NativeMethods, PortScanner, ILogger)
-  href: api/SharpHoundCommonLib.LdapUtils.html#SharpHoundCommonLib_LdapUtils__ctor_SharpHoundCommonLib_NativeMethods_SharpHoundCommonLib_Processors_PortScanner_ILogger_
-  commentId: M:SharpHoundCommonLib.LdapUtils.#ctor(SharpHoundCommonLib.NativeMethods,SharpHoundCommonLib.Processors.PortScanner,ILogger)
-  fullName: SharpHoundCommonLib.LdapUtils.LdapUtils(SharpHoundCommonLib.NativeMethods, SharpHoundCommonLib.Processors.PortScanner, ILogger)
-  nameWithType: LdapUtils.LdapUtils(NativeMethods, PortScanner, ILogger)
+- uid: SharpHoundCommonLib.LdapUtils.#ctor(SharpHoundCommonLib.NativeMethods,SharpHoundCommonLib.Processors.PortScanner,ILogger,SharpHoundCommonLib.Interfaces.IMetricRouter)
+  name: LdapUtils(NativeMethods, PortScanner, ILogger, IMetricRouter)
+  href: api/SharpHoundCommonLib.LdapUtils.html#SharpHoundCommonLib_LdapUtils__ctor_SharpHoundCommonLib_NativeMethods_SharpHoundCommonLib_Processors_PortScanner_ILogger_SharpHoundCommonLib_Interfaces_IMetricRouter_
+  commentId: M:SharpHoundCommonLib.LdapUtils.#ctor(SharpHoundCommonLib.NativeMethods,SharpHoundCommonLib.Processors.PortScanner,ILogger,SharpHoundCommonLib.Interfaces.IMetricRouter)
+  fullName: SharpHoundCommonLib.LdapUtils.LdapUtils(SharpHoundCommonLib.NativeMethods, SharpHoundCommonLib.Processors.PortScanner, ILogger, SharpHoundCommonLib.Interfaces.IMetricRouter)
+  nameWithType: LdapUtils.LdapUtils(NativeMethods, PortScanner, ILogger, IMetricRouter)
 - uid: SharpHoundCommonLib.LdapUtils.#ctor*
   name: LdapUtils
   href: api/SharpHoundCommonLib.LdapUtils.html#SharpHoundCommonLib_LdapUtils__ctor_
@@ -6579,6 +6750,57 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.LdapUtils.TestLdapConnection
   nameWithType: LdapUtils.TestLdapConnection
+- uid: SharpHoundCommonLib.Models
+  name: SharpHoundCommonLib.Models
+  href: api/SharpHoundCommonLib.Models.html
+  commentId: N:SharpHoundCommonLib.Models
+  fullName: SharpHoundCommonLib.Models
+  nameWithType: SharpHoundCommonLib.Models
+- uid: SharpHoundCommonLib.Models.FileMetricSinkOptions
+  name: FileMetricSinkOptions
+  href: api/SharpHoundCommonLib.Models.FileMetricSinkOptions.html
+  commentId: T:SharpHoundCommonLib.Models.FileMetricSinkOptions
+  fullName: SharpHoundCommonLib.Models.FileMetricSinkOptions
+  nameWithType: FileMetricSinkOptions
+- uid: SharpHoundCommonLib.Models.FileMetricSinkOptions.FlushInterval
+  name: FlushInterval
+  href: api/SharpHoundCommonLib.Models.FileMetricSinkOptions.html#SharpHoundCommonLib_Models_FileMetricSinkOptions_FlushInterval
+  commentId: P:SharpHoundCommonLib.Models.FileMetricSinkOptions.FlushInterval
+  fullName: SharpHoundCommonLib.Models.FileMetricSinkOptions.FlushInterval
+  nameWithType: FileMetricSinkOptions.FlushInterval
+- uid: SharpHoundCommonLib.Models.FileMetricSinkOptions.FlushInterval*
+  name: FlushInterval
+  href: api/SharpHoundCommonLib.Models.FileMetricSinkOptions.html#SharpHoundCommonLib_Models_FileMetricSinkOptions_FlushInterval_
+  commentId: Overload:SharpHoundCommonLib.Models.FileMetricSinkOptions.FlushInterval
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Models.FileMetricSinkOptions.FlushInterval
+  nameWithType: FileMetricSinkOptions.FlushInterval
+- uid: SharpHoundCommonLib.Models.FileMetricSinkOptions.FlushWriter
+  name: FlushWriter
+  href: api/SharpHoundCommonLib.Models.FileMetricSinkOptions.html#SharpHoundCommonLib_Models_FileMetricSinkOptions_FlushWriter
+  commentId: P:SharpHoundCommonLib.Models.FileMetricSinkOptions.FlushWriter
+  fullName: SharpHoundCommonLib.Models.FileMetricSinkOptions.FlushWriter
+  nameWithType: FileMetricSinkOptions.FlushWriter
+- uid: SharpHoundCommonLib.Models.FileMetricSinkOptions.FlushWriter*
+  name: FlushWriter
+  href: api/SharpHoundCommonLib.Models.FileMetricSinkOptions.html#SharpHoundCommonLib_Models_FileMetricSinkOptions_FlushWriter_
+  commentId: Overload:SharpHoundCommonLib.Models.FileMetricSinkOptions.FlushWriter
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Models.FileMetricSinkOptions.FlushWriter
+  nameWithType: FileMetricSinkOptions.FlushWriter
+- uid: SharpHoundCommonLib.Models.FileMetricSinkOptions.TimestampFormat
+  name: TimestampFormat
+  href: api/SharpHoundCommonLib.Models.FileMetricSinkOptions.html#SharpHoundCommonLib_Models_FileMetricSinkOptions_TimestampFormat
+  commentId: P:SharpHoundCommonLib.Models.FileMetricSinkOptions.TimestampFormat
+  fullName: SharpHoundCommonLib.Models.FileMetricSinkOptions.TimestampFormat
+  nameWithType: FileMetricSinkOptions.TimestampFormat
+- uid: SharpHoundCommonLib.Models.FileMetricSinkOptions.TimestampFormat*
+  name: TimestampFormat
+  href: api/SharpHoundCommonLib.Models.FileMetricSinkOptions.html#SharpHoundCommonLib_Models_FileMetricSinkOptions_TimestampFormat_
+  commentId: Overload:SharpHoundCommonLib.Models.FileMetricSinkOptions.TimestampFormat
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Models.FileMetricSinkOptions.TimestampFormat
+  nameWithType: FileMetricSinkOptions.TimestampFormat
 - uid: SharpHoundCommonLib.NativeMethods
   name: NativeMethods
   href: api/SharpHoundCommonLib.NativeMethods.html
@@ -12322,6 +12544,272 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.SearchResultEntryWrapper.TryGetSecurityIdentifier
   nameWithType: SearchResultEntryWrapper.TryGetSecurityIdentifier
+- uid: SharpHoundCommonLib.Services
+  name: SharpHoundCommonLib.Services
+  href: api/SharpHoundCommonLib.Services.html
+  commentId: N:SharpHoundCommonLib.Services
+  fullName: SharpHoundCommonLib.Services
+  nameWithType: SharpHoundCommonLib.Services
+- uid: SharpHoundCommonLib.Services.CounterAggregator
+  name: CounterAggregator
+  href: api/SharpHoundCommonLib.Services.CounterAggregator.html
+  commentId: T:SharpHoundCommonLib.Services.CounterAggregator
+  fullName: SharpHoundCommonLib.Services.CounterAggregator
+  nameWithType: CounterAggregator
+- uid: SharpHoundCommonLib.Services.CounterAggregator.Observe(System.Double)
+  name: Observe(Double)
+  href: api/SharpHoundCommonLib.Services.CounterAggregator.html#SharpHoundCommonLib_Services_CounterAggregator_Observe_System_Double_
+  commentId: M:SharpHoundCommonLib.Services.CounterAggregator.Observe(System.Double)
+  fullName: SharpHoundCommonLib.Services.CounterAggregator.Observe(System.Double)
+  nameWithType: CounterAggregator.Observe(Double)
+- uid: SharpHoundCommonLib.Services.CounterAggregator.Observe*
+  name: Observe
+  href: api/SharpHoundCommonLib.Services.CounterAggregator.html#SharpHoundCommonLib_Services_CounterAggregator_Observe_
+  commentId: Overload:SharpHoundCommonLib.Services.CounterAggregator.Observe
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Services.CounterAggregator.Observe
+  nameWithType: CounterAggregator.Observe
+- uid: SharpHoundCommonLib.Services.CounterAggregator.Snapshot
+  name: Snapshot()
+  href: api/SharpHoundCommonLib.Services.CounterAggregator.html#SharpHoundCommonLib_Services_CounterAggregator_Snapshot
+  commentId: M:SharpHoundCommonLib.Services.CounterAggregator.Snapshot
+  fullName: SharpHoundCommonLib.Services.CounterAggregator.Snapshot()
+  nameWithType: CounterAggregator.Snapshot()
+- uid: SharpHoundCommonLib.Services.CounterAggregator.Snapshot*
+  name: Snapshot
+  href: api/SharpHoundCommonLib.Services.CounterAggregator.html#SharpHoundCommonLib_Services_CounterAggregator_Snapshot_
+  commentId: Overload:SharpHoundCommonLib.Services.CounterAggregator.Snapshot
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Services.CounterAggregator.Snapshot
+  nameWithType: CounterAggregator.Snapshot
+- uid: SharpHoundCommonLib.Services.CumulativeHistogramAggregator
+  name: CumulativeHistogramAggregator
+  href: api/SharpHoundCommonLib.Services.CumulativeHistogramAggregator.html
+  commentId: T:SharpHoundCommonLib.Services.CumulativeHistogramAggregator
+  fullName: SharpHoundCommonLib.Services.CumulativeHistogramAggregator
+  nameWithType: CumulativeHistogramAggregator
+- uid: SharpHoundCommonLib.Services.DefaultLabelValuesCache
+  name: DefaultLabelValuesCache
+  href: api/SharpHoundCommonLib.Services.DefaultLabelValuesCache.html
+  commentId: T:SharpHoundCommonLib.Services.DefaultLabelValuesCache
+  fullName: SharpHoundCommonLib.Services.DefaultLabelValuesCache
+  nameWithType: DefaultLabelValuesCache
+- uid: SharpHoundCommonLib.Services.DefaultLabelValuesCache.Intern(System.String[])
+  name: Intern(String[])
+  href: api/SharpHoundCommonLib.Services.DefaultLabelValuesCache.html#SharpHoundCommonLib_Services_DefaultLabelValuesCache_Intern_System_String___
+  commentId: M:SharpHoundCommonLib.Services.DefaultLabelValuesCache.Intern(System.String[])
+  name.vb: Intern(String())
+  fullName: SharpHoundCommonLib.Services.DefaultLabelValuesCache.Intern(System.String[])
+  fullName.vb: SharpHoundCommonLib.Services.DefaultLabelValuesCache.Intern(System.String())
+  nameWithType: DefaultLabelValuesCache.Intern(String[])
+  nameWithType.vb: DefaultLabelValuesCache.Intern(String())
+- uid: SharpHoundCommonLib.Services.DefaultLabelValuesCache.Intern*
+  name: Intern
+  href: api/SharpHoundCommonLib.Services.DefaultLabelValuesCache.html#SharpHoundCommonLib_Services_DefaultLabelValuesCache_Intern_
+  commentId: Overload:SharpHoundCommonLib.Services.DefaultLabelValuesCache.Intern
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Services.DefaultLabelValuesCache.Intern
+  nameWithType: DefaultLabelValuesCache.Intern
+- uid: SharpHoundCommonLib.Services.FileMetricSink
+  name: FileMetricSink
+  href: api/SharpHoundCommonLib.Services.FileMetricSink.html
+  commentId: T:SharpHoundCommonLib.Services.FileMetricSink
+  fullName: SharpHoundCommonLib.Services.FileMetricSink
+  nameWithType: FileMetricSink
+- uid: SharpHoundCommonLib.Services.GaugeAggregator
+  name: GaugeAggregator
+  href: api/SharpHoundCommonLib.Services.GaugeAggregator.html
+  commentId: T:SharpHoundCommonLib.Services.GaugeAggregator
+  fullName: SharpHoundCommonLib.Services.GaugeAggregator
+  nameWithType: GaugeAggregator
+- uid: SharpHoundCommonLib.Services.GaugeAggregator.Observe(System.Double)
+  name: Observe(Double)
+  href: api/SharpHoundCommonLib.Services.GaugeAggregator.html#SharpHoundCommonLib_Services_GaugeAggregator_Observe_System_Double_
+  commentId: M:SharpHoundCommonLib.Services.GaugeAggregator.Observe(System.Double)
+  fullName: SharpHoundCommonLib.Services.GaugeAggregator.Observe(System.Double)
+  nameWithType: GaugeAggregator.Observe(Double)
+- uid: SharpHoundCommonLib.Services.GaugeAggregator.Observe*
+  name: Observe
+  href: api/SharpHoundCommonLib.Services.GaugeAggregator.html#SharpHoundCommonLib_Services_GaugeAggregator_Observe_
+  commentId: Overload:SharpHoundCommonLib.Services.GaugeAggregator.Observe
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Services.GaugeAggregator.Observe
+  nameWithType: GaugeAggregator.Observe
+- uid: SharpHoundCommonLib.Services.GaugeAggregator.Snapshot
+  name: Snapshot()
+  href: api/SharpHoundCommonLib.Services.GaugeAggregator.html#SharpHoundCommonLib_Services_GaugeAggregator_Snapshot
+  commentId: M:SharpHoundCommonLib.Services.GaugeAggregator.Snapshot
+  fullName: SharpHoundCommonLib.Services.GaugeAggregator.Snapshot()
+  nameWithType: GaugeAggregator.Snapshot()
+- uid: SharpHoundCommonLib.Services.GaugeAggregator.Snapshot*
+  name: Snapshot
+  href: api/SharpHoundCommonLib.Services.GaugeAggregator.html#SharpHoundCommonLib_Services_GaugeAggregator_Snapshot_
+  commentId: Overload:SharpHoundCommonLib.Services.GaugeAggregator.Snapshot
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Services.GaugeAggregator.Snapshot
+  nameWithType: GaugeAggregator.Snapshot
+- uid: SharpHoundCommonLib.Services.MetricAggregator
+  name: MetricAggregator
+  href: api/SharpHoundCommonLib.Services.MetricAggregator.html
+  commentId: T:SharpHoundCommonLib.Services.MetricAggregator
+  fullName: SharpHoundCommonLib.Services.MetricAggregator
+  nameWithType: MetricAggregator
+- uid: SharpHoundCommonLib.Services.MetricAggregator.Observe(System.Double)
+  name: Observe(Double)
+  href: api/SharpHoundCommonLib.Services.MetricAggregator.html#SharpHoundCommonLib_Services_MetricAggregator_Observe_System_Double_
+  commentId: M:SharpHoundCommonLib.Services.MetricAggregator.Observe(System.Double)
+  fullName: SharpHoundCommonLib.Services.MetricAggregator.Observe(System.Double)
+  nameWithType: MetricAggregator.Observe(Double)
+- uid: SharpHoundCommonLib.Services.MetricAggregator.Observe*
+  name: Observe
+  href: api/SharpHoundCommonLib.Services.MetricAggregator.html#SharpHoundCommonLib_Services_MetricAggregator_Observe_
+  commentId: Overload:SharpHoundCommonLib.Services.MetricAggregator.Observe
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Services.MetricAggregator.Observe
+  nameWithType: MetricAggregator.Observe
+- uid: SharpHoundCommonLib.Services.MetricAggregator`1
+  name: MetricAggregator<T>
+  href: api/SharpHoundCommonLib.Services.MetricAggregator-1.html
+  commentId: T:SharpHoundCommonLib.Services.MetricAggregator`1
+  name.vb: MetricAggregator(Of T)
+  fullName: SharpHoundCommonLib.Services.MetricAggregator<T>
+  fullName.vb: SharpHoundCommonLib.Services.MetricAggregator(Of T)
+  nameWithType: MetricAggregator<T>
+  nameWithType.vb: MetricAggregator(Of T)
+- uid: SharpHoundCommonLib.Services.MetricAggregator`1.Snapshot
+  name: Snapshot()
+  href: api/SharpHoundCommonLib.Services.MetricAggregator-1.html#SharpHoundCommonLib_Services_MetricAggregator_1_Snapshot
+  commentId: M:SharpHoundCommonLib.Services.MetricAggregator`1.Snapshot
+  fullName: SharpHoundCommonLib.Services.MetricAggregator<T>.Snapshot()
+  fullName.vb: SharpHoundCommonLib.Services.MetricAggregator(Of T).Snapshot()
+  nameWithType: MetricAggregator<T>.Snapshot()
+  nameWithType.vb: MetricAggregator(Of T).Snapshot()
+- uid: SharpHoundCommonLib.Services.MetricAggregator`1.Snapshot*
+  name: Snapshot
+  href: api/SharpHoundCommonLib.Services.MetricAggregator-1.html#SharpHoundCommonLib_Services_MetricAggregator_1_Snapshot_
+  commentId: Overload:SharpHoundCommonLib.Services.MetricAggregator`1.Snapshot
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Services.MetricAggregator<T>.Snapshot
+  fullName.vb: SharpHoundCommonLib.Services.MetricAggregator(Of T).Snapshot
+  nameWithType: MetricAggregator<T>.Snapshot
+  nameWithType.vb: MetricAggregator(Of T).Snapshot
+- uid: SharpHoundCommonLib.Services.MetricAggregatorExtensions
+  name: MetricAggregatorExtensions
+  href: api/SharpHoundCommonLib.Services.MetricAggregatorExtensions.html
+  commentId: T:SharpHoundCommonLib.Services.MetricAggregatorExtensions
+  fullName: SharpHoundCommonLib.Services.MetricAggregatorExtensions
+  nameWithType: MetricAggregatorExtensions
+- uid: SharpHoundCommonLib.Services.MetricAggregatorExtensions.Create(MetricDefinition)
+  name: Create(MetricDefinition)
+  href: api/SharpHoundCommonLib.Services.MetricAggregatorExtensions.html#SharpHoundCommonLib_Services_MetricAggregatorExtensions_Create_MetricDefinition_
+  commentId: M:SharpHoundCommonLib.Services.MetricAggregatorExtensions.Create(MetricDefinition)
+  fullName: SharpHoundCommonLib.Services.MetricAggregatorExtensions.Create(MetricDefinition)
+  nameWithType: MetricAggregatorExtensions.Create(MetricDefinition)
+- uid: SharpHoundCommonLib.Services.MetricAggregatorExtensions.Create*
+  name: Create
+  href: api/SharpHoundCommonLib.Services.MetricAggregatorExtensions.html#SharpHoundCommonLib_Services_MetricAggregatorExtensions_Create_
+  commentId: Overload:SharpHoundCommonLib.Services.MetricAggregatorExtensions.Create
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Services.MetricAggregatorExtensions.Create
+  nameWithType: MetricAggregatorExtensions.Create
+- uid: SharpHoundCommonLib.Services.MetricFactory
+  name: MetricFactory
+  href: api/SharpHoundCommonLib.Services.MetricFactory.html
+  commentId: T:SharpHoundCommonLib.Services.MetricFactory
+  fullName: SharpHoundCommonLib.Services.MetricFactory
+  nameWithType: MetricFactory
+- uid: SharpHoundCommonLib.Services.MetricRegistry
+  name: MetricRegistry
+  href: api/SharpHoundCommonLib.Services.MetricRegistry.html
+  commentId: T:SharpHoundCommonLib.Services.MetricRegistry
+  fullName: SharpHoundCommonLib.Services.MetricRegistry
+  nameWithType: MetricRegistry
+- uid: SharpHoundCommonLib.Services.MetricRegistry.Definitions
+  name: Definitions
+  href: api/SharpHoundCommonLib.Services.MetricRegistry.html#SharpHoundCommonLib_Services_MetricRegistry_Definitions
+  commentId: P:SharpHoundCommonLib.Services.MetricRegistry.Definitions
+  fullName: SharpHoundCommonLib.Services.MetricRegistry.Definitions
+  nameWithType: MetricRegistry.Definitions
+- uid: SharpHoundCommonLib.Services.MetricRegistry.Definitions*
+  name: Definitions
+  href: api/SharpHoundCommonLib.Services.MetricRegistry.html#SharpHoundCommonLib_Services_MetricRegistry_Definitions_
+  commentId: Overload:SharpHoundCommonLib.Services.MetricRegistry.Definitions
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Services.MetricRegistry.Definitions
+  nameWithType: MetricRegistry.Definitions
+- uid: SharpHoundCommonLib.Services.MetricRegistry.Seal
+  name: Seal()
+  href: api/SharpHoundCommonLib.Services.MetricRegistry.html#SharpHoundCommonLib_Services_MetricRegistry_Seal
+  commentId: M:SharpHoundCommonLib.Services.MetricRegistry.Seal
+  fullName: SharpHoundCommonLib.Services.MetricRegistry.Seal()
+  nameWithType: MetricRegistry.Seal()
+- uid: SharpHoundCommonLib.Services.MetricRegistry.Seal*
+  name: Seal
+  href: api/SharpHoundCommonLib.Services.MetricRegistry.html#SharpHoundCommonLib_Services_MetricRegistry_Seal_
+  commentId: Overload:SharpHoundCommonLib.Services.MetricRegistry.Seal
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Services.MetricRegistry.Seal
+  nameWithType: MetricRegistry.Seal
+- uid: SharpHoundCommonLib.Services.MetricRegistry.TryRegister(MetricDefinition,System.Int32@)
+  name: TryRegister(MetricDefinition, out Int32)
+  href: api/SharpHoundCommonLib.Services.MetricRegistry.html#SharpHoundCommonLib_Services_MetricRegistry_TryRegister_MetricDefinition_System_Int32__
+  commentId: M:SharpHoundCommonLib.Services.MetricRegistry.TryRegister(MetricDefinition,System.Int32@)
+  name.vb: TryRegister(MetricDefinition, ByRef Int32)
+  fullName: SharpHoundCommonLib.Services.MetricRegistry.TryRegister(MetricDefinition, out System.Int32)
+  fullName.vb: SharpHoundCommonLib.Services.MetricRegistry.TryRegister(MetricDefinition, ByRef System.Int32)
+  nameWithType: MetricRegistry.TryRegister(MetricDefinition, out Int32)
+  nameWithType.vb: MetricRegistry.TryRegister(MetricDefinition, ByRef Int32)
+- uid: SharpHoundCommonLib.Services.MetricRegistry.TryRegister*
+  name: TryRegister
+  href: api/SharpHoundCommonLib.Services.MetricRegistry.html#SharpHoundCommonLib_Services_MetricRegistry_TryRegister_
+  commentId: Overload:SharpHoundCommonLib.Services.MetricRegistry.TryRegister
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Services.MetricRegistry.TryRegister
+  nameWithType: MetricRegistry.TryRegister
+- uid: SharpHoundCommonLib.Services.MetricRouter
+  name: MetricRouter
+  href: api/SharpHoundCommonLib.Services.MetricRouter.html
+  commentId: T:SharpHoundCommonLib.Services.MetricRouter
+  fullName: SharpHoundCommonLib.Services.MetricRouter
+  nameWithType: MetricRouter
+- uid: SharpHoundCommonLib.Services.MetricsFlushTimer
+  name: MetricsFlushTimer
+  href: api/SharpHoundCommonLib.Services.MetricsFlushTimer.html
+  commentId: T:SharpHoundCommonLib.Services.MetricsFlushTimer
+  fullName: SharpHoundCommonLib.Services.MetricsFlushTimer
+  nameWithType: MetricsFlushTimer
+- uid: SharpHoundCommonLib.Services.MetricsFlushTimer.#ctor(System.Action,System.TimeSpan)
+  name: MetricsFlushTimer(Action, TimeSpan)
+  href: api/SharpHoundCommonLib.Services.MetricsFlushTimer.html#SharpHoundCommonLib_Services_MetricsFlushTimer__ctor_System_Action_System_TimeSpan_
+  commentId: M:SharpHoundCommonLib.Services.MetricsFlushTimer.#ctor(System.Action,System.TimeSpan)
+  fullName: SharpHoundCommonLib.Services.MetricsFlushTimer.MetricsFlushTimer(System.Action, System.TimeSpan)
+  nameWithType: MetricsFlushTimer.MetricsFlushTimer(Action, TimeSpan)
+- uid: SharpHoundCommonLib.Services.MetricsFlushTimer.#ctor*
+  name: MetricsFlushTimer
+  href: api/SharpHoundCommonLib.Services.MetricsFlushTimer.html#SharpHoundCommonLib_Services_MetricsFlushTimer__ctor_
+  commentId: Overload:SharpHoundCommonLib.Services.MetricsFlushTimer.#ctor
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Services.MetricsFlushTimer.MetricsFlushTimer
+  nameWithType: MetricsFlushTimer.MetricsFlushTimer
+- uid: SharpHoundCommonLib.Services.MetricsFlushTimer.Dispose
+  name: Dispose()
+  href: api/SharpHoundCommonLib.Services.MetricsFlushTimer.html#SharpHoundCommonLib_Services_MetricsFlushTimer_Dispose
+  commentId: M:SharpHoundCommonLib.Services.MetricsFlushTimer.Dispose
+  fullName: SharpHoundCommonLib.Services.MetricsFlushTimer.Dispose()
+  nameWithType: MetricsFlushTimer.Dispose()
+- uid: SharpHoundCommonLib.Services.MetricsFlushTimer.Dispose*
+  name: Dispose
+  href: api/SharpHoundCommonLib.Services.MetricsFlushTimer.html#SharpHoundCommonLib_Services_MetricsFlushTimer_Dispose_
+  commentId: Overload:SharpHoundCommonLib.Services.MetricsFlushTimer.Dispose
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Services.MetricsFlushTimer.Dispose
+  nameWithType: MetricsFlushTimer.Dispose
+- uid: SharpHoundCommonLib.Services.MetricWriter
+  name: MetricWriter
+  href: api/SharpHoundCommonLib.Services.MetricWriter.html
+  commentId: T:SharpHoundCommonLib.Services.MetricWriter
+  fullName: SharpHoundCommonLib.Services.MetricWriter
+  nameWithType: MetricWriter
 - uid: SharpHoundCommonLib.SHRegistryKey
   name: SHRegistryKey
   href: api/SharpHoundCommonLib.SHRegistryKey.html
@@ -14411,6 +14899,168 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.SMB.SmbScanner.ScanHost
   nameWithType: SmbScanner.ScanHost
+- uid: SharpHoundCommonLib.Static
+  name: SharpHoundCommonLib.Static
+  href: api/SharpHoundCommonLib.Static.html
+  commentId: N:SharpHoundCommonLib.Static
+  fullName: SharpHoundCommonLib.Static
+  nameWithType: SharpHoundCommonLib.Static
+- uid: SharpHoundCommonLib.Static.AdaptiveTimeoutDefinitions
+  name: AdaptiveTimeoutDefinitions
+  href: api/SharpHoundCommonLib.Static.AdaptiveTimeoutDefinitions.html
+  commentId: T:SharpHoundCommonLib.Static.AdaptiveTimeoutDefinitions
+  fullName: SharpHoundCommonLib.Static.AdaptiveTimeoutDefinitions
+  nameWithType: AdaptiveTimeoutDefinitions
+- uid: SharpHoundCommonLib.Static.AdaptiveTimeoutDefinitions.TimeoutsTotal
+  name: TimeoutsTotal
+  href: api/SharpHoundCommonLib.Static.AdaptiveTimeoutDefinitions.html#SharpHoundCommonLib_Static_AdaptiveTimeoutDefinitions_TimeoutsTotal
+  commentId: F:SharpHoundCommonLib.Static.AdaptiveTimeoutDefinitions.TimeoutsTotal
+  fullName: SharpHoundCommonLib.Static.AdaptiveTimeoutDefinitions.TimeoutsTotal
+  nameWithType: AdaptiveTimeoutDefinitions.TimeoutsTotal
+- uid: SharpHoundCommonLib.Static.DefaultMetricRegistry
+  name: DefaultMetricRegistry
+  href: api/SharpHoundCommonLib.Static.DefaultMetricRegistry.html
+  commentId: T:SharpHoundCommonLib.Static.DefaultMetricRegistry
+  fullName: SharpHoundCommonLib.Static.DefaultMetricRegistry
+  nameWithType: DefaultMetricRegistry
+- uid: SharpHoundCommonLib.Static.DefaultMetricRegistry.RegisterDefaultMetrics(SharpHoundCommonLib.Interfaces.IMetricRegistry)
+  name: RegisterDefaultMetrics(IMetricRegistry)
+  href: api/SharpHoundCommonLib.Static.DefaultMetricRegistry.html#SharpHoundCommonLib_Static_DefaultMetricRegistry_RegisterDefaultMetrics_SharpHoundCommonLib_Interfaces_IMetricRegistry_
+  commentId: M:SharpHoundCommonLib.Static.DefaultMetricRegistry.RegisterDefaultMetrics(SharpHoundCommonLib.Interfaces.IMetricRegistry)
+  fullName: SharpHoundCommonLib.Static.DefaultMetricRegistry.RegisterDefaultMetrics(SharpHoundCommonLib.Interfaces.IMetricRegistry)
+  nameWithType: DefaultMetricRegistry.RegisterDefaultMetrics(IMetricRegistry)
+- uid: SharpHoundCommonLib.Static.DefaultMetricRegistry.RegisterDefaultMetrics*
+  name: RegisterDefaultMetrics
+  href: api/SharpHoundCommonLib.Static.DefaultMetricRegistry.html#SharpHoundCommonLib_Static_DefaultMetricRegistry_RegisterDefaultMetrics_
+  commentId: Overload:SharpHoundCommonLib.Static.DefaultMetricRegistry.RegisterDefaultMetrics
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Static.DefaultMetricRegistry.RegisterDefaultMetrics
+  nameWithType: DefaultMetricRegistry.RegisterDefaultMetrics
+- uid: SharpHoundCommonLib.Static.LdapMetricDefinitions
+  name: LdapMetricDefinitions
+  href: api/SharpHoundCommonLib.Static.LdapMetricDefinitions.html
+  commentId: T:SharpHoundCommonLib.Static.LdapMetricDefinitions
+  fullName: SharpHoundCommonLib.Static.LdapMetricDefinitions
+  nameWithType: LdapMetricDefinitions
+- uid: SharpHoundCommonLib.Static.LdapMetricDefinitions.ConcurrentRequests
+  name: ConcurrentRequests
+  href: api/SharpHoundCommonLib.Static.LdapMetricDefinitions.html#SharpHoundCommonLib_Static_LdapMetricDefinitions_ConcurrentRequests
+  commentId: F:SharpHoundCommonLib.Static.LdapMetricDefinitions.ConcurrentRequests
+  fullName: SharpHoundCommonLib.Static.LdapMetricDefinitions.ConcurrentRequests
+  nameWithType: LdapMetricDefinitions.ConcurrentRequests
+- uid: SharpHoundCommonLib.Static.LdapMetricDefinitions.FailedRequests
+  name: FailedRequests
+  href: api/SharpHoundCommonLib.Static.LdapMetricDefinitions.html#SharpHoundCommonLib_Static_LdapMetricDefinitions_FailedRequests
+  commentId: F:SharpHoundCommonLib.Static.LdapMetricDefinitions.FailedRequests
+  fullName: SharpHoundCommonLib.Static.LdapMetricDefinitions.FailedRequests
+  nameWithType: LdapMetricDefinitions.FailedRequests
+- uid: SharpHoundCommonLib.Static.LdapMetricDefinitions.RequestLatency
+  name: RequestLatency
+  href: api/SharpHoundCommonLib.Static.LdapMetricDefinitions.html#SharpHoundCommonLib_Static_LdapMetricDefinitions_RequestLatency
+  commentId: F:SharpHoundCommonLib.Static.LdapMetricDefinitions.RequestLatency
+  fullName: SharpHoundCommonLib.Static.LdapMetricDefinitions.RequestLatency
+  nameWithType: LdapMetricDefinitions.RequestLatency
+- uid: SharpHoundCommonLib.Static.LdapMetricDefinitions.RequestsTotal
+  name: RequestsTotal
+  href: api/SharpHoundCommonLib.Static.LdapMetricDefinitions.html#SharpHoundCommonLib_Static_LdapMetricDefinitions_RequestsTotal
+  commentId: F:SharpHoundCommonLib.Static.LdapMetricDefinitions.RequestsTotal
+  fullName: SharpHoundCommonLib.Static.LdapMetricDefinitions.RequestsTotal
+  nameWithType: LdapMetricDefinitions.RequestsTotal
+- uid: SharpHoundCommonLib.Static.LdapMetricDefinitions.UnresolvablePrincipals
+  name: UnresolvablePrincipals
+  href: api/SharpHoundCommonLib.Static.LdapMetricDefinitions.html#SharpHoundCommonLib_Static_LdapMetricDefinitions_UnresolvablePrincipals
+  commentId: F:SharpHoundCommonLib.Static.LdapMetricDefinitions.UnresolvablePrincipals
+  fullName: SharpHoundCommonLib.Static.LdapMetricDefinitions.UnresolvablePrincipals
+  nameWithType: LdapMetricDefinitions.UnresolvablePrincipals
+- uid: SharpHoundCommonLib.Static.LdapMetrics
+  name: LdapMetrics
+  href: api/SharpHoundCommonLib.Static.LdapMetrics.html
+  commentId: T:SharpHoundCommonLib.Static.LdapMetrics
+  fullName: SharpHoundCommonLib.Static.LdapMetrics
+  nameWithType: LdapMetrics
+- uid: SharpHoundCommonLib.Static.LdapMetrics.DecrementInFlight
+  name: DecrementInFlight()
+  href: api/SharpHoundCommonLib.Static.LdapMetrics.html#SharpHoundCommonLib_Static_LdapMetrics_DecrementInFlight
+  commentId: M:SharpHoundCommonLib.Static.LdapMetrics.DecrementInFlight
+  fullName: SharpHoundCommonLib.Static.LdapMetrics.DecrementInFlight()
+  nameWithType: LdapMetrics.DecrementInFlight()
+- uid: SharpHoundCommonLib.Static.LdapMetrics.DecrementInFlight*
+  name: DecrementInFlight
+  href: api/SharpHoundCommonLib.Static.LdapMetrics.html#SharpHoundCommonLib_Static_LdapMetrics_DecrementInFlight_
+  commentId: Overload:SharpHoundCommonLib.Static.LdapMetrics.DecrementInFlight
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Static.LdapMetrics.DecrementInFlight
+  nameWithType: LdapMetrics.DecrementInFlight
+- uid: SharpHoundCommonLib.Static.LdapMetrics.IncrementInFlight
+  name: IncrementInFlight()
+  href: api/SharpHoundCommonLib.Static.LdapMetrics.html#SharpHoundCommonLib_Static_LdapMetrics_IncrementInFlight
+  commentId: M:SharpHoundCommonLib.Static.LdapMetrics.IncrementInFlight
+  fullName: SharpHoundCommonLib.Static.LdapMetrics.IncrementInFlight()
+  nameWithType: LdapMetrics.IncrementInFlight()
+- uid: SharpHoundCommonLib.Static.LdapMetrics.IncrementInFlight*
+  name: IncrementInFlight
+  href: api/SharpHoundCommonLib.Static.LdapMetrics.html#SharpHoundCommonLib_Static_LdapMetrics_IncrementInFlight_
+  commentId: Overload:SharpHoundCommonLib.Static.LdapMetrics.IncrementInFlight
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Static.LdapMetrics.IncrementInFlight
+  nameWithType: LdapMetrics.IncrementInFlight
+- uid: SharpHoundCommonLib.Static.LdapMetrics.InFlightRequest
+  name: InFlightRequest
+  href: api/SharpHoundCommonLib.Static.LdapMetrics.html#SharpHoundCommonLib_Static_LdapMetrics_InFlightRequest
+  commentId: P:SharpHoundCommonLib.Static.LdapMetrics.InFlightRequest
+  fullName: SharpHoundCommonLib.Static.LdapMetrics.InFlightRequest
+  nameWithType: LdapMetrics.InFlightRequest
+- uid: SharpHoundCommonLib.Static.LdapMetrics.InFlightRequest*
+  name: InFlightRequest
+  href: api/SharpHoundCommonLib.Static.LdapMetrics.html#SharpHoundCommonLib_Static_LdapMetrics_InFlightRequest_
+  commentId: Overload:SharpHoundCommonLib.Static.LdapMetrics.InFlightRequest
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Static.LdapMetrics.InFlightRequest
+  nameWithType: LdapMetrics.InFlightRequest
+- uid: SharpHoundCommonLib.Static.LdapMetrics.ResetInFlight
+  name: ResetInFlight()
+  href: api/SharpHoundCommonLib.Static.LdapMetrics.html#SharpHoundCommonLib_Static_LdapMetrics_ResetInFlight
+  commentId: M:SharpHoundCommonLib.Static.LdapMetrics.ResetInFlight
+  fullName: SharpHoundCommonLib.Static.LdapMetrics.ResetInFlight()
+  nameWithType: LdapMetrics.ResetInFlight()
+- uid: SharpHoundCommonLib.Static.LdapMetrics.ResetInFlight*
+  name: ResetInFlight
+  href: api/SharpHoundCommonLib.Static.LdapMetrics.html#SharpHoundCommonLib_Static_LdapMetrics_ResetInFlight_
+  commentId: Overload:SharpHoundCommonLib.Static.LdapMetrics.ResetInFlight
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Static.LdapMetrics.ResetInFlight
+  nameWithType: LdapMetrics.ResetInFlight
+- uid: SharpHoundCommonLib.Static.MetricId
+  name: MetricId
+  href: api/SharpHoundCommonLib.Static.MetricId.html
+  commentId: T:SharpHoundCommonLib.Static.MetricId
+  fullName: SharpHoundCommonLib.Static.MetricId
+  nameWithType: MetricId
+- uid: SharpHoundCommonLib.Static.MetricId.InvalidId
+  name: InvalidId
+  href: api/SharpHoundCommonLib.Static.MetricId.html#SharpHoundCommonLib_Static_MetricId_InvalidId
+  commentId: F:SharpHoundCommonLib.Static.MetricId.InvalidId
+  fullName: SharpHoundCommonLib.Static.MetricId.InvalidId
+  nameWithType: MetricId.InvalidId
+- uid: SharpHoundCommonLib.Static.Metrics
+  name: Metrics
+  href: api/SharpHoundCommonLib.Static.Metrics.html
+  commentId: T:SharpHoundCommonLib.Static.Metrics
+  fullName: SharpHoundCommonLib.Static.Metrics
+  nameWithType: Metrics
+- uid: SharpHoundCommonLib.Static.Metrics.Factory
+  name: Factory
+  href: api/SharpHoundCommonLib.Static.Metrics.html#SharpHoundCommonLib_Static_Metrics_Factory
+  commentId: P:SharpHoundCommonLib.Static.Metrics.Factory
+  fullName: SharpHoundCommonLib.Static.Metrics.Factory
+  nameWithType: Metrics.Factory
+- uid: SharpHoundCommonLib.Static.Metrics.Factory*
+  name: Factory
+  href: api/SharpHoundCommonLib.Static.Metrics.html#SharpHoundCommonLib_Static_Metrics_Factory_
+  commentId: Overload:SharpHoundCommonLib.Static.Metrics.Factory
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Static.Metrics.Factory
+  nameWithType: Metrics.Factory
 - uid: SharpHoundCommonLib.ThirdParty.PSOpenAD
   name: SharpHoundCommonLib.ThirdParty.PSOpenAD
   href: api/SharpHoundCommonLib.ThirdParty.PSOpenAD.html
