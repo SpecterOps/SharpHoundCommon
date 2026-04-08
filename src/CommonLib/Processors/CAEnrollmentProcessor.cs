@@ -19,8 +19,9 @@ namespace SharpHoundCommonLib.Processors {
         private readonly string _caName;
         private readonly ILogger _logger;
 
-        private const SslProtocols CaEnrollmentSslProtocols = 
-            SslProtocols.Ssl3 | SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Tls12;
+        // TLS1.3 is not available in .Net Framework 4.7.2, but the enum can still be assigned.
+        private const SslProtocols CaEnrollmentSslProtocols =
+            SslProtocols.Ssl3 | SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Tls12 | (SslProtocols)12288;
 
         public CAEnrollmentProcessor(string caDnsHostname, string caName, ILogger log = null) {
             _caDnsHostname = caDnsHostname;
@@ -46,7 +47,7 @@ namespace SharpHoundCommonLib.Processors {
             } catch (Exception ex) {
                 _logger.LogError(ex, "An error occurred while scanning enrollment endpoints");
             }
-            
+
             endpoints = TagEndpoints(endpoints).ToList();
 
             return endpoints;
@@ -57,7 +58,7 @@ namespace SharpHoundCommonLib.Processors {
             foreach (var endpoint in tagEndpoints) {
                 if (!endpoint.Collected)
                     continue;
-                
+
                 var enrollmentEndpoint = endpoint.Result;
                 if (enrollmentEndpoint.Url.Scheme != Uri.UriSchemeHttps) {
                     switch (enrollmentEndpoint.Status) {

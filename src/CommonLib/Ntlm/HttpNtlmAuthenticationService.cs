@@ -22,7 +22,7 @@ public class HttpNtlmAuthenticationService {
 
     public HttpNtlmAuthenticationService(INtlmHttpClientFactory ntlmHttpClientFactory, ILogger logger = null) {
         _logger = logger ?? Logging.LogProvider.CreateLogger(nameof(HttpNtlmAuthenticationService));
-        _ntlmHttpClientFactory = ntlmHttpClientFactory;
+        _ntlmHttpClientFactory = ntlmHttpClientFactory ?? throw new ArgumentNullException(nameof(ntlmHttpClientFactory));
         _getSupportedNTLMAuthSchemesAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(GetSupportedNtlmAuthSchemesAsync)));
         _ntlmAuthAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(NtlmAuthenticationHandler.PerformNtlmAuthenticationAsync)));
         _authWithChannelBindingAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(AuthWithBadChannelBindingsAsync)));
