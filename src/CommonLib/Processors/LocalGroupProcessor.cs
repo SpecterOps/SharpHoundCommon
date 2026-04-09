@@ -225,7 +225,7 @@ namespace SharpHoundCommonLib.Processors
                         }
                         
                         //If we get a local well known principal, we need to convert it using the computer's objectid
-                        if (ConvertLocalWellKnownPrincipal(securityIdentifier, computerObjectId, computerDomain, out var principal))
+                        if (_utils.ConvertLocalWellKnownPrincipal(securityIdentifier, computerObjectId, computerDomain, out var principal))
                         {
                             //If the principal is null, it means we hit a weird edge case, but this is a local well known principal 
                             if (principal != null)
@@ -313,34 +313,6 @@ namespace SharpHoundCommonLib.Processors
             if (_utils.GetWellKnownPrincipal(sid, computerDomain, out var wellKnown))
                 return wellKnown;
             return _utils.ResolveIDAndType(sid, computerDomain);
-        }
-
-        private bool ConvertLocalWellKnownPrincipal(SecurityIdentifier sid, string computerObjectId, string computerDomain, out TypedPrincipal principal)
-        {
-            if (WellKnownPrincipal.GetWellKnownPrincipal(sid.Value, out var common))
-            {
-                if (sid.Value is "S-1-1-0" or "S-1-5-11")
-                {
-                    _utils.GetWellKnownPrincipal(sid.Value, computerDomain, out principal);
-                    return true;
-                }
-
-                principal = new TypedPrincipal
-                {
-                    ObjectIdentifier = $"{computerObjectId}-{sid.Rid()}",
-                    ObjectType = common.ObjectType switch
-                    {
-                        Label.User => Label.LocalUser,
-                        Label.Group => Label.LocalGroup,
-                        _ => common.ObjectType
-                    }
-                };
-
-                return true;
-            }
-
-            principal = null;
-            return false;
         }
 
         private NamedPrincipal ResolveGroupName(string baseName, string computerName, string computerDomainSid,

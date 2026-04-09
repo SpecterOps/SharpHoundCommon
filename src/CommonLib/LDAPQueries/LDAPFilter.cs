@@ -202,6 +202,17 @@ namespace SharpHoundCommonLib.LDAPQueries
         }
 
         /// <summary>
+        ///     Add a filter that will include Issuance Policies
+        /// </summary>
+        /// <param name="conditions"></param>
+        /// <returns></returns>
+        public LDAPFilter AddIssuancePolicies(params string[] conditions)
+        {
+            _filterParts.Add(BuildString("(objectClass=msPKI-Enterprise-Oid)", conditions));
+            return this;
+        }
+
+        /// <summary>
         ///     Add a filter that will include schema items
         /// </summary>
         /// <param name="conditions"></param>

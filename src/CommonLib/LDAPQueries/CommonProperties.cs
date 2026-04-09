@@ -83,8 +83,8 @@
             LDAPProperties.CertificateTemplates, LDAPProperties.Flags, LDAPProperties.DNSHostName, LDAPProperties.CACertificate, LDAPProperties.PKINameFlag,
             LDAPProperties.PKIEnrollmentFlag, LDAPProperties.DisplayName, LDAPProperties.Name, LDAPProperties.TemplateSchemaVersion, LDAPProperties.CertTemplateOID,
             LDAPProperties.PKIOverlappedPeriod, LDAPProperties.PKIExpirationPeriod, LDAPProperties.ExtendedKeyUsage, LDAPProperties.NumSignaturesRequired,
-            LDAPProperties.CertificateApplicationPolicy, LDAPProperties.IssuancePolicies, LDAPProperties.CrossCertificatePair,
-            LDAPProperties.ApplicationPolicies, LDAPProperties.PKIPrivateKeyFlag
+            LDAPProperties.CertificateApplicationPolicy, LDAPProperties.CertificatePolicy, LDAPProperties.IssuancePolicies, LDAPProperties.CrossCertificatePair,
+            LDAPProperties.ApplicationPolicies, LDAPProperties.PKIPrivateKeyFlag, LDAPProperties.OIDGroupLink
         };
     }
 }

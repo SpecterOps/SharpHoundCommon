@@ -23,7 +23,7 @@ namespace CommonLibTest
                 "OU=Test\\, OU,OU=Test,DC=Fabrikam,DC=COM");
             Assert.Equal("OU=Test,DC=Fabrikam,DC=COM", result);
         }
-        
+
         [Fact]
         public void SplitGPLinkProperty_ValidPropFilterEnabled_ExpectedResult()
         {
@@ -166,7 +166,7 @@ namespace CommonLibTest
             var actual = SharpHoundCommonLib.Helpers.StripServicePrincipalName(testString);
             Assert.Equal(expected, actual);
         }
-        
+
         [Fact]
         public void StripServicePrincipalName_EmptyHost_Valid()
         {
@@ -202,7 +202,7 @@ namespace CommonLibTest
             Assert.Equal(-1, result);
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public void ConvertFileTimeToUnixEpoch_WrongFormat_FortmatException()
         {
             Exception ex =
@@ -229,7 +229,7 @@ namespace CommonLibTest
             Assert.Equal(d.ToUniversalTime().Date, testDate);
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public void ConvertTimestampToUnixEpoch_InvalidTimestamp_FormatException()
         {
             Exception ex = Assert.Throws<FormatException>(() =>

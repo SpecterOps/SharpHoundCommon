@@ -14,10 +14,10 @@
         Container,
         Configuration,
         CertTemplate,
-        CertAuthority,
         RootCA,
         AIACA,
         EnterpriseCA,
-        NTAuthStore
+        NTAuthStore,
+        IssuancePolicy
     }
 }

@@ -21,6 +21,7 @@
         public const string AddKeyCredentialLink = "AddKeyCredentialLink";
         public const string SQLAdmin = "SQLAdmin";
         public const string WriteAccountRestrictions = "WriteAccountRestrictions";
+        public const string WriteGPLink = "WriteGPLink";
 
         //CertAbuse edges
         public const string WritePKIEnrollmentFlag = "WritePKIEnrollmentFlag";

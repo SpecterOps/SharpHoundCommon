@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.DirectoryServices.Protocols;
 using Microsoft.Extensions.Logging;
+using SharpHoundCommonLib.Enums;
 using SharpHoundCommonLib.LDAPQueries;
 using SharpHoundCommonLib.OutputTypes;
 
@@ -47,6 +48,13 @@ namespace SharpHoundCommonLib.Processors
         public TypedPrincipal GetContainingObject(string distinguishedName)
         {
             var containerDn = Helpers.RemoveDistinguishedNamePrefix(distinguishedName);
+
+            if (containerDn.StartsWith("CN=BUILTIN", StringComparison.OrdinalIgnoreCase))
+            {
+                var domain = Helpers.DistinguishedNameToDomain(distinguishedName);
+                var domainSid = _utils.GetSidFromDomainName(domain);
+                return new TypedPrincipal(domainSid, Label.Domain);
+            }
 
             if (string.IsNullOrEmpty(containerDn))
                 return null;

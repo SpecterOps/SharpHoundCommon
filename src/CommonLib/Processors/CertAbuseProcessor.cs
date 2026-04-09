@@ -170,14 +170,23 @@ namespace SharpHoundCommonLib.Processors
             return ret;
         }
         
-        public IEnumerable<TypedPrincipal> ProcessCertTemplates(string[] templates, string domainName)
+        public (IEnumerable<TypedPrincipal> resolvedTemplates, IEnumerable<String> unresolvedTemplates) ProcessCertTemplates(string[] templates, string domainName)
         {
+            var resolvedTemplates = new List<TypedPrincipal>();
+            var unresolvedTemplates = new List<String>();
+
             var certTemplatesLocation = _utils.BuildLdapPath(DirectoryPaths.CertTemplateLocation, domainName);
             foreach (var templateCN in templates)
             {
                 var res = _utils.ResolveCertTemplateByProperty(Encoder.LdapFilterEncode(templateCN), LDAPProperties.CanonicalName, certTemplatesLocation, domainName);
-                yield return res;
+                if (res != null) {
+                    resolvedTemplates.Add(res);
+                } else {
+                    unresolvedTemplates.Add(templateCN);
+                }
             }
+
+            return (resolvedTemplates: resolvedTemplates, unresolvedTemplates: unresolvedTemplates);
         }
 
         /// <summary>
@@ -246,6 +255,40 @@ namespace SharpHoundCommonLib.Processors
             return ret;
         }
 
+        /// <summary>
+        /// This function checks a registry setting on the target host for the specified CA to see if role seperation is enabled.
+        /// If enabled, you cannot perform any CA actions if you have both ManageCA and ManageCertificates permissions. Only CA admins can modify the setting.
+        /// </summary>
+        /// <remarks>https://www.itprotoday.com/security/q-how-can-i-make-sure-given-windows-account-assigned-only-single-certification-authority-ca</remarks>
+        /// <param name="target"></param>
+        /// <param name="caName"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        [ExcludeFromCodeCoverage]
+        public BoolRegistryAPIResult RoleSeparationEnabled(string target, string caName)
+        {
+            var ret = new BoolRegistryAPIResult();
+            var regSubKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{caName}";
+            const string regValue = "RoleSeparationEnabled";
+            var data = Helpers.GetRegistryKeyData(target, regSubKey, regValue, _log);
+
+            ret.Collected = data.Collected;
+            if (!data.Collected)
+            {
+                ret.FailureReason = data.FailureReason;
+                return ret;
+            }
+
+            if (data.Value == null)
+            {
+                return ret;
+            }
+
+            ret.Value = (int)data.Value == 1;
+
+            return ret;
+        }
+
         public TypedPrincipal GetRegistryPrincipal(SecurityIdentifier sid, string computerDomain, string computerName, bool isDomainController, string computerObjectId, SecurityIdentifier machineSid)
         {
             _log.LogTrace("Got principal with sid {SID} on computer {ComputerName}", sid.Value, computerName);
@@ -256,13 +299,13 @@ namespace SharpHoundCommonLib.Processors
 
             if (isDomainController)
             {
-                var result = ResolveDomainControllerPrincipal(sid.Value, computerDomain);
+                var result = _utils.ResolveIDAndType(sid.Value, computerDomain);
                 if (result != null)
                     return result;
             }
 
             //If we get a local well known principal, we need to convert it using the computer's domain sid
-            if (ConvertLocalWellKnownPrincipal(sid, computerObjectId, computerDomain, out var principal))
+            if (_utils.ConvertLocalWellKnownPrincipal(sid, computerObjectId, computerDomain, out var principal))
             {
                 _log.LogTrace("Got Well Known Principal {SID} on computer {Computer} with type {Type}", principal.ObjectIdentifier, computerName, principal.ObjectType);
                 return principal;
@@ -339,46 +382,7 @@ namespace SharpHoundCommonLib.Processors
         }
 
         // TODO: Copied from URA processor. Find a way to have this function in a shared spot
-        private TypedPrincipal ResolveDomainControllerPrincipal(string sid, string computerDomain)
-        {
-            //If the server is a domain controller and we have a well known group, use the domain value
-            if (_utils.GetWellKnownPrincipal(sid, computerDomain, out var wellKnown))
-                return wellKnown;
-            //Otherwise, do a domain lookup
-            return _utils.ResolveIDAndType(sid, computerDomain);
-        }
-
-        // TODO: Copied from URA processor. Find a way to have this function in a shared spot
-        private bool ConvertLocalWellKnownPrincipal(SecurityIdentifier sid, string computerDomainSid,
-            string computerDomain, out TypedPrincipal principal)
-        {
-            if (WellKnownPrincipal.GetWellKnownPrincipal(sid.Value, out var common))
-            {
-                //The everyone and auth users principals are special and will be converted to the domain equivalent
-                if (sid.Value is "S-1-1-0" or "S-1-5-11")
-                {
-                    _utils.GetWellKnownPrincipal(sid.Value, computerDomain, out principal);
-                    return true;
-                }
-
-                //Use the computer object id + the RID of the sid we looked up to create our new principal
-                principal = new TypedPrincipal
-                {
-                    ObjectIdentifier = $"{computerDomainSid}-{sid.Rid()}",
-                    ObjectType = common.ObjectType switch
-                    {
-                        Label.User => Label.LocalUser,
-                        Label.Group => Label.LocalGroup,
-                        _ => common.ObjectType
-                    }
-                };
-
-                return true;
-            }
-
-            principal = null;
-            return false;
-        }
+        
 
         public virtual Result<ISAMServer> OpenSamServer(string computerName)
         {

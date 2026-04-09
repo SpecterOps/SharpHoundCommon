@@ -7,7 +7,7 @@ namespace CommonLibTest.Facades
         public static Forest Construct(string forestDnsName)
         {
             var forest = FacadeHelpers.GetUninitializedObject<Forest>();
-            FacadeHelpers.SetProperty(forest, "_forestDnsName", forestDnsName);
+            FacadeHelpers.SetField(forest, "_forestDnsName", forestDnsName);
 
             return forest;
         }

@@ -13,9 +13,15 @@ namespace CommonLibTest.Facades
             return (T) FormatterServices.GetUninitializedObject(typeof(T));
         }
 
-        internal static void SetProperty<T1, T2>(T1 obj, string propertyName, T2 propertyValue)
+        internal static void SetField<T1, T2>(T1 obj, string propertyName, T2 propertyValue)
         {
             var set = typeof(T1).GetField(propertyName, nonPublicInstance);
+            if (set != null) set.SetValue(obj, propertyValue);
+        }
+        
+        internal static void SetProperty<T1, T2>(T1 obj, string propertyName, T2 propertyValue)
+        {
+            var set = typeof(T1).GetProperty(propertyName, nonPublicInstance);
             if (set != null) set.SetValue(obj, propertyValue);
         }
     }

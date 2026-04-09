@@ -55,6 +55,7 @@
         public const string PKIOverlappedPeriod = "pkioverlapperiod";
         public const string TemplateSchemaVersion = "mspki-template-schema-version";
         public const string CertTemplateOID = "mspki-cert-template-oid";
+        public const string OIDGroupLink = "msds-oidtogrouplink";
         public const string PKIEnrollmentFlag = "mspki-enrollment-flag";
         public const string PKINameFlag = "mspki-certificate-name-flag";
         public const string ExtendedKeyUsage = "pkiextendedkeyusage";
@@ -63,9 +64,15 @@
         public const string ApplicationPolicies = "mspki-ra-application-policies";
         public const string IssuancePolicies = "mspki-ra-policies";
         public const string CertificateApplicationPolicy = "mspki-certificate-application-policy";
+        public const string CertificatePolicy = "mspki-certificate-policy";
         public const string CACertificate = "cacertificate";
         public const string CertificateTemplates = "certificatetemplates";
         public const string CrossCertificatePair = "crosscertificatepair";
         public const string Flags = "flags";
+        public const string RootDomainNamingContext = "rootdomainnamingcontext";
+        public const string ConfigurationNamingContext = "configurationnamingcontext";
+        public const string NetbiosName = "netbiosName";
+        public const string DnsRoot = "dnsroot";
+        public const string ServerName = "servername";
     }
 }

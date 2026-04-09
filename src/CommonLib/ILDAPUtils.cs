@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.DirectoryServices.ActiveDirectory;
 using System.DirectoryServices.Protocols;
+using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
 using SharpHoundCommonLib.Enums;
@@ -41,6 +42,9 @@ namespace SharpHoundCommonLib
         string GetSidFromDomainName(string domainName);
         string ConvertWellKnownPrincipal(string sid, string domain);
         bool GetWellKnownPrincipal(string sid, string domain, out TypedPrincipal commonPrincipal);
+
+        bool ConvertLocalWellKnownPrincipal(SecurityIdentifier sid, string computerDomainSid, string computerDomain,
+            out TypedPrincipal principal);
         Domain GetDomain(string domainName = null);
         void AddDomainController(string domainControllerSID);
         IEnumerable<OutputBase> GetWellKnownPrincipalOutput(string domain);

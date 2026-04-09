@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.DirectoryServices.ActiveDirectory;
 using System.DirectoryServices.Protocols;
 using System.Linq;
+using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
 using Moq;
@@ -41,10 +43,10 @@ namespace CommonLibTest.Facades
             name = name.ToLower();
             return name switch
             {
-                "dfm" => new[] {"S-1-5-21-3130019616-2776909439-2417379446-1105"},
+                "dfm" => new[] { "S-1-5-21-3130019616-2776909439-2417379446-1105" },
                 "administrator" => new[]
                     {"S-1-5-21-3130019616-2776909439-2417379446-500", "S-1-5-21-3084884204-958224920-2707782874-500"},
-                "admin" => new[] {"S-1-5-21-3130019616-2776909439-2417379446-2116"},
+                "admin" => new[] { "S-1-5-21-3130019616-2776909439-2417379446-2116" },
                 _ => Array.Empty<string>()
             };
         }
@@ -690,7 +692,12 @@ namespace CommonLibTest.Facades
 
         public string GetSidFromDomainName(string domainName)
         {
-            throw new NotImplementedException();
+            if (domainName.Equals("TESTLAB.LOCAL", StringComparison.OrdinalIgnoreCase))
+            {
+                return "S-1-5-21-3130019616-2776909439-2417379446";
+            }
+
+            return null;
         }
 
         public string ConvertWellKnownPrincipal(string sid, string domain)
@@ -709,6 +716,37 @@ namespace CommonLibTest.Facades
             commonPrincipal.ObjectIdentifier = ConvertWellKnownPrincipal(sid, domain);
             _seenWellKnownPrincipals.TryAdd(commonPrincipal.ObjectIdentifier, sid);
             return true;
+        }
+
+        public bool ConvertLocalWellKnownPrincipal(SecurityIdentifier sid, string computerDomainSid, string computerDomain,
+            out TypedPrincipal principal)
+        {
+            if (WellKnownPrincipal.GetWellKnownPrincipal(sid.Value, out var common))
+            {
+                //The everyone and auth users principals are special and will be converted to the domain equivalent
+                if (sid.Value is "S-1-1-0" or "S-1-5-11")
+                {
+                    GetWellKnownPrincipal(sid.Value, computerDomain, out principal);
+                    return true;
+                }
+
+                //Use the computer object id + the RID of the sid we looked up to create our new principal
+                principal = new TypedPrincipal
+                {
+                    ObjectIdentifier = $"{computerDomainSid}-{sid.Rid()}",
+                    ObjectType = common.ObjectType switch
+                    {
+                        Label.User => Label.LocalUser,
+                        Label.Group => Label.LocalGroup,
+                        _ => common.ObjectType
+                    }
+                };
+
+                return true;
+            }
+
+            principal = null;
+            return false;
         }
 
         public void AddDomainController(string domainControllerSID)
@@ -1016,7 +1054,8 @@ namespace CommonLibTest.Facades
                     "S-1-5-21-3130019616-2776909439-2417379446-2106", Label.User),
                 "CN=KRBTGT,CN=USERS,DC=TESTLAB,DC=LOCAL" => new TypedPrincipal(
                     "S-1-5-21-3130019616-2776909439-2417379446-502", Label.User),
-                _ => null
+                "CN=ENTERPRISE KEY ADMINS,CN=USERS,DC=ESC10,DC=LOCAL" => new TypedPrincipal("S-1-5-21-3662707843-2053279151-3839588741-527", Label.Group),
+                _ => null,
             };
         }
 
@@ -1059,7 +1098,7 @@ namespace CommonLibTest.Facades
 
         private Group GetBaseEnterpriseDC()
         {
-            var g = new Group {ObjectIdentifier = "TESTLAB.LOCAL-S-1-5-9".ToUpper()};
+            var g = new Group { ObjectIdentifier = "TESTLAB.LOCAL-S-1-5-9".ToUpper() };
             g.Properties.Add("name", "ENTERPRISE DOMAIN CONTROLLERS@TESTLAB.LOCAL".ToUpper());
             return g;
         }

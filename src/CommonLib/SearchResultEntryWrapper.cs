@@ -146,6 +146,7 @@ namespace SharpHoundCommonLib
                     res.DisplayName = $"{samAccountName}@{itemDomain}";
                     break;
                 case Label.Computer:
+                {
                     var shortName = samAccountName?.TrimEnd('$');
                     var dns = GetProperty(LDAPProperties.DNSHostName);
                     var cn = GetProperty(LDAPProperties.CanonicalName);
@@ -160,9 +161,15 @@ namespace SharpHoundCommonLib
                         res.DisplayName = $"{cn}.{itemDomain}";
 
                     break;
+                }
                 case Label.GPO:
-                    res.DisplayName = $"{GetProperty(LDAPProperties.DisplayName)}@{itemDomain}";
+                case Label.IssuancePolicy:
+                {
+                    var cn = GetProperty(LDAPProperties.CanonicalName);
+                    var displayName = GetProperty(LDAPProperties.DisplayName);
+                    res.DisplayName = string.IsNullOrEmpty(displayName) ? $"{cn}@{itemDomain}" : $"{GetProperty(LDAPProperties.DisplayName)}@{itemDomain}";
                     break;
+                }
                 case Label.Domain:
                     res.DisplayName = itemDomain;
                     break;

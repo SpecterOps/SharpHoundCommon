@@ -7,7 +7,7 @@ namespace CommonLibTest.Facades
         public static Domain Construct(string domainName)
         {
             var domain = FacadeHelpers.GetUninitializedObject<Domain>();
-            FacadeHelpers.SetProperty(domain, "partitionName", domainName);
+            FacadeHelpers.SetField(domain, "partitionName", domainName);
 
             return domain;
         }

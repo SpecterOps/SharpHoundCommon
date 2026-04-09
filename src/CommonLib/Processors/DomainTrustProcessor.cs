@@ -74,12 +74,12 @@ namespace SharpHoundCommonLib.Processors
                     continue;
                 }
 
-                trust.IsTransitive = (attributes & TrustAttributes.NonTransitive) == 0;
+                trust.IsTransitive = !attributes.HasFlag(TrustAttributes.NonTransitive);
                 var name = result.GetProperty(LDAPProperties.CanonicalName)?.ToUpper();
                 if (name != null)
                     trust.TargetDomainName = name;
 
-                trust.SidFilteringEnabled = (attributes & TrustAttributes.FilterSids) != 0;
+                trust.SidFilteringEnabled = attributes.HasFlag(TrustAttributes.FilterSids);
                 trust.TrustType = TrustAttributesToType(attributes);
 
                 yield return trust;
@@ -90,12 +90,12 @@ namespace SharpHoundCommonLib.Processors
         {
             TrustType trustType;
 
-            if ((attributes & TrustAttributes.WithinForest) != 0)
+            if (attributes.HasFlag(TrustAttributes.WithinForest))
                 trustType = TrustType.ParentChild;
-            else if ((attributes & TrustAttributes.ForestTransitive) != 0)
+            else if (attributes.HasFlag(TrustAttributes.ForestTransitive))
                 trustType = TrustType.Forest;
-            else if ((attributes & TrustAttributes.WithinForest) == 0 &&
-                     (attributes & TrustAttributes.ForestTransitive) == 0)
+            else if (!attributes.HasFlag(TrustAttributes.WithinForest) &&
+                     !attributes.HasFlag(TrustAttributes.ForestTransitive))
                 trustType = TrustType.External;
             else
                 trustType = TrustType.Unknown;

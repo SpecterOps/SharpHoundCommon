@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using CommonLibTest.Facades;
+using SharpHoundCommonLib;
 using SharpHoundCommonLib.Enums;
 using SharpHoundCommonLib.OutputTypes;
 using SharpHoundCommonLib.Processors;
@@ -714,8 +715,11 @@ namespace CommonLibTest
                     {"ekus", new[]
                     {"1.3.6.1.5.5.7.3.2"}
                     },
-                    {"certificateapplicationpolicy", new[]
+                    {LDAPProperties.CertificateApplicationPolicy, new[]
                     {"1.3.6.1.5.5.7.3.2"}
+                    },
+                    {LDAPProperties.CertificatePolicy, new[]
+                        {"1.3.6.1.5.5.7.3.2"}
                     },
                     {"authorizedsignatures", 1},
                     {"applicationpolicies", new[]
@@ -754,10 +758,88 @@ namespace CommonLibTest
             Assert.Contains("subjectrequireemail", keys);
             Assert.Contains("ekus", keys);
             Assert.Contains("certificateapplicationpolicy", keys);
+            var hasPolicy = test.TryGetValue("certificatepolicy", out var policies);
+            Assert.True(hasPolicy);
+            if (policies is string[] e)
+            {
+                Assert.Contains("1.3.6.1.5.5.7.3.2", e);
+            }
             Assert.Contains("authorizedsignatures", keys);
             Assert.Contains("applicationpolicies", keys);
             Assert.Contains("issuancepolicies", keys);
 
+        }
+
+        [Fact]
+        public void LDAPPropertyProcessor_ReadIssuancePolicyProperties()
+        {
+            var mock = new MockSearchResultEntry("CN\u003d6250993.11BB1AB25A8A65E9FCDF709FCDD5FBC6,CN\u003dOID,CN\u003dPUBLIC KEY SERVICES,CN\u003dSERVICES,CN\u003dCONFIGURATION,DC\u003dESC10,DC\u003dLOCAL",
+                new Dictionary<string, object>
+                {
+                    {"domain", "ESC10.LOCAL"},
+                    {"name", "KEYADMINSOID@ESC10.LOCAL"},
+                    {"domainsid", "S-1-5-21-3662707843-2053279151-3839588741"},
+                    {"description", null},
+                    {"whencreated", 1712567279},
+                    {"displayname", "KeyAdminsOID"},
+                    {"certtemplateoid", "1.3.6.1.4.1.311.21.8.4571196.1884641.3293620.10686285.12068043.134.1.30"},
+                    {"msds-oidtogrouplink", "CN=ENTERPRISE KEY ADMINS,CN=USERS,DC=ESC10,DC=LOCAL"}
+                    ,
+                }, "1E5311A8-E949-4E02-8E08-234ED63200DE", Label.IssuancePolicy);
+
+            var mockLDAPUtils = new MockLDAPUtils();
+            var ldapPropertyProcessor = new LDAPPropertyProcessor(mockLDAPUtils);
+
+
+            var test = ldapPropertyProcessor.ReadIssuancePolicyProperties(mock);
+            var keys = test.Props.Keys;
+
+            //These are not common properties
+            Assert.DoesNotContain("domain", keys);
+            Assert.DoesNotContain("name", keys);
+            Assert.DoesNotContain("domainsid", keys);
+
+            Assert.Contains("description", keys);
+            Assert.Contains("whencreated", keys);
+            Assert.Contains("displayname", keys);
+            Assert.Contains("certtemplateoid", keys);
+            Assert.Contains("oidgrouplink", keys);
+        }
+
+        [Fact]
+        public void LDAPPropertyProcessor_ReadIssuancePolicyProperties_NoOIDGroupLink()
+        {
+            var mock = new MockSearchResultEntry("CN\u003d6250993.11BB1AB25A8A65E9FCDF709FCDD5FBC6,CN\u003dOID,CN\u003dPUBLIC KEY SERVICES,CN\u003dSERVICES,CN\u003dCONFIGURATION,DC\u003dESC10,DC\u003dLOCAL",
+                new Dictionary<string, object>
+                {
+                    {"domain", "ESC10.LOCAL"},
+                    {"name", "KEYADMINSOID@ESC10.LOCAL"},
+                    {"domainsid", "S-1-5-21-3662707843-2053279151-3839588741"},
+                    {"description", null},
+                    {"whencreated", 1712567279},
+                    {"displayname", "KeyAdminsOID"},
+                    {"certtemplateoid", "1.3.6.1.4.1.311.21.8.4571196.1884641.3293620.10686285.12068043.134.1.30"},
+                    {"msds-oidtogrouplink", null}
+                    ,
+                }, "1E5311A8-E949-4E02-8E08-234ED63200DE", Label.IssuancePolicy);
+
+            var mockLDAPUtils = new MockLDAPUtils();
+            var ldapPropertyProcessor = new LDAPPropertyProcessor(mockLDAPUtils);
+
+
+            var test = ldapPropertyProcessor.ReadIssuancePolicyProperties(mock);
+            var keys = test.Props.Keys;
+
+            //These are not common properties
+            Assert.DoesNotContain("domain", keys);
+            Assert.DoesNotContain("name", keys);
+            Assert.DoesNotContain("domainsid", keys);
+            Assert.DoesNotContain("oidgrouplink", keys);
+
+            Assert.Contains("description", keys);
+            Assert.Contains("whencreated", keys);
+            Assert.Contains("displayname", keys);
+            Assert.Contains("certtemplateoid", keys);
         }
 
         [Fact]

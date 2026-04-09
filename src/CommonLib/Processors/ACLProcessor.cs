@@ -36,7 +36,8 @@ namespace SharpHoundCommonLib.Processors
                 {Label.AIACA, "3fdfee50-47f4-11d1-a9c3-0000f80367c1"},
                 {Label.EnterpriseCA, "ee4aa692-3bba-11d2-90cc-00c04fd91ab1"},
                 {Label.NTAuthStore, "3fdfee50-47f4-11d1-a9c3-0000f80367c1"},
-                {Label.CertTemplate, "e5209ca2-3bba-11d2-90cc-00c04fd91ab1"}
+                {Label.CertTemplate, "e5209ca2-3bba-11d2-90cc-00c04fd91ab1"},
+                {Label.IssuancePolicy, "37cfd85c-6719-4ad8-8f9e-8678ba627563"}
             };
         }
 
@@ -72,6 +73,7 @@ namespace SharpHoundCommonLib.Processors
             }
 
             _log.LogTrace("Requesting schema from {Schema}", schema);
+            
             foreach (var entry in _utils.QueryLDAP("(schemaIDGUID=*)", SearchScope.Subtree,
                          new[] {LDAPProperties.SchemaIDGUID, LDAPProperties.Name}, adsPath: schema))
             {
@@ -374,7 +376,18 @@ namespace SharpHoundCommonLib.Processors
                 if (aceRights.HasFlag(ActiveDirectoryRights.GenericWrite) ||
                     aceRights.HasFlag(ActiveDirectoryRights.WriteProperty))
                 {
-                    if (objectType is Label.User or Label.Group or Label.Computer or Label.GPO)
+                    if (objectType is Label.User 
+                        or Label.Group 
+                        or Label.Computer 
+                        or Label.GPO 
+                        or Label.OU 
+                        or Label.Domain
+                        or Label.CertTemplate 
+                        or Label.RootCA 
+                        or Label.EnterpriseCA 
+                        or Label.AIACA 
+                        or Label.NTAuthStore 
+                        or Label.IssuancePolicy)
                         if (aceType is ACEGuids.AllGuid or "")
                             yield return new ACE
                             {
@@ -400,13 +413,21 @@ namespace SharpHoundCommonLib.Processors
                             IsInherited = inherited,
                             RightName = EdgeNames.AddAllowedToAct
                         };
-                    else if (objectType == Label.Computer && aceType == ACEGuids.UserAccountRestrictions && !resolvedPrincipal.ObjectIdentifier.EndsWith("-512"))
+                    else if (objectType == Label.Computer && aceType == ACEGuids.UserAccountRestrictions)
                         yield return new ACE
                         {
                             PrincipalType = resolvedPrincipal.ObjectType,
                             PrincipalSID = resolvedPrincipal.ObjectIdentifier,
                             IsInherited = inherited,
                             RightName = EdgeNames.WriteAccountRestrictions
+                        };
+                    else if (objectType is Label.OU or Label.Domain && aceType == ACEGuids.WriteGPLink)
+                        yield return new ACE
+                        {
+                            PrincipalType = resolvedPrincipal.ObjectType,
+                            PrincipalSID = resolvedPrincipal.ObjectIdentifier,
+                            IsInherited = inherited,
+                            RightName = EdgeNames.WriteGPLink
                         };
                     else if (objectType == Label.Group && aceType == ACEGuids.WriteMember)
                         yield return new ACE

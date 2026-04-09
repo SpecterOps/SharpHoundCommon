@@ -14,5 +14,6 @@
         public const string NTAuthStores = "ntauthstores";
         public const string EnterpriseCAs = "enterprisecas";
         public const string CertTemplates = "certtemplates";
+        public const string IssuancePolicies = "issuancepolicies";
     }
 }

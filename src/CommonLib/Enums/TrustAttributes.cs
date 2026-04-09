@@ -15,6 +15,7 @@ namespace SharpHoundCommonLib.Enums
         TrustUsesRc4 = 0x80,
         TrustUsesAes = 0x100,
         CrossOrganizationNoTGTDelegation = 0x200,
-        PIMTrust = 0x400
+        PIMTrust = 0x400,
+        Unknown = 0x400000,
     }
 }

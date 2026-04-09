@@ -50,7 +50,7 @@ namespace SharpHoundCommonLib
         /// </summary>
         /// <param name="key"></param>
         /// <param name="value"></param>
-        internal static void AddSidToDomain(string key, string value)
+        internal static void AddDomainSidMapping(string key, string value)
         {
             CacheInstance?.SIDToDomainCache.TryAdd(key, value);
         }

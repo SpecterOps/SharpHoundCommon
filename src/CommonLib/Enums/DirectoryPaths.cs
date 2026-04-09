@@ -9,5 +9,6 @@
         public const string NTAuthStoreLocation = "CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration";
         public const string PKILocation = "CN=Public Key Services,CN=Services,CN=Configuration";
         public const string ConfigLocation = "CN=Configuration";
+        public const string OIDContainerLocation = "CN=OID,CN=Public Key Services,CN=Services,CN=Configuration";
     }
 }

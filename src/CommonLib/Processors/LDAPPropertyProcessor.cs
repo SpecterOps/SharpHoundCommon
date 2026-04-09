@@ -148,14 +148,14 @@ namespace SharpHoundCommonLib.Processors
         {
             var userProps = new UserProperties();
             var props = GetCommonProps(entry);
-            
+
             var uacFlags = (UacFlags)0;
             var uac = entry.GetProperty(LDAPProperties.UserAccountControl);
             if (int.TryParse(uac, out var flag))
             {
                 uacFlags = (UacFlags)flag;
             }
-            
+
             props.Add("sensitive", uacFlags.HasFlag(UacFlags.NotDelegated));
             props.Add("dontreqpreauth", uacFlags.HasFlag(UacFlags.DontReqPreauth));
             props.Add("passwordnotreqd", uacFlags.HasFlag(UacFlags.PasswordNotRequired));
@@ -260,14 +260,14 @@ namespace SharpHoundCommonLib.Processors
         {
             var compProps = new ComputerProperties();
             var props = GetCommonProps(entry);
-            
+
             var flags = (UacFlags)0;
             var uac = entry.GetProperty(LDAPProperties.UserAccountControl);
             if (int.TryParse(uac, out var flag))
             {
                 flags = (UacFlags)flag;
             }
-            
+
             props.Add("enabled", !flags.HasFlag(UacFlags.AccountDisable));
             props.Add("unconstraineddelegation", flags.HasFlag(UacFlags.TrustedForDelegation));
             props.Add("trustedtoauth", flags.HasFlag(UacFlags.TrustedToAuthForDelegation));
@@ -286,7 +286,7 @@ namespace SharpHoundCommonLib.Processors
                     var hname = d.Contains("/") ? d.Split('/')[1] : d;
                     hname = hname.Split(':')[0];
                     var resolvedHost = await _utils.ResolveHostToSid(hname, domain);
-                    if (resolvedHost != null && (resolvedHost.Contains(".") || resolvedHost.Contains("S-1")))
+                    if (resolvedHost != null && resolvedHost.Contains("S-1"))
                         comps.Add(new TypedPrincipal
                         {
                             ObjectIdentifier = resolvedHost,
@@ -385,7 +385,7 @@ namespace SharpHoundCommonLib.Processors
             var rawCertificate = entry.GetByteProperty(LDAPProperties.CACertificate);
             if (rawCertificate != null)
             {
-                ParsedCertificate cert = new ParsedCertificate(rawCertificate);
+                var cert = new ParsedCertificate(rawCertificate);
                 props.Add("certthumbprint", cert.Thumbprint);
                 props.Add("certname", cert.Name);
                 props.Add("certchain", cert.Chain);
@@ -414,7 +414,7 @@ namespace SharpHoundCommonLib.Processors
             var rawCertificate = entry.GetByteProperty(LDAPProperties.CACertificate);
             if (rawCertificate != null)
             {
-                ParsedCertificate cert = new ParsedCertificate(rawCertificate);
+                var cert = new ParsedCertificate(rawCertificate);
                 props.Add("certthumbprint", cert.Thumbprint);
                 props.Add("certname", cert.Name);
                 props.Add("certchain", cert.Chain);
@@ -436,7 +436,7 @@ namespace SharpHoundCommonLib.Processors
             var rawCertificate = entry.GetByteProperty(LDAPProperties.CACertificate);
             if (rawCertificate != null)
             {
-                ParsedCertificate cert = new ParsedCertificate(rawCertificate);
+                var cert = new ParsedCertificate(rawCertificate);
                 props.Add("certthumbprint", cert.Thumbprint);
                 props.Add("certname", cert.Name);
                 props.Add("certchain", cert.Chain);
@@ -506,15 +506,18 @@ namespace SharpHoundCommonLib.Processors
                     nameFlags.HasFlag(PKICertificateNameFlag.SUBJECT_REQUIRE_EMAIL));
             }
 
-            string[] ekus = entry.GetArrayProperty(LDAPProperties.ExtendedKeyUsage);
+            var ekus = entry.GetArrayProperty(LDAPProperties.ExtendedKeyUsage);
             props.Add("ekus", ekus);
-            string[] certificateapplicationpolicy = entry.GetArrayProperty(LDAPProperties.CertificateApplicationPolicy);
-            props.Add("certificateapplicationpolicy", certificateapplicationpolicy);
+            var certificateApplicationPolicy = entry.GetArrayProperty(LDAPProperties.CertificateApplicationPolicy);
+            props.Add("certificateapplicationpolicy", certificateApplicationPolicy);
+
+            var certificatePolicy = entry.GetArrayProperty(LDAPProperties.CertificatePolicy);
+            props.Add("certificatepolicy", certificatePolicy);
 
             if (entry.GetIntProperty(LDAPProperties.NumSignaturesRequired, out var authorizedSignatures))
                 props.Add("authorizedsignatures", authorizedSignatures);
 
-            bool hasUseLegacyProvider = false;
+            var hasUseLegacyProvider = false;
             if (entry.GetIntProperty(LDAPProperties.PKIPrivateKeyFlag, out var privateKeyFlagsRaw))
             {
                 var privateKeyFlags = (PKIPrivateKeyFlag)privateKeyFlagsRaw;
@@ -525,14 +528,36 @@ namespace SharpHoundCommonLib.Processors
             props.Add("issuancepolicies", entry.GetArrayProperty(LDAPProperties.IssuancePolicies));
 
             // Construct effectiveekus
-            string[] effectiveekus = schemaVersion == 1 & ekus.Length > 0 ? ekus : certificateapplicationpolicy;
+            var effectiveekus = schemaVersion == 1 & ekus.Length > 0 ? ekus : certificateApplicationPolicy;
             props.Add("effectiveekus", effectiveekus);
 
             // Construct authenticationenabled
-            bool authenticationenabled = effectiveekus.Intersect(Helpers.AuthenticationOIDs).Any() | effectiveekus.Length == 0;
-            props.Add("authenticationenabled", authenticationenabled);
+            var authenticationEnabled = effectiveekus.Intersect(Helpers.AuthenticationOIDs).Any() | effectiveekus.Length == 0;
+            props.Add("authenticationenabled", authenticationEnabled);
 
             return props;
+        }
+
+        public IssuancePolicyProperties ReadIssuancePolicyProperties(ISearchResultEntry entry)
+        {
+            var ret = new IssuancePolicyProperties();
+            var props = GetCommonProps(entry);
+            props.Add("displayname", entry.GetProperty(LDAPProperties.DisplayName));
+            props.Add("certtemplateoid", entry.GetProperty(LDAPProperties.CertTemplateOID));
+
+            var link = entry.GetProperty(LDAPProperties.OIDGroupLink);
+            if (!string.IsNullOrEmpty(link))
+            {
+                var linkedGroup = _utils.ResolveDistinguishedName(link);
+                if (linkedGroup != null)
+                {
+                    props.Add("oidgrouplink", linkedGroup.ObjectIdentifier);
+                    ret.GroupLink = linkedGroup;
+                }
+            }
+
+            ret.Props = props;
+            return ret;
         }
 
         /// <summary>
@@ -596,13 +621,16 @@ namespace SharpHoundCommonLib.Processors
                 || applicationPolicies.Length == 0
                 || schemaVersion == 1
                 || schemaVersion == 2
-                || (schemaVersion == 4 && hasUseLegacyProvider)) {
+                || (schemaVersion == 4 && hasUseLegacyProvider))
+            {
                 return applicationPolicies;
-            } else {
+            }
+            else
+            {
                 // Format: "Name`Type`Value`Name`Type`Value`..."
                 // (https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-crtd/c55ec697-be3f-4117-8316-8895e4399237)
                 // Return the Value of Name = "msPKI-RA-Application-Policies" entries
-                string[] entries = applicationPolicies[0].Split('`');
+                var entries = applicationPolicies[0].Split('`');
                 return Enumerable.Range(0, entries.Length / 3)
                     .Select(i => entries.Skip(i * 3).Take(3).ToArray())
                     .Where(parts => parts.Length == 3 && parts[0].Equals(LDAPProperties.ApplicationPolicies, StringComparison.OrdinalIgnoreCase))
@@ -781,5 +809,11 @@ namespace SharpHoundCommonLib.Processors
         public TypedPrincipal[] AllowedToAct { get; set; } = Array.Empty<TypedPrincipal>();
         public TypedPrincipal[] SidHistory { get; set; } = Array.Empty<TypedPrincipal>();
         public TypedPrincipal[] DumpSMSAPassword { get; set; } = Array.Empty<TypedPrincipal>();
+    }
+
+    public class IssuancePolicyProperties
+    {
+        public Dictionary<string, object> Props { get; set; } = new();
+        public TypedPrincipal GroupLink { get; set; } = new TypedPrincipal();
     }
 }
