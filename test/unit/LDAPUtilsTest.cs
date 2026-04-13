@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.DirectoryServices;
+using System.DirectoryServices.AccountManagement;
 using System.DirectoryServices.ActiveDirectory;
 using System.Reflection;
 using System.Runtime.Versioning;
@@ -431,6 +432,102 @@ namespace CommonLibTest {
 
             Assert.Equal("testuser", entry.Username);
             Assert.Equal("LDAP://domain.com", entry.Path);
+        }
+
+        #endregion
+
+        #region BuildPrincipalContextParameters Tests
+
+        // ---------------------------------------------------------------------------
+        // contextName – no server configured
+        // ---------------------------------------------------------------------------
+
+        [Fact]
+        public void BuildPrincipalContextParameters_NoServer_NoDomain_ContextNameIsNull() {
+            var (contextName, _) = LdapUtils.BuildPrincipalContextParameters(new LdapConfig());
+            Assert.Null(contextName);
+        }
+
+        [Fact]
+        public void BuildPrincipalContextParameters_NoServer_DomainProvided_ContextNameIsDomain() {
+            var (contextName, _) = LdapUtils.BuildPrincipalContextParameters(new LdapConfig(), "testlab.local");
+            Assert.Equal("testlab.local", contextName);
+        }
+
+        // ---------------------------------------------------------------------------
+        // contextName – server configured
+        // ---------------------------------------------------------------------------
+
+        [Fact]
+        public void BuildPrincipalContextParameters_ServerSet_DefaultPort_ContextNameIsServerOnly() {
+            var config = new LdapConfig { Server = "dc01.corp.com" };
+            var (contextName, _) = LdapUtils.BuildPrincipalContextParameters(config);
+            Assert.Equal("dc01.corp.com", contextName);
+        }
+
+        [Fact]
+        public void BuildPrincipalContextParameters_ServerSet_CustomPort_ContextNameIncludesPort() {
+            var config = new LdapConfig { Server = "dc01.corp.com", Port = 3636 };
+            var (contextName, _) = LdapUtils.BuildPrincipalContextParameters(config);
+            Assert.Equal("dc01.corp.com:3636", contextName);
+        }
+
+        [Fact]
+        public void BuildPrincipalContextParameters_ServerSet_DomainIgnoredWhenServerPresent() {
+            // The domain name should be ignored when a server is explicitly configured.
+            var config = new LdapConfig { Server = "dc01.corp.com" };
+            var (contextName, _) = LdapUtils.BuildPrincipalContextParameters(config, "testlab.local");
+            Assert.Equal("dc01.corp.com", contextName);
+        }
+
+        [Fact]
+        public void BuildPrincipalContextParameters_ServerSet_ForceSSL_DefaultSSLPort_ContextNameIsServerOnly() {
+            var config = new LdapConfig { Server = "dc01.corp.com", ForceSSL = true };
+            var (contextName, _) = LdapUtils.BuildPrincipalContextParameters(config);
+            Assert.Equal("dc01.corp.com", contextName);
+        }
+
+        [Fact]
+        public void BuildPrincipalContextParameters_ServerSet_ForceSSL_CustomSSLPort_ContextNameIncludesPort() {
+            var config = new LdapConfig { Server = "dc01.corp.com", ForceSSL = true, SSLPort = 1636 };
+            var (contextName, _) = LdapUtils.BuildPrincipalContextParameters(config);
+            Assert.Equal("dc01.corp.com:1636", contextName);
+        }
+
+        // ---------------------------------------------------------------------------
+        // ContextOptions – mirroring connection pool's mutual-exclusion rule
+        // ---------------------------------------------------------------------------
+
+        [Fact]
+        public void BuildPrincipalContextParameters_Default_HasNegotiateSigningAndSealing() {
+            var (_, options) = LdapUtils.BuildPrincipalContextParameters(new LdapConfig());
+            var expected = ContextOptions.Negotiate | ContextOptions.Signing | ContextOptions.Sealing;
+            Assert.Equal(expected, options);
+        }
+
+        [Fact]
+        public void BuildPrincipalContextParameters_ForceSSL_HasNegotiateAndSSLOnly_NoSigningOrSealing() {
+            var config = new LdapConfig { ForceSSL = true };
+            var (_, options) = LdapUtils.BuildPrincipalContextParameters(config);
+            var expected = ContextOptions.Negotiate | ContextOptions.SecureSocketLayer;
+            Assert.Equal(expected, options);
+            Assert.Equal((ContextOptions)0, options & ContextOptions.Signing);
+            Assert.Equal((ContextOptions)0, options & ContextOptions.Sealing);
+        }
+
+        [Fact]
+        public void BuildPrincipalContextParameters_DisableSigning_HasNegotiateOnly() {
+            var config = new LdapConfig { DisableSigning = true };
+            var (_, options) = LdapUtils.BuildPrincipalContextParameters(config);
+            Assert.Equal(ContextOptions.Negotiate, options);
+        }
+
+        [Fact]
+        public void BuildPrincipalContextParameters_ForceSSLAndDisableSigning_HasNegotiateAndSSLOnly() {
+            var config = new LdapConfig { ForceSSL = true, DisableSigning = true };
+            var (_, options) = LdapUtils.BuildPrincipalContextParameters(config);
+            var expected = ContextOptions.Negotiate | ContextOptions.SecureSocketLayer;
+            Assert.Equal(expected, options);
         }
 
         #endregion

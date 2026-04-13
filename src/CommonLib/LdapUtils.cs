@@ -185,7 +185,7 @@ namespace SharpHoundCommonLib {
             }
 
             try {
-                using (var ctx = new PrincipalContext(ContextType.Domain)) {
+                using (var ctx = CreatePrincipalContext(_ldapConfig, tempDomain)) {
                     // Blocking External Call
                     var principal = Principal.FindByIdentity(ctx, IdentityType.Sid, sid);
                     if (principal != null) {
@@ -234,7 +234,7 @@ namespace SharpHoundCommonLib {
             }
 
             try {
-                using (var ctx = new PrincipalContext(ContextType.Domain)) {
+                using (var ctx = CreatePrincipalContext(_ldapConfig, domain)) {
                     // Blocking External Call
                     var principal = Principal.FindByIdentity(ctx, IdentityType.Guid, guid);
                     if (principal != null) {
@@ -374,7 +374,7 @@ namespace SharpHoundCommonLib {
             }
 
             try {
-                using (var ctx = new PrincipalContext(ContextType.Domain)) {
+                using (var ctx = CreatePrincipalContext(_ldapConfig)) {
                     // Blocking External Call
                     var principal = Principal.FindByIdentity(ctx, IdentityType.Sid, sid);
                     if (principal != null) {
@@ -951,7 +951,7 @@ namespace SharpHoundCommonLib {
             }
 
             try {
-                using (var ctx = new PrincipalContext(ContextType.Domain)) {
+                using (var ctx = CreatePrincipalContext(_ldapConfig, domain)) {
                     // Blocking External Call
                     var lookupPrincipal =
                         Principal.FindByIdentity(ctx, IdentityType.DistinguishedName, distinguishedName);
@@ -1180,6 +1180,82 @@ namespace SharpHoundCommonLib {
             }
 
             return new DirectoryEntry(path) { AuthenticationType = authType }.ToDirectoryObject();
+        }
+
+        /// <summary>
+        /// Computes the <c>contextName</c> and <see cref="ContextOptions"/> that should be passed
+        /// to a <see cref="PrincipalContext"/> for a given <see cref="LdapConfig"/>.
+        ///
+        /// <para>
+        /// Separated from <see cref="CreatePrincipalContext"/> so that the parameter-building logic
+        /// can be unit-tested without constructing a real <see cref="PrincipalContext"/> (which
+        /// would require a live directory connection).
+        /// </para>
+        ///
+        /// <para>
+        /// When <see cref="LdapConfig.Server"/> is set, the server hostname is returned as
+        /// <c>contextName</c> so that <see cref="PrincipalContext"/> binds to that specific DC
+        /// rather than relying on domain-level DNS discovery. Non-standard ports are expressed as
+        /// <c>host:port</c>. Otherwise <paramref name="domainName"/> is returned as-is (null = let
+        /// the runtime discover the current domain).
+        /// </para>
+        ///
+        /// <para>
+        /// Signing and sealing are disabled when SSL is active, mirroring the mutual-exclusion rule
+        /// applied by <see cref="LdapConnectionPool.CreateBaseConnection"/>.
+        /// </para>
+        /// </summary>
+        internal static (string ContextName, ContextOptions Options) BuildPrincipalContextParameters(
+            LdapConfig config, string domainName = null) {
+            var options = ContextOptions.Negotiate;
+
+            if (config.ForceSSL) {
+                options |= ContextOptions.SecureSocketLayer;
+            }
+
+            // Signing and sealing are mutually exclusive with SSL (the transport provides integrity).
+            if (!config.DisableSigning && !config.ForceSSL) {
+                options |= ContextOptions.Signing | ContextOptions.Sealing;
+            }
+
+            string contextName;
+            if (config.Server != null) {
+                var port = config.GetPort(config.ForceSSL);
+                var isDefaultPort = port == (config.ForceSSL ? 636 : 389);
+                contextName = isDefaultPort ? config.Server : $"{config.Server}:{port}";
+            } else {
+                contextName = domainName; // null = let the runtime discover the current domain
+            }
+
+            return (contextName, options);
+        }
+
+        /// <summary>
+        /// Creates a <see cref="PrincipalContext"/> that targets the same DC as the connection pool
+        /// and applies the same SSL / signing / credential settings from <paramref name="config"/>.
+        ///
+        /// <para>
+        /// <see cref="ContextType.Domain"/> is always used. When <see cref="LdapConfig.Server"/> is
+        /// set, the server hostname is passed as the <c>name</c> argument so the runtime binds to
+        /// that specific DC rather than performing domain-level DNS discovery.
+        /// </para>
+        ///
+        /// <para>Note: <see cref="LdapConfig.DisableCertVerification"/> cannot be applied here —
+        /// <see cref="PrincipalContext"/> exposes no API for it.</para>
+        ///
+        /// <para>This is intentionally <c>static</c> so that Moq's Castle.DynamicProxy does not
+        /// encounter <see cref="PrincipalContext"/> in an instance-method signature when building
+        /// test proxies against <see cref="LdapUtils"/> on non-Windows runtimes.</para>
+        /// </summary>
+        private static PrincipalContext CreatePrincipalContext(LdapConfig config, string domainName = null) {
+            var (contextName, options) = BuildPrincipalContextParameters(config, domainName);
+
+            if (config.Username != null) {
+                return new PrincipalContext(ContextType.Domain, contextName, null, options,
+                    config.Username, config.Password);
+            }
+
+            return new PrincipalContext(ContextType.Domain, contextName, null, options);
         }
 
         public void Dispose() {
