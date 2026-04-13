@@ -1146,11 +1146,40 @@ namespace SharpHoundCommonLib {
         }
 
         private IDirectoryObject CreateDirectoryEntry(string path) {
-            if (_ldapConfig.Username != null) {
-                return new DirectoryEntry(path, _ldapConfig.Username, _ldapConfig.Password).ToDirectoryObject();
+            // Build AuthenticationTypes flags from LdapConfig.
+            // AuthenticationTypes.Secure requests SSPI (Negotiate) and is the safe default.
+            var authType = AuthenticationTypes.Secure;
+
+            if (_ldapConfig.ForceSSL) {
+                authType |= AuthenticationTypes.SecureSocketsLayer;
             }
 
-            return new DirectoryEntry(path).ToDirectoryObject();
+            // Mirror the connection pool's logic: signing and sealing are mutually exclusive with
+            // SSL (the transport already provides integrity) and are skipped when DisableSigning is set.
+            if (!_ldapConfig.DisableSigning && !_ldapConfig.ForceSSL) {
+                authType |= AuthenticationTypes.Signing | AuthenticationTypes.Sealing;
+            }
+
+            // If a specific server is configured, insert it into the ADSI path so that this
+            // call targets the same DC as the connection pool rather than relying on DNS discovery.
+            //   "LDAP://<SID=...>"       → "LDAP://dc01.corp.com:389/<SID=...>"
+            //   "LDAP://domain.com"      → "LDAP://dc01.corp.com/domain.com"
+            //   "LDAP://domain/RootDSE"  → "LDAP://dc01.corp.com/domain/RootDSE"
+            // Note: DisableCertVerification cannot be honoured here — there is no ADSI API for it.
+            if (_ldapConfig.Server != null) {
+                const string ldapPrefix = "LDAP://";
+                var port = _ldapConfig.GetPort(_ldapConfig.ForceSSL);
+                var isDefaultPort = port == (_ldapConfig.ForceSSL ? 636 : 389);
+                var serverTarget = isDefaultPort ? _ldapConfig.Server : $"{_ldapConfig.Server}:{port}";
+                path = $"{ldapPrefix}{serverTarget}/{path.Substring(ldapPrefix.Length)}";
+            }
+
+            if (_ldapConfig.Username != null) {
+                return new DirectoryEntry(path, _ldapConfig.Username, _ldapConfig.Password, authType)
+                    .ToDirectoryObject();
+            }
+
+            return new DirectoryEntry(path) { AuthenticationType = authType }.ToDirectoryObject();
         }
 
         public void Dispose() {
