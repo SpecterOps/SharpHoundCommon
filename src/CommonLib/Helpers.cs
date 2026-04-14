@@ -16,6 +16,10 @@ namespace SharpHoundCommonLib {
         private static readonly HashSet<string> Users = new() { "805306368", "805306370" };
 
         private static readonly Regex SPNRegex = new(@".*\/.*", RegexOptions.Compiled);
+
+        // Splits a DN on commas that are not escaped (i.e. not preceded by a backslash).
+        // Plain Split(',') would break on OU/CN values that contain \, (e.g. "OU=Sales\, West").
+        private static readonly Regex UnescapedCommaRegex = new(@"(?<!\\),", RegexOptions.Compiled);
         private static readonly DateTime EpochDiff = new(1970, 1, 1);
 
         private static readonly string[] FilteredSids = {
@@ -133,7 +137,7 @@ namespace SharpHoundCommonLib {
             // component correctly skips leading DC= RDNs on deleted-object tombstones and any
             // over-split pieces from escaped commas in CN/OU values — DC= values are DNS labels
             // and never contain commas themselves.
-            var rdns = distinguishedName.Split(',');
+            var rdns = UnescapedCommaRegex.Split(distinguishedName);
             var dcValues = new List<string>();
             for (var i = rdns.Length - 1; i >= 0; i--) {
                 var rdn = rdns[i].Trim();

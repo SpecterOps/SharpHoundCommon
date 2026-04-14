@@ -259,6 +259,15 @@ namespace CommonLibTest {
         }
 
         [Fact]
+        public void DistinguishedNameToDomain_EscapedCommaInOUValueFollowedByDCEquals_ReturnsCorrectDomain() {
+            // The fragment after the escaped comma starts with "DC=" which would cause a naive
+            // Split(',') to misidentify it as a domain component.  The unescaped-comma split
+            // must keep the whole OU value together so only the true trailing DC= RDNs are used.
+            var result = Helpers.DistinguishedNameToDomain(@"CN=User,OU=Dept\, DC=Proxy,DC=corp,DC=com");
+            Assert.Equal("CORP.COM", result);
+        }
+
+        [Fact]
         public void DistinguishedNameToDomain_DomainOnlyDN_ReturnsCorrectDomain() {
             // A DN that consists solely of DC= components (e.g. as stored in RootDSE).
             var result = Helpers.DistinguishedNameToDomain("DC=corp,DC=com");
