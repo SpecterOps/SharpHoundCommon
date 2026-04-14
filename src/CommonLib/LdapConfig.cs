@@ -42,7 +42,7 @@ namespace SharpHoundCommonLib
         /// </summary>
         public string GetServerTarget()
         {
-            if (Server == null) return null;
+            if (string.IsNullOrWhiteSpace(Server)) return null;
             var port = GetPort(ForceSSL);
             var isDefaultPort = port == (ForceSSL ? 636 : 389);
             return isDefaultPort ? Server : $"{Server}:{port}";
