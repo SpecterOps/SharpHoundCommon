@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Runtime.Versioning;
 using System.Text;
 using System.Threading.Tasks;
@@ -26,53 +27,52 @@ namespace CommonLibTest {
 
         [Fact]
         public void SplitGPLinkProperty_ValidPropFilterEnabled_ExpectedResult() {
-            var isPropFilterEnabled = false;
-            //TODO: Ari, proper test string?
-            var testGPLinkProperty =
-                "[LDAP:/o=foo/ou=foo Group (ABC123)/cn=foouser (blah)123; SIP:foouser@example.co.uk; smtp:foouser@sub1.example.co.uk; smtp:foouser@sub2.example.co.uk; SMTP:foouser@example.co.uk][]";
+            // Filter is ON (filterDisabled = true): an enabled link (status 0) must pass through.
+            const string testGPLinkProperty =
+                "[LDAP://CN={94DD0260-38B5-497E-8876-10E7A96E80D0},CN=Policies,CN=System,DC=testlab,DC=local;0]";
 
-            var res = Helpers.SplitGPLinkProperty(testGPLinkProperty, isPropFilterEnabled);
+            var res = Helpers.SplitGPLinkProperty(testGPLinkProperty, filterDisabled: true).ToList();
 
-            foreach (var parsedGPLink in res)
-                Assert.Equal("cn=foouser (blah)123", parsedGPLink.DistinguishedName);
-            // TODO: issue here with test data? Assert.Equal("1", parsedGPLink.Status);
+            Assert.Single(res);
+            Assert.Equal("CN={94DD0260-38B5-497E-8876-10E7A96E80D0},CN=Policies,CN=System,DC=testlab,DC=local",
+                res[0].DistinguishedName);
+            Assert.Equal("0", res[0].Status);
         }
 
         [Fact]
         public void SplitGPLinkProperty_ValidPropFilterDisabled_ExpectedResult() {
-            var isPropFilterEnabled = false;
-            //TODO: Ari, proper test string?
-            var testGPLinkProperty =
-                "[LDAP:/o=foo/ou=foo Group (ABC123)/cn=foouser (blah)123; SIP:foouser@example.co.uk; smtp:foouser@sub1.example.co.uk; smtp:foouser@sub2.example.co.uk; SMTP:foouser@example.co.uk][]";
+            // Filter is OFF (filterDisabled = false): a disabled link (status 1) must still come through.
+            const string testGPLinkProperty =
+                "[LDAP://CN={94DD0260-38B5-497E-8876-10E7A96E80D0},CN=Policies,CN=System,DC=testlab,DC=local;1]";
 
-            var res = Helpers.SplitGPLinkProperty(testGPLinkProperty, isPropFilterEnabled);
+            var res = Helpers.SplitGPLinkProperty(testGPLinkProperty, filterDisabled: false).ToList();
 
-            foreach (var parsedGPLink in res)
-                Assert.Equal("cn=foouser (blah)123", parsedGPLink.DistinguishedName);
-            // TODO: issue here with test data? Assert.Equal("1", parsedGPLink.Status);
+            Assert.Single(res);
+            Assert.Equal("CN={94DD0260-38B5-497E-8876-10E7A96E80D0},CN=Policies,CN=System,DC=testlab,DC=local",
+                res[0].DistinguishedName);
+            Assert.Equal("1", res[0].Status);
         }
 
-        /// 
         [Fact]
-        public void SplitGPLinkProperty_PropWithUnsupportedDelimiter_FilterEnabled_ExpectedResult() {
-            var isPropFilterEnabled = true;
-            //TODO: Ari, proper test string?
-            var testGPLinkProperty =
-                "[LDAP:/o=foo/ou=foo Group (ABC123)/cn=foouser (blah)123; DC=somedomainName; SIP:foouser@example.co.uk; smtp:foouser@sub1.example.co.uk; smtp:foouser@sub2.example.co.uk; SMTP:foouser@example.co.uk][]";
+        public void SplitGPLinkProperty_MixedStatuses_FilterEnabled_OnlyEnabledLinksReturned() {
+            // Filter is ON: a multi-link property containing both enabled (status 0) and disabled
+            // (status 1) links must yield only the enabled one.
+            const string testGPLinkProperty =
+                "[LDAP://CN={94DD0260-38B5-497E-8876-10E7A96E80D0},CN=Policies,CN=System,DC=testlab,DC=local;0]" +
+                "[LDAP://CN={C52F168C-CD05-4487-B405-564934DA8EFF},CN=Policies,CN=System,DC=testlab,DC=local;1]";
 
-            var res = Helpers.SplitGPLinkProperty(testGPLinkProperty, isPropFilterEnabled);
+            var res = Helpers.SplitGPLinkProperty(testGPLinkProperty, filterDisabled: true).ToList();
 
-            foreach (var parsedGPLink in res)
-                Assert.Equal("cn=foouser (blah)123", parsedGPLink.DistinguishedName);
-            // TODO: issue here with test data? Assert.Equal("1", parsedGPLink.Status);
+            Assert.Single(res);
+            Assert.Equal("CN={94DD0260-38B5-497E-8876-10E7A96E80D0},CN=Policies,CN=System,DC=testlab,DC=local",
+                res[0].DistinguishedName);
+            Assert.Equal("0", res[0].Status);
         }
 
         [Fact]
         public void SplitGPLinkProperty_InValidPropFilterDisabled_ExpectedResult() {
-            var isPropFilterEnabled = false;
-            //TODO: Ari, proper test string?
-            var testGPLinkProperty = "/*obviously wrong data*/";
-            var res = Helpers.SplitGPLinkProperty(testGPLinkProperty, isPropFilterEnabled);
+            const string testGPLinkProperty = "/*obviously wrong data*/";
+            var res = Helpers.SplitGPLinkProperty(testGPLinkProperty, filterDisabled: false);
             Assert.Empty(res);
         }
 

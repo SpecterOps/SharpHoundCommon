@@ -65,5 +65,40 @@ namespace SharpHoundCommonLib
             }
             return sb.ToString();
         }
+
+        public string GetConfigWarnings() {
+            var builder = new StringBuilder();
+            var hasWarning = false;
+            if (!string.IsNullOrWhiteSpace(Server)) {
+                hasWarning = true;
+                builder.AppendLine("-------------LDAP CONFIG WARNINGS-------------");
+                builder.AppendLine($"-Explicit Server has been set to {Server}, this can degrade cross domain lookups");
+            }
+
+            if (ForceSSL && DisableCertVerification) {
+                if (!hasWarning) {
+                    builder.AppendLine("-------------LDAP CONFIG WARNINGS-------------");
+                }
+
+                hasWarning = true;
+                builder.AppendLine("-Not all calls are able to respect DisableCertVerification, lookups may fail");
+            }
+
+            if (DisableSigning) {
+                if (!hasWarning) {
+                    builder.AppendLine("-------------LDAP CONFIG WARNINGS-------------");
+                }
+
+                hasWarning = true;
+                builder.AppendLine("-Signing is disabled, regular LDAP traffic will be in plaintext");
+            }
+
+            if (hasWarning) {
+                builder.AppendLine("----------------------------------------------");
+                return builder.ToString();
+            }
+
+            return string.Empty;
+        }
     }
 }
