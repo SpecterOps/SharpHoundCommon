@@ -35,6 +35,19 @@ namespace SharpHoundCommonLib
             return ssl ? 3269 : 3268;
         }
 
+        /// <summary>
+        /// Returns the server-target string used in ADSI paths and <see cref="System.DirectoryServices.AccountManagement.PrincipalContext"/> bindings:
+        /// <c>"server"</c> when the port is the protocol default, or <c>"server:port"</c> when a
+        /// non-default port is configured. Returns <c>null</c> when <see cref="Server"/> is not set.
+        /// </summary>
+        public string GetServerTarget()
+        {
+            if (Server == null) return null;
+            var port = GetPort(ForceSSL);
+            var isDefaultPort = port == (ForceSSL ? 636 : 389);
+            return isDefaultPort ? Server : $"{Server}:{port}";
+        }
+
         public override string ToString() {
             var sb = new StringBuilder();
             sb.AppendLine($"Server: {Server}");

@@ -15,7 +15,6 @@ namespace SharpHoundCommonLib {
         private static readonly HashSet<string> Computers = new() { "805306369" };
         private static readonly HashSet<string> Users = new() { "805306368", "805306370" };
 
-        private static readonly Regex DCReplaceRegex = new("DC=", RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private static readonly Regex SPNRegex = new(@".*\/.*", RegexOptions.Compiled);
         private static readonly DateTime EpochDiff = new(1970, 1, 1);
 
@@ -129,21 +128,22 @@ namespace SharpHoundCommonLib {
         /// <param name="distinguishedName">Distinguished Name to extract domain from</param>
         /// <returns>String representing the domain name of this object</returns>
         public static string DistinguishedNameToDomain(string distinguishedName) {
-            int idx;
-            if (distinguishedName.ToUpper().Contains("DELETED OBJECTS")) {
-                idx = distinguishedName.IndexOf("DC=", 3, StringComparison.Ordinal);
-            }
-            else {
-                idx = distinguishedName.IndexOf("DC=",
-                    StringComparison.CurrentCultureIgnoreCase);
+            // Split on commas and collect only the trailing DC= RDNs (which always form the
+            // DNS domain suffix in AD DNs). Walking backward and stopping at the first non-DC=
+            // component correctly skips leading DC= RDNs on deleted-object tombstones and any
+            // over-split pieces from escaped commas in CN/OU values — DC= values are DNS labels
+            // and never contain commas themselves.
+            var rdns = distinguishedName.Split(',');
+            var dcValues = new List<string>();
+            for (var i = rdns.Length - 1; i >= 0; i--) {
+                var rdn = rdns[i].Trim();
+                if (!rdn.StartsWith("DC=", StringComparison.OrdinalIgnoreCase)) break;
+                dcValues.Add(rdn.Substring(3));
             }
 
-            if (idx < 0)
-                return null;
-
-            var temp = distinguishedName.Substring(idx);
-            temp = DCReplaceRegex.Replace(temp, "").Replace(",", ".").ToUpper();
-            return temp;
+            if (dcValues.Count == 0) return null;
+            dcValues.Reverse();
+            return string.Join(".", dcValues).ToUpper();
         }
 
         /// <summary>

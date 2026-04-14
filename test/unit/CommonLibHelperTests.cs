@@ -235,6 +235,37 @@ namespace CommonLibTest {
         }
 
         [Fact]
+        public void DistinguishedNameToDomain_CNValueStartsWithDCEquals_ReturnsTrailingDCComponents() {
+            // A naive IndexOf("DC=") would hit the "DC=" inside the CN value and return
+            // the wrong domain.  The correct result uses only the trailing DC= RDNs.
+            var result = Helpers.DistinguishedNameToDomain("CN=DC=proxy,CN=Users,DC=corp,DC=com");
+            Assert.Equal("CORP.COM", result);
+        }
+
+        [Fact]
+        public void DistinguishedNameToDomain_DeletedDNSZoneWithLeadingDCRdn_ReturnsCorrectDomain() {
+            // Deleted DNS zone objects have a DC= attribute type on the first RDN.
+            // That leading DC= must not be included in the domain result.
+            var result = Helpers.DistinguishedNameToDomain(
+                @"DC=_msdcs.corp.com\0ADEL:guid,CN=Deleted Objects,DC=corp,DC=com");
+            Assert.Equal("CORP.COM", result);
+        }
+
+        [Fact]
+        public void DistinguishedNameToDomain_EscapedCommaInCN_ReturnsCorrectDomain() {
+            // The escaped comma inside the CN value must not be used as an RDN separator.
+            var result = Helpers.DistinguishedNameToDomain(@"CN=Smith\, John,OU=Sales,DC=corp,DC=com");
+            Assert.Equal("CORP.COM", result);
+        }
+
+        [Fact]
+        public void DistinguishedNameToDomain_DomainOnlyDN_ReturnsCorrectDomain() {
+            // A DN that consists solely of DC= components (e.g. as stored in RootDSE).
+            var result = Helpers.DistinguishedNameToDomain("DC=corp,DC=com");
+            Assert.Equal("CORP.COM", result);
+        }
+
+        [Fact]
         public void ConvertTimestampToUnixEpoch_ValidTimestamp() {
             var d = DateTime.Parse("2025-04-07T00:00:00.0000000-07:00");
             var result =

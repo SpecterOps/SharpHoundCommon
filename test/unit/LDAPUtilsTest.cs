@@ -307,7 +307,7 @@ namespace CommonLibTest {
             var result = InvokeCreateDirectoryEntry(utils, "LDAP://domain.com");
             var entry = ExtractDirectoryEntry(result);
 
-            Assert.Equal("LDAP://dc01.corp.com/domain.com", entry.Path);
+            Assert.Equal("LDAP://dc01.corp.com/DC=domain,DC=com", entry.Path);
         }
 
         [Fact]
@@ -318,7 +318,7 @@ namespace CommonLibTest {
             var result = InvokeCreateDirectoryEntry(utils, "LDAP://domain.com");
             var entry = ExtractDirectoryEntry(result);
 
-            Assert.Equal("LDAP://dc01.corp.com:3636/domain.com", entry.Path);
+            Assert.Equal("LDAP://dc01.corp.com:3636/DC=domain,DC=com", entry.Path);
         }
 
         [Fact]
@@ -329,7 +329,7 @@ namespace CommonLibTest {
             var result = InvokeCreateDirectoryEntry(utils, "LDAP://domain.com");
             var entry = ExtractDirectoryEntry(result);
 
-            Assert.Equal("LDAP://dc01.corp.com/domain.com", entry.Path);
+            Assert.Equal("LDAP://dc01.corp.com/DC=domain,DC=com", entry.Path);
         }
 
         [Fact]
@@ -340,7 +340,7 @@ namespace CommonLibTest {
             var result = InvokeCreateDirectoryEntry(utils, "LDAP://domain.com");
             var entry = ExtractDirectoryEntry(result);
 
-            Assert.Equal("LDAP://dc01.corp.com:1636/domain.com", entry.Path);
+            Assert.Equal("LDAP://dc01.corp.com:1636/DC=domain,DC=com", entry.Path);
         }
 
         [Fact]
@@ -362,7 +362,78 @@ namespace CommonLibTest {
             var result = InvokeCreateDirectoryEntry(utils, "LDAP://domain.com/RootDSE");
             var entry = ExtractDirectoryEntry(result);
 
-            Assert.Equal("LDAP://dc01.corp.com/domain.com/RootDSE", entry.Path);
+            Assert.Equal("LDAP://dc01.corp.com/DC=domain,DC=com/RootDSE", entry.Path);
+        }
+
+        // ---------------------------------------------------------------------------
+        // Path construction – domain-shortcut edge cases
+        // ---------------------------------------------------------------------------
+
+        [Fact]
+        public void CreateDirectoryEntry_ServerSet_SingleLabelDomain_ConvertedToSingleDCPart() {
+            // A domain name with no dots (e.g. a NetBIOS-style name) should become "DC=<name>".
+            var utils = new LdapUtils();
+            utils.SetLdapConfig(new LdapConfig { Server = "dc01.corp.com" });
+
+            var result = InvokeCreateDirectoryEntry(utils, "LDAP://corp");
+            var entry = ExtractDirectoryEntry(result);
+
+            Assert.Equal("LDAP://dc01.corp.com/DC=corp", entry.Path);
+        }
+
+        [Fact]
+        public void CreateDirectoryEntry_ServerSet_ExistingDNPath_ServerInjectedWithoutConversion() {
+            // When the path already carries a proper DN (contains '=') it must be forwarded
+            // verbatim after the server – no DC= conversion should be applied.
+            var utils = new LdapUtils();
+            utils.SetLdapConfig(new LdapConfig { Server = "dc01.corp.com" });
+
+            var result = InvokeCreateDirectoryEntry(utils, "LDAP://DC=domain,DC=com");
+            var entry = ExtractDirectoryEntry(result);
+
+            Assert.Equal("LDAP://dc01.corp.com/DC=domain,DC=com", entry.Path);
+        }
+
+        // ---------------------------------------------------------------------------
+        // Path construction – double injection guard
+        // ---------------------------------------------------------------------------
+
+        [Fact]
+        public void CreateDirectoryEntry_ServerSet_PathAlreadyHasServer_NotInjectedAgain() {
+            // If the path already begins with LDAP://<server>/ the server must not be
+            // prepended a second time.
+            var utils = new LdapUtils();
+            utils.SetLdapConfig(new LdapConfig { Server = "dc01.corp.com" });
+
+            var result = InvokeCreateDirectoryEntry(utils, "LDAP://dc01.corp.com/DC=domain,DC=com");
+            var entry = ExtractDirectoryEntry(result);
+
+            Assert.Equal("LDAP://dc01.corp.com/DC=domain,DC=com", entry.Path);
+        }
+
+        [Fact]
+        public void CreateDirectoryEntry_ServerSet_CustomPort_PathAlreadyHasServerWithPort_NotInjectedAgain() {
+            // Same guard when the path already carries the server with a non-default port.
+            var utils = new LdapUtils();
+            utils.SetLdapConfig(new LdapConfig { Server = "dc01.corp.com", Port = 3636 });
+
+            var result = InvokeCreateDirectoryEntry(utils, "LDAP://dc01.corp.com:3636/DC=domain,DC=com");
+            var entry = ExtractDirectoryEntry(result);
+
+            Assert.Equal("LDAP://dc01.corp.com:3636/DC=domain,DC=com", entry.Path);
+        }
+
+        [Fact]
+        public void CreateDirectoryEntry_ServerSet_PathAlreadyHasServerWithRootDSE_NotInjectedAgain() {
+            // The guard must fire even when the path component after the server is not a DN
+            // (e.g. the special "RootDSE" target used by GetNamingContextPath).
+            var utils = new LdapUtils();
+            utils.SetLdapConfig(new LdapConfig { Server = "dc01.corp.com" });
+
+            var result = InvokeCreateDirectoryEntry(utils, "LDAP://dc01.corp.com/RootDSE");
+            var entry = ExtractDirectoryEntry(result);
+
+            Assert.Equal("LDAP://dc01.corp.com/RootDSE", entry.Path);
         }
 
         // ---------------------------------------------------------------------------
@@ -432,6 +503,7 @@ namespace CommonLibTest {
 
             Assert.Equal("testuser", entry.Username);
             Assert.Equal("LDAP://domain.com", entry.Path);
+            Assert.Equal(AuthenticationTypes.Secure | AuthenticationTypes.Signing | AuthenticationTypes.Sealing, entry.AuthenticationType);
         }
 
         #endregion

@@ -1162,16 +1162,36 @@ namespace SharpHoundCommonLib {
 
             // If a specific server is configured, insert it into the ADSI path so that this
             // call targets the same DC as the connection pool rather than relying on DNS discovery.
-            //   "LDAP://<SID=...>"       → "LDAP://dc01.corp.com:389/<SID=...>"
-            //   "LDAP://domain.com"      → "LDAP://dc01.corp.com/domain.com"
-            //   "LDAP://domain/RootDSE"  → "LDAP://dc01.corp.com/domain/RootDSE"
+            //   "LDAP://<SID=...>"       → "LDAP://dc01.corp.com/<SID=...>"
+            //   "LDAP://domain.com"      → "LDAP://dc01.corp.com/DC=domain,DC=com"
+            //   "LDAP://domain/RootDSE"  → "LDAP://dc01.corp.com/DC=domain/RootDSE"
             // Note: DisableCertVerification cannot be honoured here — there is no ADSI API for it.
-            if (_ldapConfig.Server != null) {
+            var serverTarget = _ldapConfig.GetServerTarget();
+            if (serverTarget != null) {
                 const string ldapPrefix = "LDAP://";
-                var port = _ldapConfig.GetPort(_ldapConfig.ForceSSL);
-                var isDefaultPort = port == (_ldapConfig.ForceSSL ? 636 : 389);
-                var serverTarget = isDefaultPort ? _ldapConfig.Server : $"{_ldapConfig.Server}:{port}";
-                path = $"{ldapPrefix}{serverTarget}/{path.Substring(ldapPrefix.Length)}";
+                var serverPrefix = $"{ldapPrefix}{serverTarget}/";
+
+                // Guard: if the path already begins with "LDAP://<serverTarget>/" the server has
+                // already been injected (e.g. the caller constructed the path from a previous
+                // result).  Injecting again would corrupt the path, so leave it unchanged.
+                if (!path.StartsWith(serverPrefix, StringComparison.OrdinalIgnoreCase)) {
+                    var afterPrefix = path.Substring(ldapPrefix.Length);
+
+                    // Detect domain-shortcut targets: the component before the first '/' contains no '='
+                    // so it is a plain domain name (e.g. "domain.com", "domain") rather than an
+                    // already-valid DN ("DC=domain,DC=com") or an ADSI special moniker ("<SID=...>").
+                    var slashIndex = afterPrefix.IndexOf('/');
+                    var firstComponent = slashIndex >= 0 ? afterPrefix.Substring(0, slashIndex) : afterPrefix;
+                    var suffix = slashIndex >= 0 ? afterPrefix.Substring(slashIndex) : string.Empty;
+
+                    if (!firstComponent.Contains('=')) {
+                        // "domain.com" → "DC=domain,DC=com"; single-label "domain" → "DC=domain"
+                        var dn = string.Join(",", firstComponent.Split('.').Select(part => $"DC={part}"));
+                        path = $"{ldapPrefix}{serverTarget}/{dn}{suffix}";
+                    } else {
+                        path = $"{ldapPrefix}{serverTarget}/{afterPrefix}";
+                    }
+                }
             }
 
             if (_ldapConfig.Username != null) {
@@ -1218,14 +1238,9 @@ namespace SharpHoundCommonLib {
                 options |= ContextOptions.Signing | ContextOptions.Sealing;
             }
 
-            string contextName;
-            if (config.Server != null) {
-                var port = config.GetPort(config.ForceSSL);
-                var isDefaultPort = port == (config.ForceSSL ? 636 : 389);
-                contextName = isDefaultPort ? config.Server : $"{config.Server}:{port}";
-            } else {
-                contextName = domainName; // null = let the runtime discover the current domain
-            }
+            // GetServerTarget() returns null when Server is not set, so the ?? falls through to
+            // domainName — which itself may be null, meaning "let the runtime discover the domain".
+            var contextName = config.GetServerTarget() ?? domainName;
 
             return (contextName, options);
         }
