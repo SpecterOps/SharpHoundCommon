@@ -126,11 +126,11 @@ public class MockDirectoryObject : IDirectoryObject {
 
     public bool TryGetCertificateArrayProperty(string propertyName, out X509Certificate2[] value) {
         if (!TryGetByteArrayProperty(propertyName, out var b)) {
-            value = Array.Empty<X509Certificate2>();
+            value = [];
             return false;
         }
-        
-        value = b.Select(x => new X509Certificate2(x)).ToArray();
+
+        value = b.Select(X509CertificateLoader.LoadCertificate).ToArray();
         return true;
     }
 
