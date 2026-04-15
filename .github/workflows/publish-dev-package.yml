@@ -3,7 +3,8 @@ name: Publish Dev Package
 on:
   push:
     branches:
-      - "v4"
+      - "lfalslev/bed-7878"
+#      - "v4"
 
 jobs:
   update-dev-package:
@@ -16,18 +17,15 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: 8.0.x
+          dotnet-version: 10.0.x
 
       - name: Compute dev version
         id: version
         shell: pwsh
         run: |
           $base_version = dotnet msbuild Directory.Build.props --getProperty:Version
-          $parts = $base_version.Split('.')
-          $parts[2] = [int]$parts[2] + 1
-          $next_version = $parts -join '.'
           $date_stamp = Get-Date -Format 'yyyyMMddHHmm'
-          "dev_version=$next_version-dev.$date_stamp" >> $env:GITHUB_OUTPUT
+          "dev_version=$base_version-dev.$date_stamp" >> $env:GITHUB_OUTPUT
 
       - name: Restore dependencies
         run: dotnet restore

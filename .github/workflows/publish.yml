@@ -23,9 +23,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: |
-              7.0.x
-              5.0.x
+          dotnet-version: 10.0.x
 
       - name: Restore Dependencies
         run: dotnet restore
