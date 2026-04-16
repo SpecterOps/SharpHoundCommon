@@ -362,7 +362,7 @@ namespace CommonLibTest {
             var result = InvokeCreateDirectoryEntry(utils, "LDAP://domain.com/RootDSE");
             var entry = ExtractDirectoryEntry(result);
 
-            Assert.Equal("LDAP://dc01.corp.com/DC=domain,DC=com/RootDSE", entry.Path);
+            Assert.Equal("LDAP://dc01.corp.com/RootDSE", entry.Path);
         }
 
         // ---------------------------------------------------------------------------

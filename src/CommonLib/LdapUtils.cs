@@ -1164,7 +1164,7 @@ namespace SharpHoundCommonLib {
             // call targets the same DC as the connection pool rather than relying on DNS discovery.
             //   "LDAP://<SID=...>"       → "LDAP://dc01.corp.com/<SID=...>"
             //   "LDAP://domain.com"      → "LDAP://dc01.corp.com/DC=domain,DC=com"
-            //   "LDAP://domain/RootDSE"  → "LDAP://dc01.corp.com/DC=domain/RootDSE"
+            //   "LDAP://domain/RootDSE"  → "LDAP://dc01.corp.com/RootDSE"
             // Note: DisableCertVerification cannot be honoured here — there is no ADSI API for it.
             var serverTarget = _ldapConfig.GetServerTarget();
             if (serverTarget != null) {
@@ -1185,9 +1185,17 @@ namespace SharpHoundCommonLib {
                     var suffix = slashIndex >= 0 ? afterPrefix.Substring(slashIndex) : string.Empty;
 
                     if (!firstComponent.Contains('=')) {
-                        // "domain.com" → "DC=domain,DC=com"; single-label "domain" → "DC=domain"
-                        var dn = string.Join(",", firstComponent.Split('.').Select(part => $"DC={part}"));
-                        path = $"{ldapPrefix}{serverTarget}/{dn}{suffix}";
+                        // RootDSE is a special ADSI moniker – when the caller passes a path like
+                        // "LDAP://domain.com/RootDSE" (used by GetNamingContextPath) the domain
+                        // portion is only there for server selection.  We must NOT convert it to
+                        // a DN component; instead just point at the server's RootDSE directly.
+                        if (suffix.Equals("/RootDSE", StringComparison.OrdinalIgnoreCase)) {
+                            path = $"{ldapPrefix}{serverTarget}/RootDSE";
+                        } else {
+                            // "domain.com" → "DC=domain,DC=com"; single-label "domain" → "DC=domain"
+                            var dn = string.Join(",", firstComponent.Split('.').Select(part => $"DC={part}"));
+                            path = $"{ldapPrefix}{serverTarget}/{dn}{suffix}";
+                        }
                     } else {
                         path = $"{ldapPrefix}{serverTarget}/{afterPrefix}";
                     }
