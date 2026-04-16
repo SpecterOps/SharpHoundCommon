@@ -3,8 +3,7 @@ name: Publish Dev Package
 on:
   push:
     branches:
-      - "lfalslev/bed-7878"
-#      - "v4"
+      - "v4"
 
 jobs:
   update-dev-package:
