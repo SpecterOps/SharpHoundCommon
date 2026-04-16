@@ -24,8 +24,11 @@ jobs:
         shell: pwsh
         run: |
           $base_version = dotnet msbuild Directory.Build.props --getProperty:Version
+          $parts = $base_version.Split('.')
+          $parts[2] = [int]$parts[2] + 1
+          $next_version = $parts -join '.'
           $date_stamp = Get-Date -Format 'yyyyMMddHHmm'
-          "dev_version=$base_version-dev.$date_stamp" >> $env:GITHUB_OUTPUT
+          "dev_version=$next_version-dev.$date_stamp" >> $env:GITHUB_OUTPUT
 
       - name: Restore dependencies
         run: dotnet restore
