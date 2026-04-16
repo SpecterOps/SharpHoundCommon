@@ -260,13 +260,19 @@ namespace CommonLibTest {
         // ---------------------------------------------------------------------------
 
         /// <summary>
-        /// Invokes the private CreateDirectoryEntry method via reflection.
+        /// Invokes the static CreateDirectoryEntry method via reflection.
         /// DirectoryEntry does not connect to the server until properties are accessed,
         /// so the call succeeds even with a fake path.
         /// </summary>
         private static IDirectoryObject InvokeCreateDirectoryEntry(LdapUtils utils, string path) {
-            return TestPrivateMethod.InstanceMethod<IDirectoryObject>(utils, "CreateDirectoryEntry",
-                new object[] { path });
+            // Extract the LdapConfig from the LdapUtils instance via reflection.
+            var configField = typeof(LdapUtils).GetField("_ldapConfig",
+                BindingFlags.NonPublic | BindingFlags.Instance);
+            Assert.NotNull(configField);
+            var config = (LdapConfig)configField.GetValue(utils);
+
+            return TestPrivateMethod.StaticMethod<IDirectoryObject>(typeof(LdapUtils),
+                "CreateDirectoryEntry", new object[] { path, config });
         }
 
         /// <summary>

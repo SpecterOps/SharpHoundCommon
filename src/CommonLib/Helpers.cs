@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.DirectoryServices;
 using System.Globalization;
 using System.Linq;
 using System.Security.Principal;
@@ -54,6 +55,71 @@ namespace SharpHoundCommonLib {
             }
 
             return "";
+        }
+        
+        internal static IDirectoryObject CreateDirectoryEntry(string path, LdapConfig config) {
+            // Build AuthenticationTypes flags from LdapConfig.
+            // AuthenticationTypes.Secure requests SSPI (Negotiate) and is the safe default.
+            var authType = AuthenticationTypes.Secure;
+
+            if (config.ForceSSL) {
+                authType |= AuthenticationTypes.SecureSocketsLayer;
+            }
+
+            // Mirror the connection pool's logic: signing and sealing are mutually exclusive with
+            // SSL (the transport already provides integrity) and are skipped when DisableSigning is set.
+            if (!config.DisableSigning && !config.ForceSSL) {
+                authType |= AuthenticationTypes.Signing | AuthenticationTypes.Sealing;
+            }
+
+            // If a specific server is configured, insert it into the ADSI path so that this
+            // call targets the same DC as the connection pool rather than relying on DNS discovery.
+            //   "LDAP://<SID=...>"       → "LDAP://dc01.corp.com/<SID=...>"
+            //   "LDAP://domain.com"      → "LDAP://dc01.corp.com/DC=domain,DC=com"
+            //   "LDAP://domain/RootDSE"  → "LDAP://dc01.corp.com/RootDSE"
+            // Note: DisableCertVerification cannot be honoured here — there is no ADSI API for it.
+            var serverTarget = config.GetServerTarget();
+            if (serverTarget != null) {
+                const string ldapPrefix = "LDAP://";
+                var serverPrefix = $"{ldapPrefix}{serverTarget}/";
+
+                // Guard: if the path already begins with "LDAP://<serverTarget>/" the server has
+                // already been injected (e.g. the caller constructed the path from a previous
+                // result).  Injecting again would corrupt the path, so leave it unchanged.
+                if (!path.StartsWith(serverPrefix, StringComparison.OrdinalIgnoreCase)) {
+                    var afterPrefix = path.Substring(ldapPrefix.Length);
+
+                    // Detect domain-shortcut targets: the component before the first '/' contains no '='
+                    // so it is a plain domain name (e.g. "domain.com", "domain") rather than an
+                    // already-valid DN ("DC=domain,DC=com") or an ADSI special moniker ("<SID=...>").
+                    var slashIndex = afterPrefix.IndexOf('/');
+                    var firstComponent = slashIndex >= 0 ? afterPrefix.Substring(0, slashIndex) : afterPrefix;
+                    var suffix = slashIndex >= 0 ? afterPrefix.Substring(slashIndex) : string.Empty;
+
+                    if (!firstComponent.Contains('=')) {
+                        // RootDSE is a special ADSI moniker – when the caller passes a path like
+                        // "LDAP://domain.com/RootDSE" (used by GetNamingContextPath) the domain
+                        // portion is only there for server selection.  We must NOT convert it to
+                        // a DN component; instead just point at the server's RootDSE directly.
+                        if (suffix.Equals("/RootDSE", StringComparison.OrdinalIgnoreCase)) {
+                            path = $"{ldapPrefix}{serverTarget}/RootDSE";
+                        } else {
+                            // "domain.com" → "DC=domain,DC=com"; single-label "domain" → "DC=domain"
+                            var dn = string.Join(",", firstComponent.Split('.').Select(part => $"DC={part}"));
+                            path = $"{ldapPrefix}{serverTarget}/{dn}{suffix}";
+                        }
+                    } else {
+                        path = $"{ldapPrefix}{serverTarget}/{afterPrefix}";
+                    }
+                }
+            }
+
+            if (config.Username != null) {
+                return new DirectoryEntry(path, config.Username, config.Password, authType)
+                    .ToDirectoryObject();
+            }
+
+            return new DirectoryEntry(path) { AuthenticationType = authType }.ToDirectoryObject();
         }
 
         /// <summary>
