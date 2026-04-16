@@ -42,7 +42,7 @@ namespace SharpHoundCommonLib.Processors {
             };
         }
 
-        public ACLProcessor(ILdapUtils utils, string TEST_BREAKING_CHANGE, ILogger log = null)
+        public ACLProcessor(ILdapUtils utils, ILogger log = null)
         {
             _utils = utils;
             _log = log ?? Logging.LogProvider.CreateLogger("ACLProc");
