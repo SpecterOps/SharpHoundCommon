@@ -2,6 +2,10 @@ name: Publish Dev Package
 
 on:
   push:
+    workflow_run:
+      workflows: ["Build and Test"]
+      types:
+        - completed
     branches:
       - "lfalslev/bed-7878"
 #      - "v4"
@@ -10,7 +14,6 @@ jobs:
   update-dev-package:
     name: update-dev-package
     runs-on: windows-latest
-    needs: build-and-test
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
