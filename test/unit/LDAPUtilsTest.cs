@@ -271,7 +271,7 @@ namespace CommonLibTest {
             Assert.NotNull(configField);
             var config = (LdapConfig)configField.GetValue(utils);
 
-            return TestPrivateMethod.StaticMethod<IDirectoryObject>(typeof(LdapUtils),
+            return TestPrivateMethod.StaticMethod<IDirectoryObject>(typeof(Helpers),
                 "CreateDirectoryEntry", new object[] { path, config });
         }
 
