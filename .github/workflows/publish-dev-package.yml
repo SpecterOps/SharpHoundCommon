@@ -10,6 +10,7 @@ jobs:
   update-dev-package:
     name: update-dev-package
     runs-on: windows-latest
+    needs: build-and-test
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
