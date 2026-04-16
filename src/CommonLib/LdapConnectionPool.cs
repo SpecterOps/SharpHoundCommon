@@ -642,7 +642,7 @@ namespace SharpHoundCommonLib {
                     continue;
                 }
 
-                if (response?.Entries.Count == 1) {
+                if (response.Entries.Count == 1) {
                     var entry = response.Entries[0];
                     //We dont know the name of our attribute, but there should only be one, so we're safe to just use a loop here
                     foreach (string attr in entry.Attributes.AttributeNames) {
