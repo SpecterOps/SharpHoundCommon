@@ -2,10 +2,6 @@ name: Publish Dev Package
 
 on:
   push:
-    workflow_run:
-      workflows: ["Build and Test"]
-      types:
-        - completed
     branches:
       - "lfalslev/bed-7878"
 #      - "v4"
