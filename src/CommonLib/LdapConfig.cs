@@ -35,6 +35,19 @@ namespace SharpHoundCommonLib
             return ssl ? 3269 : 3268;
         }
 
+        /// <summary>
+        /// Returns the server-target string used in ADSI paths and <see cref="System.DirectoryServices.AccountManagement.PrincipalContext"/> bindings:
+        /// <c>"server"</c> when the port is the protocol default, or <c>"server:port"</c> when a
+        /// non-default port is configured. Returns <c>null</c> when <see cref="Server"/> is not set.
+        /// </summary>
+        public string GetServerTarget()
+        {
+            if (string.IsNullOrWhiteSpace(Server)) return null;
+            var port = GetPort(ForceSSL);
+            var isDefaultPort = port == (ForceSSL ? 636 : 389);
+            return isDefaultPort ? Server : $"{Server}:{port}";
+        }
+
         public override string ToString() {
             var sb = new StringBuilder();
             sb.AppendLine($"Server: {Server}");
@@ -51,6 +64,41 @@ namespace SharpHoundCommonLib
                 sb.AppendLine($"Password: {new string('*', Password.Length)}");    
             }
             return sb.ToString();
+        }
+
+        public string GetConfigWarnings() {
+            var builder = new StringBuilder();
+            var hasWarning = false;
+            if (!string.IsNullOrWhiteSpace(Server)) {
+                hasWarning = true;
+                builder.AppendLine("-------------LDAP CONFIG WARNINGS-------------");
+                builder.AppendLine($"-Explicit Server has been set to {Server}, this can degrade cross domain lookups");
+            }
+
+            if (ForceSSL && DisableCertVerification) {
+                if (!hasWarning) {
+                    builder.AppendLine("-------------LDAP CONFIG WARNINGS-------------");
+                }
+
+                hasWarning = true;
+                builder.AppendLine("-Not all calls are able to respect DisableCertVerification, lookups may fail");
+            }
+
+            if (DisableSigning) {
+                if (!hasWarning) {
+                    builder.AppendLine("-------------LDAP CONFIG WARNINGS-------------");
+                }
+
+                hasWarning = true;
+                builder.AppendLine("-Signing is disabled, regular LDAP traffic will be in plaintext");
+            }
+
+            if (hasWarning) {
+                builder.AppendLine("----------------------------------------------");
+                return builder.ToString();
+            }
+
+            return string.Empty;
         }
     }
 }
