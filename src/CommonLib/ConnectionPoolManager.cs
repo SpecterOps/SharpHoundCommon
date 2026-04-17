@@ -83,11 +83,8 @@ namespace SharpHoundCommonLib {
             }
 
             var resolved = ResolveIdentifier(identifier);
-            if (!_pools.TryGetValue(resolved, out var pool)) {
-                pool = new LdapConnectionPool(identifier, resolved, _ldapConfig, scanner: _portScanner);
-                _pools.TryAdd(resolved, pool);
-            }
-
+            var pool = _pools.GetOrAdd(resolved, _ => new LdapConnectionPool(identifier, resolved, _ldapConfig, scanner: _portScanner));
+            
             return (true, pool);
         }
 

@@ -53,6 +53,10 @@ public class ConcurrentHashSet : IDisposable{
         return _backingDictionary.Keys;
     }
 
+    public void Clear() {
+        _backingDictionary?.Clear();
+    }
+
     public void Dispose() {
         _backingDictionary = null;
         GC.SuppressFinalize(this);
