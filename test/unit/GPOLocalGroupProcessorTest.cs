@@ -147,7 +147,7 @@ namespace CommonLibTest {
 
             var processor = new GPOLocalGroupProcessor(mockLDAPUtils.Object);
             var testGPLinkProperty =
-                "[LDAP:/o=foo/ou=foo Group (ABC123)/cn=foouser (blah)123/dc=somedomain;0;][LDAP:/o=foo/ou=foo Group (ABC123)/cn=foouser (blah)123/dc=someotherdomain;2;]";
+                "[LDAP://CN={ECAD920E-8EB1-4E31-A80E-DD36367F81F4},CN=Policies,CN=System,DC=somedomain;0][LDAP://CN={ECAD920E-8EB1-4E31-A80E-DD36367F81F4},CN=Policies,CN=System,DC=someotherdomain;2]";
             var result = await processor.ReadGPOLocalGroups(testGPLinkProperty, "DC=Testlab,DC=Local");
 
             Assert.Single(result.AffectedComputers);
@@ -234,7 +234,7 @@ namespace CommonLibTest {
                         y.SearchScope.Equals(SearchScope.Base) &&
                         y.Attributes.Contains(LDAPProperties.GPCFileSYSPath) &&
                         y.Attributes.Contains(LDAPProperties.Flags) &&
-                        y.SearchBase.Equals("cn=foouser (blah)123/dc=somedomain", StringComparison.OrdinalIgnoreCase) &&
+                        y.SearchBase.Equals("CN={ECAD920E-8EB1-4E31-A80E-DD36367F81F4},CN=Policies,CN=System,DC=somedomain", StringComparison.OrdinalIgnoreCase) &&
                         y.DomainName.Equals("somedomain", StringComparison.OrdinalIgnoreCase)),
                     It.IsAny<CancellationToken>()))
                 .Returns(result0.ToAsyncEnumerable);
@@ -245,7 +245,7 @@ namespace CommonLibTest {
                         y.SearchScope.Equals(SearchScope.Base) &&
                         y.Attributes.Contains(LDAPProperties.GPCFileSYSPath) &&
                         y.Attributes.Contains(LDAPProperties.Flags) &&
-                        y.SearchBase.Equals("cn=foouser (blah)123/dc=someotherdomain", StringComparison.OrdinalIgnoreCase) &&
+                        y.SearchBase.Equals("CN={ECAD920E-8EB1-4E31-A80E-DD36367F81F4},CN=Policies,CN=System,DC=someotherdomain", StringComparison.OrdinalIgnoreCase) &&
                         y.DomainName.Equals("someotherdomain", StringComparison.OrdinalIgnoreCase)),
                     It.IsAny<CancellationToken>()))
                 .Returns(result1.ToAsyncEnumerable);
@@ -256,7 +256,7 @@ namespace CommonLibTest {
                         y.SearchScope.Equals(SearchScope.Base) &&
                         y.Attributes.Contains(LDAPProperties.GPCFileSYSPath) &&
                         y.Attributes.Contains(LDAPProperties.Flags) &&
-                        y.SearchBase.Equals("cn=foouser (blah)123/dc=somethirddomain", StringComparison.OrdinalIgnoreCase) &&
+                        y.SearchBase.Equals("CN={ECAD920E-8EB1-4E31-A80E-DD36367F81F4},CN=Policies,CN=System,DC=somethirddomain", StringComparison.OrdinalIgnoreCase) &&
                         y.DomainName.Equals("somethirddomain", StringComparison.OrdinalIgnoreCase)),
                     It.IsAny<CancellationToken>()))
                 .Returns(result2.ToAsyncEnumerable);
@@ -267,16 +267,16 @@ namespace CommonLibTest {
                         y.SearchScope.Equals(SearchScope.Base) &&
                         y.Attributes.Contains(LDAPProperties.GPCFileSYSPath) &&
                         y.Attributes.Contains(LDAPProperties.Flags) &&
-                        y.SearchBase.Equals("cn=foouser (blah)123/dc=somefourthdomain", StringComparison.OrdinalIgnoreCase) &&
+                        y.SearchBase.Equals("CN={ECAD920E-8EB1-4E31-A80E-DD36367F81F4},CN=Policies,CN=System,DC=somefourthdomain", StringComparison.OrdinalIgnoreCase) &&
                         y.DomainName.Equals("somefourthdomain", StringComparison.OrdinalIgnoreCase)),
                     It.IsAny<CancellationToken>()))
                 .Returns(result3.ToAsyncEnumerable);
-            
+
             var processor = new GPOLocalGroupProcessor(mockLDAPUtils.Object);
-            var testGPLinkProperty0 = "[LDAP:/o=foo/ou=foo Group (ABC123)/cn=foouser (blah)123/dc=somedomain;0;]";
-            var testGPLinkProperty1 = "[LDAP:/o=foo/ou=foo Group (ABC123)/cn=foouser (blah)123/dc=someotherdomain;0;]";
-            var testGPLinkProperty2 = "[LDAP:/o=foo/ou=foo Group (ABC123)/cn=foouser (blah)123/dc=somethirddomain;0;]";
-            var testGPLinkProperty3 = "[LDAP:/o=foo/ou=foo Group (ABC123)/cn=foouser (blah)123/dc=somefourthdomain;0;]";
+            var testGPLinkProperty0 = "[LDAP://CN={ECAD920E-8EB1-4E31-A80E-DD36367F81F4},CN=Policies,CN=System,DC=somedomain;0]";
+            var testGPLinkProperty1 = "[LDAP://CN={ECAD920E-8EB1-4E31-A80E-DD36367F81F4},CN=Policies,CN=System,DC=someotherdomain;0]";
+            var testGPLinkProperty2 = "[LDAP://CN={ECAD920E-8EB1-4E31-A80E-DD36367F81F4},CN=Policies,CN=System,DC=somethirddomain;0]";
+            var testGPLinkProperty3 = "[LDAP://CN={ECAD920E-8EB1-4E31-A80E-DD36367F81F4},CN=Policies,CN=System,DC=somefourthdomain;0]";
             
             // Act
             var act0 = await processor.ReadGPOLocalGroups(testGPLinkProperty0, "DC=Testlab,DC=Local");
@@ -330,7 +330,7 @@ namespace CommonLibTest {
             
 
             var testGPLinkProperty =
-                "[LDAP:/o=foo/ou=foo Group (ABC123)/cn=foouser (blah)123/dc=somedomain;0;][LDAP:/o=foo/ou=foo Group (ABC123)/cn=foouser (blah)123/dc=someotherdomain;2;]";
+                "[LDAP://CN={ECAD920E-8EB1-4E31-A80E-DD36367F81F4},CN=Policies,CN=System,DC=somedomain;0][LDAP://CN={ECAD920E-8EB1-4E31-A80E-DD36367F81F4},CN=Policies,CN=System,DC=someotherdomain;2]";
             var result = await processor.ReadGPOLocalGroups(testGPLinkProperty, null);
             
             //mockLDAPUtils.VerifyAll();
