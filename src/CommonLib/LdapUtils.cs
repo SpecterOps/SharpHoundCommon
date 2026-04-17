@@ -174,7 +174,7 @@ namespace SharpHoundCommonLib {
             }
 
             try {
-                var entry = CreateDirectoryEntry($"LDAP://<SID={sid}>");
+                var entry = Helpers.CreateDirectoryEntry($"LDAP://<SID={sid}>", _ldapConfig);
                 if (entry.GetLabel(out type)) {
                     Cache.AddType(sid, type);
                     return (true, type);
@@ -185,7 +185,7 @@ namespace SharpHoundCommonLib {
             }
 
             try {
-                using (var ctx = new PrincipalContext(ContextType.Domain)) {
+                using (var ctx = CreatePrincipalContext(_ldapConfig, tempDomain)) {
                     // Blocking External Call
                     var principal = Principal.FindByIdentity(ctx, IdentityType.Sid, sid);
                     if (principal != null) {
@@ -223,7 +223,7 @@ namespace SharpHoundCommonLib {
             }
 
             try {
-                var entry = CreateDirectoryEntry($"LDAP://<GUID={guid}>");
+                var entry = Helpers.CreateDirectoryEntry($"LDAP://<GUID={guid}>", _ldapConfig);
                 if (entry.GetLabel(out type)) {
                     Cache.AddType(guid, type);
                     return (true, type);
@@ -234,7 +234,7 @@ namespace SharpHoundCommonLib {
             }
 
             try {
-                using (var ctx = new PrincipalContext(ContextType.Domain)) {
+                using (var ctx = CreatePrincipalContext(_ldapConfig, domain)) {
                     // Blocking External Call
                     var principal = Principal.FindByIdentity(ctx, IdentityType.Guid, guid);
                     if (principal != null) {
@@ -358,7 +358,7 @@ namespace SharpHoundCommonLib {
             }
 
             try {
-                var entry = CreateDirectoryEntry($"LDAP://<SID={domainSid}>");
+                var entry = Helpers.CreateDirectoryEntry($"LDAP://<SID={domainSid}>", _ldapConfig);
                 if (entry.TryGetDistinguishedName(out var dn)) {
                     Cache.AddDomainSidMapping(domainSid, Helpers.DistinguishedNameToDomain(dn));
                     return (true, Helpers.DistinguishedNameToDomain(dn));
@@ -374,7 +374,7 @@ namespace SharpHoundCommonLib {
             }
 
             try {
-                using (var ctx = new PrincipalContext(ContextType.Domain)) {
+                using (var ctx = CreatePrincipalContext(_ldapConfig)) {
                     // Blocking External Call
                     var principal = Principal.FindByIdentity(ctx, IdentityType.Sid, sid);
                     if (principal != null) {
@@ -440,7 +440,7 @@ namespace SharpHoundCommonLib {
             if (Cache.GetDomainSidMapping(domainName, out var domainSid)) return (true, domainSid);
 
             try {
-                var entry = CreateDirectoryEntry($"LDAP://{domainName}");
+                var entry = Helpers.CreateDirectoryEntry($"LDAP://{domainName}", _ldapConfig);
                 //Force load objectsid into the object cache
                 if (entry.TryGetSecurityIdentifier(out var sid)) {
                     Cache.AddDomainSidMapping(domainName, sid);
@@ -951,7 +951,7 @@ namespace SharpHoundCommonLib {
             }
 
             try {
-                using (var ctx = new PrincipalContext(ContextType.Domain)) {
+                using (var ctx = CreatePrincipalContext(_ldapConfig, domain)) {
                     // Blocking External Call
                     var lookupPrincipal =
                         Principal.FindByIdentity(ctx, IdentityType.DistinguishedName, distinguishedName);
@@ -1096,7 +1096,7 @@ namespace SharpHoundCommonLib {
             };
 
             try {
-                var entry = CreateDirectoryEntry($"LDAP://{domain}/RootDSE");
+                var entry = Helpers.CreateDirectoryEntry($"LDAP://{domain}/RootDSE", _ldapConfig);
                 if (entry.TryGetProperty(property, out var searchBase)) {
                     return (true, searchBase);
                 }
@@ -1145,12 +1145,75 @@ namespace SharpHoundCommonLib {
             LdapMetrics.ResetInFlight();
         }
 
-        private IDirectoryObject CreateDirectoryEntry(string path) {
-            if (_ldapConfig.Username != null) {
-                return new DirectoryEntry(path, _ldapConfig.Username, _ldapConfig.Password).ToDirectoryObject();
+        /// <summary>
+        /// Computes the <c>contextName</c> and <see cref="ContextOptions"/> that should be passed
+        /// to a <see cref="PrincipalContext"/> for a given <see cref="LdapConfig"/>.
+        ///
+        /// <para>
+        /// Separated from <see cref="CreatePrincipalContext"/> so that the parameter-building logic
+        /// can be unit-tested without constructing a real <see cref="PrincipalContext"/> (which
+        /// would require a live directory connection).
+        /// </para>
+        ///
+        /// <para>
+        /// When <see cref="LdapConfig.Server"/> is set, the server hostname is returned as
+        /// <c>contextName</c> so that <see cref="PrincipalContext"/> binds to that specific DC
+        /// rather than relying on domain-level DNS discovery. Non-standard ports are expressed as
+        /// <c>host:port</c>. Otherwise <paramref name="domainName"/> is returned as-is (null = let
+        /// the runtime discover the current domain).
+        /// </para>
+        ///
+        /// <para>
+        /// Signing and sealing are disabled when SSL is active, mirroring the mutual-exclusion rule
+        /// applied by <see cref="LdapConnectionPool.CreateBaseConnection"/>.
+        /// </para>
+        /// </summary>
+        internal static (string ContextName, ContextOptions Options) BuildPrincipalContextParameters(
+            LdapConfig config, string domainName = null) {
+            var options = ContextOptions.Negotiate;
+
+            if (config.ForceSSL) {
+                options |= ContextOptions.SecureSocketLayer;
             }
 
-            return new DirectoryEntry(path).ToDirectoryObject();
+            // Signing and sealing are mutually exclusive with SSL (the transport provides integrity).
+            if (!config.DisableSigning && !config.ForceSSL) {
+                options |= ContextOptions.Signing | ContextOptions.Sealing;
+            }
+
+            // GetServerTarget() returns null when Server is not set, so the ?? falls through to
+            // domainName — which itself may be null, meaning "let the runtime discover the domain".
+            var contextName = config.GetServerTarget() ?? domainName;
+
+            return (contextName, options);
+        }
+
+        /// <summary>
+        /// Creates a <see cref="PrincipalContext"/> that targets the same DC as the connection pool
+        /// and applies the same SSL / signing / credential settings from <paramref name="config"/>.
+        ///
+        /// <para>
+        /// <see cref="ContextType.Domain"/> is always used. When <see cref="LdapConfig.Server"/> is
+        /// set, the server hostname is passed as the <c>name</c> argument so the runtime binds to
+        /// that specific DC rather than performing domain-level DNS discovery.
+        /// </para>
+        ///
+        /// <para>Note: <see cref="LdapConfig.DisableCertVerification"/> cannot be applied here —
+        /// <see cref="PrincipalContext"/> exposes no API for it.</para>
+        ///
+        /// <para>This is intentionally <c>static</c> so that Moq's Castle.DynamicProxy does not
+        /// encounter <see cref="PrincipalContext"/> in an instance-method signature when building
+        /// test proxies against <see cref="LdapUtils"/> on non-Windows runtimes.</para>
+        /// </summary>
+        private static PrincipalContext CreatePrincipalContext(LdapConfig config, string domainName = null) {
+            var (contextName, options) = BuildPrincipalContextParameters(config, domainName);
+
+            if (config.Username != null) {
+                return new PrincipalContext(ContextType.Domain, contextName, null, options,
+                    config.Username, config.Password);
+            }
+
+            return new PrincipalContext(ContextType.Domain, contextName, null, options);
         }
 
         public void Dispose() {

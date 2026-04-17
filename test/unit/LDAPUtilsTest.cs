@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.DirectoryServices;
+using System.DirectoryServices.AccountManagement;
 using System.DirectoryServices.ActiveDirectory;
+using System.Reflection;
 using System.Runtime.Versioning;
 using System.Threading.Tasks;
 using CommonLibTest.Facades;
@@ -249,6 +252,363 @@ namespace CommonLibTest {
             Assert.Equal("TESTLAB.LOCAL", result.Domain);
             Assert.False(result.Deleted);
         }
+
+        #region CreateDirectoryEntry Tests
+
+        // ---------------------------------------------------------------------------
+        // Helpers
+        // ---------------------------------------------------------------------------
+
+        /// <summary>
+        /// Invokes the static CreateDirectoryEntry method via reflection.
+        /// DirectoryEntry does not connect to the server until properties are accessed,
+        /// so the call succeeds even with a fake path.
+        /// </summary>
+        private static IDirectoryObject InvokeCreateDirectoryEntry(LdapUtils utils, string path) {
+            // Extract the LdapConfig from the LdapUtils instance via reflection.
+            var configField = typeof(LdapUtils).GetField("_ldapConfig",
+                BindingFlags.NonPublic | BindingFlags.Instance);
+            Assert.NotNull(configField);
+            var config = (LdapConfig)configField.GetValue(utils);
+
+            return TestPrivateMethod.StaticMethod<IDirectoryObject>(typeof(Helpers),
+                "CreateDirectoryEntry", new object[] { path, config });
+        }
+
+        /// <summary>
+        /// Extracts the underlying DirectoryEntry from its DirectoryEntryWrapper so that
+        /// Path and AuthenticationType can be inspected without triggering a network call.
+        /// </summary>
+        private static DirectoryEntry ExtractDirectoryEntry(IDirectoryObject directoryObject) {
+            var entryField = directoryObject.GetType()
+                .GetField("_entry", BindingFlags.NonPublic | BindingFlags.Instance);
+            Assert.NotNull(entryField);
+            return (DirectoryEntry)entryField.GetValue(directoryObject);
+        }
+
+        // ---------------------------------------------------------------------------
+        // Path construction – no server configured
+        // ---------------------------------------------------------------------------
+
+        [Fact]
+        public void CreateDirectoryEntry_NoServer_PathIsUnchanged() {
+            var utils = new LdapUtils();
+            utils.SetLdapConfig(new LdapConfig());
+
+            var result = InvokeCreateDirectoryEntry(utils, "LDAP://domain.com");
+            var entry = ExtractDirectoryEntry(result);
+
+            Assert.Equal("LDAP://domain.com", entry.Path);
+        }
+
+        // ---------------------------------------------------------------------------
+        // Path construction – server configured
+        // ---------------------------------------------------------------------------
+
+        [Fact]
+        public void CreateDirectoryEntry_ServerSet_DefaultPort_InjectsServerWithoutPort() {
+            var utils = new LdapUtils();
+            utils.SetLdapConfig(new LdapConfig { Server = "dc01.corp.com" });
+
+            var result = InvokeCreateDirectoryEntry(utils, "LDAP://domain.com");
+            var entry = ExtractDirectoryEntry(result);
+
+            Assert.Equal("LDAP://dc01.corp.com/DC=domain,DC=com", entry.Path);
+        }
+
+        [Fact]
+        public void CreateDirectoryEntry_ServerSet_CustomPort_InjectsServerWithPort() {
+            var utils = new LdapUtils();
+            utils.SetLdapConfig(new LdapConfig { Server = "dc01.corp.com", Port = 3636 });
+
+            var result = InvokeCreateDirectoryEntry(utils, "LDAP://domain.com");
+            var entry = ExtractDirectoryEntry(result);
+
+            Assert.Equal("LDAP://dc01.corp.com:3636/DC=domain,DC=com", entry.Path);
+        }
+
+        [Fact]
+        public void CreateDirectoryEntry_ServerSet_ForceSSL_DefaultSSLPort_InjectsServerWithoutPort() {
+            var utils = new LdapUtils();
+            utils.SetLdapConfig(new LdapConfig { Server = "dc01.corp.com", ForceSSL = true });
+
+            var result = InvokeCreateDirectoryEntry(utils, "LDAP://domain.com");
+            var entry = ExtractDirectoryEntry(result);
+
+            Assert.Equal("LDAP://dc01.corp.com/DC=domain,DC=com", entry.Path);
+        }
+
+        [Fact]
+        public void CreateDirectoryEntry_ServerSet_ForceSSL_CustomSSLPort_InjectsServerWithPort() {
+            var utils = new LdapUtils();
+            utils.SetLdapConfig(new LdapConfig { Server = "dc01.corp.com", ForceSSL = true, SSLPort = 1636 });
+
+            var result = InvokeCreateDirectoryEntry(utils, "LDAP://domain.com");
+            var entry = ExtractDirectoryEntry(result);
+
+            Assert.Equal("LDAP://dc01.corp.com:1636/DC=domain,DC=com", entry.Path);
+        }
+
+        [Fact]
+        public void CreateDirectoryEntry_ServerSet_SIDPath_InjectsServerBeforeSIDMoniiker() {
+            var utils = new LdapUtils();
+            utils.SetLdapConfig(new LdapConfig { Server = "dc01.corp.com" });
+
+            var result = InvokeCreateDirectoryEntry(utils, "LDAP://<SID=S-1-5-21-123>");
+            var entry = ExtractDirectoryEntry(result);
+
+            Assert.Equal("LDAP://dc01.corp.com/<SID=S-1-5-21-123>", entry.Path);
+        }
+
+        [Fact]
+        public void CreateDirectoryEntry_ServerSet_RootDSEPath_InjectsServerBeforeSuffix() {
+            var utils = new LdapUtils();
+            utils.SetLdapConfig(new LdapConfig { Server = "dc01.corp.com" });
+
+            var result = InvokeCreateDirectoryEntry(utils, "LDAP://domain.com/RootDSE");
+            var entry = ExtractDirectoryEntry(result);
+
+            Assert.Equal("LDAP://dc01.corp.com/RootDSE", entry.Path);
+        }
+
+        // ---------------------------------------------------------------------------
+        // Path construction – domain-shortcut edge cases
+        // ---------------------------------------------------------------------------
+
+        [Fact]
+        public void CreateDirectoryEntry_ServerSet_SingleLabelDomain_ConvertedToSingleDCPart() {
+            // A domain name with no dots (e.g. a NetBIOS-style name) should become "DC=<name>".
+            var utils = new LdapUtils();
+            utils.SetLdapConfig(new LdapConfig { Server = "dc01.corp.com" });
+
+            var result = InvokeCreateDirectoryEntry(utils, "LDAP://corp");
+            var entry = ExtractDirectoryEntry(result);
+
+            Assert.Equal("LDAP://dc01.corp.com/DC=corp", entry.Path);
+        }
+
+        [Fact]
+        public void CreateDirectoryEntry_ServerSet_ExistingDNPath_ServerInjectedWithoutConversion() {
+            // When the path already carries a proper DN (contains '=') it must be forwarded
+            // verbatim after the server – no DC= conversion should be applied.
+            var utils = new LdapUtils();
+            utils.SetLdapConfig(new LdapConfig { Server = "dc01.corp.com" });
+
+            var result = InvokeCreateDirectoryEntry(utils, "LDAP://DC=domain,DC=com");
+            var entry = ExtractDirectoryEntry(result);
+
+            Assert.Equal("LDAP://dc01.corp.com/DC=domain,DC=com", entry.Path);
+        }
+
+        // ---------------------------------------------------------------------------
+        // Path construction – double injection guard
+        // ---------------------------------------------------------------------------
+
+        [Fact]
+        public void CreateDirectoryEntry_ServerSet_PathAlreadyHasServer_NotInjectedAgain() {
+            // If the path already begins with LDAP://<server>/ the server must not be
+            // prepended a second time.
+            var utils = new LdapUtils();
+            utils.SetLdapConfig(new LdapConfig { Server = "dc01.corp.com" });
+
+            var result = InvokeCreateDirectoryEntry(utils, "LDAP://dc01.corp.com/DC=domain,DC=com");
+            var entry = ExtractDirectoryEntry(result);
+
+            Assert.Equal("LDAP://dc01.corp.com/DC=domain,DC=com", entry.Path);
+        }
+
+        [Fact]
+        public void CreateDirectoryEntry_ServerSet_CustomPort_PathAlreadyHasServerWithPort_NotInjectedAgain() {
+            // Same guard when the path already carries the server with a non-default port.
+            var utils = new LdapUtils();
+            utils.SetLdapConfig(new LdapConfig { Server = "dc01.corp.com", Port = 3636 });
+
+            var result = InvokeCreateDirectoryEntry(utils, "LDAP://dc01.corp.com:3636/DC=domain,DC=com");
+            var entry = ExtractDirectoryEntry(result);
+
+            Assert.Equal("LDAP://dc01.corp.com:3636/DC=domain,DC=com", entry.Path);
+        }
+
+        [Fact]
+        public void CreateDirectoryEntry_ServerSet_PathAlreadyHasServerWithRootDSE_NotInjectedAgain() {
+            // The guard must fire even when the path component after the server is not a DN
+            // (e.g. the special "RootDSE" target used by GetNamingContextPath).
+            var utils = new LdapUtils();
+            utils.SetLdapConfig(new LdapConfig { Server = "dc01.corp.com" });
+
+            var result = InvokeCreateDirectoryEntry(utils, "LDAP://dc01.corp.com/RootDSE");
+            var entry = ExtractDirectoryEntry(result);
+
+            Assert.Equal("LDAP://dc01.corp.com/RootDSE", entry.Path);
+        }
+
+        // ---------------------------------------------------------------------------
+        // AuthenticationTypes – matching connection pool logic
+        // ---------------------------------------------------------------------------
+
+        [Fact]
+        public void CreateDirectoryEntry_Default_HasSecureSigningAndSealing() {
+            var utils = new LdapUtils();
+            utils.SetLdapConfig(new LdapConfig()); // ForceSSL=false, DisableSigning=false
+
+            var result = InvokeCreateDirectoryEntry(utils, "LDAP://domain.com");
+            var entry = ExtractDirectoryEntry(result);
+
+            var expected = AuthenticationTypes.Secure | AuthenticationTypes.Signing | AuthenticationTypes.Sealing;
+            Assert.Equal(expected, entry.AuthenticationType);
+        }
+
+        [Fact]
+        public void CreateDirectoryEntry_ForceSSL_HasSecureSSLOnly_NoSigningOrSealing() {
+            var utils = new LdapUtils();
+            utils.SetLdapConfig(new LdapConfig { ForceSSL = true });
+
+            var result = InvokeCreateDirectoryEntry(utils, "LDAP://domain.com");
+            var entry = ExtractDirectoryEntry(result);
+
+            var expected = AuthenticationTypes.Secure | AuthenticationTypes.SecureSocketsLayer;
+            Assert.Equal(expected, entry.AuthenticationType);
+            Assert.Equal(AuthenticationTypes.None, entry.AuthenticationType & AuthenticationTypes.Signing);
+            Assert.Equal(AuthenticationTypes.None, entry.AuthenticationType & AuthenticationTypes.Sealing);
+        }
+
+        [Fact]
+        public void CreateDirectoryEntry_DisableSigning_HasSecureOnly() {
+            var utils = new LdapUtils();
+            utils.SetLdapConfig(new LdapConfig { DisableSigning = true });
+
+            var result = InvokeCreateDirectoryEntry(utils, "LDAP://domain.com");
+            var entry = ExtractDirectoryEntry(result);
+
+            Assert.Equal(AuthenticationTypes.Secure, entry.AuthenticationType);
+        }
+
+        [Fact]
+        public void CreateDirectoryEntry_ForceSSLAndDisableSigning_HasSecureSSLOnly() {
+            var utils = new LdapUtils();
+            utils.SetLdapConfig(new LdapConfig { ForceSSL = true, DisableSigning = true });
+
+            var result = InvokeCreateDirectoryEntry(utils, "LDAP://domain.com");
+            var entry = ExtractDirectoryEntry(result);
+
+            var expected = AuthenticationTypes.Secure | AuthenticationTypes.SecureSocketsLayer;
+            Assert.Equal(expected, entry.AuthenticationType);
+        }
+
+        // ---------------------------------------------------------------------------
+        // Credentials
+        // ---------------------------------------------------------------------------
+
+        [Fact]
+        public void CreateDirectoryEntry_WithCredentials_UsernameAndPasswordApplied() {
+            var utils = new LdapUtils();
+            utils.SetLdapConfig(new LdapConfig { Username = "testuser", Password = "testpass" });
+
+            var result = InvokeCreateDirectoryEntry(utils, "LDAP://domain.com");
+            var entry = ExtractDirectoryEntry(result);
+
+            Assert.Equal("testuser", entry.Username);
+            Assert.Equal("LDAP://domain.com", entry.Path);
+            Assert.Equal(AuthenticationTypes.Secure | AuthenticationTypes.Signing | AuthenticationTypes.Sealing, entry.AuthenticationType);
+        }
+
+        #endregion
+
+        #region BuildPrincipalContextParameters Tests
+
+        // ---------------------------------------------------------------------------
+        // contextName – no server configured
+        // ---------------------------------------------------------------------------
+
+        [Fact]
+        public void BuildPrincipalContextParameters_NoServer_NoDomain_ContextNameIsNull() {
+            var (contextName, _) = LdapUtils.BuildPrincipalContextParameters(new LdapConfig());
+            Assert.Null(contextName);
+        }
+
+        [Fact]
+        public void BuildPrincipalContextParameters_NoServer_DomainProvided_ContextNameIsDomain() {
+            var (contextName, _) = LdapUtils.BuildPrincipalContextParameters(new LdapConfig(), "testlab.local");
+            Assert.Equal("testlab.local", contextName);
+        }
+
+        // ---------------------------------------------------------------------------
+        // contextName – server configured
+        // ---------------------------------------------------------------------------
+
+        [Fact]
+        public void BuildPrincipalContextParameters_ServerSet_DefaultPort_ContextNameIsServerOnly() {
+            var config = new LdapConfig { Server = "dc01.corp.com" };
+            var (contextName, _) = LdapUtils.BuildPrincipalContextParameters(config);
+            Assert.Equal("dc01.corp.com", contextName);
+        }
+
+        [Fact]
+        public void BuildPrincipalContextParameters_ServerSet_CustomPort_ContextNameIncludesPort() {
+            var config = new LdapConfig { Server = "dc01.corp.com", Port = 3636 };
+            var (contextName, _) = LdapUtils.BuildPrincipalContextParameters(config);
+            Assert.Equal("dc01.corp.com:3636", contextName);
+        }
+
+        [Fact]
+        public void BuildPrincipalContextParameters_ServerSet_DomainIgnoredWhenServerPresent() {
+            // The domain name should be ignored when a server is explicitly configured.
+            var config = new LdapConfig { Server = "dc01.corp.com" };
+            var (contextName, _) = LdapUtils.BuildPrincipalContextParameters(config, "testlab.local");
+            Assert.Equal("dc01.corp.com", contextName);
+        }
+
+        [Fact]
+        public void BuildPrincipalContextParameters_ServerSet_ForceSSL_DefaultSSLPort_ContextNameIsServerOnly() {
+            var config = new LdapConfig { Server = "dc01.corp.com", ForceSSL = true };
+            var (contextName, _) = LdapUtils.BuildPrincipalContextParameters(config);
+            Assert.Equal("dc01.corp.com", contextName);
+        }
+
+        [Fact]
+        public void BuildPrincipalContextParameters_ServerSet_ForceSSL_CustomSSLPort_ContextNameIncludesPort() {
+            var config = new LdapConfig { Server = "dc01.corp.com", ForceSSL = true, SSLPort = 1636 };
+            var (contextName, _) = LdapUtils.BuildPrincipalContextParameters(config);
+            Assert.Equal("dc01.corp.com:1636", contextName);
+        }
+
+        // ---------------------------------------------------------------------------
+        // ContextOptions – mirroring connection pool's mutual-exclusion rule
+        // ---------------------------------------------------------------------------
+
+        [Fact]
+        public void BuildPrincipalContextParameters_Default_HasNegotiateSigningAndSealing() {
+            var (_, options) = LdapUtils.BuildPrincipalContextParameters(new LdapConfig());
+            var expected = ContextOptions.Negotiate | ContextOptions.Signing | ContextOptions.Sealing;
+            Assert.Equal(expected, options);
+        }
+
+        [Fact]
+        public void BuildPrincipalContextParameters_ForceSSL_HasNegotiateAndSSLOnly_NoSigningOrSealing() {
+            var config = new LdapConfig { ForceSSL = true };
+            var (_, options) = LdapUtils.BuildPrincipalContextParameters(config);
+            var expected = ContextOptions.Negotiate | ContextOptions.SecureSocketLayer;
+            Assert.Equal(expected, options);
+            Assert.Equal((ContextOptions)0, options & ContextOptions.Signing);
+            Assert.Equal((ContextOptions)0, options & ContextOptions.Sealing);
+        }
+
+        [Fact]
+        public void BuildPrincipalContextParameters_DisableSigning_HasNegotiateOnly() {
+            var config = new LdapConfig { DisableSigning = true };
+            var (_, options) = LdapUtils.BuildPrincipalContextParameters(config);
+            Assert.Equal(ContextOptions.Negotiate, options);
+        }
+
+        [Fact]
+        public void BuildPrincipalContextParameters_ForceSSLAndDisableSigning_HasNegotiateAndSSLOnly() {
+            var config = new LdapConfig { ForceSSL = true, DisableSigning = true };
+            var (_, options) = LdapUtils.BuildPrincipalContextParameters(config);
+            var expected = ContextOptions.Negotiate | ContextOptions.SecureSocketLayer;
+            Assert.Equal(expected, options);
+        }
+
+        #endregion
 
         [Fact]
         public async Task Test_ResolveHostToSid_BlankHost() {

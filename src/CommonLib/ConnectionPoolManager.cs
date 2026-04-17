@@ -83,11 +83,8 @@ namespace SharpHoundCommonLib {
             }
 
             var resolved = ResolveIdentifier(identifier);
-            if (!_pools.TryGetValue(resolved, out var pool)) {
-                pool = new LdapConnectionPool(identifier, resolved, _ldapConfig, scanner: _portScanner);
-                _pools.TryAdd(resolved, pool);
-            }
-
+            var pool = _pools.GetOrAdd(resolved, _ => new LdapConnectionPool(identifier, resolved, _ldapConfig, scanner: _portScanner));
+            
             return (true, pool);
         }
 
@@ -139,7 +136,7 @@ namespace SharpHoundCommonLib {
             if (Cache.GetDomainSidMapping(domainName, out var domainSid)) return (true, domainSid);
 
             try {
-                var entry = new DirectoryEntry($"LDAP://{domainName}").ToDirectoryObject();
+                var entry = Helpers.CreateDirectoryEntry($"LDAP://{domainName}", _ldapConfig);
                 if (entry.TryGetSecurityIdentifier(out var sid)) {
                     Cache.AddDomainSidMapping(domainName, sid);
                     return (true, sid);

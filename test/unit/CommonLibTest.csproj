@@ -25,6 +25,7 @@
         <PackageReference Include="Moq" Version="4.16.1" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
         <PackageReference Include="System.DirectoryServices" Version="8.0.0" />
+        <PackageReference Include="System.DirectoryServices.AccountManagement" Version="8.0.0" />
         <PackageReference Include="System.DirectoryServices.Protocols" Version="8.0.0" />
         <PackageReference Include="Xbehave" Version="2.4.1" />
         <PackageReference Include="xunit" Version="2.4.1" />
