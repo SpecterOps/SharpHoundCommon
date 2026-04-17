@@ -11,17 +11,17 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # ratchet:actions/checkout@v6
 
       - name: Parse Version
-        uses: web3j/substr-action@v1.2
+        uses: web3j/substr-action@b4d735ad319ec9616c1e15965f83fddf4b1a44ab # ratchet:web3j/substr-action@v1.2
         id: version
         with:
           value: ${{ github.ref_name }}
           start: 1
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # ratchet:actions/setup-dotnet@v5
         with:
           dotnet-version: 10.0.x
 
@@ -32,25 +32,25 @@ jobs:
         run: dotnet test # coverage happens by default
 
       - name: Upload Coverage Report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # ratchet:actions/upload-artifact@v7
         with:
           name: report
           path: docfx/coverage/report/
 
       - name: Pack
-        run: | 
+        run: |
           mkdir pkgs
           dotnet pack --no-restore -c Release -p:PackageVersion=${{ steps.version.outputs.result }} -o ./pkgs
-        
-#      - name: Prep Packages
-#        run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/BloodHoundAD/index.json"
 
-#      - name: Publish to GitHub Packages
-#        run: dotnet nuget push *.nupkg --api-key ${{ secrets.GITHUB_TOKEN }} --source "github"
-#
-#      - name: Publish NuGet
-#        run: dotnet nuget push *.nupkg -s https://api.nuget.org/v3/index.json -k ${{ secrets.NUGET_TOKEN }} --skip-duplicate
-        
+        #      - name: Prep Packages
+        #        run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/BloodHoundAD/index.json"
+
+        #      - name: Publish to GitHub Packages
+        #        run: dotnet nuget push *.nupkg --api-key ${{ secrets.GITHUB_TOKEN }} --source "github"
+        #
+        #      - name: Publish NuGet
+        #        run: dotnet nuget push *.nupkg -s https://api.nuget.org/v3/index.json -k ${{ secrets.NUGET_TOKEN }} --skip-duplicate
+
       - name: Publish to SpecterOps Packages
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
@@ -58,28 +58,28 @@ jobs:
         run: |
           dotnet tool install -g sleet
           sleet push ./pkgs --skip-existing
-        
+
   ghpages:
     name: ghpages
     needs: nuget
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v2
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # ratchet:actions/checkout@v6
 
       - name: Download Coverage Report
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # ratchet:actions/download-artifact@v8
         with:
           name: report
           path: docfx/coverage/report
 
       - name: Build Documentation
-        uses: nikeee/docfx-action@v1.0.0
+        uses: nikeee/docfx-action@b9c2cf92e3b4aa06878a1410833a8828b4bdcd26 # ratchet:nikeee/docfx-action@v1.0.0
         with:
           args: docfx/docfx.json
 
       - name: Deploy GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@4.1.4
+        uses: JamesIves/github-pages-deploy-action@d92aa235d04922e8f08b40ce78cc5442fcfbfa2f # ratchet:JamesIves/github-pages-deploy-action@v4.8.0
         with:
           branch: gh-pages
           folder: docs
