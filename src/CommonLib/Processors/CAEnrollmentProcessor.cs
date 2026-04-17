@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
+using System.Security.Authentication;
 using System.Threading.Tasks;
 
 namespace SharpHoundCommonLib.Processors {
@@ -18,13 +19,11 @@ namespace SharpHoundCommonLib.Processors {
         private readonly string _caName;
         private readonly ILogger _logger;
 
-        public CAEnrollmentProcessor(string caDnsHostname, string caName, ILogger log = null) {
-            ServicePointManager.SecurityProtocol |=
-                SecurityProtocolType.Ssl3
-                | SecurityProtocolType.Tls12
-                | SecurityProtocolType.Tls11
-                | SecurityProtocolType.Tls;
+        // TLS1.3 is not available in .Net Framework 4.7.2, but the enum can still be assigned.
+        private const SslProtocols CaEnrollmentSslProtocols =
+            SslProtocols.Ssl3 | SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Tls12 | (SslProtocols)12288;
 
+        public CAEnrollmentProcessor(string caDnsHostname, string caName, ILogger log = null) {
             _caDnsHostname = caDnsHostname;
             _caName = caName;
             _logger = log ?? Logging.LogProvider.CreateLogger("CAEnrollmentProcessor");
@@ -48,7 +47,7 @@ namespace SharpHoundCommonLib.Processors {
             } catch (Exception ex) {
                 _logger.LogError(ex, "An error occurred while scanning enrollment endpoints");
             }
-            
+
             endpoints = TagEndpoints(endpoints).ToList();
 
             return endpoints;
@@ -59,7 +58,7 @@ namespace SharpHoundCommonLib.Processors {
             foreach (var endpoint in tagEndpoints) {
                 if (!endpoint.Collected)
                     continue;
-                
+
                 var enrollmentEndpoint = endpoint.Result;
                 if (enrollmentEndpoint.Url.Scheme != Uri.UriSchemeHttps) {
                     switch (enrollmentEndpoint.Status) {
@@ -126,7 +125,7 @@ namespace SharpHoundCommonLib.Processors {
         private async Task<APIResult<CAEnrollmentEndpoint>> GetNtlmEndpoint(Uri url, bool? useBadChannelBinding,
             CAEnrollmentEndpointType type, CAEnrollmentEndpointScanResult scanResult) {
             var authService = new HttpNtlmAuthenticationService(
-                new HttpClientFactory()
+                new NtlmHttpClientFactory(CaEnrollmentSslProtocols)
             );
 
             var output = new CAEnrollmentEndpoint(url, type, scanResult);
