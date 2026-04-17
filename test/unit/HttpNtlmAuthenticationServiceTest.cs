@@ -25,7 +25,7 @@ namespace CommonLibTest {
 
         [Fact]
         public void HttpNtlmAuthenticationService_ExtractAuthSchemes_AuthNotRequiredException() {
-            var service = new HttpNtlmAuthenticationService(new HttpClientFactory(), null);
+            var service = new HttpNtlmAuthenticationService(new NtlmHttpClientFactory(), null);
             var httpResponseMessage = new HttpResponseMessage {
                 StatusCode = HttpStatusCode.OK,
             };
@@ -37,7 +37,7 @@ namespace CommonLibTest {
 
         [Fact]
         public void HttpNtlmAuthenticationService_ExtractAuthSchemes_HttpForbiddenException() {
-            var service = new HttpNtlmAuthenticationService(new HttpClientFactory(), null);
+            var service = new HttpNtlmAuthenticationService(new NtlmHttpClientFactory(), null);
             var httpResponseMessage = new HttpResponseMessage {
                 StatusCode = HttpStatusCode.Forbidden,
             };
@@ -49,7 +49,7 @@ namespace CommonLibTest {
 
         [Fact]
         public void HttpNtlmAuthenticationService_ExtractAuthSchemes_HttpServerErrorException() {
-            var service = new HttpNtlmAuthenticationService(new HttpClientFactory(), null);
+            var service = new HttpNtlmAuthenticationService(new NtlmHttpClientFactory(), null);
             var httpResponseMessage = new HttpResponseMessage {
                 StatusCode = HttpStatusCode.InternalServerError,
             };
@@ -61,7 +61,7 @@ namespace CommonLibTest {
 
         [Fact]
         public void HttpNtlmAuthenticationService_ExtractAuthSchemes_Success() {
-            var service = new HttpNtlmAuthenticationService(new HttpClientFactory(), null);
+            var service = new HttpNtlmAuthenticationService(new NtlmHttpClientFactory(), null);
             var httpResponseMessage = new HttpResponseMessage();
             httpResponseMessage.StatusCode = HttpStatusCode.Accepted;
             httpResponseMessage.Headers.WwwAuthenticate.Add(
