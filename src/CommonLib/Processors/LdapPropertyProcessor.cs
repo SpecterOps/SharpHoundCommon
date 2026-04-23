@@ -8,6 +8,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using SharpHoundCommonLib.DirectoryObjects;
 using SharpHoundCommonLib.Enums;
 using SharpHoundCommonLib.LDAPQueries;
 using SharpHoundCommonLib.OutputTypes;
@@ -37,10 +38,12 @@ namespace SharpHoundCommonLib.Processors {
 
         private readonly ILdapUtils _utils;
         private readonly ILogger _log;
+        private readonly ACLProcessor _aclProcessor;
 
         public LdapPropertyProcessor(ILdapUtils utils, ILogger log = null) {
             _utils = utils;
             _log = log ?? Logging.LogProvider.CreateLogger(nameof(LdapPropertyProcessor));
+            _aclProcessor = new ACLProcessor(utils, _log);
         }
 
         private static Dictionary<string, object> GetCommonProps(IDirectoryObject entry) {
@@ -78,6 +81,7 @@ namespace SharpHoundCommonLib.Processors {
         /// <returns></returns>
         public async Task<Dictionary<string, object>> ReadDomainProperties(IDirectoryObject entry, string domain) {
             var props = GetCommonProps(entry);
+            await AddCustomDenyAceProperty(props, entry, domain, Label.Domain);
 
             if (entry.TryGetProperty(LDAPProperties.ExpirePasswordsOnSmartCardOnlyAccounts, out var expirePassword) &&
                 bool.TryParse(expirePassword, out var expirePasswordBool)) {
@@ -178,8 +182,9 @@ namespace SharpHoundCommonLib.Processors {
         /// </summary>
         /// <param name="entry"></param>
         /// <returns></returns>
-        public static Dictionary<string, object> ReadGPOProperties(IDirectoryObject entry) {
+        public async Task<Dictionary<string, object>> ReadGPOProperties(IDirectoryObject entry) {
             var props = GetCommonProps(entry);
+            await AddCustomDenyAceProperty(props, entry, GetEntryDomain(entry), Label.GPO);
             entry.TryGetProperty(LDAPProperties.GPCFileSYSPath, out var path);
             props.Add("gpcpath", path.ToUpper());
             entry.TryGetProperty(LDAPProperties.Flags, out var flags);
@@ -192,8 +197,9 @@ namespace SharpHoundCommonLib.Processors {
         /// </summary>
         /// <param name="entry"></param>
         /// <returns></returns>
-        public static Dictionary<string, object> ReadOUProperties(IDirectoryObject entry) {
+        public async Task<Dictionary<string, object>> ReadOUProperties(IDirectoryObject entry) {
             var props = GetCommonProps(entry);
+            await AddCustomDenyAceProperty(props, entry, GetEntryDomain(entry), Label.OU);
             return props;
         }
         
@@ -212,6 +218,7 @@ namespace SharpHoundCommonLib.Processors {
         {
             var groupProperties = new GroupProperties();
             var props = GetCommonProps(entry);
+            await AddCustomDenyAceProperty(props, entry, domain, Label.Group);
             entry.TryGetLongProperty(LDAPProperties.AdminCount, out var ac);
             props.Add("admincount", ac != 0);
             entry.TryGetLongProperty(LDAPProperties.GroupType, out var groupType);
@@ -230,8 +237,10 @@ namespace SharpHoundCommonLib.Processors {
         /// </summary>
         /// <param name="entry"></param>
         /// <returns></returns>
-        public static Dictionary<string, object> ReadContainerProperties(IDirectoryObject entry) {
+        public async Task<Dictionary<string, object>> ReadContainerProperties(IDirectoryObject entry) {
             var props = GetCommonProps(entry);
+            var objectType = entry.GetLabel(out var label) ? label : Label.Container;
+            await AddCustomDenyAceProperty(props, entry, GetEntryDomain(entry), objectType);
             return props;
         }
 
@@ -249,6 +258,7 @@ namespace SharpHoundCommonLib.Processors {
         public async Task<UserProperties> ReadUserProperties(IDirectoryObject entry, string domain) {
             var userProps = new UserProperties();
             var props = GetCommonProps(entry);
+            await AddCustomDenyAceProperty(props, entry, domain, Label.User);
 
             if (entry.TryGetLongProperty(LDAPProperties.UserAccountControl, out var uac)) {
               var uacFlags = (UacFlags)uac;
@@ -364,6 +374,7 @@ namespace SharpHoundCommonLib.Processors {
         public async Task<ComputerProperties> ReadComputerProperties(IDirectoryObject entry, string domain) {
             var compProps = new ComputerProperties();
             var props = GetCommonProps(entry);
+            await AddCustomDenyAceProperty(props, entry, domain, Label.Computer);
 
             var flags = (UacFlags)0;
             if (entry.TryGetLongProperty(LDAPProperties.UserAccountControl, out var uac)) {
@@ -468,8 +479,9 @@ namespace SharpHoundCommonLib.Processors {
         /// </summary>
         /// <param name="entry"></param>
         /// <returns>Returns a dictionary with the common properties of the RootCA</returns>
-        public static Dictionary<string, object> ReadRootCAProperties(IDirectoryObject entry) {
+        public async Task<Dictionary<string, object>> ReadRootCAProperties(IDirectoryObject entry) {
             var props = GetCommonProps(entry);
+            await AddCustomDenyAceProperty(props, entry, GetEntryDomain(entry), Label.RootCA);
 
             // Certificate
             if (entry.TryGetByteProperty(LDAPProperties.CACertificate, out var rawCertificate) && HasBytes(rawCertificate)) {
@@ -489,8 +501,9 @@ namespace SharpHoundCommonLib.Processors {
         /// </summary>
         /// <param name="entry"></param>
         /// <returns>Returns a dictionary with the common properties and the crosscertificatepair property of the AICA</returns>
-        public static Dictionary<string, object> ReadAIACAProperties(IDirectoryObject entry) {
+        public async Task<Dictionary<string, object>> ReadAIACAProperties(IDirectoryObject entry) {
             var props = GetCommonProps(entry);
+            await AddCustomDenyAceProperty(props, entry, GetEntryDomain(entry), Label.AIACA);
             entry.TryGetByteArrayProperty(LDAPProperties.CrossCertificatePair, out var crossCertificatePair);
             var hasCrossCertificatePair = crossCertificatePair.Length > 0;
 
@@ -515,8 +528,9 @@ namespace SharpHoundCommonLib.Processors {
         /// </summary>
         /// <param name="entry"></param>
         /// <returns>Returns a dictionary with the common properties and the caname, hostname, and flags properties of the EnterpriseCA</returns>
-        public static Dictionary<string, object> ReadEnterpriseCAProperties(IDirectoryObject entry) {
+        public async Task<Dictionary<string, object>> ReadEnterpriseCAProperties(IDirectoryObject entry) {
             var props = GetCommonProps(entry);
+            await AddCustomDenyAceProperty(props, entry, GetEntryDomain(entry), Label.EnterpriseCA);
             if (entry.TryGetLongProperty("flags", out var flags))
                 props.Add("flags", (PKICertificateAuthorityFlags)flags);
             props.Add("caname", entry.GetProperty(LDAPProperties.Name));
@@ -540,8 +554,9 @@ namespace SharpHoundCommonLib.Processors {
         /// </summary>
         /// <param name="entry"></param>
         /// <returns>Returns a dictionary with the common properties of the NTAuthStore</returns>
-        public static Dictionary<string, object> ReadNTAuthStoreProperties(IDirectoryObject entry) {
+        public async Task<Dictionary<string, object>> ReadNTAuthStoreProperties(IDirectoryObject entry) {
             var props = GetCommonProps(entry);
+            await AddCustomDenyAceProperty(props, entry, GetEntryDomain(entry), Label.NTAuthStore);
             return props;
         }
 
@@ -550,8 +565,9 @@ namespace SharpHoundCommonLib.Processors {
         /// </summary>
         /// <param name="entry"></param>
         /// <returns>Returns a dictionary associated with the CertTemplate properties that were read</returns>
-        public static Dictionary<string, object> ReadCertTemplateProperties(IDirectoryObject entry) {
+        public async Task<Dictionary<string, object>> ReadCertTemplateProperties(IDirectoryObject entry) {
             var props = GetCommonProps(entry);
+            await AddCustomDenyAceProperty(props, entry, GetEntryDomain(entry), Label.CertTemplate);
 
             props.Add("validityperiod", ConvertPKIPeriod(entry.GetByteProperty(LDAPProperties.PKIExpirationPeriod)));
             props.Add("renewalperiod", ConvertPKIPeriod(entry.GetByteProperty(LDAPProperties.PKIOverlappedPeriod)));
@@ -636,6 +652,7 @@ namespace SharpHoundCommonLib.Processors {
         public async Task<IssuancePolicyProperties> ReadIssuancePolicyProperties(IDirectoryObject entry) {
             var ret = new IssuancePolicyProperties();
             var props = GetCommonProps(entry);
+            await AddCustomDenyAceProperty(props, entry, GetEntryDomain(entry), Label.IssuancePolicy);
             props.Add("displayname", entry.GetProperty(LDAPProperties.DisplayName));
             props.Add("certtemplateoid", entry.GetProperty(LDAPProperties.CertTemplateOID));
 
@@ -648,6 +665,23 @@ namespace SharpHoundCommonLib.Processors {
 
             ret.Props = props;
             return ret;
+        }
+
+        private async Task AddCustomDenyAceProperty(Dictionary<string, object> props, IDirectoryObject entry,
+            string domain, Label objectType) {
+            if (!entry.TryGetByteProperty(LDAPProperties.SecurityDescriptor, out var ntSecurityDescriptor)) {
+                return;
+            }
+
+            entry.TryGetDistinguishedName(out var distinguishedName);
+            await _aclProcessor.AddCustomDenyAcesProperty(props, ntSecurityDescriptor, domain, objectType,
+                distinguishedName, entry.IsMSA() || entry.IsGMSA(), distinguishedName ?? string.Empty);
+        }
+
+        private static string GetEntryDomain(IDirectoryObject entry) {
+            return entry.TryGetDistinguishedName(out var distinguishedName)
+                ? Helpers.DistinguishedNameToDomain(distinguishedName)
+                : string.Empty;
         }
 
         /// <summary>

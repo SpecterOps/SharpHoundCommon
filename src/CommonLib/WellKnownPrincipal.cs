@@ -5,6 +5,8 @@ namespace SharpHoundCommonLib
 {
     public static class WellKnownPrincipal
     {
+        public const string EveryoneSid = "S-1-1-0";
+
         /// <summary>
         ///     Gets the principal associated with a well known SID
         /// </summary>
@@ -18,7 +20,7 @@ namespace SharpHoundCommonLib
                 "S-1-0" => new TypedPrincipal("Null Authority", Label.User),
                 "S-1-0-0" => new TypedPrincipal("Nobody", Label.User),
                 "S-1-1" => new TypedPrincipal("World Authority", Label.User),
-                "S-1-1-0" => new TypedPrincipal("Everyone", Label.Group),
+                EveryoneSid => new TypedPrincipal("Everyone", Label.Group),
                 "S-1-2" => new TypedPrincipal("Local Authority", Label.User),
                 "S-1-2-0" => new TypedPrincipal("Local", Label.Group),
                 "S-1-2-1" => new TypedPrincipal("Console Logon", Label.Group),

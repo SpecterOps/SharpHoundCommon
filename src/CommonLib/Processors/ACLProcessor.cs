@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using SharpHoundCommonLib.DirectoryObjects;
 using SharpHoundCommonLib.Enums;
+using SharpHoundCommonLib.LDAPQueries;
 using SharpHoundCommonLib.OutputTypes;
 using System.Linq;
 
@@ -20,7 +21,15 @@ namespace SharpHoundCommonLib.Processors {
         private readonly ILogger _log;
         private readonly ILdapUtils _utils;
         private readonly ConcurrentHashSet _builtDomainCaches = new(StringComparer.OrdinalIgnoreCase);
+        private readonly ConcurrentDictionary<string, string[]> _exchangeTrusteeSidCache = new(StringComparer.OrdinalIgnoreCase);
         private readonly object _lock = new();
+        // These Exchange principals commonly carry product-added deny ACEs that we intentionally suppress.
+        private static readonly HashSet<string> ExchangeTrusteeNames = new(StringComparer.OrdinalIgnoreCase) {
+            "Exchange Windows Permissions",
+            "Exchange Trusted Subsystem",
+            "Exchange Servers",
+            "Organization Management"
+        };
 
         static ACLProcessor() {
             //Create a dictionary with the base GUIDs of each object type
@@ -879,6 +888,175 @@ namespace SharpHoundCommonLib.Processors {
                         };
                 }
             }
+        }
+
+        public Task<string[]> GetCustomDenyAces(ResolvedSearchResult result, IDirectoryObject searchResult) {
+            if (!searchResult.TryGetByteProperty(LDAPProperties.SecurityDescriptor, out var descriptor)) {
+                return Task.FromResult(Array.Empty<string>());
+            }
+
+            searchResult.TryGetDistinguishedName(out var distinguishedName);
+            return GetCustomDenyAces(
+                descriptor,
+                result.Domain,
+                result.ObjectType,
+                distinguishedName,
+                searchResult.IsMSA() || searchResult.IsGMSA(),
+                result.DisplayName);
+        }
+
+        public async Task<string[]> GetCustomDenyAces(byte[] ntSecurityDescriptor, string objectDomain,
+            Label objectType, string distinguishedName = null, bool isMSA = false, string objectName = "") {
+            if (ntSecurityDescriptor == null) {
+                return Array.Empty<string>();
+            }
+
+            RawSecurityDescriptor descriptor;
+            try {
+                descriptor = new RawSecurityDescriptor(ntSecurityDescriptor, 0);
+            }
+            catch (OverflowException) {
+                _log.LogWarning(
+                    "Security descriptor on object {Name} exceeds maximum allowable length. Unable to process custom deny ACEs",
+                    objectName);
+                return Array.Empty<string>();
+            }
+
+            if (descriptor.DiscretionaryAcl == null || descriptor.DiscretionaryAcl.Count == 0) {
+                return Array.Empty<string>();
+            }
+
+            var results = new List<string>();
+
+            // Walk the raw DACL so we can preserve deny ACE ordering and serialize each ACE back to SDDL verbatim.
+            foreach (GenericAce ace in descriptor.DiscretionaryAcl) {
+                if (!TryGetDenyAceData(ace, out var principalSid, out var rights, out var objectAceType)) {
+                    continue;
+                }
+
+                if (await ShouldExcludeCustomDenyAce(principalSid, rights, objectAceType, objectDomain, objectType,
+                        distinguishedName, isMSA)) {
+                    continue;
+                }
+
+                var sddl = SerializeAceToSddl(ace);
+                if (!string.IsNullOrWhiteSpace(sddl)) {
+                    results.Add(sddl);
+                }
+            }
+
+            return results.Count == 0 ? Array.Empty<string>() : results.ToArray();
+        }
+
+        public async Task AddCustomDenyAcesProperty(Dictionary<string, object> props, byte[] ntSecurityDescriptor,
+            string objectDomain, Label objectType, string distinguishedName = null, bool isMSA = false,
+            string objectName = "") {
+            var customDenyAces = await GetCustomDenyAces(ntSecurityDescriptor, objectDomain, objectType,
+                distinguishedName, isMSA, objectName);
+
+            if (customDenyAces.Length > 0) {
+                props[LDAPProperties.CustomDenyAces] = customDenyAces;
+            }
+        }
+
+        private static bool TryGetDenyAceData(GenericAce ace, out string principalSid, out ActiveDirectoryRights rights,
+            out Guid objectAceType) {
+            principalSid = null;
+            rights = 0;
+            objectAceType = Guid.Empty;
+
+            switch (ace) {
+                case CommonAce commonAce when commonAce.AceQualifier == AceQualifier.AccessDenied:
+                    principalSid = commonAce.SecurityIdentifier?.Value;
+                    rights = (ActiveDirectoryRights)commonAce.AccessMask;
+                    return !string.IsNullOrWhiteSpace(principalSid);
+                case ObjectAce objectAce when objectAce.AceQualifier == AceQualifier.AccessDenied:
+                    principalSid = objectAce.SecurityIdentifier?.Value;
+                    rights = (ActiveDirectoryRights)objectAce.AccessMask;
+                    objectAceType = objectAce.ObjectAceType;
+                    return !string.IsNullOrWhiteSpace(principalSid);
+                default:
+                    return false;
+            }
+        }
+
+        private async Task<bool> ShouldExcludeCustomDenyAce(string principalSid, ActiveDirectoryRights rights,
+            Guid objectAceType, string objectDomain, Label objectType, string distinguishedName, bool isMSA) {
+            // Filter Exchange Deny ACEs
+            if (!string.IsNullOrWhiteSpace(distinguishedName) &&
+                distinguishedName.IndexOf(DirectoryPaths.ExchangeLocation, StringComparison.OrdinalIgnoreCase) >= 0) {
+                return true;
+            }
+
+            if (await IsExchangeTrustee(principalSid, objectDomain)) {
+                return true;
+            }
+
+            // Filter default Everyone Deny ACEs
+            if (principalSid.Equals(WellKnownPrincipal.EveryoneSid, StringComparison.OrdinalIgnoreCase)) {
+                if ((objectType is Label.OU or Label.Container) &&
+                    rights.HasFlag(ActiveDirectoryRights.Delete) &&
+                    rights.HasFlag(ActiveDirectoryRights.DeleteTree)) {
+                    return true;
+                }
+
+                if (isMSA &&
+                    rights.HasFlag(ActiveDirectoryRights.ExtendedRight) &&
+                    objectAceType.Equals(new Guid(ACEGuids.UserForceChangePassword))) {
+                    return true;
+                }
+
+                if (objectType == Label.Domain && rights.HasFlag(ActiveDirectoryRights.DeleteChild)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private async Task<bool> IsExchangeTrustee(string principalSid, string objectDomain) {
+            if (string.IsNullOrWhiteSpace(principalSid) || string.IsNullOrWhiteSpace(objectDomain)) {
+                return false;
+            }
+
+            if (_exchangeTrusteeSidCache.TryGetValue(objectDomain, out var cachedSids)) {
+                return cachedSids.Contains(principalSid, StringComparer.OrdinalIgnoreCase);
+            }
+
+            // Well-known principals never match the Exchange groups we are suppressing.
+            if (WellKnownPrincipal.GetWellKnownPrincipal(principalSid, out _)) {
+                return false;
+            }
+
+            // Resolve the small fixed set of Exchange trustee names once per domain using the shared name -> ID cache path.
+            var resolvedSids = new List<string>();
+            foreach (var trusteeName in ExchangeTrusteeNames) {
+                if (await _utils.ResolveAccountName(trusteeName, objectDomain) is (true, var principal) &&
+                    !string.IsNullOrWhiteSpace(principal.ObjectIdentifier)) {
+                    resolvedSids.Add(principal.ObjectIdentifier);
+                }
+            }
+
+            var exchangeTrusteeSids = resolvedSids.Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
+            _exchangeTrusteeSidCache.TryAdd(objectDomain, exchangeTrusteeSids);
+            return exchangeTrusteeSids.Contains(principalSid, StringComparer.OrdinalIgnoreCase);
+        }
+
+        private static string SerializeAceToSddl(GenericAce ace) {
+            // Rehydrate the ACE inside a one-entry DACL and let the framework emit the canonical ACE SDDL for us.
+            var acl = new RawAcl(ace is ObjectAce ? GenericAcl.AclRevisionDS : GenericAcl.AclRevision, 1);
+            acl.InsertAce(0, CloneAce(ace));
+
+            var descriptor = new RawSecurityDescriptor(ControlFlags.DiscretionaryAclPresent, null, null, null, acl);
+            var sddl = descriptor.GetSddlForm(AccessControlSections.Access);
+
+            return sddl.StartsWith("D:", StringComparison.OrdinalIgnoreCase) ? sddl.Substring(2) : sddl;
+        }
+
+        private static GenericAce CloneAce(GenericAce ace) {
+            var buffer = new byte[ace.BinaryLength];
+            ace.GetBinaryForm(buffer, 0);
+            return GenericAce.CreateFromBinaryForm(buffer, 0);
         }
 
 
