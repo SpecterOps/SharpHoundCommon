@@ -154,7 +154,7 @@ namespace CommonLibTest
             var processor = new LdapPropertyProcessor(ldapUtils);
             var test = await processor.ReadOUProperties(mock);
 
-            Assert.DoesNotContain(LDAPProperties.CustomDenyAces, test.Keys);
+            Assert.DoesNotContain("customdenyaces", test.Keys);
         }
 
         [Fact]

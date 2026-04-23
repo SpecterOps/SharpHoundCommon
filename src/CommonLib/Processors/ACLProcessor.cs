@@ -955,7 +955,7 @@ namespace SharpHoundCommonLib.Processors {
                 distinguishedName, isMSA, objectName);
 
             if (customDenyAces.Length > 0) {
-                props[LDAPProperties.CustomDenyAces] = customDenyAces;
+                props["customdenyaces"] = customDenyAces;
             }
         }
 
