@@ -677,9 +677,12 @@ namespace SharpHoundCommonLib.Processors {
                 return;
             }
 
-            entry.TryGetDistinguishedName(out var distinguishedName);
+            var distinguishedName = entry.TryGetDistinguishedName(out var dn) ? dn : string.Empty;
+            var objectName = entry.TryGetProperty(LDAPProperties.SAMAccountName, out var samAccountName)
+                ? samAccountName
+                : distinguishedName;
             await _aclProcessor.AddCustomDenyAcesProperty(props, ntSecurityDescriptor, domain, objectType,
-                distinguishedName, entry.IsMSA() || entry.IsGMSA(), distinguishedName ?? string.Empty);
+                distinguishedName, entry.IsMSA() || entry.IsGMSA(), objectName);
         }
 
         private static string GetEntryDomain(IDirectoryObject entry) {
