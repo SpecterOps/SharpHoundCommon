@@ -31,6 +31,7 @@ namespace CommonLibTest
             _testOutputHelper = testOutputHelper;
         }
 
+        [SupportedOSPlatform("windows")]
         private static byte[] CreateSecurityDescriptorBytes(params GenericAce[] aces)
         {
             var acl = new RawAcl(GenericAcl.AclRevisionDS, aces.Length);
@@ -136,7 +137,8 @@ namespace CommonLibTest
             Assert.Equal("Test", test["description"] as string);
         }
 
-        [Fact]
+        [SupportedOSPlatform("windows")]
+        [WindowsOnlyFact]
         public async Task LDAPPropertyProcessor_ReadOUProperties_SkipsCustomDenyAces_WhenLdapConfigRequestsIt()
         {
             var denyAce = new CommonAce(AceFlags.None, AceQualifier.AccessDenied, (int)ActiveDirectoryRights.Delete,
