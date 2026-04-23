@@ -1486,10 +1486,12 @@ namespace SharpHoundCommonLib {
             }
 
             // Canonical name is always derivable from the default NC (e.g. DC=contoso,DC=local -> CONTOSO.LOCAL).
-            var info = new DomainInfo {
-                Name = Helpers.DistinguishedNameToDomain(defaultNc).ToUpper(),
-                DistinguishedName = defaultNc,
-            };
+            var name = Helpers.DistinguishedNameToDomain(defaultNc).ToUpper();
+            string domainSid = null;
+            string forestName = null;
+            string primaryDomainController = null;
+            string netBiosName = null;
+            IReadOnlyList<string> domainControllers = null;
 
             // Base search on the domain NC harvests the domain SID, forest root NC, and PDC FSMO owner DN
             // in a single round-trip.
@@ -1509,14 +1511,14 @@ namespace SharpHoundCommonLib {
                 if (baseRes.IsSuccess) {
                     // objectSid on the domain NC itself is the domain SID (S-1-5-21-a-b-c).
                     if (baseRes.Value.TryGetSecurityIdentifier(out var sid) && !string.IsNullOrEmpty(sid)) {
-                        info.DomainSid = sid.ToUpper();
+                        domainSid = sid.ToUpper();
                     }
 
                     // rootDomainNamingContext points at the forest root domain's NC even when queried
                     // against a child domain, giving us the forest name without a separate GC lookup.
                     if (baseRes.Value.TryGetProperty(LDAPProperties.RootDomainNamingContext, out var rootNc) &&
                         !string.IsNullOrEmpty(rootNc)) {
-                        info.ForestName = Helpers.DistinguishedNameToDomain(rootNc).ToUpper();
+                        forestName = Helpers.DistinguishedNameToDomain(rootNc).ToUpper();
                     }
 
                     // fSMORoleOwner on the domain NC is a DN to the NTDS Settings object of the PDC,
@@ -1534,7 +1536,7 @@ namespace SharpHoundCommonLib {
 
                         if (pdcRes.IsSuccess &&
                             pdcRes.Value.TryGetProperty(LDAPProperties.DNSHostName, out var pdcName)) {
-                            info.PrimaryDomainController = pdcName;
+                            primaryDomainController = pdcName;
                         }
                     }
                 }
@@ -1557,7 +1559,7 @@ namespace SharpHoundCommonLib {
                     }).DefaultIfEmpty(LdapResult<IDirectoryObject>.Fail()).FirstOrDefaultAsync();
 
                     if (nbRes.IsSuccess && nbRes.Value.TryGetProperty(LDAPProperties.NetbiosName, out var nb)) {
-                        info.NetBiosName = nb;
+                        netBiosName = nb;
                     }
                 }
                 catch (Exception ex) {
@@ -1583,18 +1585,25 @@ namespace SharpHoundCommonLib {
                     }
                 }
 
-                info.DomainControllers = dcs;
+                domainControllers = dcs;
                 // Last-resort PDC: if the FSMO resolution above failed, any DC is a reasonable
                 // fallback target for callers that just want a working DC name.
-                if (string.IsNullOrEmpty(info.PrimaryDomainController) && dcs.Count > 0) {
-                    info.PrimaryDomainController = dcs[0];
+                if (string.IsNullOrEmpty(primaryDomainController) && dcs.Count > 0) {
+                    primaryDomainController = dcs[0];
                 }
             }
             catch (Exception ex) {
                 log?.LogDebug(ex, "ResolveDomainInfoControlled: DC enumeration failed for {Domain}", domainName);
             }
 
-            return (true, info);
+            return (true, new DomainInfo(
+                name: name,
+                distinguishedName: defaultNc,
+                forestName: forestName,
+                domainSid: domainSid,
+                netBiosName: netBiosName,
+                primaryDomainController: primaryDomainController,
+                domainControllers: domainControllers));
         }
 
         /// <summary>
@@ -1665,17 +1674,19 @@ namespace SharpHoundCommonLib {
                     return false;
                 }
 
-                info = new DomainInfo {
-                    Name = domain.Name?.ToUpper(),
-                    DistinguishedName = !string.IsNullOrEmpty(domain.Name)
-                        ? Helpers.DomainNameToDistinguishedName(domain.Name)
-                        : null,
-                };
+                var name = domain.Name?.ToUpper();
+                var distinguishedName = !string.IsNullOrEmpty(domain.Name)
+                    ? Helpers.DomainNameToDistinguishedName(domain.Name)
+                    : null;
+                string forestName = null;
+                string primaryDomainController = null;
+                string domainSid = null;
+                IReadOnlyList<string> domainControllers = null;
 
                 // Forest lookup triggers a separate bind under the hood; swallow any failure and
                 // leave ForestName null rather than losing the rest of the DomainInfo.
                 try {
-                    info.ForestName = domain.Forest?.Name?.ToUpper();
+                    forestName = domain.Forest?.Name?.ToUpper();
                 }
                 catch {
                     //pass
@@ -1684,7 +1695,7 @@ namespace SharpHoundCommonLib {
                 // PdcRoleOwner.Name is the DNS hostname of the PDC. Separately guarded because
                 // it performs its own RPC lookup.
                 try {
-                    info.PrimaryDomainController = domain.PdcRoleOwner?.Name;
+                    primaryDomainController = domain.PdcRoleOwner?.Name;
                 }
                 catch {
                     //pass
@@ -1703,7 +1714,7 @@ namespace SharpHoundCommonLib {
                         }
                     }
 
-                    info.DomainControllers = dcs;
+                    domainControllers = dcs;
                 }
                 catch {
                     //pass
@@ -1732,13 +1743,20 @@ namespace SharpHoundCommonLib {
 
                     var entry = rawEntry.ToDirectoryObject();
                     if (entry.TryGetSecurityIdentifier(out var sid) && !string.IsNullOrEmpty(sid)) {
-                        info.DomainSid = sid.ToUpper();
+                        domainSid = sid.ToUpper();
                     }
                 }
                 catch {
                     //pass
                 }
 
+                info = new DomainInfo(
+                    name: name,
+                    distinguishedName: distinguishedName,
+                    forestName: forestName,
+                    domainSid: domainSid,
+                    primaryDomainController: primaryDomainController,
+                    domainControllers: domainControllers);
                 return true;
             }
             catch (Exception e) {
@@ -1785,7 +1803,11 @@ namespace SharpHoundCommonLib {
             }
 
             return await Task.Run<(bool Success, DomainInfo DomainInfo)>(() => {
-                DomainInfo info;
+                string name;
+                string distinguishedName;
+                string domainSid = null;
+                string forestName = null;
+                string primaryDomainController = null;
                 IDirectoryObject root;
                 try {
                     root = Helpers.CreateDirectoryEntry($"LDAP://{domainName}", config);
@@ -1798,13 +1820,11 @@ namespace SharpHoundCommonLib {
                         return (false, null);
                     }
 
-                    info = new DomainInfo {
-                        Name = Helpers.DistinguishedNameToDomain(defaultNc).ToUpper(),
-                        DistinguishedName = defaultNc,
-                    };
+                    name = Helpers.DistinguishedNameToDomain(defaultNc).ToUpper();
+                    distinguishedName = defaultNc;
 
                     if (root.TryGetSecurityIdentifier(out var sid) && !string.IsNullOrEmpty(sid)) {
-                        info.DomainSid = sid.ToUpper();
+                        domainSid = sid.ToUpper();
                     }
                 }
                 catch (Exception e) {
@@ -1817,7 +1837,7 @@ namespace SharpHoundCommonLib {
                     var rootDse = Helpers.CreateDirectoryEntry($"LDAP://{domainName}/RootDSE", config);
                     if (rootDse.TryGetProperty(LDAPProperties.RootDomainNamingContext, out var rootNc) &&
                         !string.IsNullOrEmpty(rootNc)) {
-                        info.ForestName = Helpers.DistinguishedNameToDomain(rootNc).ToUpper();
+                        forestName = Helpers.DistinguishedNameToDomain(rootNc).ToUpper();
                     }
                 }
                 catch (Exception ex) {
@@ -1833,7 +1853,7 @@ namespace SharpHoundCommonLib {
                         var server = Helpers.CreateDirectoryEntry($"LDAP://{serverDn}", config);
                         if (server.TryGetProperty(LDAPProperties.DNSHostName, out var pdc) &&
                             !string.IsNullOrEmpty(pdc)) {
-                            info.PrimaryDomainController = pdc;
+                            primaryDomainController = pdc;
                         }
                     }
                 }
@@ -1842,7 +1862,12 @@ namespace SharpHoundCommonLib {
                         "DirectoryEntry tier: PDC lookup failed for {Domain}", domainName);
                 }
 
-                return (true, info);
+                return (true, new DomainInfo(
+                    name: name,
+                    distinguishedName: distinguishedName,
+                    forestName: forestName,
+                    domainSid: domainSid,
+                    primaryDomainController: primaryDomainController));
             }).ConfigureAwait(false);
         }
 
@@ -1979,12 +2004,13 @@ namespace SharpHoundCommonLib {
                 return (false, null);
             }
 
-            var info = new DomainInfo {
-                Name = Helpers.DistinguishedNameToDomain(defaultNc).ToUpper(),
-                DistinguishedName = defaultNc,
-            };
+            var name = Helpers.DistinguishedNameToDomain(defaultNc).ToUpper();
+            string domainSid = null;
+            string forestName = null;
+            string primaryDomainController = null;
+            IReadOnlyList<string> domainControllers = null;
             if (!string.IsNullOrWhiteSpace(rootNc)) {
-                info.ForestName = Helpers.DistinguishedNameToDomain(rootNc).ToUpper();
+                forestName = Helpers.DistinguishedNameToDomain(rootNc).ToUpper();
             }
 
             // 2. Domain NC base search - objectSid + fsmoRoleOwner in one round-trip.
@@ -1997,7 +2023,7 @@ namespace SharpHoundCommonLib {
                 if (domResp?.Entries != null && domResp.Entries.Count > 0) {
                     var entry = new SearchResultEntryWrapper(domResp.Entries[0]);
                     if (entry.TryGetSecurityIdentifier(out var sid) && !string.IsNullOrEmpty(sid)) {
-                        info.DomainSid = sid.ToUpper();
+                        domainSid = sid.ToUpper();
                     }
                     entry.TryGetProperty(LDAPProperties.FSMORoleOwner, out fsmoOwner);
                 }
@@ -2016,7 +2042,7 @@ namespace SharpHoundCommonLib {
                     if (pdcResp?.Entries != null && pdcResp.Entries.Count > 0) {
                         var entry = new SearchResultEntryWrapper(pdcResp.Entries[0]);
                         if (entry.TryGetProperty(LDAPProperties.DNSHostName, out var pdcName)) {
-                            info.PrimaryDomainController = pdcName;
+                            primaryDomainController = pdcName;
                         }
                     }
                 }
@@ -2041,16 +2067,22 @@ namespace SharpHoundCommonLib {
                         }
                     }
                 }
-                info.DomainControllers = dcs;
-                if (string.IsNullOrEmpty(info.PrimaryDomainController) && dcs.Count > 0) {
-                    info.PrimaryDomainController = dcs[0];
+                domainControllers = dcs;
+                if (string.IsNullOrEmpty(primaryDomainController) && dcs.Count > 0) {
+                    primaryDomainController = dcs[0];
                 }
             }
             catch (Exception e) {
                 log?.LogDebug(e, "Direct LDAP DC enumeration failed for {Domain}", domainName);
             }
 
-            return (true, info);
+            return (true, new DomainInfo(
+                name: name,
+                distinguishedName: defaultNc,
+                forestName: forestName,
+                domainSid: domainSid,
+                primaryDomainController: primaryDomainController,
+                domainControllers: domainControllers));
         }
 
         public void ResetUtils() {

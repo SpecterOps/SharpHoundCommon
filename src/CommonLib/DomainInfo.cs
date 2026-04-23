@@ -12,24 +12,41 @@ namespace SharpHoundCommonLib
     public sealed class DomainInfo
     {
         /// <summary>Upper-cased DNS name of the domain (e.g. <c>CONTOSO.LOCAL</c>).</summary>
-        public string Name { get; set; }
+        public string Name { get; }
 
         /// <summary>Default naming context distinguished name (e.g. <c>DC=contoso,DC=local</c>).</summary>
-        public string DistinguishedName { get; set; }
+        public string DistinguishedName { get; }
 
         /// <summary>Upper-cased DNS name of the forest root domain, when known.</summary>
-        public string ForestName { get; set; }
+        public string ForestName { get; }
 
         /// <summary>Domain SID (S-1-5-21-...) if resolved, otherwise null.</summary>
-        public string DomainSid { get; set; }
+        public string DomainSid { get; }
 
         /// <summary>Legacy NetBIOS domain name if resolved from the Partitions container, otherwise null.</summary>
-        public string NetBiosName { get; set; }
+        public string NetBiosName { get; }
 
         /// <summary>DNS hostname of the PDC FSMO role owner if resolved, otherwise null.</summary>
-        public string PrimaryDomainController { get; set; }
+        public string PrimaryDomainController { get; }
 
         /// <summary>DNS hostnames of known domain controllers for this domain.</summary>
-        public IReadOnlyList<string> DomainControllers { get; set; } = Array.Empty<string>();
+        public IReadOnlyList<string> DomainControllers { get; }
+
+        public DomainInfo(
+            string name = null,
+            string distinguishedName = null,
+            string forestName = null,
+            string domainSid = null,
+            string netBiosName = null,
+            string primaryDomainController = null,
+            IReadOnlyList<string> domainControllers = null) {
+            Name = name;
+            DistinguishedName = distinguishedName;
+            ForestName = forestName;
+            DomainSid = domainSid;
+            NetBiosName = netBiosName;
+            PrimaryDomainController = primaryDomainController;
+            DomainControllers = domainControllers ?? Array.Empty<string>();
+        }
     }
 }

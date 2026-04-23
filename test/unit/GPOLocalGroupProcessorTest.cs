@@ -323,7 +323,7 @@ namespace CommonLibTest {
                 .Returns(mockComputerResults.ToAsyncEnumerable)
                 .Returns(mockGCPFileSysPathResults.ToAsyncEnumerable)
                 .Returns(Array.Empty<LdapResult<IDirectoryObject>>().ToAsyncEnumerable);
-            var domainInfo = new DomainInfo { Name = "TESTLAB.LOCAL" };
+            var domainInfo = new DomainInfo(name: "TESTLAB.LOCAL");
             mockLDAPUtils.Setup(x => x.GetDomainInfoAsync()).ReturnsAsync((true, domainInfo));
 
             var processor = new GPOLocalGroupProcessor(mockLDAPUtils.Object);
