@@ -1453,7 +1453,7 @@ namespace SharpHoundCommonLib {
         /// </list>
         /// All follow-up queries after the initial NC read are wrapped in try/catch and only
         /// populate optional fields - a failure here still returns a partially-filled
-        /// <see cref="DomainInfo"/> with <see cref="DomainInfo.FromFallback"/> = false. A failure
+        /// <see cref="DomainInfo"/> . A failure
         /// to acquire the connection or to read the default NC is fatal and returns <c>(false, null)</c>.
         /// </remarks>
         private static async Task<(bool Success, DomainInfo DomainInfo)> ResolveDomainInfoControlledAsyncCore(
@@ -1635,8 +1635,7 @@ namespace SharpHoundCommonLib {
         /// The call into <c>Domain.GetDomain</c> does not honor any <see cref="LdapConfig"/> flag
         /// beyond the username/password branches - server, port, SSL, signing, and cert-verification
         /// settings are all bypassed because that API performs its own DC discovery via the native
-        /// DS RPC stack. The resulting <see cref="DomainInfo"/> is marked with
-        /// <see cref="DomainInfo.FromFallback"/> = true so callers and tests can detect the path.
+        /// DS RPC stack. 
         /// </para>
         /// <para>
         /// Every optional property access (<c>Forest</c>, <c>PdcRoleOwner</c>, <c>DomainControllers</c>,
