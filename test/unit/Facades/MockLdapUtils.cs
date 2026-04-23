@@ -20,6 +20,7 @@ namespace CommonLibTest.Facades
     [SuppressMessage("Interoperability", "CA1416:Validate platform compatibility")]
     public class MockLdapUtils : ILdapUtils
     {
+        private LdapConfig _ldapConfig = new();
         private readonly ConcurrentDictionary<string, byte> _domainControllers = new();
         private readonly Forest _forest;
         private readonly ConcurrentDictionary<string, string> _seenWellKnownPrincipals = new();
@@ -1007,7 +1008,11 @@ namespace CommonLibTest.Facades
         }
 
         public void SetLdapConfig(LdapConfig config) {
-            throw new NotImplementedException();
+            _ldapConfig = config;
+        }
+
+        public LdapConfig GetLdapConfig() {
+            return _ldapConfig;
         }
 
         public Task<(bool Success, string Message)> TestLdapConnection(string domain) {

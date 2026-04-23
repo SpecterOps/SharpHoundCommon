@@ -669,6 +669,10 @@ namespace SharpHoundCommonLib.Processors {
 
         private async Task AddCustomDenyAceProperty(Dictionary<string, object> props, IDirectoryObject entry,
             string domain, Label objectType) {
+            if (_utils.GetLdapConfig().SkipDenyAces) {
+                return;
+            }
+
             if (!entry.TryGetByteProperty(LDAPProperties.SecurityDescriptor, out var ntSecurityDescriptor)) {
                 return;
             }

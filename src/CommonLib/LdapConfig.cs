@@ -13,6 +13,7 @@ namespace SharpHoundCommonLib
         public bool ForceSSL { get; set; } = false;
         public bool DisableSigning { get; set; } = false;
         public bool DisableCertVerification { get; set; } = false;
+        public bool SkipDenyAces { get; set; } = false;
         public AuthType AuthType { get; set; } = AuthType.Kerberos;
         public int MaxConcurrentQueries { get; set; } = 15;
 

@@ -157,6 +157,10 @@ namespace SharpHoundCommonLib {
         /// <param name="config">The new ldap config</param>
         void SetLdapConfig(LdapConfig config);
         /// <summary>
+        /// Gets the current ldap config for this utils instance
+        /// </summary>
+        LdapConfig GetLdapConfig();
+        /// <summary>
         /// Tests if a LDAP connection can be made successfully to a domain
         /// </summary>
         /// <param name="domain">The domain to test</param>

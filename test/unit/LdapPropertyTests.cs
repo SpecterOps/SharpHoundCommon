@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.DirectoryServices;
 using System.Runtime.Versioning;
+using System.Security.AccessControl;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
@@ -28,6 +29,20 @@ namespace CommonLibTest
         public LdapPropertyTests(ITestOutputHelper testOutputHelper)
         {
             _testOutputHelper = testOutputHelper;
+        }
+
+        private static byte[] CreateSecurityDescriptorBytes(params GenericAce[] aces)
+        {
+            var acl = new RawAcl(GenericAcl.AclRevisionDS, aces.Length);
+            for (var i = 0; i < aces.Length; i++)
+            {
+                acl.InsertAce(i, aces[i]);
+            }
+
+            var descriptor = new RawSecurityDescriptor(ControlFlags.DiscretionaryAclPresent, null, null, null, acl);
+            var buffer = new byte[descriptor.BinaryLength];
+            descriptor.GetBinaryForm(buffer, 0);
+            return buffer;
         }
 
         [Fact]
@@ -119,6 +134,27 @@ namespace CommonLibTest
             var test = await processor.ReadOUProperties(mock);
             Assert.Contains("description", test.Keys);
             Assert.Equal("Test", test["description"] as string);
+        }
+
+        [Fact]
+        public async Task LDAPPropertyProcessor_ReadOUProperties_SkipsCustomDenyAces_WhenLdapConfigRequestsIt()
+        {
+            var denyAce = new CommonAce(AceFlags.None, AceQualifier.AccessDenied, (int)ActiveDirectoryRights.Delete,
+                new SecurityIdentifier("S-1-5-21-3130019616-2776909439-2417379446-2500"), false, null);
+            var mock = new MockDirectoryObject("OU\u003dTestOU,DC\u003dtestlab,DC\u003dlocal",
+                new Dictionary<string, object>
+                {
+                    {LDAPProperties.SecurityDescriptor, CreateSecurityDescriptorBytes(denyAce)}
+                }, "", "2A374493-816A-4193-BEFD-D2F4132C6DCA");
+            var ldapUtils = new MockLdapUtils();
+            ldapUtils.SetLdapConfig(new LdapConfig {
+                SkipDenyAces = true
+            });
+
+            var processor = new LdapPropertyProcessor(ldapUtils);
+            var test = await processor.ReadOUProperties(mock);
+
+            Assert.DoesNotContain(LDAPProperties.CustomDenyAces, test.Keys);
         }
 
         [Fact]

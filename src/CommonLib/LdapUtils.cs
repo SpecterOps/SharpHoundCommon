@@ -1077,6 +1077,10 @@ namespace SharpHoundCommonLib {
             _connectionPool = new ConnectionPoolManager(_ldapConfig, scanner: _portScanner);
         }
 
+        public LdapConfig GetLdapConfig() {
+            return _ldapConfig;
+        }
+
         public Task<(bool Success, string Message)> TestLdapConnection(string domain) {
             return _connectionPool.TestDomainConnection(domain, false);
         }
