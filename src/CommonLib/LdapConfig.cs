@@ -15,6 +15,8 @@ namespace SharpHoundCommonLib
         public bool DisableCertVerification { get; set; } = false;
         public AuthType AuthType { get; set; } = AuthType.Kerberos;
         public int MaxConcurrentQueries { get; set; } = 15;
+        public bool AllowFallbackToUncontrolledLdap { get; set; } = false;
+        public string CurrentUserDomain { get; set; } = null;
 
         //Returns the port for connecting to LDAP. Will always respect a user's overridden config over anything else
         public int GetPort(bool ssl)
@@ -56,6 +58,10 @@ namespace SharpHoundCommonLib
             sb.AppendLine($"ForceSSL: {ForceSSL}");
             sb.AppendLine($"AuthType: {AuthType.ToString()}");
             sb.AppendLine($"MaxConcurrentQueries: {MaxConcurrentQueries}");
+            sb.AppendLine($"AllowFallbackToUncontrolledLdap: {AllowFallbackToUncontrolledLdap}");
+            if (!string.IsNullOrWhiteSpace(CurrentUserDomain)) {
+                sb.AppendLine($"CurrentUserDomain: {CurrentUserDomain}");
+            }
             if (!string.IsNullOrWhiteSpace(Username)) {
                 sb.AppendLine($"Username: {Username}");    
             }

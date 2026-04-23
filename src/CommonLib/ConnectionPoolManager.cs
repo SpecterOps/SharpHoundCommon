@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.DirectoryServices;
-using System.Runtime.CompilerServices;
 using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
@@ -146,17 +144,19 @@ namespace SharpHoundCommonLib {
                 //we expect this to fail sometimes
             }
 
-            if (LdapUtils.GetDomain(domainName, _ldapConfig, out var domainObject))
-                try {
-                    // TODO: MC - Confirm GetDirectoryEntry is not a Blocking External Call
-                    if (domainObject.GetDirectoryEntry().ToDirectoryObject().TryGetSecurityIdentifier(out domainSid)) {
-                        Cache.AddDomainSidMapping(domainName, domainSid);
-                        return (true, domainSid);
-                    }
-                }
-                catch {
-                    //we expect this to fail sometimes (not sure why, but better safe than sorry)
-                }
+            // Controlled replacement for LdapUtils.GetDomain + GetDirectoryEntry. We pass pool: null
+            // because this method is called from inside GetPool -> ResolveIdentifier while resolving
+            // the pool for this same domain; reusing the pool here would reenter GetLdapConnection and
+            // recurse into GetDomainSidFromDomainName. With pool: null, GetDomainInfoStaticAsync falls
+            // through to its direct-LDAP (one-shot LdapConnection) path, which still honors LdapConfig.
+            // The call is sync-over-async to match the sibling pattern in GetLdapConnectionForServer.
+            var (infoOk, info) = LdapUtils
+                .GetDomainInfoStaticAsync(domainName, _ldapConfig, _log)
+                .GetAwaiter().GetResult();
+            if (infoOk && !string.IsNullOrEmpty(info?.DomainSid)) {
+                Cache.AddDomainSidMapping(domainName, info.DomainSid);
+                return (true, info.DomainSid);
+            }
 
             foreach (var name in _translateNames)
                 try {

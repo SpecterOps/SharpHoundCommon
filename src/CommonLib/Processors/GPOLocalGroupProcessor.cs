@@ -66,13 +66,14 @@ namespace SharpHoundCommonLib.Processors {
             string domain;
             //If our dn is null, use our default domain
             if (string.IsNullOrEmpty(distinguishedName)) {
-                if (!_utils.GetDomain(out var domainResult)) {
+                var (ok, info) = await _utils.GetDomainInfoAsync();
+                if (!ok || string.IsNullOrEmpty(info?.Name)) {
                     return ret;
                 }
 
-                domain = domainResult.Name;
+                domain = info.Name;
             } else {
-                domain = Helpers.DistinguishedNameToDomain(distinguishedName);    
+                domain = Helpers.DistinguishedNameToDomain(distinguishedName);
             }
             
             // First lets check if this OU actually has computers that it contains. If not, then we'll ignore it.

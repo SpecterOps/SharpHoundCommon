@@ -703,6 +703,14 @@ namespace CommonLibTest.Facades
             return false;
         }
 
+        public Task<(bool Success, DomainInfo DomainInfo)> GetDomainInfoAsync(string domainName) {
+            return Task.FromResult<(bool, DomainInfo)>((false, null));
+        }
+
+        public Task<(bool Success, DomainInfo DomainInfo)> GetDomainInfoAsync() {
+            return Task.FromResult<(bool, DomainInfo)>((false, null));
+        }
+
         public async Task<(bool Success, TypedPrincipal Principal)> ResolveAccountName(string name, string domain) {
             var res = name.ToUpper() switch {
                 "ADMINISTRATOR" => new TypedPrincipal(

@@ -647,5 +647,153 @@ namespace CommonLibTest {
             Assert.Equal("TESTLAB.LOCAL-S-1-5-9", entDCGroup.ObjectIdentifier);
             Assert.Equal(3, entDCGroup.Members.Length);
         }
+
+        // ---------------------------------------------------------------------------
+        // AllowFallbackToUncontrolledLdap gate and DomainInfo resolution
+        // ---------------------------------------------------------------------------
+
+        [Fact]
+        public void LdapConfig_AllowFallbackToUncontrolledLdap_DefaultsToFalse() {
+            var config = new LdapConfig();
+            Assert.False(config.AllowFallbackToUncontrolledLdap);
+        }
+
+        [Fact]
+        public void LdapConfig_ToString_IncludesAllowFallbackFlag() {
+            var offConfig = new LdapConfig();
+            Assert.Contains("AllowFallbackToUncontrolledLdap: False", offConfig.ToString());
+
+            var onConfig = new LdapConfig { AllowFallbackToUncontrolledLdap = true };
+            Assert.Contains("AllowFallbackToUncontrolledLdap: True", onConfig.ToString());
+        }
+
+        [Fact]
+        public void LdapConfig_CurrentUserDomain_DefaultsToNull() {
+            var config = new LdapConfig();
+            Assert.Null(config.CurrentUserDomain);
+        }
+
+        [Fact]
+        public void LdapConfig_ToString_IncludesCurrentUserDomain_WhenSet() {
+            var unset = new LdapConfig();
+            Assert.DoesNotContain("CurrentUserDomain:", unset.ToString());
+
+            var set = new LdapConfig { CurrentUserDomain = "CONTOSO.LOCAL" };
+            Assert.Contains("CurrentUserDomain: CONTOSO.LOCAL", set.ToString());
+        }
+
+        [Fact]
+        public async Task GetDomainInfoAsync_ControlledPathFails_FallbackDisabled_ReturnsFailure() {
+            var utils = new LdapUtils();
+            utils.SetLdapConfig(new LdapConfig {
+                Server = "unreachable.invalid.test",
+                AllowFallbackToUncontrolledLdap = false
+            });
+
+            var (success, info) = await utils.GetDomainInfoAsync("unreachable.invalid.test");
+            Assert.False(success);
+            Assert.Null(info);
+        }
+
+        [Fact]
+        public void GetDomain_OutDomain_ReturnsFalse_WhenFallbackDisabled() {
+            var utils = new LdapUtils();
+            utils.SetLdapConfig(new LdapConfig { AllowFallbackToUncontrolledLdap = false });
+
+            Assert.False(utils.GetDomain(out var currentDomain));
+            Assert.Null(currentDomain);
+
+            Assert.False(utils.GetDomain("unreachable.invalid.test", out var namedDomain));
+            Assert.Null(namedDomain);
+
+            Assert.False(LdapUtils.GetDomain("unreachable.invalid.test",
+                new LdapConfig { AllowFallbackToUncontrolledLdap = false }, out var staticDomain));
+            Assert.Null(staticDomain);
+        }
+
+        // ---------------------------------------------------------------------------
+        // TryStripNtdsSettingsPrefix
+        // ---------------------------------------------------------------------------
+
+        [Fact]
+        public void TryStripNtdsSettingsPrefix_StandardDn_StripsPrefixAndReturnsServerDn() {
+            const string input =
+                "CN=NTDS Settings,CN=DC01,CN=Servers,CN=Default-First-Site-Name,CN=Sites,CN=Configuration,DC=contoso,DC=local";
+            var ok = LdapUtils.TryStripNtdsSettingsPrefix(input, out var serverDn);
+            Assert.True(ok);
+            Assert.Equal(
+                "CN=DC01,CN=Servers,CN=Default-First-Site-Name,CN=Sites,CN=Configuration,DC=contoso,DC=local",
+                serverDn);
+        }
+
+        [Fact]
+        public void TryStripNtdsSettingsPrefix_LowercasePrefix_StripsCaseInsensitively() {
+            const string input = "cn=ntds settings,CN=DC01,CN=Servers,DC=contoso,DC=local";
+            var ok = LdapUtils.TryStripNtdsSettingsPrefix(input, out var serverDn);
+            Assert.True(ok);
+            Assert.Equal("CN=DC01,CN=Servers,DC=contoso,DC=local", serverDn);
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        public void TryStripNtdsSettingsPrefix_NullOrEmptyInput_ReturnsFalse(string input) {
+            var ok = LdapUtils.TryStripNtdsSettingsPrefix(input, out var serverDn);
+            Assert.False(ok);
+            Assert.Null(serverDn);
+        }
+
+        [Fact]
+        public void TryStripNtdsSettingsPrefix_MissingPrefix_ReturnsFalse() {
+            const string input = "CN=DC01,CN=Servers,DC=contoso,DC=local";
+            var ok = LdapUtils.TryStripNtdsSettingsPrefix(input, out var serverDn);
+            Assert.False(ok);
+            Assert.Null(serverDn);
+        }
+
+        [Fact]
+        public void TryStripNtdsSettingsPrefix_PrefixOnly_ReturnsFalse() {
+            const string input = "CN=NTDS Settings,";
+            var ok = LdapUtils.TryStripNtdsSettingsPrefix(input, out var serverDn);
+            Assert.False(ok);
+            Assert.Equal(string.Empty, serverDn);
+        }
+
+        // ---------------------------------------------------------------------------
+        // ResolveEffectiveDomainHint
+        // ---------------------------------------------------------------------------
+
+        [Fact]
+        public void ResolveEffectiveDomainHint_ExplicitDomain_WinsOverCurrentUserDomain() {
+            var utils = new LdapUtils();
+            utils.SetLdapConfig(new LdapConfig { CurrentUserDomain = "FALLBACK.LOCAL" });
+
+            Assert.Equal("EXPLICIT.LOCAL", utils.ResolveEffectiveDomainHint("EXPLICIT.LOCAL"));
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("   ")]
+        public void ResolveEffectiveDomainHint_NullOrWhitespaceInput_FallsBackToCurrentUserDomain(string input) {
+            var utils = new LdapUtils();
+            utils.SetLdapConfig(new LdapConfig { CurrentUserDomain = "CONTOSO.LOCAL" });
+
+            Assert.Equal("CONTOSO.LOCAL", utils.ResolveEffectiveDomainHint(input));
+        }
+
+        [Fact]
+        public void ResolveEffectiveDomainHint_WhitespaceCurrentUserDomain_FallsThroughToEnvironment() {
+            var utils = new LdapUtils();
+            utils.SetLdapConfig(new LdapConfig { CurrentUserDomain = "   " });
+
+            // Cannot assert a literal without pinning Environment.UserDomainName; asserting
+            // that the whitespace CurrentUserDomain was skipped and something else was chosen
+            // is sufficient to cover the branch.
+            var result = utils.ResolveEffectiveDomainHint(null);
+            Assert.False(string.IsNullOrWhiteSpace(result));
+            Assert.NotEqual("   ", result);
+        }
+
     }
 }
