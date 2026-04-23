@@ -146,6 +146,11 @@ namespace CommonLibTest
                 {
                     {LDAPProperties.SecurityDescriptor, CreateSecurityDescriptorBytes(denyAce)}
                 }, "", "2A374493-816A-4193-BEFD-D2F4132C6DCA");
+
+            var baselineProcessor = new LdapPropertyProcessor(new MockLdapUtils());
+            var baseline = await baselineProcessor.ReadOUProperties(mock);
+            Assert.Contains("customdenyaces", baseline.Keys);
+
             var ldapUtils = new MockLdapUtils();
             ldapUtils.SetLdapConfig(new LdapConfig {
                 SkipDenyAces = true

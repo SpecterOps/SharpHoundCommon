@@ -42,6 +42,7 @@ namespace SharpHoundCommonLib
             sb.AppendLine($"LdapPort: {GetPort(false)}");
             sb.AppendLine($"LdapSSLPort: {GetPort(true)}");
             sb.AppendLine($"ForceSSL: {ForceSSL}");
+            sb.AppendLine($"SkipDenyAces: {SkipDenyAces}");
             sb.AppendLine($"AuthType: {AuthType.ToString()}");
             sb.AppendLine($"MaxConcurrentQueries: {MaxConcurrentQueries}");
             if (!string.IsNullOrWhiteSpace(Username)) {

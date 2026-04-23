@@ -915,7 +915,7 @@ namespace SharpHoundCommonLib.Processors {
             try {
                 descriptor = new RawSecurityDescriptor(ntSecurityDescriptor, 0);
             }
-            catch (OverflowException) {
+            catch (Exception e) when (e is OverflowException or ArgumentException) {
                 _log.LogWarning(
                     "Security descriptor on object {Name} exceeds maximum allowable length. Unable to process custom deny ACEs",
                     objectName);

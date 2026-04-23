@@ -157,9 +157,9 @@ namespace SharpHoundCommonLib {
         /// <param name="config">The new ldap config</param>
         void SetLdapConfig(LdapConfig config);
         /// <summary>
-        /// Gets the current ldap config for this utils instance
+        /// Gets whether custom deny ACE collection is disabled for this utils instance
         /// </summary>
-        LdapConfig GetLdapConfig();
+        bool SkipDenyAces { get; }
         /// <summary>
         /// Tests if a LDAP connection can be made successfully to a domain
         /// </summary>
