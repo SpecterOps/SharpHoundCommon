@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using SharpHoundCommonLib;
 using SharpHoundCommonLib.Exceptions;
@@ -24,12 +25,12 @@ public class AdaptiveTimeoutTest {
         var minTimeout = TimeSpan.Zero;
         var adaptiveTimeout = new AdaptiveTimeout(maxTimeout, minTimeout, new TestLogger(_testOutputHelper, Microsoft.Extensions.Logging.LogLevel.Trace), 10, 1000, 3);
 
-        await adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(50), latencyObservation: LatencyObservation);
+        await adaptiveTimeout.ExecuteWithTimeout((_) => Thread.Sleep(50), latencyObservation: LatencyObservation);
 
         var adaptiveTimeoutResult = adaptiveTimeout.GetAdaptiveTimeout();
         Assert.Equal(maxTimeout, adaptiveTimeoutResult);
         
-        Assert.InRange(observedLatency, 0.0, 100);
+        Assert.InRange(observedLatency, 50, 150);
         return;
 
         void LatencyObservation(double latency) {
@@ -47,18 +48,17 @@ public class AdaptiveTimeoutTest {
         var minTimeout = TimeSpan.Zero;
         var adaptiveTimeout = new AdaptiveTimeout(maxTimeout, minTimeout, new TestLogger(_testOutputHelper, Microsoft.Extensions.Logging.LogLevel.Trace), 10, 1000, 3, false);
 
-        await adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(50), latencyObservation: LatencyObservation1);
-        await adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(50), latencyObservation: LatencyObservation2);
-        await adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(50), latencyObservation: LatencyObservation3);
+        await adaptiveTimeout.ExecuteWithTimeout((_) => Thread.Sleep(50), latencyObservation: LatencyObservation1);
+        await adaptiveTimeout.ExecuteWithTimeout((_) => Thread.Sleep(50), latencyObservation: LatencyObservation2);
+        await adaptiveTimeout.ExecuteWithTimeout((_) => Thread.Sleep(50), latencyObservation: LatencyObservation3);
 
         var adaptiveTimeoutResult = adaptiveTimeout.GetAdaptiveTimeout();
+        Assert.InRange(observedLatency1, 50, 150);
+        Assert.InRange(observedLatency2, 50, 150);
+        Assert.InRange(observedLatency3, 50, 150);
         Assert.Equal(maxTimeout, adaptiveTimeoutResult);
-        Assert.InRange(observedLatency1, 0.0, 100);
-        Assert.InRange(observedLatency2, 0.0, 100);
-        Assert.InRange(observedLatency3, 0.0, 100);
         return;
-
-
+        
         void LatencyObservation1(double latency) {
             observedLatency1 = latency;
         }
@@ -79,15 +79,15 @@ public class AdaptiveTimeoutTest {
         var minTimeout = TimeSpan.Zero;
         var adaptiveTimeout = new AdaptiveTimeout(maxTimeout, minTimeout, new TestLogger(_testOutputHelper, Microsoft.Extensions.Logging.LogLevel.Trace), 10, 1000, 3);
 
-        await adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(40), latencyObservation: LatencyObservation1);
-        await adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(50), latencyObservation: LatencyObservation2);
-        await adaptiveTimeout.ExecuteWithTimeout(async (_) => await Task.Delay(60), latencyObservation: LatencyObservation3);
+        await adaptiveTimeout.ExecuteWithTimeout((_) => Thread.Sleep(40), latencyObservation: LatencyObservation1);
+        await adaptiveTimeout.ExecuteWithTimeout((_) => Thread.Sleep(50), latencyObservation: LatencyObservation2);
+        await adaptiveTimeout.ExecuteWithTimeout((_) => Thread.Sleep(60), latencyObservation: LatencyObservation3);
 
         var adaptiveTimeoutResult = adaptiveTimeout.GetAdaptiveTimeout();
         Assert.True(adaptiveTimeoutResult < maxTimeout);
-        Assert.InRange(observedLatency1, 0.0, 150);
-        Assert.InRange(observedLatency2, 0.0, 160);
-        Assert.InRange(observedLatency3, 0.0, 170);
+        Assert.InRange(observedLatency1, 40, 140);
+        Assert.InRange(observedLatency2, 50, 150);
+        Assert.InRange(observedLatency3, 60, 160);
         return;
         
         void LatencyObservation1(double latency) {
