@@ -133,6 +133,22 @@ namespace SharpHoundCommonLib {
         private (bool, string) GetDomainSidFromDomainName(string domainName) {
             if (Cache.GetDomainSidMapping(domainName, out var domainSid)) return (true, domainSid);
 
+            // Controlled replacement for LdapUtils.GetDomain + GetDirectoryEntry. We pass pool: null
+            // because this method is called from inside GetPool -> ResolveIdentifier while resolving
+            // the pool for this same domain; reusing the pool here would reenter GetLdapConnection and
+            // recurse into GetDomainSidFromDomainName. With pool: null, GetDomainInfoStaticAsync falls
+            // through to its direct-LDAP (one-shot LdapConnection) path, which still honors LdapConfig.
+            // The call is sync-over-async to match the sibling pattern in GetLdapConnectionForServer.
+            // Tried before the legacy ADSI bind so that uncontrolled/serverless ADSI lookups do not
+            // run prior to ResolveIdentifier/GetPool/GetLdapConnectionForServer logic.
+            var (infoOk, info) = LdapUtils
+                .GetDomainInfoStaticAsync(domainName, _ldapConfig, _log)
+                .GetAwaiter().GetResult();
+            if (infoOk && !string.IsNullOrEmpty(info?.DomainSid)) {
+                Cache.AddDomainSidMapping(domainName, info.DomainSid);
+                return (true, info.DomainSid);
+            }
+
             try {
                 var entry = Helpers.CreateDirectoryEntry($"LDAP://{domainName}", _ldapConfig);
                 if (entry.TryGetSecurityIdentifier(out var sid)) {
@@ -142,20 +158,6 @@ namespace SharpHoundCommonLib {
             }
             catch {
                 //we expect this to fail sometimes
-            }
-
-            // Controlled replacement for LdapUtils.GetDomain + GetDirectoryEntry. We pass pool: null
-            // because this method is called from inside GetPool -> ResolveIdentifier while resolving
-            // the pool for this same domain; reusing the pool here would reenter GetLdapConnection and
-            // recurse into GetDomainSidFromDomainName. With pool: null, GetDomainInfoStaticAsync falls
-            // through to its direct-LDAP (one-shot LdapConnection) path, which still honors LdapConfig.
-            // The call is sync-over-async to match the sibling pattern in GetLdapConnectionForServer.
-            var (infoOk, info) = LdapUtils
-                .GetDomainInfoStaticAsync(domainName, _ldapConfig, _log)
-                .GetAwaiter().GetResult();
-            if (infoOk && !string.IsNullOrEmpty(info?.DomainSid)) {
-                Cache.AddDomainSidMapping(domainName, info.DomainSid);
-                return (true, info.DomainSid);
             }
 
             foreach (var name in _translateNames)
