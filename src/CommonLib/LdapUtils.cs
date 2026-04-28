@@ -35,6 +35,22 @@ namespace SharpHoundCommonLib {
         private static ConcurrentHashSet _domainControllers = new(StringComparer.OrdinalIgnoreCase);
         private static ConcurrentHashSet _unresolvablePrincipals = new(StringComparer.OrdinalIgnoreCase);
 
+        // Coalesces concurrent first-time domain resolutions so that N callers asking for the
+        // same domain trigger one tier walk, not N. The first caller's pool/config/log is captured
+        // by the lazy; subsequent callers await the same task and see the same result. Entries
+        // are removed once the task settles, so a later cache miss for the same domain (e.g.,
+        // post-ResetUtils) starts a fresh resolution rather than reusing a completed task.
+        private static readonly ConcurrentDictionary<string, Lazy<Task<(bool Success, DomainInfo DomainInfo)>>>
+            _inFlightDomainResolutions = new(StringComparer.OrdinalIgnoreCase);
+
+        // Tracks which domains are currently being resolved on the calling logical execution
+        // context. Reentrant resolution is by design: the pool tier's GetLdapConnection path
+        // calls back into GetDomainInfoStaticAsync to resolve the domain SID before binding.
+        // Without this guard the inner call would await the outer lazy that hasn't published
+        // yet, deadlocking on Lazy<T>'s self-recursion detection. AsyncLocal flows through async
+        // continuations, so it captures the recursion chain across any number of awaits.
+        private static readonly AsyncLocal<HashSet<string>> _resolvingDomains = new();
+
         private static readonly ConcurrentDictionary<string, ResolvedWellKnownPrincipal>
             SeenWellKnownPrincipals = new();
 
@@ -1321,10 +1337,69 @@ namespace SharpHoundCommonLib {
         }
 
         /// <summary>
-        /// Shared resolution core that drives the four-tier walk for both
+        /// Shared resolution entry point that drives the four-tier walk for both
         /// <see cref="GetDomainInfoAsync(string)"/> and <see cref="GetDomainInfoStaticAsync"/>.
         /// Tier 1 (pool-driven controlled LDAP) is skipped when <paramref name="pool"/> is null.
         /// Tiers 2-4 (one-shot direct LDAP, ADSI, uncontrolled fallback) run unconditionally.
+        /// </summary>
+        /// <remarks>
+        /// Concurrent first-time resolutions for the same domain are coalesced through
+        /// <see cref="_inFlightDomainResolutions"/> so duplicate callers observe the same
+        /// richest-tier-published record instead of each issuing the full tier walk independently.
+        /// The first caller's <paramref name="pool"/>, <paramref name="config"/>, and
+        /// <paramref name="log"/> are captured by the lazy; subsequent awaiters inherit those.
+        /// In practice all <see cref="LdapUtils"/> instances in a process share the same effective
+        /// config, so this matches the ambient assumption already made by the static
+        /// <see cref="_domainInfoCache"/>.
+        /// <para>
+        /// A pool-equipped caller treats a cached record produced by a non-pool tier
+        /// (signaled by an absent <see cref="DomainInfo.NetBiosName"/>, since only the pool tier
+        /// reads <c>CN=Partitions</c>) as still re-resolvable. Otherwise an earlier sparse write
+        /// from a re-entrant <see cref="GetDomainInfoStaticAsync"/> call would permanently shadow
+        /// the richer record this caller's pool could produce.
+        /// </para>
+        /// </remarks>
+        private static async Task<(bool Success, DomainInfo DomainInfo)> ResolveDomainInfoAsync(
+            string domainName, ConnectionPoolManager pool, LdapConfig config, ILogger log) {
+            if (string.IsNullOrWhiteSpace(domainName)) {
+                return (false, null);
+            }
+
+            if (_domainInfoCache.TryGetValue(domainName, out var cached)
+                && (pool == null || !string.IsNullOrEmpty(cached.NetBiosName))) {
+                return (true, cached);
+            }
+
+            // Reentrant resolution on the same async chain (pool tier -> GetDomainSidFromDomainName ->
+            // GetDomainInfoStaticAsync -> back here) bypasses the lazy: the outer lazy hasn't published
+            // a Task yet, so awaiting it would self-deadlock. The recursion is bounded because the
+            // inner call always runs with pool=null and so cannot re-enter the pool tier.
+            var resolving = _resolvingDomains.Value ??= new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            if (!resolving.Add(domainName)) {
+                return await ResolveDomainInfoCoreAsync(domainName, pool, config, log);
+            }
+
+            try {
+                var lazy = _inFlightDomainResolutions.GetOrAdd(domainName,
+                    key => new Lazy<Task<(bool Success, DomainInfo DomainInfo)>>(
+                        () => ResolveDomainInfoCoreAsync(key, pool, config, log),
+                        LazyThreadSafetyMode.ExecutionAndPublication));
+
+                try {
+                    return await lazy.Value.ConfigureAwait(false);
+                }
+                finally {
+                    _inFlightDomainResolutions.TryRemove(domainName, out _);
+                }
+            }
+            finally {
+                resolving.Remove(domainName);
+            }
+        }
+
+        /// <summary>
+        /// Drives the actual four-tier walk for <see cref="ResolveDomainInfoAsync"/>. Wrapped by a
+        /// per-domain <see cref="Lazy{T}"/> so concurrent first-time callers share the result.
         /// </summary>
         /// <remarks>
         /// Tier ordering rationale: the pool tier honors every <see cref="LdapConfig"/> flag and
@@ -1336,13 +1411,12 @@ namespace SharpHoundCommonLib {
         /// direct-LDAP enrichment pass against the discovered PDC so the cached record reaches the
         /// same shape as the pool and one-shot tiers.
         /// </remarks>
-        private static async Task<(bool Success, DomainInfo DomainInfo)> ResolveDomainInfoAsync(
+        private static async Task<(bool Success, DomainInfo DomainInfo)> ResolveDomainInfoCoreAsync(
             string domainName, ConnectionPoolManager pool, LdapConfig config, ILogger log) {
-            if (string.IsNullOrWhiteSpace(domainName)) {
-                return (false, null);
-            }
-
-            if (_domainInfoCache.TryGetValue(domainName, out var cached)) {
+            // Re-check inside the lazy: another caller may have published a satisfying record
+            // between our outer cache miss and this lazy's first execution.
+            if (_domainInfoCache.TryGetValue(domainName, out var cached)
+                && (pool == null || !string.IsNullOrEmpty(cached.NetBiosName))) {
                 return (true, cached);
             }
 
@@ -1470,7 +1544,7 @@ namespace SharpHoundCommonLib {
             if (config is not { AllowFallbackToUncontrolledLdap: true }) return false;
 
             if (!string.IsNullOrWhiteSpace(config.Server)) {
-                log.LogDebug(
+                log?.LogDebug(
                     "TryResolveHintViaUncontrolledGetDomain(\"{Name}\", out string DomainName) short-circuited: Specific Server is set",
                     domainName);
                 return false;
@@ -2266,6 +2340,7 @@ namespace SharpHoundCommonLib {
             lock (_currentDomainLock) {
                 _currentDomain = null;
             }
+            LdapConnectionPool.ClearExclusions();
             _connectionPool?.Dispose();
             _connectionPool = new ConnectionPoolManager(_ldapConfig, scanner: _portScanner);
 

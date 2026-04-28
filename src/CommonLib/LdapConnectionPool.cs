@@ -36,13 +36,17 @@ namespace SharpHoundCommonLib {
         private static readonly TimeSpan MaxBackoffDelay = TimeSpan.FromSeconds(20);
         private const int BackoffDelayMultiplier = 2;
         private const int MaxRetries = 3;
-        private static readonly ConcurrentDictionary<string, NetAPIStructs.DomainControllerInfo?> DCInfoCache = new();
+        private static readonly ConcurrentDictionary<string, NetAPIStructs.DomainControllerInfo?> DCInfoCache = new(StringComparer.OrdinalIgnoreCase);
         
         // Metrics
         private readonly IMetricRouter _metric;
 
-        // Tracks domains we know we've determined we shouldn't try to connect to
+        // Tracks domains we know we've determined we shouldn't try to connect to.
         private static readonly ConcurrentHashSet ExcludedDomains = new(StringComparer.OrdinalIgnoreCase);
+
+        // Drops every exclusion record. Called from LdapUtils.ResetUtils so a fresh enumeration
+        // pass after a configuration change isn't shadowed by stale exclusion state.
+        internal static void ClearExclusions() => ExcludedDomains.Clear();
 
         public LdapConnectionPool(string identifier, string poolIdentifier, LdapConfig config,
             IPortScanner scanner = null, NativeMethods nativeMethods = null, ILogger log = null, IMetricRouter metric = null) {
@@ -693,7 +697,7 @@ namespace SharpHoundCommonLib {
                 string tempPath;
                 if (CallDsGetDcName(queryParameters.DomainName, out var info) && info != null) {
                     tempPath = Helpers.DomainNameToDistinguishedName(info.Value.DomainName);
-                    connectionWrapper.SaveContext(queryParameters.NamingContext, basePath);
+                    connectionWrapper.SaveContext(queryParameters.NamingContext, tempPath);
                 }
                 else {
                     // Controlled replacement for LdapUtils.GetDomain + DomainNameToDistinguishedName.
