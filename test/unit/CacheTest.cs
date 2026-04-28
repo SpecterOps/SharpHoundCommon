@@ -127,5 +127,64 @@ namespace CommonLibTest
 
             Cache.SetCacheInstance(null);
         }
+
+        [Fact]
+        public void SetCacheInstance_AfterDeserialization_RestoresCaseInsensitiveSidToDomain()
+        {
+            // Simulate the load-from-disk scenario by round-tripping with
+            // ObjectCreationHandling.Replace, which forces the deserializer to assign a fresh
+            // ConcurrentDictionary via the property setter rather than reusing the one created
+            // by the private parameterless constructor. This reproduces the behavior of
+            // serializers (DataContractSerializer, System.Text.Json) that always replace via
+            // setters and therefore drop the OrdinalIgnoreCase comparer.
+            var original = Cache.CreateNewCache();
+            Cache.SetCacheInstance(original);
+            Cache.AddDomainSidMapping("S-1-5-21-1-2-3", "CONTOSO.LOCAL");
+
+            var json = JsonConvert.SerializeObject(original);
+            var settings = new JsonSerializerSettings
+            {
+                ObjectCreationHandling = ObjectCreationHandling.Replace
+            };
+            var deserialized = JsonConvert.DeserializeObject<Cache>(json, settings);
+
+            // Sanity: the freshly deserialized dictionary is case-sensitive - a differently
+            // cased key misses against the inner dict directly. Proves the test reproduces
+            // the regression the rewrap is fixing.
+            Assert.False(deserialized.SIDToDomainCache.TryGetValue("contoso.local", out _));
+
+            Cache.SetCacheInstance(deserialized);
+
+            Assert.True(Cache.GetDomainSidMapping("contoso.local", out var resolvedSid));
+            Assert.Equal("S-1-5-21-1-2-3", resolvedSid);
+            Assert.True(Cache.GetDomainSidMapping("s-1-5-21-1-2-3", out var resolvedName));
+            Assert.Equal("CONTOSO.LOCAL", resolvedName);
+
+            Cache.SetCacheInstance(null);
+        }
+
+        [Fact]
+        public void SetCacheInstance_AfterDeserialization_RestoresCaseInsensitiveGlobalCatalog()
+        {
+            var original = Cache.CreateNewCache();
+            Cache.SetCacheInstance(original);
+            Cache.AddGCCache("CONTOSO.LOCAL", new[] { "gc1.contoso.local", "gc2.contoso.local" });
+
+            var json = JsonConvert.SerializeObject(original);
+            var settings = new JsonSerializerSettings
+            {
+                ObjectCreationHandling = ObjectCreationHandling.Replace
+            };
+            var deserialized = JsonConvert.DeserializeObject<Cache>(json, settings);
+
+            Assert.False(deserialized.GlobalCatalogCache.TryGetValue("contoso.local", out _));
+
+            Cache.SetCacheInstance(deserialized);
+
+            Assert.True(Cache.GetGCCache("contoso.local", out var gcs));
+            Assert.Equal(2, gcs.Length);
+
+            Cache.SetCacheInstance(null);
+        }
     }
 }

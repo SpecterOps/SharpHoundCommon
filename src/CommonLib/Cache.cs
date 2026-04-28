@@ -160,7 +160,31 @@ namespace SharpHoundCommonLib
         public static void SetCacheInstance(Cache cache)
         {
             CacheInstance = cache;
+            NormalizeCaseInsensitiveCaches();
             CreateMissingDictionaries();
+        }
+
+        /// <summary>
+        ///     Rewraps dictionaries that must be case-insensitive after assignment. Serializers
+        ///     (DataContractSerializer, Newtonsoft.Json, System.Text.Json) reconstruct
+        ///     <see cref="ConcurrentDictionary{TKey,TValue}"/> via its parameterless constructor,
+        ///     which produces a case-sensitive instance regardless of how the dictionary was
+        ///     created prior to serialization. Without this rewrap, a loaded cache silently
+        ///     regresses the case-insensitive invariants applied at construction time.
+        /// </summary>
+        private static void NormalizeCaseInsensitiveCaches()
+        {
+            if (CacheInstance == null) return;
+            if (CacheInstance.SIDToDomainCache != null)
+            {
+                CacheInstance.SIDToDomainCache = new ConcurrentDictionary<string, string>(
+                    CacheInstance.SIDToDomainCache, StringComparer.OrdinalIgnoreCase);
+            }
+            if (CacheInstance.GlobalCatalogCache != null)
+            {
+                CacheInstance.GlobalCatalogCache = new ConcurrentDictionary<string, string[]>(
+                    CacheInstance.GlobalCatalogCache, StringComparer.OrdinalIgnoreCase);
+            }
         }
 
         /// <summary>

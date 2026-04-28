@@ -1254,7 +1254,10 @@ namespace SharpHoundCommonLib {
         /// <remarks>
         /// Resolution order:
         /// <list type="number">
-        ///   <item>Static cache lookup keyed by <paramref name="domainName"/> (or <see cref="_nullCacheKey"/> when null).</item>
+        ///   <item>Static cache lookup keyed by the effective domain hint (the explicit
+        ///   <paramref name="domainName"/> when supplied, otherwise the resolved current-user
+        ///   domain via <see cref="ResolveEffectiveDomainHint"/>). Falls back to
+        ///   <see cref="_nullCacheKey"/> only when no hint can be resolved.</item>
         ///   <item>Controlled LDAP resolution via the connection pool (see <see cref="ResolveDomainInfoControlledAsyncCore"/>).</item>
         ///   <item>Uncontrolled fallback via <c>System.DirectoryServices.ActiveDirectory.Domain.GetDomain</c>,
         ///   gated on <see cref="LdapConfig.AllowFallbackToUncontrolledLdap"/> (see <see cref="TryGetDomainInfoViaUncontrolledFallback"/>).</item>
@@ -1263,24 +1266,26 @@ namespace SharpHoundCommonLib {
         /// <see cref="ResetUtils"/> is invoked).
         /// </remarks>
         public async Task<(bool Success, DomainInfo DomainInfo)> GetDomainInfoAsync(string domainName) {
-            // Null domain names are stored under a per-instance sentinel to match the existing
-            // _domainCache null-key convention used by the legacy GetDomain overloads.
-            var cacheKey = domainName ?? _nullCacheKey;
+            // Canonicalize the cache key BEFORE the lookup. Without this, a null domainName was
+            // stored under a per-instance GUID sentinel, fragmenting the static _domainInfoCache:
+            // N LdapUtils instances each wrote a separate entry for the same effective domain,
+            // and a later call with the explicit DNS name missed the entry written under null.
+            // ResolveEffectiveDomainHint returns explicit arguments verbatim and single-shot-caches
+            // the uncontrolled tier in _uncontrolledGetDomainHint, so this is essentially free.
+            var effectiveDomain = ResolveEffectiveDomainHint(domainName);
+            var cacheKey = !string.IsNullOrWhiteSpace(effectiveDomain) ? effectiveDomain : _nullCacheKey;
             if (_domainInfoCache.TryGetValue(cacheKey, out var cached)) {
                 return (true, cached);
             }
 
             // Preferred path: every LDAP call made here flows through LdapConnectionPool and
-            // therefore honors every flag on LdapConfig.
-            var (controlledOk, controlledInfo) = await ResolveDomainInfoControlledAsync(domainName);
+            // therefore honors every flag on LdapConfig. Pass the already-resolved hint so the
+            // controlled adapter does not redo ResolveEffectiveDomainHint internally.
+            var (controlledOk, controlledInfo) = await ResolveDomainInfoControlledAsync(effectiveDomain);
             if (controlledOk) {
                 CacheDomainInfo(cacheKey, controlledInfo);
                 return (true, controlledInfo);
             }
-
-            // Resolve the effective domain hint so the remaining tiers can still operate when the
-            // caller passed null (netonly / workgroup hosts rely on LdapConfig.CurrentUserDomain here).
-            var effectiveDomain = ResolveEffectiveDomainHint(domainName);
 
             // Secondary controlled path: bind directly to the domain name with a one-shot
             // LdapConnection honoring LdapConfig. Tried before ADSI because this tier is the
