@@ -295,5 +295,68 @@ namespace CommonLibTest
 
             Cache.SetCacheInstance(null);
         }
+
+        [Fact]
+        public void SetCacheInstance_AfterDeserialization_HealsCaseCollidingKeys()
+        {
+            // A persisted cache produced before the case-insensitive invariant was applied
+            // (or hand-edited / corrupted on disk) can contain two keys that differ only by
+            // case in the same dictionary. Deserialization rebuilds a case-sensitive
+            // ConcurrentDictionary, so both keys survive the round trip. The rewrap must
+            // tolerate the collision (first writer wins) instead of throwing from the
+            // ConcurrentDictionary(IEnumerable, IEqualityComparer) constructor.
+            // Each dictionary contains a pair of keys differing only by case. In a
+            // case-sensitive ConcurrentDictionary (what the deserializer rebuilds) both keys
+            // survive; rewrapping with OrdinalIgnoreCase against that source is the path that
+            // previously threw ArgumentException.
+            const string json = @"{
+                ""SIDToDomainCache"": {
+                    ""CONTOSO.LOCAL"": ""S-1-5-21-1-2-3"",
+                    ""contoso.local"": ""S-1-5-21-1-2-3""
+                },
+                ""GlobalCatalogCache"": {
+                    ""CONTOSO.LOCAL"": [""gc1.contoso.local""],
+                    ""contoso.local"": [""gc1.contoso.local""]
+                },
+                ""ValueToIdCache"": {
+                    ""Administrator|CONTOSO.LOCAL"": ""S-1-5-21-1-2-3-500"",
+                    ""administrator|contoso.local"": ""S-1-5-21-1-2-3-500""
+                },
+                ""IdToTypeCache"": {},
+                ""MachineSidCache"": {},
+                ""CacheCreationDate"": ""0001-01-01T00:00:00"",
+                ""CacheCreationVersion"": ""1.0.0""
+            }";
+            var settings = new JsonSerializerSettings
+            {
+                ObjectCreationHandling = ObjectCreationHandling.Replace
+            };
+            var deserialized = JsonConvert.DeserializeObject<Cache>(json, settings);
+
+            // Sanity: the deserialized dictionaries actually contain the colliding keys.
+            // Without this, the test would not exercise the constructor's duplicate-key path.
+            Assert.Equal(2, deserialized.SIDToDomainCache.Count);
+            Assert.Equal(2, deserialized.GlobalCatalogCache.Count);
+            Assert.Equal(2, deserialized.ValueToIdCache.Count);
+
+            // Pre-fix this call threw ArgumentException from the rewrap constructor.
+            var ex = Record.Exception(() => Cache.SetCacheInstance(deserialized));
+            Assert.Null(ex);
+
+            // Each cache collapses to a single entry per case-insensitive key (first wins).
+            Assert.Single(deserialized.SIDToDomainCache);
+            Assert.Single(deserialized.GlobalCatalogCache);
+            Assert.Single(deserialized.ValueToIdCache);
+
+            // Lookups succeed under either casing after the rewrap.
+            Assert.True(Cache.GetDomainSidMapping("contoso.local", out var resolvedSid));
+            Assert.Equal("S-1-5-21-1-2-3", resolvedSid);
+            Assert.True(Cache.GetGCCache("contoso.local", out var gcs));
+            Assert.Single(gcs);
+            Assert.True(Cache.GetPrefixedValue("administrator", "contoso.local", out var resolvedId));
+            Assert.Equal("S-1-5-21-1-2-3-500", resolvedId);
+
+            Cache.SetCacheInstance(null);
+        }
     }
 }

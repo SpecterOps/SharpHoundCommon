@@ -204,19 +204,33 @@ namespace SharpHoundCommonLib
             if (CacheInstance == null) return;
             if (CacheInstance.SIDToDomainCache != null)
             {
-                CacheInstance.SIDToDomainCache = new ConcurrentDictionary<string, string>(
-                    CacheInstance.SIDToDomainCache, StringComparer.OrdinalIgnoreCase);
+                CacheInstance.SIDToDomainCache = CopyCaseInsensitive(CacheInstance.SIDToDomainCache);
             }
             if (CacheInstance.GlobalCatalogCache != null)
             {
-                CacheInstance.GlobalCatalogCache = new ConcurrentDictionary<string, string[]>(
-                    CacheInstance.GlobalCatalogCache, StringComparer.OrdinalIgnoreCase);
+                CacheInstance.GlobalCatalogCache = CopyCaseInsensitive(CacheInstance.GlobalCatalogCache);
             }
             if (CacheInstance.ValueToIdCache != null)
             {
-                CacheInstance.ValueToIdCache = new ConcurrentDictionary<string, string>(
-                    CacheInstance.ValueToIdCache, StringComparer.OrdinalIgnoreCase);
+                CacheInstance.ValueToIdCache = CopyCaseInsensitive(CacheInstance.ValueToIdCache);
             }
+        }
+
+        /// <summary>
+        ///     Copies <paramref name="source"/> into a new <see cref="ConcurrentDictionary{TKey,TValue}"/> keyed
+        ///     by <see cref="StringComparer.OrdinalIgnoreCase"/>. Entries are added with TryAdd so keys that
+        ///     collide only by case (introduced before the case-insensitive invariant was reapplied) are
+        ///     silently dropped — first writer wins — rather than throwing from the constructor.
+        /// </summary>
+        private static ConcurrentDictionary<string, TValue> CopyCaseInsensitive<TValue>(
+            ConcurrentDictionary<string, TValue> source)
+        {
+            var copy = new ConcurrentDictionary<string, TValue>(StringComparer.OrdinalIgnoreCase);
+            foreach (var kvp in source)
+            {
+                copy.TryAdd(kvp.Key, kvp.Value);
+            }
+            return copy;
         }
 
         /// <summary>
