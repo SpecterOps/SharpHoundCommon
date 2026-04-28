@@ -946,6 +946,121 @@ namespace CommonLibTest {
             Assert.Null(cached);
         }
 
+        [Fact]
+        public async Task CacheDomainInfo_KeyMismatchesCandidateName_NoOp() {
+            new LdapUtils().ResetUtils();
+            const string key = "h2-contoso.test";
+
+            // Simulates a misconfigured LdapConfig.Server pin that lands on a DC outside the
+            // requested domain - the candidate's Name describes fabrikam, but the caller asked
+            // about contoso. The guard must reject the write to prevent cache poisoning.
+            var fabrikam = new DomainInfo(
+                name: "H2-FABRIKAM.TEST",
+                distinguishedName: "DC=h2-fabrikam,DC=test",
+                domainSid: "S-1-5-21-9-9-9",
+                netBiosName: "FABRIKAM");
+            LdapUtils.CacheDomainInfo(key, fabrikam);
+
+            var (ok, cached) = await LdapUtils.GetDomainInfoStaticAsync(key, new LdapConfig {
+                Server = "unreachable.invalid.test",
+                AllowFallbackToUncontrolledLdap = false
+            });
+            Assert.False(ok);
+            Assert.Null(cached);
+        }
+
+        [Fact]
+        public async Task CacheDomainInfo_KeyMatchesNetBiosName_Cached() {
+            new LdapUtils().ResetUtils();
+            const string netBiosKey = "H2NETBIOS";
+
+            // NetBIOS short-name keys are a legitimate alias form - the guard must accept the
+            // write when key matches candidate.NetBiosName even though it differs from Name.
+            var info = new DomainInfo(
+                name: "H2-NETBIOS-MATCH.TEST",
+                distinguishedName: "DC=h2-netbios-match,DC=test",
+                domainSid: "S-1-5-21-1-1-1",
+                netBiosName: "H2NETBIOS");
+            LdapUtils.CacheDomainInfo(netBiosKey, info);
+
+            var (ok, cached) = await LdapUtils.GetDomainInfoStaticAsync(netBiosKey, new LdapConfig {
+                Server = "unreachable.invalid.test",
+                AllowFallbackToUncontrolledLdap = false
+            });
+            Assert.True(ok);
+            Assert.Equal("H2-NETBIOS-MATCH.TEST", cached.Name);
+        }
+
+        [Fact]
+        public async Task CacheDomainInfo_KeyMatchesCandidateNameCaseInsensitive_Cached() {
+            new LdapUtils().ResetUtils();
+            const string lowerKey = "h2-case.test";
+
+            var info = new DomainInfo(name: "H2-CASE.TEST", domainSid: "S-1-5-21-2-2-2");
+            LdapUtils.CacheDomainInfo(lowerKey, info);
+
+            var (ok, cached) = await LdapUtils.GetDomainInfoStaticAsync(lowerKey, new LdapConfig {
+                Server = "unreachable.invalid.test",
+                AllowFallbackToUncontrolledLdap = false
+            });
+            Assert.True(ok);
+            Assert.Equal("S-1-5-21-2-2-2", cached.DomainSid);
+        }
+
+        [Fact]
+        public async Task CacheDomainInfo_MirrorsEntryUnderCandidateName() {
+            new LdapUtils().ResetUtils();
+            const string netBiosKey = "H1MIRROR";
+
+            // Write under the NetBIOS alias - the helper must mirror the entry under the
+            // canonical DNS Name so a later lookup by FQDN hits the same record without redoing
+            // resolution.
+            var info = new DomainInfo(
+                name: "H1-MIRROR.TEST",
+                distinguishedName: "DC=h1-mirror,DC=test",
+                domainSid: "S-1-5-21-3-3-3",
+                netBiosName: "H1MIRROR");
+            LdapUtils.CacheDomainInfo(netBiosKey, info);
+
+            var (ok, cached) = await LdapUtils.GetDomainInfoStaticAsync("H1-MIRROR.TEST", new LdapConfig {
+                Server = "unreachable.invalid.test",
+                AllowFallbackToUncontrolledLdap = false
+            });
+            Assert.True(ok);
+            Assert.Equal("H1MIRROR", cached.NetBiosName);
+            Assert.Equal("S-1-5-21-3-3-3", cached.DomainSid);
+        }
+
+        [Fact]
+        public async Task CacheDomainInfo_RicherAliasWriteUpgradesNameKeyEntry() {
+            new LdapUtils().ResetUtils();
+            const string fqdnKey = "h1-upgrade.test";
+            const string netBiosKey = "H1UPGRADE";
+
+            // Pre-seed the canonical-Name entry with a sparse record (e.g. an earlier ADSI tier
+            // result). A later richer write under the NetBIOS alias must propagate through the
+            // mirror so a FQDN lookup observes the upgrade rather than the stale sparse entry.
+            var sparse = new DomainInfo(name: "H1-UPGRADE.TEST", domainSid: "S-1-5-21-4-4-4");
+            LdapUtils.CacheDomainInfo(fqdnKey, sparse);
+
+            var rich = new DomainInfo(
+                name: "H1-UPGRADE.TEST",
+                distinguishedName: "DC=h1-upgrade,DC=test",
+                domainSid: "S-1-5-21-4-4-4",
+                netBiosName: "H1UPGRADE",
+                primaryDomainController: "dc01.h1-upgrade.test",
+                domainControllers: new[] { "dc01.h1-upgrade.test" });
+            LdapUtils.CacheDomainInfo(netBiosKey, rich);
+
+            var (ok, cached) = await LdapUtils.GetDomainInfoStaticAsync(fqdnKey, new LdapConfig {
+                Server = "unreachable.invalid.test",
+                AllowFallbackToUncontrolledLdap = false
+            });
+            Assert.True(ok);
+            Assert.Equal("H1UPGRADE", cached.NetBiosName);
+            Assert.Equal("dc01.h1-upgrade.test", cached.PrimaryDomainController);
+        }
+
         // ---------------------------------------------------------------------------
         // SelectRicherDomainInfo / TryEnrichDomainInfoViaDirectLdapAsync coverage
         // ---------------------------------------------------------------------------

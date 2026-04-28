@@ -30,16 +30,10 @@ using SearchScope = System.DirectoryServices.Protocols.SearchScope;
 
 namespace SharpHoundCommonLib {
     public class LdapUtils : ILdapUtils {
-        //This cache is indexed by domain sid
-        private static ConcurrentDictionary<string, Domain> _domainCache =
-            new(StringComparer.OrdinalIgnoreCase);
         private static ConcurrentDictionary<string, DomainInfo> _domainInfoCache =
             new(StringComparer.OrdinalIgnoreCase);
         private static ConcurrentHashSet _domainControllers = new(StringComparer.OrdinalIgnoreCase);
         private static ConcurrentHashSet _unresolvablePrincipals = new(StringComparer.OrdinalIgnoreCase);
-
-        private static readonly ConcurrentDictionary<string, string> DomainToForestCache =
-            new(StringComparer.OrdinalIgnoreCase);
 
         // Single-shot cache for the uncontrolled Domain.GetDomain() hint tier in
         // ResolveEffectiveDomainHint. null = not attempted; "" = attempted and failed; otherwise the
@@ -67,12 +61,11 @@ namespace SharpHoundCommonLib {
         private readonly ILogger _log;
         private readonly IPortScanner _portScanner;
         private readonly NativeMethods _nativeMethods;
-        private readonly string _nullCacheKey = Guid.NewGuid().ToString();
 
         // Per-instance cache for the no-hint Domain resolution. The OS-side resolution depends
         // on the calling thread's auth context and/or _ldapConfig credentials, neither of which
-        // is a usable cache key, so this state cannot live in the static _domainCache. Failures
-        // are not cached; the next call retries.
+        // is a usable cache key for a process-wide store. Failures are not cached; the next call
+        // retries.
         private Domain _currentDomain;
         private readonly object _currentDomainLock = new();
         private static readonly Regex SIDRegex = new(@"^(S-\d+-\d+-\d+-\d+-\d+-\d+)(-\d+)?$");
@@ -316,23 +309,14 @@ namespace SharpHoundCommonLib {
         }
 
         public virtual async Task<(bool Success, string ForestName)> GetForest(string domain) {
-            if (DomainToForestCache.TryGetValue(domain, out var cachedForest)) {
-                return (true, cachedForest);
-            }
-
+            // DomainInfo.ForestName is already memoized in _domainInfoCache, so a separate
+            // domain-to-forest dictionary would be a duplicate cache over the same key space.
             if (await GetDomainInfoAsync(domain) is (true, var domainInfo) &&
                 !string.IsNullOrEmpty(domainInfo?.ForestName)) {
-                DomainToForestCache.TryAdd(domain, domainInfo.ForestName);
                 return (true, domainInfo.ForestName);
             }
 
-            var (success, forest) = await GetForestFromLdap(domain);
-            if (success) {
-                DomainToForestCache.TryAdd(domain, forest);
-                return (true, forest);
-            }
-
-            return (false, null);
+            return await GetForestFromLdap(domain);
         }
 
         private async Task<(bool Success, string ForestName)> GetForestFromLdap(string domain) {
@@ -527,13 +511,10 @@ namespace SharpHoundCommonLib {
             }
 
             // A blank/whitespace name is the no-target form. Delegate so the per-instance
-            // _currentDomain handles it without a per-instance GUID sentinel against the
-            // process-wide static cache.
+            // _currentDomain handles it.
             if (string.IsNullOrWhiteSpace(domainName)) {
                 return GetDomain(out domain);
             }
-
-            if (_domainCache.TryGetValue(domainName, out domain)) return true;
 
             try {
                 var context = _ldapConfig.Username != null
@@ -543,17 +524,7 @@ namespace SharpHoundCommonLib {
 
                 // Blocking External Call
                 domain = Domain.GetDomain(context);
-                if (domain == null) return false;
-
-                // Cache under the caller's input AND the canonical name returned by SDS. The
-                // two may differ (e.g. NetBIOS alias vs DNS canonical), so writing both keys
-                // ensures alias-form callers don't miss while future canonical-form callers
-                // still benefit.
-                _domainCache.TryAdd(domainName, domain);
-                if (!string.IsNullOrWhiteSpace(domain.Name)) {
-                    _domainCache.TryAdd(domain.Name, domain);
-                }
-                return true;
+                return domain != null;
             }
             catch (Exception e) {
                 _log.LogDebug(e, "GetDomain call failed for domain name {Name}", domainName);
@@ -579,17 +550,14 @@ namespace SharpHoundCommonLib {
                 return false;
             }
 
-            // The static overload has no per-instance state to cache a no-hint resolution
-            // against, and ConcurrentDictionary throws on a null key. Reject up front rather
-            // than proceeding with an unkeyable resolution.
+            // The static overload has no per-instance state to anchor a no-hint resolution to.
+            // Reject up front rather than proceeding with a resolution we can't attribute.
             if (string.IsNullOrWhiteSpace(domainName)) {
                 Logging.Logger.LogDebug(
                     "Static GetDomain short-circuited: domainName is null or whitespace");
                 domain = null;
                 return false;
             }
-
-            if (_domainCache.TryGetValue(domainName, out domain)) return true;
 
             try {
                 var context = ldapConfig.Username != null
@@ -599,13 +567,7 @@ namespace SharpHoundCommonLib {
 
                 // Blocking External Call
                 domain = Domain.GetDomain(context);
-                if (domain == null) return false;
-
-                _domainCache.TryAdd(domainName, domain);
-                if (!string.IsNullOrWhiteSpace(domain.Name)) {
-                    _domainCache.TryAdd(domain.Name, domain);
-                }
-                return true;
+                return domain != null;
             }
             catch (Exception e) {
                 Logging.Logger.LogDebug("Static GetDomain call failed for domain {DomainName}: {Error}", domainName,
@@ -618,9 +580,7 @@ namespace SharpHoundCommonLib {
         /// <summary>
         ///     Attempts to get the Domain object representing the user's current domain. The
         ///     resolution depends on the calling thread's auth context and configured credentials,
-        ///     so the result is cached per <see cref="LdapUtils"/> instance rather than in the
-        ///     shared static cache. Successful resolutions also seed the static cache under the
-        ///     canonical DNS name so that future explicit-name callers benefit.
+        ///     so the result is cached per <see cref="LdapUtils"/> instance.
         /// </summary>
         public bool GetDomain(out Domain domain) {
             if (!_ldapConfig.AllowFallbackToUncontrolledLdap) {
@@ -660,16 +620,8 @@ namespace SharpHoundCommonLib {
 
                     // Blocking External Call
                     var resolved = Domain.GetDomain(context);
-                    if (resolved == null) {
-                        domain = null;
-                        return false;
-                    }
 
                     _currentDomain = resolved;
-                    if (!string.IsNullOrWhiteSpace(resolved.Name)) {
-                        _domainCache.TryAdd(resolved.Name, resolved);
-                    }
-
                     domain = resolved;
                     return true;
                 }
@@ -1252,17 +1204,47 @@ namespace SharpHoundCommonLib {
         /// <c>CN=Partitions</c> for <see cref="DomainInfo.NetBiosName"/>. Because the static helper
         /// is invoked re-entrantly from <see cref="ConnectionPoolManager.GetDomainSidFromDomainName"/>
         /// during pool acquisition, the sparser one-shot direct-LDAP record reaches the cache first;
-        /// without this helper the subsequent pool-derived record would be silently discarded by
+        /// without the score guard the subsequent pool-derived record would be silently discarded by
         /// <c>TryAdd</c> and every later cache hit would observe the partial record.
+        /// <para>
+        /// The cross-domain guard (<see cref="KeyMatchesCandidate"/>) prevents cache poisoning when
+        /// a misconfigured <see cref="LdapConfig.Server"/> pin or a cross-forest leak causes a tier
+        /// to return a <see cref="DomainInfo"/> describing a different domain than the one the
+        /// caller asked about. On every successful write the entry is also mirrored under
+        /// <see cref="DomainInfo.Name"/> when that differs from <paramref name="key"/>, so
+        /// subsequent lookups by a different alias form (NetBIOS short name vs. DNS FQDN) hit the
+        /// same richest-available record.
+        /// </para>
         /// </remarks>
         internal static void CacheDomainInfo(string key, DomainInfo candidate) {
             if (key == null || candidate == null) return;
-            _domainInfoCache.AddOrUpdate(
-                key,
-                candidate,
-                (_, existing) => CompletenessScore(candidate) > CompletenessScore(existing)
-                    ? candidate
-                    : existing);
+            if (!KeyMatchesCandidate(key, candidate)) return;
+
+            DomainInfo PickRicher(string _, DomainInfo existing)
+                => CompletenessScore(candidate) > CompletenessScore(existing) ? candidate : existing;
+
+            _domainInfoCache.AddOrUpdate(key, candidate, PickRicher);
+
+            if (!string.IsNullOrWhiteSpace(candidate.Name)
+                && !string.Equals(key, candidate.Name, StringComparison.OrdinalIgnoreCase)) {
+                _domainInfoCache.AddOrUpdate(candidate.Name, candidate, PickRicher);
+            }
+        }
+
+        /// <summary>
+        /// Returns <c>true</c> when <paramref name="key"/> identifies the same domain that
+        /// <paramref name="candidate"/> describes, comparing case-insensitively against
+        /// <see cref="DomainInfo.Name"/> and <see cref="DomainInfo.NetBiosName"/>. A candidate
+        /// with no <see cref="DomainInfo.Name"/> is treated as unverifiable and accepted; the
+        /// resolution tiers always populate Name on success, so this branch only matters for
+        /// hand-built records in tests.
+        /// </summary>
+        private static bool KeyMatchesCandidate(string key, DomainInfo candidate) {
+            if (string.IsNullOrEmpty(candidate.Name)) return true;
+            if (string.Equals(key, candidate.Name, StringComparison.OrdinalIgnoreCase)) return true;
+            if (!string.IsNullOrEmpty(candidate.NetBiosName)
+                && string.Equals(key, candidate.NetBiosName, StringComparison.OrdinalIgnoreCase)) return true;
+            return false;
         }
 
         /// <summary>
@@ -1297,87 +1279,15 @@ namespace SharpHoundCommonLib {
         /// AuthType, signing, cert verification, credentials).
         /// </summary>
         /// <remarks>
-        /// Resolution order:
-        /// <list type="number">
-        ///   <item>Static cache lookup keyed by the effective domain hint (the explicit
-        ///   <paramref name="domainName"/> when supplied, otherwise the resolved current-user
-        ///   domain via <see cref="ResolveEffectiveDomainHint"/>). Falls back to
-        ///   <see cref="_nullCacheKey"/> only when no hint can be resolved.</item>
-        ///   <item>Controlled LDAP resolution via the connection pool (see <see cref="ResolveDomainInfoControlledAsyncCore"/>).</item>
-        ///   <item>Uncontrolled fallback via <c>System.DirectoryServices.ActiveDirectory.Domain.GetDomain</c>,
-        ///   gated on <see cref="LdapConfig.AllowFallbackToUncontrolledLdap"/> (see <see cref="TryGetDomainInfoViaUncontrolledFallback"/>).</item>
-        /// </list>
-        /// Successful results from either path are cached for the lifetime of the process (until
-        /// <see cref="ResetUtils"/> is invoked).
+        /// Walks <see cref="ResolveDomainInfoAsync"/> with this instance's connection pool and
+        /// config, after substituting a current-user domain hint via
+        /// <see cref="ResolveEffectiveDomainHint"/> when <paramref name="domainName"/> is empty.
+        /// Successful results are cached in the static <see cref="_domainInfoCache"/> for the
+        /// lifetime of the process (until <see cref="ResetUtils"/> is invoked).
         /// </remarks>
-        public async Task<(bool Success, DomainInfo DomainInfo)> GetDomainInfoAsync(string domainName) {
-            // Canonicalize the cache key BEFORE the lookup. Without this, a null domainName was
-            // stored under a per-instance GUID sentinel, fragmenting the static _domainInfoCache:
-            // N LdapUtils instances each wrote a separate entry for the same effective domain,
-            // and a later call with the explicit DNS name missed the entry written under null.
-            // ResolveEffectiveDomainHint returns explicit arguments verbatim and single-shot-caches
-            // the uncontrolled tier in _uncontrolledGetDomainHint, so this is essentially free.
-            var effectiveDomain = ResolveEffectiveDomainHint(domainName);
-            var cacheKey = !string.IsNullOrWhiteSpace(effectiveDomain) ? effectiveDomain : _nullCacheKey;
-            if (_domainInfoCache.TryGetValue(cacheKey, out var cached)) {
-                return (true, cached);
-            }
-
-            // Preferred path: every LDAP call made here flows through LdapConnectionPool and
-            // therefore honors every flag on LdapConfig. Pass the already-resolved hint so the
-            // controlled adapter does not redo ResolveEffectiveDomainHint internally.
-            var (controlledOk, controlledInfo) = await ResolveDomainInfoControlledAsync(effectiveDomain);
-            if (controlledOk) {
-                CacheDomainInfo(cacheKey, controlledInfo);
-                return (true, controlledInfo);
-            }
-
-            // Secondary controlled path: bind directly to the domain name with a one-shot
-            // LdapConnection honoring LdapConfig. Tried before ADSI because this tier is the
-            // only one that can express fine-grained LdapConfig.AuthType and
-            // LdapConfig.DisableCertVerification - running ADSI first would silently ignore
-            // those flags whenever the ADSI bind happened to succeed.
-            if (!string.IsNullOrWhiteSpace(effectiveDomain)) {
-                var (directOk, directInfo) =
-                    await TryResolveDomainInfoViaDirectLdapAsync(effectiveDomain, _ldapConfig, _log);
-                if (directOk) {
-                    CacheDomainInfo(cacheKey, directInfo);
-                    return (true, directInfo);
-                }
-            }
-
-            // Tertiary controlled path: ADSI. DirectoryEntry's serverless binding invokes
-            // DsGetDcName internally, so NetBIOS short names and domains without a direct DNS
-            // A record still bind here after the raw-LDAP tier above could not resolve them.
-            if (!string.IsNullOrWhiteSpace(effectiveDomain)) {
-                var (adsiOk, adsiInfo) =
-                    await TryResolveDomainInfoViaDirectoryEntryAsync(effectiveDomain, _ldapConfig, _log);
-                if (adsiOk) {
-                    // ADSI populates PrimaryDomainController via DsGetDcName. Retrying the
-                    // direct-LDAP path against that discovered DC closes the score gap when the
-                    // original raw-LDAP attempt failed only because the domain name itself had
-                    // no resolvable A/SRV record from this host.
-                    adsiInfo = await TryEnrichDomainInfoViaDirectLdapAsync(
-                        effectiveDomain, adsiInfo, _ldapConfig, _log);
-                    CacheDomainInfo(cacheKey, adsiInfo);
-                    return (true, adsiInfo);
-                }
-            }
-
-            // Opt-in fallback. TryGetDomainInfoViaUncontrolledFallback short-circuits when
-            // AllowFallbackToUncontrolledLdap is disabled, so when the flag is off this call is a no-op.
-            if (TryGetDomainInfoViaUncontrolledFallback(effectiveDomain, _ldapConfig, _log, out var fallbackInfo)) {
-                // Same enrichment opportunity as the ADSI tier - the uncontrolled fallback
-                // populates both PrimaryDomainController and DomainControllers but never
-                // NetBiosName, so the discovered DC name is enough to reach a score-7 record
-                // via a controlled retry.
-                fallbackInfo = await TryEnrichDomainInfoViaDirectLdapAsync(
-                    effectiveDomain, fallbackInfo, _ldapConfig, _log);
-                CacheDomainInfo(cacheKey, fallbackInfo);
-                return (true, fallbackInfo);
-            }
-
-            return (false, null);
+        public Task<(bool Success, DomainInfo DomainInfo)> GetDomainInfoAsync(string domainName) {
+            var hint = ResolveEffectiveDomainHint(domainName);
+            return ResolveDomainInfoAsync(hint, _connectionPool, _ldapConfig, _log);
         }
 
         /// <summary>
@@ -1398,14 +1308,35 @@ namespace SharpHoundCommonLib {
         /// <param name="config">Config used to honor the <see cref="LdapConfig.AllowFallbackToUncontrolledLdap"/> gate and to build fallback credentials.</param>
         /// <param name="log">Logger used for debug-level diagnostics on failure paths.</param>
         /// <remarks>
-        /// Results from both paths are stored in the same static <see cref="_domainInfoCache"/>
-        /// used by the instance overload, so a successful lookup here also benefits later
-        /// <see cref="GetDomainInfoAsync(string)"/> calls on the same process.
+        /// Results are stored in the same static <see cref="_domainInfoCache"/> used by the
+        /// instance overload, so a successful lookup here also benefits later
+        /// <see cref="GetDomainInfoAsync(string)"/> calls on the same process. The pool tier is
+        /// skipped here because no <see cref="ConnectionPoolManager"/> is available; the remaining
+        /// three tiers (one-shot direct LDAP, ADSI, uncontrolled fallback) still run.
         /// </remarks>
-        internal static async Task<(bool Success, DomainInfo DomainInfo)> GetDomainInfoStaticAsync(
+        internal static Task<(bool Success, DomainInfo DomainInfo)> GetDomainInfoStaticAsync(
             string domainName, LdapConfig config, ILogger log = null) {
-            // Unlike the instance overload, the static entry point does not fabricate a current-domain
-            // hint - its callers always know which domain they are asking about.
+            return ResolveDomainInfoAsync(domainName, pool: null, config, log);
+        }
+
+        /// <summary>
+        /// Shared resolution core that drives the four-tier walk for both
+        /// <see cref="GetDomainInfoAsync(string)"/> and <see cref="GetDomainInfoStaticAsync"/>.
+        /// Tier 1 (pool-driven controlled LDAP) is skipped when <paramref name="pool"/> is null.
+        /// Tiers 2-4 (one-shot direct LDAP, ADSI, uncontrolled fallback) run unconditionally.
+        /// </summary>
+        /// <remarks>
+        /// Tier ordering rationale: the pool tier honors every <see cref="LdapConfig"/> flag and
+        /// is preferred when available. The one-shot direct-LDAP tier is tried before ADSI because
+        /// it is the only tier outside the pool that can express fine-grained
+        /// <see cref="LdapConfig.AuthType"/> and <see cref="LdapConfig.DisableCertVerification"/> -
+        /// running ADSI first would silently ignore those flags whenever its serverless bind
+        /// happened to succeed. The ADSI and uncontrolled-fallback tiers are followed by a
+        /// direct-LDAP enrichment pass against the discovered PDC so the cached record reaches the
+        /// same shape as the pool and one-shot tiers.
+        /// </remarks>
+        private static async Task<(bool Success, DomainInfo DomainInfo)> ResolveDomainInfoAsync(
+            string domainName, ConnectionPoolManager pool, LdapConfig config, ILogger log) {
             if (string.IsNullOrWhiteSpace(domainName)) {
                 return (false, null);
             }
@@ -1414,25 +1345,23 @@ namespace SharpHoundCommonLib {
                 return (true, cached);
             }
 
-            // Secondary controlled path: a one-shot LdapConnection bound directly to the domain
-            // name, honoring LdapConfig. Tried before ADSI because this tier is the only one
-            // that can express fine-grained LdapConfig.AuthType and LdapConfig.DisableCertVerification.
+            if (pool != null) {
+                var (poolOk, poolInfo) = await ResolveDomainInfoControlledAsyncCore(domainName, pool, log);
+                if (poolOk) {
+                    CacheDomainInfo(domainName, poolInfo);
+                    return (true, poolInfo);
+                }
+            }
+
             var (directOk, directInfo) = await TryResolveDomainInfoViaDirectLdapAsync(domainName, config, log);
             if (directOk) {
                 CacheDomainInfo(domainName, directInfo);
                 return (true, directInfo);
             }
 
-            // Tertiary controlled path: ADSI. DirectoryEntry's serverless binding handles
-            // NetBIOS short names and domains whose DNS layout does not expose an A record on
-            // the domain name itself, at the cost of not honoring every LdapConfig flag.
             var (adsiOk, adsiInfo) = await TryResolveDomainInfoViaDirectoryEntryAsync(domainName, config, log);
             if (adsiOk) {
-                // Retry the direct-LDAP path against the DC discovered by ADSI so the cached
-                // record reaches the same shape as the pool/one-shot tiers. Mirrors the matching
-                // enrichment in the instance overload.
-                adsiInfo = await TryEnrichDomainInfoViaDirectLdapAsync(
-                    domainName, adsiInfo, config, log);
+                adsiInfo = await TryEnrichDomainInfoViaDirectLdapAsync(domainName, adsiInfo, config, log);
                 CacheDomainInfo(domainName, adsiInfo);
                 return (true, adsiInfo);
             }
@@ -1445,28 +1374,6 @@ namespace SharpHoundCommonLib {
             }
 
             return (false, null);
-        }
-
-        /// <summary>
-        /// Instance-level adapter over <see cref="ResolveDomainInfoControlledAsyncCore"/> that supplies
-        /// this utils' connection pool and logger, and substitutes a current-domain hint when
-        /// <paramref name="domainName"/> is null/empty.
-        /// </summary>
-        /// <remarks>
-        /// The hint is taken from <see cref="LdapConfig.CurrentUserDomain"/> when set, otherwise
-        /// from <see cref="Environment.UserDomainName"/>. The config override is the only workable
-        /// hint in netonly contexts (<c>runas /netonly</c>) and on workgroup machines, where the
-        /// OS API reports the local machine name rather than the target AD domain. If neither is
-        /// usable the connection pool will fail to resolve the hint and this method returns
-        /// <c>(false, null)</c> so the orchestrator can fall through to the uncontrolled fallback.
-        /// </remarks>
-        private Task<(bool Success, DomainInfo DomainInfo)> ResolveDomainInfoControlledAsync(string domainName) {
-            var hint = ResolveEffectiveDomainHint(domainName);
-            if (string.IsNullOrWhiteSpace(hint)) {
-                return Task.FromResult<(bool, DomainInfo)>((false, null));
-            }
-
-            return ResolveDomainInfoControlledAsyncCore(hint, _connectionPool, _log);
         }
 
         /// <summary>
@@ -2369,7 +2276,6 @@ namespace SharpHoundCommonLib {
 
         public void ResetUtils() {
             _unresolvablePrincipals.Clear();
-            _domainCache.Clear();
             _domainInfoCache.Clear();
             _domainControllers.Clear();
             lock (_currentDomainLock) {
