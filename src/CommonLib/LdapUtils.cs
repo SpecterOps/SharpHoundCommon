@@ -456,6 +456,14 @@ namespace SharpHoundCommonLib {
             if (await GetDomainInfoAsync(domainName) is (true, var domainInfo) &&
                 !string.IsNullOrEmpty(domainInfo?.DomainSid)) {
                 Cache.AddDomainSidMapping(domainName, domainInfo.DomainSid);
+                // Also seed the canonical FQDN keyed write so the SID->Name slot is populated
+                // even when the caller passed a NetBIOS alias. AddDomainSidMapping gates the
+                // SID->Name direction on the name being DNS-shaped, so the NetBIOS-keyed call
+                // above only writes Name->SID; this second call fills in the FQDN side.
+                if (!string.IsNullOrEmpty(domainInfo.Name) &&
+                    !string.Equals(domainName, domainInfo.Name, StringComparison.OrdinalIgnoreCase)) {
+                    Cache.AddDomainSidMapping(domainInfo.Name, domainInfo.DomainSid);
+                }
                 return (true, domainInfo.DomainSid);
             }
 

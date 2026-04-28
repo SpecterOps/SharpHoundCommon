@@ -129,6 +129,71 @@ namespace CommonLibTest
         }
 
         [Fact]
+        public void AddDomainSidMapping_NetBiosName_DoesNotPoisonSidToNameSlot()
+        {
+            // A NetBIOS-only write must not populate the SID->Name slot, because consumers of
+            // that slot expect a DNS-shaped FQDN (LDAP base DN construction, server selection,
+            // GetDomainInfoAsync hint resolution). Leaving the slot empty lets a later
+            // FQDN-keyed write populate it correctly.
+            Cache.SetCacheInstance(Cache.CreateNewCache());
+
+            const string sid = "S-1-5-21-1212121212-3434343434-5656565656";
+            const string netbios = "CONTOSO";
+
+            Cache.AddDomainSidMapping(sid, netbios);
+
+            Assert.False(Cache.GetDomainSidMapping(sid, out _));
+            Assert.True(Cache.GetDomainSidMapping(netbios, out var resolvedSid));
+            Assert.Equal(sid, resolvedSid);
+
+            Cache.SetCacheInstance(null);
+        }
+
+        [Fact]
+        public void AddDomainSidMapping_NetBiosName_ReverseArgumentOrder_DoesNotPoisonSidToNameSlot()
+        {
+            // Same poisoning vector with arguments reversed: AddDomainSidMapping(netbios, sid).
+            Cache.SetCacheInstance(Cache.CreateNewCache());
+
+            const string sid = "S-1-5-21-7878787878-9090909090-1212121212";
+            const string netbios = "FABRIKAM";
+
+            Cache.AddDomainSidMapping(netbios, sid);
+
+            Assert.False(Cache.GetDomainSidMapping(sid, out _));
+            Assert.True(Cache.GetDomainSidMapping(netbios, out var resolvedSid));
+            Assert.Equal(sid, resolvedSid);
+
+            Cache.SetCacheInstance(null);
+        }
+
+        [Fact]
+        public void AddDomainSidMapping_NetBiosThenFqdn_FqdnPopulatesSidToNameSlot()
+        {
+            // After a NetBIOS-keyed write leaves the SID->Name slot empty, a subsequent
+            // FQDN-keyed write must fill it with the canonical DNS name. This is the key
+            // behavior that makes the gating safe: the slot stays available for the richer
+            // resolver to populate.
+            Cache.SetCacheInstance(Cache.CreateNewCache());
+
+            const string sid = "S-1-5-21-3434343434-5656565656-7878787878";
+            const string netbios = "CONTOSO";
+            const string fqdn = "CONTOSO.LOCAL";
+
+            Cache.AddDomainSidMapping(netbios, sid);
+            Cache.AddDomainSidMapping(fqdn, sid);
+
+            Assert.True(Cache.GetDomainSidMapping(sid, out var resolvedName));
+            Assert.Equal(fqdn, resolvedName);
+            Assert.True(Cache.GetDomainSidMapping(netbios, out var resolvedFromNetbios));
+            Assert.Equal(sid, resolvedFromNetbios);
+            Assert.True(Cache.GetDomainSidMapping(fqdn, out var resolvedFromFqdn));
+            Assert.Equal(sid, resolvedFromFqdn);
+
+            Cache.SetCacheInstance(null);
+        }
+
+        [Fact]
         public void SetCacheInstance_AfterDeserialization_RestoresCaseInsensitiveSidToDomain()
         {
             // Simulate the load-from-disk scenario by round-tripping with

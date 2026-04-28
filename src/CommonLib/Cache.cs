@@ -46,10 +46,12 @@ namespace SharpHoundCommonLib
         [IgnoreDataMember] private static Cache CacheInstance { get; set; }
 
         /// <summary>
-        ///     Add a SID/Domain-name pair to the cache. Writes both directions (SID→Name and
-        ///     Name→SID) so a successful resolution by any tier benefits subsequent lookups in
-        ///     either direction. Existing entries are preserved (TryAdd semantics) — first
-        ///     resolver wins.
+        ///     Add a SID/Domain-name pair to the cache. The Name→SID direction is always written
+        ///     (NetBIOS aliases are valid lookup keys). The SID→Name direction is only written
+        ///     when the name is a DNS-shaped FQDN: a NetBIOS-keyed reverse write would poison
+        ///     the slot for downstream consumers that depend on the SID→Name lookup yielding a
+        ///     DNS name (LDAP base DN construction, server selection, GetDomainInfoAsync hints).
+        ///     Existing entries are preserved (TryAdd semantics) — first resolver wins.
         /// </summary>
         /// <param name="key">A SID or a domain name.</param>
         /// <param name="value">The corresponding domain name or SID.</param>
@@ -57,11 +59,36 @@ namespace SharpHoundCommonLib
         {
             if (CacheInstance == null) return;
             if (string.IsNullOrEmpty(key) || string.IsNullOrEmpty(value)) return;
-            CacheInstance.SIDToDomainCache.TryAdd(key, value);
-            // Bidirectional: SIDs (S-…) and DNS domain names cannot collide as keys, so writing
-            // the reverse mapping makes a successful resolution by any tier visible to lookups
-            // in either direction.
-            CacheInstance.SIDToDomainCache.TryAdd(value, key);
+
+            var keyIsSid = LooksLikeDomainSid(key);
+            var valueIsSid = LooksLikeDomainSid(value);
+
+            if (keyIsSid == valueIsSid)
+            {
+                // Both look like SIDs or neither does — caller misuse or an unexpected input
+                // shape. Throw this data out
+                return;
+            }
+
+            var sid = keyIsSid ? key : value;
+            var name = keyIsSid ? value : key;
+
+            CacheInstance.SIDToDomainCache.TryAdd(name, sid);
+
+            if (LooksLikeDnsDomainName(name))
+            {
+                CacheInstance.SIDToDomainCache.TryAdd(sid, name);
+            }
+        }
+
+        private static bool LooksLikeDomainSid(string value)
+        {
+            return value != null && value.StartsWith("S-1-", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool LooksLikeDnsDomainName(string value)
+        {
+            return value != null && value.IndexOf('.') >= 0;
         }
 
         /// <summary>

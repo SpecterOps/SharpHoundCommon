@@ -146,6 +146,13 @@ namespace SharpHoundCommonLib {
                 .GetAwaiter().GetResult();
             if (infoOk && !string.IsNullOrEmpty(info?.DomainSid)) {
                 Cache.AddDomainSidMapping(domainName, info.DomainSid);
+                // Also seed the canonical FQDN keyed write so the SID->Name slot is populated
+                // even when the caller passed a NetBIOS alias. AddDomainSidMapping gates the
+                // SID->Name direction on the name being DNS-shaped.
+                if (!string.IsNullOrEmpty(info.Name) &&
+                    !string.Equals(domainName, info.Name, StringComparison.OrdinalIgnoreCase)) {
+                    Cache.AddDomainSidMapping(info.Name, info.DomainSid);
+                }
                 return (true, info.DomainSid);
             }
 
