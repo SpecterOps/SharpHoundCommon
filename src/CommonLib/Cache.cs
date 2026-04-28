@@ -26,9 +26,9 @@ namespace SharpHoundCommonLib
         {
             ValueToIdCache = new ConcurrentDictionary<string, string>();
             IdToTypeCache = new ConcurrentDictionary<string, Label>();
-            GlobalCatalogCache = new ConcurrentDictionary<string, string[]>();
+            GlobalCatalogCache = new ConcurrentDictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
             MachineSidCache = new ConcurrentDictionary<string, string>();
-            SIDToDomainCache = new ConcurrentDictionary<string, string>();
+            SIDToDomainCache = new ConcurrentDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         }
 
         [DataMember] public ConcurrentDictionary<string, string[]> GlobalCatalogCache { get; private set; }
@@ -46,13 +46,22 @@ namespace SharpHoundCommonLib
         [IgnoreDataMember] private static Cache CacheInstance { get; set; }
 
         /// <summary>
-        ///     Add a SID to/from Domain mapping to the cache
+        ///     Add a SID/Domain-name pair to the cache. Writes both directions (SID→Name and
+        ///     Name→SID) so a successful resolution by any tier benefits subsequent lookups in
+        ///     either direction. Existing entries are preserved (TryAdd semantics) — first
+        ///     resolver wins.
         /// </summary>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
+        /// <param name="key">A SID or a domain name.</param>
+        /// <param name="value">The corresponding domain name or SID.</param>
         internal static void AddDomainSidMapping(string key, string value)
         {
-            CacheInstance?.SIDToDomainCache.TryAdd(key, value);
+            if (CacheInstance == null) return;
+            if (string.IsNullOrEmpty(key) || string.IsNullOrEmpty(value)) return;
+            CacheInstance.SIDToDomainCache.TryAdd(key, value);
+            // Bidirectional: SIDs (S-…) and DNS domain names cannot collide as keys, so writing
+            // the reverse mapping makes a successful resolution by any tier visible to lookups
+            // in either direction.
+            CacheInstance.SIDToDomainCache.TryAdd(value, key);
         }
 
         /// <summary>
@@ -102,7 +111,7 @@ namespace SharpHoundCommonLib
 
         internal static bool GetGCCache(string key, out string[] value)
         {
-            if (CacheInstance != null) return CacheInstance.GlobalCatalogCache.TryGetValue(key.ToUpper(), out value);
+            if (CacheInstance != null) return CacheInstance.GlobalCatalogCache.TryGetValue(key, out value);
             value = null;
             return false;
         }
@@ -184,9 +193,11 @@ namespace SharpHoundCommonLib
         {
             CacheInstance ??= new Cache();
             CacheInstance.IdToTypeCache ??= new ConcurrentDictionary<string, Label>();
-            CacheInstance.GlobalCatalogCache ??= new ConcurrentDictionary<string, string[]>();
+            CacheInstance.GlobalCatalogCache ??=
+                new ConcurrentDictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
             CacheInstance.MachineSidCache ??= new ConcurrentDictionary<string, string>();
-            CacheInstance.SIDToDomainCache ??= new ConcurrentDictionary<string, string>();
+            CacheInstance.SIDToDomainCache ??=
+                new ConcurrentDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             CacheInstance.ValueToIdCache ??= new ConcurrentDictionary<string, string>();
         }
     }

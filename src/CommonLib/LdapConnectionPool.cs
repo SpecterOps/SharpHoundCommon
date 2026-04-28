@@ -42,7 +42,7 @@ namespace SharpHoundCommonLib {
         private readonly IMetricRouter _metric;
 
         // Tracks domains we know we've determined we shouldn't try to connect to
-        private static readonly ConcurrentHashSet ExcludedDomains = new();
+        private static readonly ConcurrentHashSet ExcludedDomains = new(StringComparer.OrdinalIgnoreCase);
 
         public LdapConnectionPool(string identifier, string poolIdentifier, LdapConfig config,
             IPortScanner scanner = null, NativeMethods nativeMethods = null, ILogger log = null, IMetricRouter metric = null) {

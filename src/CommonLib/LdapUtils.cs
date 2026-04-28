@@ -31,7 +31,8 @@ using SearchScope = System.DirectoryServices.Protocols.SearchScope;
 namespace SharpHoundCommonLib {
     public class LdapUtils : ILdapUtils {
         //This cache is indexed by domain sid
-        private static ConcurrentDictionary<string, Domain> _domainCache = new();
+        private static ConcurrentDictionary<string, Domain> _domainCache =
+            new(StringComparer.OrdinalIgnoreCase);
         private static ConcurrentDictionary<string, DomainInfo> _domainInfoCache =
             new(StringComparer.OrdinalIgnoreCase);
         private static ConcurrentHashSet _domainControllers = new(StringComparer.OrdinalIgnoreCase);
@@ -2317,10 +2318,10 @@ namespace SharpHoundCommonLib {
         }
 
         public void ResetUtils() {
-            _unresolvablePrincipals = new ConcurrentHashSet(StringComparer.OrdinalIgnoreCase);
-            _domainCache = new ConcurrentDictionary<string, Domain>();
-            _domainInfoCache = new ConcurrentDictionary<string, DomainInfo>(StringComparer.OrdinalIgnoreCase);
-            _domainControllers = new ConcurrentHashSet(StringComparer.OrdinalIgnoreCase);
+            _unresolvablePrincipals.Clear();
+            _domainCache.Clear();
+            _domainInfoCache.Clear();
+            _domainControllers.Clear();
             lock (_uncontrolledGetDomainHintLock) {
                 _uncontrolledGetDomainHint = null;
             }
