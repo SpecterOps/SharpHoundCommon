@@ -35,13 +35,6 @@ namespace SharpHoundCommonLib {
         private static ConcurrentHashSet _domainControllers = new(StringComparer.OrdinalIgnoreCase);
         private static ConcurrentHashSet _unresolvablePrincipals = new(StringComparer.OrdinalIgnoreCase);
 
-        // Single-shot cache for the uncontrolled Domain.GetDomain() hint tier in
-        // ResolveEffectiveDomainHint. null = not attempted; "" = attempted and failed; otherwise the
-        // resolved domain name. Guarded by _uncontrolledGetDomainHintLock because the underlying RPC
-        // is slow and we only want it to fire once per process. Reset from ResetUtils.
-        private static string _uncontrolledGetDomainHint;
-        private static readonly object _uncontrolledGetDomainHintLock = new();
-
         private static readonly ConcurrentDictionary<string, ResolvedWellKnownPrincipal>
             SeenWellKnownPrincipals = new();
 
@@ -1409,7 +1402,9 @@ namespace SharpHoundCommonLib {
         ///     target, letting the SDS/DsGetDcName stack resolve the current user's domain from the
         ///     thread's outbound authentication context. In <c>runas /netonly</c> that context is the
         ///     alt credential (not the local primary token that step 3 failed on), so this recovers
-        ///     the real target domain. Result cached process-wide after the first successful attempt.</item>
+        ///     the real target domain. The RPC is issued on every call that reaches this tier; the
+        ///     resolved hint becomes the <see cref="_domainInfoCache"/> key on success so subsequent
+        ///     resolutions for the same domain short-circuit at the controlled-LDAP tier.</item>
         ///   <item><b>Last-resort <see cref="Environment.UserDomainName"/></b> even when it equals the
         ///     machine name. Downstream tiers will almost certainly fail to bind against this, but
         ///     returning the env var here keeps behavior identical to the pre-change code for users who
@@ -1466,12 +1461,6 @@ namespace SharpHoundCommonLib {
         /// supplying it to <see cref="DirectoryContext"/> could misdirect the locator; the
         /// credential-less form instead lets Windows use whatever authentication context is already
         /// bound to the thread.
-        /// <para>
-        /// Result is cached process-wide in <see cref="_uncontrolledGetDomainHint"/> under
-        /// <see cref="_uncontrolledGetDomainHintLock"/>. The lock serializes the RPC so it fires at
-        /// most once per <see cref="ResetUtils"/> cycle even under concurrent callers. A stored empty
-        /// string is a "tried and failed" sentinel so repeat callers short-circuit without retrying.
-        /// </para>
         /// </remarks>
         private static bool TryResolveHintViaUncontrolledGetDomain(
             LdapConfig config, ILogger log, out string domainName) {
@@ -1479,7 +1468,7 @@ namespace SharpHoundCommonLib {
 
             // Hard gate: uncontrolled calls require explicit opt-in.
             if (config is not { AllowFallbackToUncontrolledLdap: true }) return false;
-            
+
             if (!string.IsNullOrWhiteSpace(config.Server)) {
                 log.LogDebug(
                     "TryResolveHintViaUncontrolledGetDomain(\"{Name}\", out string DomainName) short-circuited: Specific Server is set",
@@ -1487,35 +1476,23 @@ namespace SharpHoundCommonLib {
                 return false;
             }
 
-            lock (_uncontrolledGetDomainHintLock) {
-                // Previously resolved or previously failed - either way, no new RPC.
-                if (_uncontrolledGetDomainHint != null) {
-                    if (_uncontrolledGetDomainHint.Length == 0) return false;
-                    domainName = _uncontrolledGetDomainHint;
+            try {
+                // No name, no credentials: SDS resolves via the thread's outbound auth context,
+                // which is what surfaces the alt-creds domain under runas /netonly.
+                var ctx = new DirectoryContext(DirectoryContextType.Domain);
+                var domain = Domain.GetDomain(ctx);
+                var name = domain?.Name;
+                if (!string.IsNullOrEmpty(name)) {
+                    domainName = name;
                     return true;
                 }
-
-                try {
-                    // No name, no credentials: SDS resolves via the thread's outbound auth context,
-                    // which is what surfaces the alt-creds domain under runas /netonly.
-                    var ctx = new DirectoryContext(DirectoryContextType.Domain);
-                    var domain = Domain.GetDomain(ctx);
-                    var name = domain?.Name;
-                    if (!string.IsNullOrEmpty(name)) {
-                        _uncontrolledGetDomainHint = name;
-                        domainName = name;
-                        return true;
-                    }
-                }
-                catch (Exception e) {
-                    log?.LogDebug(e,
-                        "TryResolveHintViaUncontrolledGetDomain: Domain.GetDomain failed");
-                }
-
-                // Negative-cache the failure so repeat cache-miss paths don't re-issue the RPC.
-                _uncontrolledGetDomainHint = string.Empty;
-                return false;
             }
+            catch (Exception e) {
+                log?.LogDebug(e,
+                    "TryResolveHintViaUncontrolledGetDomain: Domain.GetDomain failed");
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -2288,9 +2265,6 @@ namespace SharpHoundCommonLib {
             _domainControllers.Clear();
             lock (_currentDomainLock) {
                 _currentDomain = null;
-            }
-            lock (_uncontrolledGetDomainHintLock) {
-                _uncontrolledGetDomainHint = null;
             }
             _connectionPool?.Dispose();
             _connectionPool = new ConnectionPoolManager(_ldapConfig, scanner: _portScanner);
