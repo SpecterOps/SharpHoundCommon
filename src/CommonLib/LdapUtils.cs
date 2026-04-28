@@ -1849,7 +1849,7 @@ namespace SharpHoundCommonLib {
                         : new DirectoryContext(DirectoryContextType.Domain);
 
                 // Blocking External Call
-                var domain = Domain.GetDomain(context);
+                using var domain = Domain.GetDomain(context);
                 if (domain == null) {
                     return false;
                 }
@@ -1907,7 +1907,7 @@ namespace SharpHoundCommonLib {
                 // (matching Helpers.CreateDirectoryEntry) before the first property access forces
                 // the bind.
                 try {
-                    var rawEntry = domain.GetDirectoryEntry();
+                    using var rawEntry = domain.GetDirectoryEntry();
                     var authType = AuthenticationTypes.Secure;
                     if (config.ForceSSL) {
                         authType |= AuthenticationTypes.SecureSocketsLayer;
