@@ -24,7 +24,7 @@ namespace SharpHoundCommonLib
         
         private Cache()
         {
-            ValueToIdCache = new ConcurrentDictionary<string, string>();
+            ValueToIdCache = new ConcurrentDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             IdToTypeCache = new ConcurrentDictionary<string, Label>();
             GlobalCatalogCache = new ConcurrentDictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
             MachineSidCache = new ConcurrentDictionary<string, string>();
@@ -185,6 +185,11 @@ namespace SharpHoundCommonLib
                 CacheInstance.GlobalCatalogCache = new ConcurrentDictionary<string, string[]>(
                     CacheInstance.GlobalCatalogCache, StringComparer.OrdinalIgnoreCase);
             }
+            if (CacheInstance.ValueToIdCache != null)
+            {
+                CacheInstance.ValueToIdCache = new ConcurrentDictionary<string, string>(
+                    CacheInstance.ValueToIdCache, StringComparer.OrdinalIgnoreCase);
+            }
         }
 
         /// <summary>
@@ -222,7 +227,8 @@ namespace SharpHoundCommonLib
             CacheInstance.MachineSidCache ??= new ConcurrentDictionary<string, string>();
             CacheInstance.SIDToDomainCache ??=
                 new ConcurrentDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            CacheInstance.ValueToIdCache ??= new ConcurrentDictionary<string, string>();
+            CacheInstance.ValueToIdCache ??=
+                new ConcurrentDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         }
     }
 }

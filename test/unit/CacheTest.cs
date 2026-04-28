@@ -186,5 +186,49 @@ namespace CommonLibTest
 
             Cache.SetCacheInstance(null);
         }
+
+        [Theory]
+        [InlineData("Administrator", "CONTOSO.LOCAL", "administrator", "contoso.local")]
+        [InlineData("administrator", "contoso.local", "ADMINISTRATOR", "CONTOSO.LOCAL")]
+        [InlineData("HOST01$", "contoso.local", "host01$", "CONTOSO.LOCAL")]
+        public void AddPrefixedValue_LookupIsCaseInsensitiveOnBothComponents(
+            string writeName, string writeDomain, string readName, string readDomain)
+        {
+            // samAccountName uses caseIgnoreString syntax in AD and DNS domain names are
+            // case-insensitive; the cache must reflect that to avoid fragmented entries
+            // and redundant LDAP queries.
+            Cache.SetCacheInstance(Cache.CreateNewCache());
+
+            Cache.AddPrefixedValue(writeName, writeDomain, "S-1-5-21-1-2-3-1001");
+
+            Assert.True(Cache.GetPrefixedValue(readName, readDomain, out var resolved));
+            Assert.Equal("S-1-5-21-1-2-3-1001", resolved);
+
+            Cache.SetCacheInstance(null);
+        }
+
+        [Fact]
+        public void SetCacheInstance_AfterDeserialization_RestoresCaseInsensitiveValueToId()
+        {
+            var original = Cache.CreateNewCache();
+            Cache.SetCacheInstance(original);
+            Cache.AddPrefixedValue("Administrator", "CONTOSO.LOCAL", "S-1-5-21-1-2-3-500");
+
+            var json = JsonConvert.SerializeObject(original);
+            var settings = new JsonSerializerSettings
+            {
+                ObjectCreationHandling = ObjectCreationHandling.Replace
+            };
+            var deserialized = JsonConvert.DeserializeObject<Cache>(json, settings);
+
+            Assert.False(deserialized.ValueToIdCache.TryGetValue("administrator|contoso.local", out _));
+
+            Cache.SetCacheInstance(deserialized);
+
+            Assert.True(Cache.GetPrefixedValue("administrator", "contoso.local", out var resolved));
+            Assert.Equal("S-1-5-21-1-2-3-500", resolved);
+
+            Cache.SetCacheInstance(null);
+        }
     }
 }
