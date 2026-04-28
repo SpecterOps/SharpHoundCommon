@@ -68,6 +68,13 @@ namespace SharpHoundCommonLib {
         private readonly IPortScanner _portScanner;
         private readonly NativeMethods _nativeMethods;
         private readonly string _nullCacheKey = Guid.NewGuid().ToString();
+
+        // Per-instance cache for the no-hint Domain resolution. The OS-side resolution depends
+        // on the calling thread's auth context and/or _ldapConfig credentials, neither of which
+        // is a usable cache key, so this state cannot live in the static _domainCache. Failures
+        // are not cached; the next call retries.
+        private Domain _currentDomain;
+        private readonly object _currentDomainLock = new();
         private static readonly Regex SIDRegex = new(@"^(S-\d+-\d+-\d+-\d+-\d+-\d+)(-\d+)?$");
 
         private readonly string[] _translateNames = { "Administrator", "admin" };
@@ -510,7 +517,7 @@ namespace SharpHoundCommonLib {
                 domain = null;
                 return false;
             }
-            
+
             if (!string.IsNullOrWhiteSpace(_ldapConfig.Server)) {
                 _log.LogDebug(
                     "GetDomain(\"{Name}\", out Domain) short-circuited: Specific Server is set",
@@ -519,26 +526,33 @@ namespace SharpHoundCommonLib {
                 return false;
             }
 
-            var cacheKey = domainName ?? _nullCacheKey;
-            if (_domainCache.TryGetValue(cacheKey, out domain)) return true;
+            // A blank/whitespace name is the no-target form. Delegate so the per-instance
+            // _currentDomain handles it without a per-instance GUID sentinel against the
+            // process-wide static cache.
+            if (string.IsNullOrWhiteSpace(domainName)) {
+                return GetDomain(out domain);
+            }
+
+            if (_domainCache.TryGetValue(domainName, out domain)) return true;
 
             try {
-                DirectoryContext context;
-                if (_ldapConfig.Username != null)
-                    context = domainName != null
-                        ? new DirectoryContext(DirectoryContextType.Domain, domainName, _ldapConfig.Username,
-                            _ldapConfig.Password)
-                        : new DirectoryContext(DirectoryContextType.Domain, _ldapConfig.Username,
-                            _ldapConfig.Password);
-                else
-                    context = domainName != null
-                        ? new DirectoryContext(DirectoryContextType.Domain, domainName)
-                        : new DirectoryContext(DirectoryContextType.Domain);
+                var context = _ldapConfig.Username != null
+                    ? new DirectoryContext(DirectoryContextType.Domain, domainName, _ldapConfig.Username,
+                        _ldapConfig.Password)
+                    : new DirectoryContext(DirectoryContextType.Domain, domainName);
 
                 // Blocking External Call
                 domain = Domain.GetDomain(context);
                 if (domain == null) return false;
-                _domainCache.TryAdd(cacheKey, domain);
+
+                // Cache under the caller's input AND the canonical name returned by SDS. The
+                // two may differ (e.g. NetBIOS alias vs DNS canonical), so writing both keys
+                // ensures alias-form callers don't miss while future canonical-form callers
+                // still benefit.
+                _domainCache.TryAdd(domainName, domain);
+                if (!string.IsNullOrWhiteSpace(domain.Name)) {
+                    _domainCache.TryAdd(domain.Name, domain);
+                }
                 return true;
             }
             catch (Exception e) {
@@ -556,11 +570,21 @@ namespace SharpHoundCommonLib {
                 domain = null;
                 return false;
             }
-            
+
             if (!string.IsNullOrWhiteSpace(ldapConfig.Server)) {
                 Logging.Logger.LogDebug(
-                    "GetDomain(\"{Name}\", out Domain) short-circuited: Specific Server is set",
+                    "Static GetDomain(\"{Name}\", out Domain) short-circuited: Specific Server is set",
                     domainName);
+                domain = null;
+                return false;
+            }
+
+            // The static overload has no per-instance state to cache a no-hint resolution
+            // against, and ConcurrentDictionary throws on a null key. Reject up front rather
+            // than proceeding with an unkeyable resolution.
+            if (string.IsNullOrWhiteSpace(domainName)) {
+                Logging.Logger.LogDebug(
+                    "Static GetDomain short-circuited: domainName is null or whitespace");
                 domain = null;
                 return false;
             }
@@ -568,22 +592,19 @@ namespace SharpHoundCommonLib {
             if (_domainCache.TryGetValue(domainName, out domain)) return true;
 
             try {
-                DirectoryContext context;
-                if (ldapConfig.Username != null)
-                    context = domainName != null
-                        ? new DirectoryContext(DirectoryContextType.Domain, domainName, ldapConfig.Username,
-                            ldapConfig.Password)
-                        : new DirectoryContext(DirectoryContextType.Domain, ldapConfig.Username,
-                            ldapConfig.Password);
-                else
-                    context = domainName != null
-                        ? new DirectoryContext(DirectoryContextType.Domain, domainName)
-                        : new DirectoryContext(DirectoryContextType.Domain);
+                var context = ldapConfig.Username != null
+                    ? new DirectoryContext(DirectoryContextType.Domain, domainName, ldapConfig.Username,
+                        ldapConfig.Password)
+                    : new DirectoryContext(DirectoryContextType.Domain, domainName);
 
                 // Blocking External Call
                 domain = Domain.GetDomain(context);
                 if (domain == null) return false;
+
                 _domainCache.TryAdd(domainName, domain);
+                if (!string.IsNullOrWhiteSpace(domain.Name)) {
+                    _domainCache.TryAdd(domain.Name, domain);
+                }
                 return true;
             }
             catch (Exception e) {
@@ -595,12 +616,12 @@ namespace SharpHoundCommonLib {
         }
 
         /// <summary>
-        ///     Attempts to get the Domain object representing the target domain. If null is specified for the domain name, gets
-        ///     the user's current domain
+        ///     Attempts to get the Domain object representing the user's current domain. The
+        ///     resolution depends on the calling thread's auth context and configured credentials,
+        ///     so the result is cached per <see cref="LdapUtils"/> instance rather than in the
+        ///     shared static cache. Successful resolutions also seed the static cache under the
+        ///     canonical DNS name so that future explicit-name callers benefit.
         /// </summary>
-        /// <param name="domain"></param>
-        /// <param name="domainName"></param>
-        /// <returns></returns>
         public bool GetDomain(out Domain domain) {
             if (!_ldapConfig.AllowFallbackToUncontrolledLdap) {
                 _log.LogDebug(
@@ -608,7 +629,7 @@ namespace SharpHoundCommonLib {
                 domain = null;
                 return false;
             }
-            
+
             if (!string.IsNullOrWhiteSpace(_ldapConfig.Server)) {
                 _log.LogDebug(
                     "GetDomain() short-circuited: Specific Server is set");
@@ -616,23 +637,47 @@ namespace SharpHoundCommonLib {
                 return false;
             }
 
-            if (_domainCache.TryGetValue(_nullCacheKey, out domain)) return true;
-
-            try {
-                var context = _ldapConfig.Username != null
-                    ? new DirectoryContext(DirectoryContextType.Domain, _ldapConfig.Username,
-                        _ldapConfig.Password)
-                    : new DirectoryContext(DirectoryContextType.Domain);
-
-                // Blocking External Call
-                domain = Domain.GetDomain(context);
-                _domainCache.TryAdd(_nullCacheKey, domain);
+            // Lock-free fast path for the common case of repeated null-hint calls on a single
+            // instance after the first successful resolution.
+            if (_currentDomain != null) {
+                domain = _currentDomain;
                 return true;
             }
-            catch (Exception e) {
-                _log.LogDebug(e, "GetDomain call failed for blank domain");
-                domain = null;
-                return false;
+
+            // Serialize concurrent first-time resolutions on the same instance so we don't fan
+            // out duplicate Domain.GetDomain RPCs.
+            lock (_currentDomainLock) {
+                if (_currentDomain != null) {
+                    domain = _currentDomain;
+                    return true;
+                }
+
+                try {
+                    var context = _ldapConfig.Username != null
+                        ? new DirectoryContext(DirectoryContextType.Domain, _ldapConfig.Username,
+                            _ldapConfig.Password)
+                        : new DirectoryContext(DirectoryContextType.Domain);
+
+                    // Blocking External Call
+                    var resolved = Domain.GetDomain(context);
+                    if (resolved == null) {
+                        domain = null;
+                        return false;
+                    }
+
+                    _currentDomain = resolved;
+                    if (!string.IsNullOrWhiteSpace(resolved.Name)) {
+                        _domainCache.TryAdd(resolved.Name, resolved);
+                    }
+
+                    domain = resolved;
+                    return true;
+                }
+                catch (Exception e) {
+                    _log.LogDebug(e, "GetDomain call failed for blank domain");
+                    domain = null;
+                    return false;
+                }
             }
         }
 
@@ -2327,6 +2372,9 @@ namespace SharpHoundCommonLib {
             _domainCache.Clear();
             _domainInfoCache.Clear();
             _domainControllers.Clear();
+            lock (_currentDomainLock) {
+                _currentDomain = null;
+            }
             lock (_uncontrolledGetDomainHintLock) {
                 _uncontrolledGetDomainHint = null;
             }

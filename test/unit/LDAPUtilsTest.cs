@@ -711,6 +711,22 @@ namespace CommonLibTest {
             Assert.Null(staticDomain);
         }
 
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("   ")]
+        public void GetDomain_Static_ReturnsFalse_WithoutThrowing_OnBlankName(string domainName) {
+            // ConcurrentDictionary throws on null keys, so the static overload would previously
+            // crash on a null hint. The static has no per-instance null-resolution cache to fall
+            // back on, so blank inputs are rejected up front.
+            var config = new LdapConfig { AllowFallbackToUncontrolledLdap = true };
+
+            var success = LdapUtils.GetDomain(domainName, config, out var domain);
+
+            Assert.False(success);
+            Assert.Null(domain);
+        }
+
         // ---------------------------------------------------------------------------
         // TryStripNtdsSettingsPrefix
         // ---------------------------------------------------------------------------
