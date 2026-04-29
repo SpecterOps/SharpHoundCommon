@@ -1716,6 +1716,12 @@ namespace SharpHoundCommonLib {
 
             // DC enumeration uses the canonical "DC object = computer with SERVER_TRUST_ACCOUNT in UAC"
             // bit test (0x2000). This is the same filter used elsewhere in the project via CommonFilters.
+            // Uses pool.Query (non-paged) rather than pool.PagedQuery: a domain whose DC count exceeds
+            // the LDAP query policy's MaxPageSize (default 1000) would have its DomainControllers list
+            // silently truncated at MaxPageSize, since SendRequest returns SizeLimitExceeded as a result
+            // code rather than an exception and the pool's Query path does not inspect ResultCode. This
+            // is accepted: SharpHound's DC consumers only need a usable DC, not an exhaustive list, and
+            // forests with >MaxPageSize DCs are not in scope for this resolver.
             try {
                 var dcs = new List<string>();
                 var dcEnum = pool.Query(new LdapQueryParameters {
@@ -2344,6 +2350,12 @@ namespace SharpHoundCommonLib {
             }
 
             // 5. Domain controller enumeration - same filter as CommonFilters.DomainControllers.
+            // Single non-paged SendRequest: a domain whose DC count exceeds the LDAP query policy's
+            // MaxPageSize (default 1000) would have its DomainControllers list silently truncated -
+            // SizeLimitExceeded surfaces as a ResultCode rather than an exception, and the success
+            // path here yields whatever Entries the server returned. Matches the pool tier's
+            // non-paged DC enumeration on purpose (so the two tiers produce equivalent results) and
+            // is accepted for the same reason: forests with >MaxPageSize DCs are not in scope.
             try {
                 var dcs = new List<string>();
                 var dcReq = new SearchRequest(
