@@ -413,7 +413,7 @@ namespace SharpHoundCommonLib {
             }
 
             result = await Query(new LdapQueryParameters {
-                DomainName = domainInfo.Name,
+                DomainName = domainInfo.ForestName,
                 Attributes = new[] { LDAPProperties.DistinguishedName, LDAPProperties.Name },
                 GlobalCatalog = true,
                 LDAPFilter = new LdapFilter().AddFilter("(objectclass=trusteddomain)", true)
@@ -1252,13 +1252,14 @@ namespace SharpHoundCommonLib {
         /// <summary>
         /// Returns <c>true</c> when <paramref name="key"/> identifies the same domain that
         /// <paramref name="candidate"/> describes, comparing case-insensitively against
-        /// <see cref="DomainInfo.Name"/> and <see cref="DomainInfo.NetBiosName"/>. A candidate
-        /// with no <see cref="DomainInfo.Name"/> is treated as unverifiable and accepted; the
-        /// resolution tiers always populate Name on success, so this branch only matters for
-        /// hand-built records in tests.
+        /// <see cref="DomainInfo.Name"/> and <see cref="DomainInfo.NetBiosName"/>. Candidates
+        /// with no <see cref="DomainInfo.Name"/> are rejected: the resolution tiers contract is
+        /// to populate Name on every successful return, so a Name-less candidate is by definition
+        /// unverifiable and caching it under the caller's key would silently associate a broken
+        /// record with that domain.
         /// </summary>
         private static bool KeyMatchesCandidate(string key, DomainInfo candidate) {
-            if (string.IsNullOrEmpty(candidate.Name)) return true;
+            if (string.IsNullOrEmpty(candidate.Name)) return false;
             if (string.Equals(key, candidate.Name, StringComparison.OrdinalIgnoreCase)) return true;
             if (!string.IsNullOrEmpty(candidate.NetBiosName)
                 && string.Equals(key, candidate.NetBiosName, StringComparison.OrdinalIgnoreCase)) return true;
@@ -1280,11 +1281,14 @@ namespace SharpHoundCommonLib {
         /// domain (cross-forest leak, decommissioned host, mismatched <c>config.Server</c>). In that
         /// case the seed is preferred even though the retry produced a higher score, because caching
         /// the retry's record under the seed's cache key would silently associate the wrong SID and
-        /// NetBIOS name with that domain.
+        /// NetBIOS name with that domain. A missing Name on either side is treated as a guard
+        /// failure (rather than letting <c>string.Equals(null, null)</c> wave through the merge),
+        /// since a Name-less record cannot be safely compared to anything.
         /// </remarks>
         internal static DomainInfo SelectRicherDomainInfo(DomainInfo seed, DomainInfo enriched) {
             if (seed == null) return enriched;
             if (enriched == null) return seed;
+            if (string.IsNullOrEmpty(seed.Name) || string.IsNullOrEmpty(enriched.Name)) return seed;
             if (!string.Equals(seed.Name, enriched.Name, StringComparison.OrdinalIgnoreCase)) {
                 return seed;
             }
@@ -1545,8 +1549,8 @@ namespace SharpHoundCommonLib {
 
             if (!string.IsNullOrWhiteSpace(config.Server)) {
                 log?.LogDebug(
-                    "TryResolveHintViaUncontrolledGetDomain(\"{Name}\", out string DomainName) short-circuited: Specific Server is set",
-                    domainName);
+                    "TryResolveHintViaUncontrolledGetDomain short-circuited: Server={Server} is set",
+                    config.Server);
                 return false;
             }
 
@@ -1625,7 +1629,11 @@ namespace SharpHoundCommonLib {
             }
 
             // Canonical name is always derivable from the default NC (e.g. DC=contoso,DC=local -> CONTOSO.LOCAL).
-            var name = Helpers.DistinguishedNameToDomain(defaultNc).ToUpper();
+            // DistinguishedNameToDomain returns null for DNs without DC= components; a tier success contract
+            // requires a populated Name so reject the result rather than emitting a Name-less DomainInfo.
+            var derivedName = Helpers.DistinguishedNameToDomain(defaultNc);
+            if (string.IsNullOrEmpty(derivedName)) return (false, null);
+            var name = derivedName.ToUpper();
             string domainSid = null;
             string forestName = null;
             string primaryDomainController = null;
@@ -1816,14 +1824,12 @@ namespace SharpHoundCommonLib {
 
                 // Blocking External Call
                 using var domain = Domain.GetDomain(context);
-                if (domain == null) {
+                if (domain == null || string.IsNullOrEmpty(domain.Name)) {
                     return false;
                 }
 
-                var name = domain.Name?.ToUpper();
-                var distinguishedName = !string.IsNullOrEmpty(domain.Name)
-                    ? Helpers.DomainNameToDistinguishedName(domain.Name)
-                    : null;
+                var name = domain.Name.ToUpper();
+                var distinguishedName = Helpers.DomainNameToDistinguishedName(domain.Name);
                 string forestName = null;
                 string primaryDomainController = null;
                 string domainSid = null;
@@ -1966,7 +1972,9 @@ namespace SharpHoundCommonLib {
                         return (false, null);
                     }
 
-                    name = Helpers.DistinguishedNameToDomain(defaultNc).ToUpper();
+                    var derivedName = Helpers.DistinguishedNameToDomain(defaultNc);
+                    if (string.IsNullOrEmpty(derivedName)) return (false, null);
+                    name = derivedName.ToUpper();
                     distinguishedName = defaultNc;
 
                     if (root.TryGetSecurityIdentifier(out var sid) && !string.IsNullOrEmpty(sid)) {
@@ -2140,53 +2148,85 @@ namespace SharpHoundCommonLib {
         /// </summary>
         /// <remarks>
         /// Skips the bind entirely when the seed already has a maximum
-        /// <see cref="CompletenessScore"/>, when <see cref="LdapConfig.Server"/> is set (the
-        /// server-pinning contract forbids binding to any host other than the configured one,
-        /// and consumers are warned that data loss is the intended trade-off), when no bind
-        /// target can be derived from the seed (<see cref="DomainInfo.PrimaryDomainController"/>
-        /// falling back to the first entry of <see cref="DomainInfo.DomainControllers"/>), or
-        /// when the bind itself fails. In any of these cases the original seed is returned
-        /// unchanged. When the retry succeeds, the merged result is selected by
+        /// <see cref="CompletenessScore"/>, when no bind target can be derived (no
+        /// <see cref="LdapConfig.Server"/> pin, no <see cref="DomainInfo.PrimaryDomainController"/>,
+        /// and an empty <see cref="DomainInfo.DomainControllers"/> list), or when every attempted
+        /// bind fails. In any of these cases the original seed is returned unchanged.
+        /// <para>
+        /// Server pinning: when <see cref="LdapConfig.Server"/> is set the pinned host is the
+        /// only enrichment target. Pinning's contract forbids fanning out to alternate DCs even
+        /// when the pinned target is unreachable, so a failed bind under pinning returns the
+        /// seed without trying any DC from the seed's discovery list.
+        /// </para>
+        /// <para>
+        /// Without pinning the function walks an ordered candidate list - PDC first, then each
+        /// entry of <see cref="DomainInfo.DomainControllers"/> - case-insensitively deduplicated
+        /// and capped at <see cref="MaxEnrichmentBindAttempts"/> targets so a stale or oversized
+        /// DC list cannot blow out call latency. The first successful resolve wins; subsequent
+        /// targets are not contacted. When the retry succeeds, the merged result is selected by
         /// <see cref="SelectRicherDomainInfo"/>, which enforces the canonical-name guard so a
         /// retry that lands on a DC outside the requested domain does not poison the cache.
-        /// </remarks>: 
+        /// </para>
+        /// </remarks>
         internal static async Task<DomainInfo> TryEnrichDomainInfoViaDirectLdapAsync(
             string domainName, DomainInfo seed, LdapConfig config, ILogger log) {
             if (seed == null) return null;
             if (CompletenessScore(seed) >= 7 || string.IsNullOrWhiteSpace(domainName) || config == null) return seed;
 
-            string target;
+            IReadOnlyList<string> candidates;
             if (!string.IsNullOrWhiteSpace(config.Server)) {
-                target = config.Server;
-            } else if (!string.IsNullOrWhiteSpace(seed.PrimaryDomainController)) {
-                target = seed.PrimaryDomainController;
-            } else if (seed.DomainControllers is { Count: > 0 }) {
-                target = seed.DomainControllers[0];
+                // Pinned: never fall through to the seed's discovery list.
+                candidates = new[] { config.Server };
             } else {
-                target = null;
+                var ordered = new List<string>();
+                var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                if (!string.IsNullOrWhiteSpace(seed.PrimaryDomainController) &&
+                    seen.Add(seed.PrimaryDomainController)) {
+                    ordered.Add(seed.PrimaryDomainController);
+                }
+                if (seed.DomainControllers is { Count: > 0 }) {
+                    foreach (var dc in seed.DomainControllers) {
+                        if (string.IsNullOrWhiteSpace(dc) || !seen.Add(dc)) continue;
+                        ordered.Add(dc);
+                        if (ordered.Count >= MaxEnrichmentBindAttempts) break;
+                    }
+                }
+                candidates = ordered;
             }
-            
-            if (string.IsNullOrWhiteSpace(target)) return seed;
 
-            var connection = TryBindOneShotLdapConnection(target, config, log);
-            if (connection == null) {
-                log?.LogDebug(
-                    "Direct LDAP enrichment bind failed for {Domain} via discovered DC {Target}",
-                    domainName, target);
-                return seed;
-            }
+            if (candidates.Count == 0) return seed;
 
-            return await Task.Run(() => {
-                try {
-                    var (ok, enriched) = ResolveDomainInfoFromConnection(connection, domainName, log);
-                    if (!ok) return seed;
+            foreach (var target in candidates) {
+                var connection = TryBindOneShotLdapConnection(target, config, log);
+                if (connection == null) {
+                    log?.LogDebug(
+                        "Direct LDAP enrichment bind failed for {Domain} via {Target}",
+                        domainName, target);
+                    continue;
+                }
+
+                var (ok, enriched) = await Task.Run(() => {
+                    try {
+                        return ResolveDomainInfoFromConnection(connection, domainName, log);
+                    }
+                    finally {
+                        connection.Dispose();
+                    }
+                }).ConfigureAwait(false);
+
+                if (ok) {
                     return SelectRicherDomainInfo(seed, enriched);
                 }
-                finally {
-                    connection.Dispose();
-                }
-            }).ConfigureAwait(false);
+
+                log?.LogDebug(
+                    "Direct LDAP enrichment resolve failed for {Domain} via {Target}",
+                    domainName, target);
+            }
+
+            return seed;
         }
+
+        private const int MaxEnrichmentBindAttempts = 5;
 
         /// <summary>
         /// Synchronous body of <see cref="TryResolveDomainInfoViaDirectLdapAsync"/>. Uses
@@ -2226,14 +2266,19 @@ namespace SharpHoundCommonLib {
                 return (false, null);
             }
 
-            var name = Helpers.DistinguishedNameToDomain(defaultNc).ToUpper();
+            var derivedName = Helpers.DistinguishedNameToDomain(defaultNc);
+            if (string.IsNullOrEmpty(derivedName)) return (false, null);
+            var name = derivedName.ToUpper();
             string domainSid = null;
             string forestName = null;
             string primaryDomainController = null;
             string netBiosName = null;
             IReadOnlyList<string> domainControllers = null;
             if (!string.IsNullOrWhiteSpace(rootNc)) {
-                forestName = Helpers.DistinguishedNameToDomain(rootNc).ToUpper();
+                var derivedForest = Helpers.DistinguishedNameToDomain(rootNc);
+                if (!string.IsNullOrEmpty(derivedForest)) {
+                    forestName = derivedForest.ToUpper();
+                }
             }
 
             // 2. Domain NC base search - objectSid + fsmoRoleOwner in one round-trip.
@@ -2421,6 +2466,7 @@ namespace SharpHoundCommonLib {
         }
 
         public void Dispose() {
+            ResetUtils();
             _connectionPool?.Dispose();
         }
 
