@@ -46,7 +46,10 @@ namespace SharpHoundCommonLib {
 
         // Drops every exclusion record. Called from LdapUtils.ResetUtils so a fresh enumeration
         // pass after a configuration change isn't shadowed by stale exclusion state.
-        internal static void ClearExclusions() => ExcludedDomains.Clear();
+        internal static void ResetCaches() {
+            DCInfoCache.Clear();
+            ExcludedDomains.Clear();
+        }
 
         public LdapConnectionPool(string identifier, string poolIdentifier, LdapConfig config,
             IPortScanner scanner = null, NativeMethods nativeMethods = null, ILogger log = null, IMetricRouter metric = null) {
