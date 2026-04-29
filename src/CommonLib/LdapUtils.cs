@@ -440,20 +440,7 @@ namespace SharpHoundCommonLib {
 
         public virtual async Task<(bool Success, string DomainSid)> GetDomainSidFromDomainName(string domainName) {
             if (Cache.GetDomainSidMapping(domainName, out var domainSid)) return (true, domainSid);
-
-            try {
-                var entry = Helpers.CreateDirectoryEntry($"LDAP://{domainName}", _ldapConfig);
-                //Force load objectsid into the object cache
-                if (entry.TryGetSecurityIdentifier(out var sid)) {
-                    Cache.AddDomainSidMapping(domainName, sid);
-                    domainSid = sid;
-                    return (true, domainSid);
-                }
-            }
-            catch {
-                //we expect this to fail sometimes
-            }
-
+            
             // Replaces the legacy GetDomain(out Domain) + GetDirectoryEntry block with a
             // controlled lookup via the connection pool.
             if (await GetDomainInfoAsync(domainName) is (true, var domainInfo) &&
@@ -470,6 +457,19 @@ namespace SharpHoundCommonLib {
                 return (true, domainInfo.DomainSid);
             }
 
+            try {
+                var entry = Helpers.CreateDirectoryEntry($"LDAP://{domainName}", _ldapConfig);
+                //Force load objectsid into the object cache
+                if (entry.TryGetSecurityIdentifier(out var sid)) {
+                    Cache.AddDomainSidMapping(domainName, sid);
+                    domainSid = sid;
+                    return (true, domainSid);
+                }
+            }
+            catch {
+                //we expect this to fail sometimes
+            }
+            
             foreach (var name in _translateNames)
                 try {
                     var account = new NTAccount(domainName, name);
@@ -1134,6 +1134,7 @@ namespace SharpHoundCommonLib {
             // can have just changed. Drop it so the next GetDomain(out _) re-resolves against the
             // new auth context instead of returning a stale Domain bound to the old config.
             lock (_currentDomainLock) {
+                _currentDomain?.Dispose();
                 _currentDomain = null;
             }
             _connectionPool.Dispose();
@@ -1366,11 +1367,12 @@ namespace SharpHoundCommonLib {
         /// config, so this matches the ambient assumption already made by the static
         /// <see cref="_domainInfoCache"/>.
         /// <para>
-        /// Cached records produced by a non-pool tier (signaled by an absent
-        /// <see cref="DomainInfo.NetBiosName"/>, since only the pool tier reads <c>CN=Partitions</c>)
-        /// are treated as still re-resolvable so a sparse seed written by an earlier
-        /// <see cref="GetDomainInfoStaticAsync"/> call doesn't permanently shadow the richer record
-        /// this caller's pool could produce.
+        /// Any cached record satisfies this lookup regardless of which tier produced it. Upgrade
+        /// from a sparser seed to a richer record happens at write time via
+        /// <see cref="CompletenessScore"/> in <see cref="CacheDomainInfo"/>; the read path does not
+        /// re-resolve a cached domain just because some attribute (e.g. <see cref="DomainInfo.NetBiosName"/>)
+        /// is absent, since attributes that are unreachable for the configured credentials would
+        /// otherwise trigger an unbounded re-resolution loop on every call.
         /// </para>
         /// </remarks>
         private static async Task<(bool Success, DomainInfo DomainInfo)> ResolveDomainInfoAsync(
@@ -1379,8 +1381,7 @@ namespace SharpHoundCommonLib {
                 return (false, null);
             }
 
-            if (_domainInfoCache.TryGetValue(domainName, out var cached)
-                && !string.IsNullOrEmpty(cached.NetBiosName)) {
+            if (_domainInfoCache.TryGetValue(domainName, out var cached)) {
                 return (true, cached);
             }
 
@@ -1413,10 +1414,9 @@ namespace SharpHoundCommonLib {
         /// </remarks>
         private static async Task<(bool Success, DomainInfo DomainInfo)> ResolveDomainInfoCoreAsync(
             string domainName, ConnectionPoolManager pool, LdapConfig config, ILogger log) {
-            // Re-check inside the lazy: another caller may have published a satisfying record
-            // between our outer cache miss and this lazy's first execution.
-            if (_domainInfoCache.TryGetValue(domainName, out var cached)
-                && (pool == null || !string.IsNullOrEmpty(cached.NetBiosName))) {
+            // Re-check inside the lazy: another caller may have published a record between our
+            // outer cache miss and this lazy's first execution.
+            if (_domainInfoCache.TryGetValue(domainName, out var cached)) {
                 return (true, cached);
             }
 
@@ -2338,6 +2338,7 @@ namespace SharpHoundCommonLib {
             _domainInfoCache.Clear();
             _domainControllers.Clear();
             lock (_currentDomainLock) {
+                _currentDomain?.Dispose();
                 _currentDomain = null;
             }
             LdapConnectionPool.ResetCaches();
