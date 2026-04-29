@@ -86,9 +86,56 @@ namespace SharpHoundCommonLib
             return value != null && value.StartsWith("S-1-", StringComparison.OrdinalIgnoreCase);
         }
 
+        // Gates the SID->Name reverse cache write. Downstream consumers (LDAP base DN
+        // construction, server selection, GetDomainInfoAsync hint resolution) treat the value in
+        // that slot as an FQDN they can split on '.' and feed to DC=/CN=Partitions queries, so
+        // a NetBIOS alias, an IPv4 literal, or a malformed label set in this slot poisons every
+        // downstream lookup for the SID. The check enforces RFC-1035-shaped multi-label DNS:
+        // total length <= 253, >= 2 non-empty labels, each label 1-63 chars of [A-Za-z0-9-]
+        // with no leading/trailing hyphen, and not an IPv4 literal (four all-digit labels).
+        // Single-label AD domains (e.g., a forest root literally named "CORP") are deliberately
+        // rejected: a single label is syntactically indistinguishable from a NetBIOS alias and
+        // we'd rather slow-path-resolve them than silently cache the wrong shape.
         private static bool LooksLikeDnsDomainName(string value)
         {
-            return value != null && value.IndexOf('.') >= 0;
+            if (string.IsNullOrEmpty(value) || value.Length > 253) return false;
+
+            var labels = value.Split('.');
+            if (labels.Length < 2) return false;
+
+            var allNumeric = true;
+            foreach (var label in labels)
+            {
+                if (!IsValidDnsLabel(label)) return false;
+                if (allNumeric && !IsAllDigits(label)) allNumeric = false;
+            }
+
+            // Reject IPv4 literals after per-label validation so we don't preempt a malformed-input
+            // rejection with a shape-based one (the diagnostic value is in the per-label check).
+            return !(labels.Length == 4 && allNumeric);
+        }
+
+        private static bool IsValidDnsLabel(string label)
+        {
+            if (label.Length == 0 || label.Length > 63) return false;
+            if (label[0] == '-' || label[label.Length - 1] == '-') return false;
+
+            foreach (var c in label)
+            {
+                var isDigit = c >= '0' && c <= '9';
+                var isAlpha = (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
+                if (!isDigit && !isAlpha && c != '-') return false;
+            }
+            return true;
+        }
+
+        private static bool IsAllDigits(string s)
+        {
+            foreach (var c in s)
+            {
+                if (c < '0' || c > '9') return false;
+            }
+            return true;
         }
 
         /// <summary>

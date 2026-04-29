@@ -129,27 +129,6 @@ namespace CommonLibTest
         }
 
         [Fact]
-        public void AddDomainSidMapping_NetBiosName_DoesNotPoisonSidToNameSlot()
-        {
-            // A NetBIOS-only write must not populate the SID->Name slot, because consumers of
-            // that slot expect a DNS-shaped FQDN (LDAP base DN construction, server selection,
-            // GetDomainInfoAsync hint resolution). Leaving the slot empty lets a later
-            // FQDN-keyed write populate it correctly.
-            Cache.SetCacheInstance(Cache.CreateNewCache());
-
-            const string sid = "S-1-5-21-1212121212-3434343434-5656565656";
-            const string netbios = "CONTOSO";
-
-            Cache.AddDomainSidMapping(sid, netbios);
-
-            Assert.False(Cache.GetDomainSidMapping(sid, out _));
-            Assert.True(Cache.GetDomainSidMapping(netbios, out var resolvedSid));
-            Assert.Equal(sid, resolvedSid);
-
-            Cache.SetCacheInstance(null);
-        }
-
-        [Fact]
         public void AddDomainSidMapping_NetBiosName_ReverseArgumentOrder_DoesNotPoisonSidToNameSlot()
         {
             // Same poisoning vector with arguments reversed: AddDomainSidMapping(netbios, sid).
@@ -162,6 +141,61 @@ namespace CommonLibTest
 
             Assert.False(Cache.GetDomainSidMapping(sid, out _));
             Assert.True(Cache.GetDomainSidMapping(netbios, out var resolvedSid));
+            Assert.Equal(sid, resolvedSid);
+
+            Cache.SetCacheInstance(null);
+        }
+
+        [Theory]
+        [InlineData("10.0.0.1")]                            // IPv4 literal
+        [InlineData("192.168.1.100")]                       // IPv4 literal
+        [InlineData("contoso.")]                            // trailing-dot artifact
+        [InlineData(".contoso.com")]                        // leading-dot junk
+        [InlineData("contoso..com")]                        // empty middle label
+        [InlineData("-contoso.com")]                        // leading hyphen
+        [InlineData("contoso-.com")]                        // trailing hyphen on label
+        [InlineData("contoso.com-")]                        // trailing hyphen on FQDN
+        [InlineData("contoso.local!")]                      // invalid character
+        [InlineData("contoso .local")]                      // embedded space
+        [InlineData("CORP")]                                // single-label (ambiguous with NetBIOS)
+        public void AddDomainSidMapping_NonDnsShapedName_DoesNotPoisonSidToNameSlot(string badName)
+        {
+            // Anything that isn't unambiguously an RFC-1035 multi-label FQDN gets rejected from
+            // the SID->Name slot. IPv4 literals and malformed label sets are the legacy-environment
+            // vectors that the old IndexOf('.') heuristic let through. NetBIOS names that happen
+            // to contain a dot (e.g. "CONTOSO.OLD") are syntactically indistinguishable from real
+            // FQDNs and remain an unavoidable false-positive of any pure-syntax check.
+            Cache.SetCacheInstance(Cache.CreateNewCache());
+
+            const string sid = "S-1-5-21-1010101010-2020202020-3030303030";
+            Cache.AddDomainSidMapping(sid, badName);
+
+            Assert.False(Cache.GetDomainSidMapping(sid, out _));
+            Assert.True(Cache.GetDomainSidMapping(badName, out var resolvedSid));
+            Assert.Equal(sid, resolvedSid);
+
+            Cache.SetCacheInstance(null);
+        }
+
+        [Theory]
+        [InlineData("contoso.local")]                       // typical AD FQDN
+        [InlineData("CONTOSO.LOCAL")]                       // upper-case
+        [InlineData("sub.contoso.local")]                   // 3 labels
+        [InlineData("a.b.c.d.e")]                           // 5 labels (rules out 4-label IPv4 collision)
+        [InlineData("dc-01.contoso.local")]                 // mid-label hyphen
+        [InlineData("123abc.contoso.local")]                // leading digit per RFC 1123
+        public void AddDomainSidMapping_DnsShapedName_PopulatesSidToNameSlot(string fqdn)
+        {
+            // Positive coverage for the tightened heuristic: legitimate FQDNs still populate
+            // both directions of the cache.
+            Cache.SetCacheInstance(Cache.CreateNewCache());
+
+            const string sid = "S-1-5-21-4040404040-5050505050-6060606060";
+            Cache.AddDomainSidMapping(sid, fqdn);
+
+            Assert.True(Cache.GetDomainSidMapping(sid, out var resolvedName));
+            Assert.Equal(fqdn, resolvedName);
+            Assert.True(Cache.GetDomainSidMapping(fqdn, out var resolvedSid));
             Assert.Equal(sid, resolvedSid);
 
             Cache.SetCacheInstance(null);
