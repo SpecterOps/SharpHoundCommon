@@ -5,10 +5,7 @@ using System.DirectoryServices;
 using System.DirectoryServices.AccountManagement;
 using System.DirectoryServices.ActiveDirectory;
 using System.Linq;
-using System.Net;
-using System.Net.Sockets;
 using System.Security.Principal;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,63 +18,41 @@ using SharpHoundCommonLib.Models;
 using SharpHoundCommonLib.OutputTypes;
 using SharpHoundCommonLib.Processors;
 using SharpHoundCommonLib.Static;
-using SharpHoundRPC.NetAPINative;
 using SharpHoundRPC.PortScanner;
 using Domain = System.DirectoryServices.ActiveDirectory.Domain;
-using Group = SharpHoundCommonLib.OutputTypes.Group;
 using SearchScope = System.DirectoryServices.Protocols.SearchScope;
 
 namespace SharpHoundCommonLib {
     public class LdapUtils : ILdapUtils {
-        //This cache is indexed by domain sid
+        // Domain object cache keyed by domain SID. Static to share across instances (original behaviour).
         private static ConcurrentDictionary<string, Domain> _domainCache = new();
-        private static ConcurrentHashSet _domainControllers = new(StringComparer.OrdinalIgnoreCase);
-        private static ConcurrentHashSet _unresolvablePrincipals = new(StringComparer.OrdinalIgnoreCase);
 
+        // Forest-name cache keyed by domain name. Static + readonly to share across instances.
         private static readonly ConcurrentDictionary<string, string> DomainToForestCache =
             new(StringComparer.OrdinalIgnoreCase);
 
-        private static readonly ConcurrentDictionary<string, ResolvedWellKnownPrincipal>
-            SeenWellKnownPrincipals = new();
+        // Unique sentinel key used to cache the result of GetDomain(out domain) (the "current" domain).
+        private readonly string _nullCacheKey = Guid.NewGuid().ToString();
 
-        private static readonly AdaptiveTimeout _requestNetBiosNameAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(1), Logging.LogProvider.CreateLogger(nameof(RequestNETBIOSNameFromComputerAsync)));
+        private static readonly Regex SIDRegex = new(@"^(S-\d+-\d+-\d+-\d+-\d+-\d+)(-\d+)?$");
 
-        private static readonly AdaptiveTimeout _callNetWkstaGetInfoAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(NativeMethods.CallNetWkstaGetInfo)));
+        // Used by GetDomainSidFromDomainName as fallback account name hints.
+        private readonly string[] _translateNames = { "Administrator", "admin" };
 
-        private readonly ConcurrentDictionary<string, string>
-            _hostResolutionMap = new(StringComparer.OrdinalIgnoreCase);
+        private LdapConfig _ldapConfig = new();
+        private ConnectionPoolManager _connectionPool;
 
-        private readonly ConcurrentDictionary<string, TypedPrincipal> _distinguishedNameCache =
-            new(StringComparer.OrdinalIgnoreCase);
-
-        // Metrics
+        // Injected infrastructure
         private readonly IMetricRouter _metric;
-            
         private readonly ILogger _log;
         private readonly IPortScanner _portScanner;
         private readonly NativeMethods _nativeMethods;
-        private readonly string _nullCacheKey = Guid.NewGuid().ToString();
-        private static readonly Regex SIDRegex = new(@"^(S-\d+-\d+-\d+-\d+-\d+-\d+)(-\d+)?$");
 
-        private readonly string[] _translateNames = { "Administrator", "admin" };
-        private LdapConfig _ldapConfig = new();
-
-        private ConnectionPoolManager _connectionPool;
-
-        private static readonly byte[] NameRequest = {
-            0x80, 0x94, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00,
-            0x00, 0x00, 0x00, 0x00, 0x20, 0x43, 0x4b, 0x41,
-            0x41, 0x41, 0x41, 0x41, 0x41, 0x41, 0x41, 0x41,
-            0x41, 0x41, 0x41, 0x41, 0x41, 0x41, 0x41, 0x41,
-            0x41, 0x41, 0x41, 0x41, 0x41, 0x41, 0x41, 0x41,
-            0x41, 0x41, 0x41, 0x41, 0x41, 0x00, 0x00, 0x21,
-            0x00, 0x01
-        };
-
-        private class ResolvedWellKnownPrincipal {
-            public string DomainName { get; set; }
-            public string WkpId { get; set; }
-        }
+        // Focused service classes that own extracted responsibilities
+        private readonly DomainControllerRegistry _domainControllerRegistry;
+        private readonly WellKnownPrincipalService _wkpService;
+        private PrincipalResolver _principalResolver;
+        private readonly HostResolver _hostResolver;
 
         public LdapUtils() {
             _nativeMethods = new NativeMethods();
@@ -85,6 +60,11 @@ namespace SharpHoundCommonLib {
             _log = Logging.LogProvider.CreateLogger("LDAPUtils");
             _metric = Metrics.Factory.CreateMetricRouter();
             _connectionPool = new ConnectionPoolManager(_ldapConfig, _log);
+            _domainControllerRegistry = new DomainControllerRegistry();
+            // Pass 'this' so that virtual-method overrides (e.g. via Moq) are respected.
+            _wkpService = new WellKnownPrincipalService(this, _domainControllerRegistry, _log);
+            _principalResolver = new PrincipalResolver(this, _wkpService, _domainControllerRegistry, _ldapConfig, _log, _metric);
+            _hostResolver = new HostResolver(_principalResolver, _portScanner, _nativeMethods, _log);
         }
 
         public LdapUtils(NativeMethods nativeMethods = null, PortScanner scanner = null, ILogger log = null, IMetricRouter metric = null) {
@@ -93,6 +73,10 @@ namespace SharpHoundCommonLib {
             _log = log ?? Logging.LogProvider.CreateLogger("LDAPUtils");
             _metric = metric ?? Metrics.Factory.CreateMetricRouter();
             _connectionPool = new ConnectionPoolManager(_ldapConfig, scanner: _portScanner);
+            _domainControllerRegistry = new DomainControllerRegistry();
+            _wkpService = new WellKnownPrincipalService(this, _domainControllerRegistry, _log);
+            _principalResolver = new PrincipalResolver(this, _wkpService, _domainControllerRegistry, _ldapConfig, _log, _metric);
+            _hostResolver = new HostResolver(_principalResolver, _portScanner, _nativeMethods, _log);
         }
 
         public IAsyncEnumerable<Result<string>> RangedRetrieval(string distinguishedName,
@@ -110,190 +94,23 @@ namespace SharpHoundCommonLib {
             return _connectionPool.PagedQuery(queryParameters, cancellationToken);
         }
 
+        // ── Principal resolution ──────────────────────────────────────────────────
+
         public async Task<(bool Success, TypedPrincipal Principal)> ResolveIDAndType(
-            SecurityIdentifier securityIdentifier,
-            string objectDomain) {
-            return await ResolveIDAndType(securityIdentifier.Value, objectDomain);
+            SecurityIdentifier securityIdentifier, string objectDomain) {
+            return await _principalResolver.ResolveIDAndType(securityIdentifier.Value, objectDomain);
         }
 
-        public async Task<(bool Success, TypedPrincipal Principal)>
-            ResolveIDAndType(string identifier, string objectDomain) {
-            if (identifier.IndexOf("0ACNF", StringComparison.OrdinalIgnoreCase) >= 0) {
-                return (false, new TypedPrincipal(identifier, Label.Base));
-            }
-
-            if (await GetWellKnownPrincipal(identifier, objectDomain) is (true, var principal)) {
-                return (true, principal);
-            }
-
-            if (_unresolvablePrincipals.Contains(identifier)) {
-                return (false, new TypedPrincipal(identifier, Label.Base));
-            }
-
-            if (identifier.StartsWith("S-")) {
-                var result = await LookupSidType(identifier, objectDomain);
-                if (!result.Success) {
-                    _unresolvablePrincipals.Add(identifier);
-                    _metric.Observe(LdapMetricDefinitions.UnresolvablePrincipals, 1, new LabelValues([nameof(LdapUtils)]));
-                }
-
-                return (result.Success, new TypedPrincipal(identifier, result.Type));
-            }
-
-            var (success, type) = await LookupGuidType(identifier, objectDomain);
-            if (!success) {
-                _unresolvablePrincipals.Add(identifier);
-                _metric.Observe(LdapMetricDefinitions.UnresolvablePrincipals, 1, new LabelValues([nameof(LdapUtils)]));
-            }
-
-            return (success, new TypedPrincipal(identifier, type));
+        public async Task<(bool Success, TypedPrincipal Principal)> ResolveIDAndType(
+            string identifier, string objectDomain) {
+            return await _principalResolver.ResolveIDAndType(identifier, objectDomain);
         }
 
-        private async Task<(bool Success, Label Type)> LookupSidType(string sid, string domain) {
-            if (Cache.GetIDType(sid, out var type)) {
-                return (true, type);
-            }
-
-            var tempDomain = domain;
-
-            if (await GetDomainNameFromSid(sid) is (true, var domainName)) {
-                tempDomain = domainName;
-            }
-
-            var result = await Query(new LdapQueryParameters() {
-                DomainName = tempDomain,
-                LDAPFilter = CommonFilters.SpecificSID(sid),
-                Attributes = CommonProperties.TypeResolutionProps
-            }).DefaultIfEmpty(LdapResult<IDirectoryObject>.Fail()).FirstOrDefaultAsync();
-
-            if (result.IsSuccess) {
-                if (result.Value.GetLabel(out type)) {
-                    Cache.AddType(sid, type);
-                    return (true, type);
-                }
-            }
-
-            try {
-                var entry = CreateDirectoryEntry($"LDAP://<SID={sid}>");
-                if (entry.GetLabel(out type)) {
-                    Cache.AddType(sid, type);
-                    return (true, type);
-                }
-            }
-            catch {
-                //pass
-            }
-
-            try {
-                using (var ctx = new PrincipalContext(ContextType.Domain)) {
-                    // Blocking External Call
-                    var principal = Principal.FindByIdentity(ctx, IdentityType.Sid, sid);
-                    if (principal != null) {
-                        // Blocking External Call
-                        var entry = ((DirectoryEntry)principal.GetUnderlyingObject()).ToDirectoryObject();
-                        if (entry.GetLabel(out type)) {
-                            Cache.AddType(sid, type);
-                            return (true, type);
-                        }
-                    }
-                }
-            }
-            catch {
-                //pass
-            }
-
-
-            return (false, Label.Base);
-        }
-
-        private async Task<(bool Success, Label type)> LookupGuidType(string guid, string domain) {
-            if (Cache.GetIDType(guid, out var type)) {
-                return (true, type);
-            }
-
-            var result = await Query(new LdapQueryParameters() {
-                DomainName = domain,
-                LDAPFilter = CommonFilters.SpecificGUID(guid),
-                Attributes = CommonProperties.TypeResolutionProps
-            }).DefaultIfEmpty(LdapResult<IDirectoryObject>.Fail()).FirstOrDefaultAsync();
-
-            if (result.IsSuccess && result.Value.GetLabel(out type)) {
-                Cache.AddType(guid, type);
-                return (true, type);
-            }
-
-            try {
-                var entry = CreateDirectoryEntry($"LDAP://<GUID={guid}>");
-                if (entry.GetLabel(out type)) {
-                    Cache.AddType(guid, type);
-                    return (true, type);
-                }
-            }
-            catch {
-                //pass
-            }
-
-            try {
-                using (var ctx = new PrincipalContext(ContextType.Domain)) {
-                    // Blocking External Call
-                    var principal = Principal.FindByIdentity(ctx, IdentityType.Guid, guid);
-                    if (principal != null) {
-                        // Blocking External Call
-                        var entry = ((DirectoryEntry)principal.GetUnderlyingObject()).ToDirectoryObject();
-                        if (entry.GetLabel(out type)) {
-                            Cache.AddType(guid, type);
-                            return (true, type);
-                        }
-                    }
-                }
-            }
-            catch {
-                //pass
-            }
-
-
-            return (false, Label.Base);
-        }
+        // ── Well-known principal resolution ───────────────────────────────────────
 
         public async Task<(bool Success, TypedPrincipal WellKnownPrincipal)> GetWellKnownPrincipal(
             string securityIdentifier, string objectDomain) {
-            if (!WellKnownPrincipal.GetWellKnownPrincipal(securityIdentifier, out var wellKnownPrincipal)) {
-                return (false, null);
-            }
-
-            var (newIdentifier, newDomain) =
-                await GetWellKnownPrincipalObjectIdentifier(securityIdentifier, objectDomain);
-
-            wellKnownPrincipal.ObjectIdentifier = newIdentifier;
-            SeenWellKnownPrincipals.TryAdd(wellKnownPrincipal.ObjectIdentifier, new ResolvedWellKnownPrincipal {
-                DomainName = newDomain,
-                WkpId = securityIdentifier
-            });
-
-            return (true, wellKnownPrincipal);
-        }
-
-        private async Task<(string ObjectID, string Domain)> GetWellKnownPrincipalObjectIdentifier(
-            string securityIdentifier, string domain) {
-            if (!WellKnownPrincipal.GetWellKnownPrincipal(securityIdentifier, out _))
-                return (securityIdentifier, string.Empty);
-
-            if (!securityIdentifier.Equals("S-1-5-9", StringComparison.OrdinalIgnoreCase)) {
-                var tempDomain = domain;
-                if (GetDomain(tempDomain, out var domainObject) && domainObject.Name != null) {
-                    tempDomain = domainObject.Name;
-                }
-
-                return ($"{tempDomain}-{securityIdentifier}".ToUpper(), tempDomain);
-            }
-
-            if (await GetForest(domain) is (true, var forest)) {
-                return ($"{forest}-{securityIdentifier}".ToUpper(), forest);
-            }
-
-            _log.LogWarning("Failed to get a forest name for domain {Domain}, unable to resolve enterprise DC sid",
-                domain);
-            return ($"UNKNOWN-{securityIdentifier}", "UNKNOWN");
+            return await _wkpService.GetWellKnownPrincipal(securityIdentifier, objectDomain);
         }
 
         public virtual async Task<(bool Success, string ForestName)> GetForest(string domain) {
@@ -586,398 +403,44 @@ namespace SharpHoundCommonLib {
             }
         }
 
+        // ── Account / host resolution ─────────────────────────────────────────────
+
         public async Task<(bool Success, TypedPrincipal Principal)> ResolveAccountName(string name, string domain) {
-            if (string.IsNullOrWhiteSpace(name)) {
-                return (false, null);
-            }
-
-            if (Cache.GetPrefixedValue(name, domain, out var id) && Cache.GetIDType(id, out var type))
-                return (true, new TypedPrincipal {
-                    ObjectIdentifier = id,
-                    ObjectType = type
-                });
-
-            var result = await Query(new LdapQueryParameters() {
-                DomainName = domain,
-                Attributes = CommonProperties.TypeResolutionProps,
-                LDAPFilter = $"(samaccountname={name})"
-            }).DefaultIfEmpty(LdapResult<IDirectoryObject>.Fail()).FirstOrDefaultAsync();
-
-            if (result.IsSuccess && result.Value.GetObjectIdentifier(out id)) {
-                result.Value.GetLabel(out type);
-                Cache.AddPrefixedValue(name, domain, id);
-                Cache.AddType(id, type);
-
-                var (tempID, _) = await GetWellKnownPrincipalObjectIdentifier(id, domain);
-                return (true, new TypedPrincipal(tempID, type));
-            }
-
-            return (false, null);
+            return await _principalResolver.ResolveAccountName(name, domain);
         }
 
         public async Task<(bool Success, string SecurityIdentifier)> ResolveHostToSid(string host, string domain) {
-            //Remove SPN prefixes from the host name so we're working with a clean name
-            var strippedHost = Helpers.StripServicePrincipalName(host).ToUpper().TrimEnd('$');
-            if (string.IsNullOrEmpty(strippedHost)) {
-                return (false, string.Empty);
-            }
-
-            if (_hostResolutionMap.TryGetValue(strippedHost, out var sid)) return (sid != null, sid);
-
-            //Immediately start with NetWkstaGetInfo as it's our most reliable indicator if successful
-            if (await GetWorkstationInfo(strippedHost) is (true, var workstationInfo)) {
-                var tempName = workstationInfo.ComputerName;
-                var tempDomain = workstationInfo.LanGroup;
-                _log.LogTrace("Get workstation info for {HostName} succeeded. Workstation {ComputerName} found.", host, tempName);
-
-                if (string.IsNullOrWhiteSpace(tempDomain)) {
-                    tempDomain = domain;
-                }
-
-                if (!string.IsNullOrWhiteSpace(tempName)) {
-                    tempName = $"{tempName}$".ToUpper();
-                    if (await ResolveAccountName(tempName, tempDomain) is (true, var principal)) {
-                        _hostResolutionMap.TryAdd(strippedHost, principal.ObjectIdentifier);
-                        return (true, principal.ObjectIdentifier);
-                    }
-                }
-            }
-
-            //Try some socket magic to get the NETBIOS name
-            try {
-                var (requestNetBiosNameSuccess, netBiosName) = await RequestNETBIOSNameFromComputerWithTimeout(strippedHost, domain);
-                if (requestNetBiosNameSuccess) {
-                    if (!string.IsNullOrWhiteSpace(netBiosName)) {
-                        var result = await ResolveAccountName($"{netBiosName}$", domain);
-                        if (result.Success) {
-                            _hostResolutionMap.TryAdd(strippedHost, result.Principal.ObjectIdentifier);
-                            return (true, result.Principal.ObjectIdentifier);
-                        }
-                    }
-                }
-            } catch (TimeoutException) {
-                _log.LogDebug("RequestNETBIOSNameFromComputer timeout on host {Host}, domain {Domain}.", strippedHost, domain);
-            }
-
-            //Start by handling non-IP address names
-            if (!IPAddress.TryParse(strippedHost, out _)) {
-                //PRIMARY.TESTLAB.LOCAL
-                if (strippedHost.Contains(".")) {
-                    var split = strippedHost.Split('.');
-                    var name = split[0];
-                    var result = await ResolveAccountName($"{name}$", domain);
-                    if (result.Success) {
-                        _hostResolutionMap.TryAdd(strippedHost, result.Principal.ObjectIdentifier);
-                        return (true, result.Principal.ObjectIdentifier);
-                    }
-
-                    var tempDomain = string.Join(".", split.Skip(1).ToArray());
-                    result = await ResolveAccountName($"{name}$", tempDomain);
-                    if (result.Success) {
-                        _hostResolutionMap.TryAdd(strippedHost, result.Principal.ObjectIdentifier);
-                        return (true, result.Principal.ObjectIdentifier);
-                    }
-                }
-                else {
-                    //Format: WIN10 (probably a netbios name)
-                    var result = await ResolveAccountName($"{strippedHost}$", domain);
-                    if (result.Success) {
-                        _hostResolutionMap.TryAdd(strippedHost, result.Principal.ObjectIdentifier);
-                        return (true, result.Principal.ObjectIdentifier);
-                    }
-                }
-            }
-
-            try {
-                // Blocking External Call
-                var resolvedHostname = (await Dns.GetHostEntryAsync(strippedHost)).HostName;
-                var split = resolvedHostname.Split('.');
-                var name = split[0];
-                var result = await ResolveAccountName($"{name}$", domain);
-                if (result.Success) {
-                    _hostResolutionMap.TryAdd(strippedHost, result.Principal.ObjectIdentifier);
-                    return (true, result.Principal.ObjectIdentifier);
-                }
-
-                var tempDomain = string.Join(".", split.Skip(1).ToArray());
-                result = await ResolveAccountName($"{name}$", tempDomain);
-                if (result.Success) {
-                    _hostResolutionMap.TryAdd(strippedHost, result.Principal.ObjectIdentifier);
-                    return (true, result.Principal.ObjectIdentifier);
-                }
-            }
-            catch {
-                //pass
-            }
-
-            _hostResolutionMap.TryAdd(strippedHost, null);
-            return (false, "");
-        }
-
-        /// <summary>
-        ///     Calls the NetWkstaGetInfo API on a hostname
-        /// </summary>
-        /// <param name="hostname"></param>
-        /// <returns></returns>
-        private async Task<(bool Success, NetAPIStructs.WorkstationInfo100 Info)> GetWorkstationInfo(string hostname) {
-            if (!await _portScanner.CheckPort(hostname)) {
-                _log.LogTrace("CheckPort returned false for {HostName}.", hostname);
-                return (false, default);
-            }
-            
-            // Blocking External Call
-            var result = await _callNetWkstaGetInfoAdaptiveTimeout.ExecuteNetAPIWithTimeout((_) => _nativeMethods.CallNetWkstaGetInfo(hostname));
-
-            if (result.IsSuccess)
-                return (true, result.Value);
-            else
-                _log.LogError(result.Error);
-
-            return (false, default);
+            return await _hostResolver.ResolveHostToSid(host, domain);
         }
 
         public async Task<(bool Success, string[] Sids)> GetGlobalCatalogMatches(string name, string domain) {
-            if (Cache.GetGCCache(name, out var matches)) {
-                return (true, matches);
-            }
-
-            var sids = new List<string>();
-
-            await foreach (var result in Query(new LdapQueryParameters {
-                DomainName = domain,
-                Attributes = new[] { LDAPProperties.ObjectSID },
-                GlobalCatalog = true,
-                LDAPFilter = new LdapFilter().AddUsers($"(samaccountname={name})").GetFilter()
-            })) {
-                if (result.IsSuccess && result.Value.TryGetSecurityIdentifier(out var sid)) {
-                    if (await GetWellKnownPrincipal(sid, domain) is (true, var principal)) {
-                        sids.Add(principal.ObjectIdentifier);
-                    }
-                    else {
-                        sids.Add(sid);
-                    }
-                }
-                else {
-                    return (false, Array.Empty<string>());
-                }
-            }
-
-            Cache.AddGCCache(name, sids.ToArray());
-            return (true, sids.ToArray());
+            return await _principalResolver.GetGlobalCatalogMatches(name, domain);
         }
 
-        public async Task<(bool Success, TypedPrincipal Principal)> ResolveCertTemplateByProperty(string propertyValue,
-            string propertyName, string domainName) {
-            var filter = new LdapFilter().AddCertificateTemplates()
-                .AddFilter($"({propertyName}={propertyValue})", true);
-            var result = await Query(new LdapQueryParameters {
-                DomainName = domainName,
-                Attributes = CommonProperties.TypeResolutionProps,
-                SearchScope = SearchScope.OneLevel,
-                NamingContext = NamingContext.Configuration,
-                RelativeSearchBase = DirectoryPaths.CertTemplateLocation,
-                LDAPFilter = filter.GetFilter(),
-            }).DefaultIfEmpty(LdapResult<IDirectoryObject>.Fail()).FirstOrDefaultAsync();
-
-            if (!result.IsSuccess) {
-                _log.LogWarning(
-                    "Could not find certificate template with {PropertyName}:{PropertyValue}: {Error}",
-                    propertyName, propertyValue, result.Error);
-                return (false, null);
-            }
-
-            if (result.Value.TryGetGuid(out var guid)) {
-                return (true, new TypedPrincipal(guid, Label.CertTemplate));
-            }
-
-            return (false, default);
+        public async Task<(bool Success, TypedPrincipal Principal)> ResolveCertTemplateByProperty(
+            string propertyValue, string propertyName, string domainName) {
+            return await _principalResolver.ResolveCertTemplateByProperty(propertyValue, propertyName, domainName);
         }
 
-        private static async Task<(bool Success, string NetBiosName)> RequestNETBIOSNameFromComputerWithTimeout(string server, string domain) {
-            var result = await _requestNetBiosNameAdaptiveTimeout.ExecuteWithTimeout(async (timeoutToken) => await RequestNETBIOSNameFromComputerAsync(server, domain, timeoutToken));
-            if (result.IsSuccess)
-                return (result.Value.Success, result.Value.NetBiosName);
-            else
-                throw new TimeoutException();
-        }
-
-        /// <summary>
-        ///     Uses a socket and a set of bytes to request the NETBIOS name from a remote computer
-        /// </summary>
-        /// <param name="server"></param>
-        /// <param name="domain"></param>
-        /// <param name="netbios"></param>
-        /// <returns></returns>
-        private static async Task<(bool Success, string NetBiosName)> RequestNETBIOSNameFromComputerAsync(string server, string domain, CancellationToken cancellationToken = default) {
-            var receiveBuffer = new byte[1024];
-            var requestSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            try {
-                //Set receive timeout to 1 second
-                requestSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, 1000);
-                EndPoint remoteEndpoint;
-
-                //We need to create an endpoint to bind too. If its an IP, just use that.
-                if (IPAddress.TryParse(server, out var parsedAddress))
-                    remoteEndpoint = new IPEndPoint(parsedAddress, 137);
-                else
-                    //If its not an IP, we're going to try and resolve it from DNS
-                    try {
-                        IPAddress address;
-                        if (server.Contains("."))
-                            address = (await Dns
-                                .GetHostAddressesAsync(server)).First(x => x.AddressFamily == AddressFamily.InterNetwork);
-                        else
-                            address = (await Dns.GetHostAddressesAsync($"{server}.{domain}"))[0];
-
-                        if (address == null) {
-                            return (false, null);
-                        }
-
-                        remoteEndpoint = new IPEndPoint(address, 137);
-                    }
-                    catch {
-                        //Failed to resolve an IP, so return null
-                        return (false, null);
-                    }
-
-                var originEndpoint = new IPEndPoint(IPAddress.Any, 0);
-                cancellationToken.ThrowIfCancellationRequested();
-                // Blocking External Call
-                requestSocket.Bind(originEndpoint);
-
-                try {
-                    // Blocking External Call
-                    requestSocket.SendTo(NameRequest, remoteEndpoint);
-                    cancellationToken.ThrowIfCancellationRequested();
-                    // Blocking External Call
-                    var receivedByteCount = requestSocket.ReceiveFrom(receiveBuffer, ref remoteEndpoint);
-                    if (receivedByteCount >= 90) {
-                        var netbios = new ASCIIEncoding().GetString(receiveBuffer, 57, 16).Trim('\0', ' ');
-                        return (true, netbios);
-                    }
-
-                    return (false, null);
-                }
-                catch (SocketException) {
-                    return (false, null);
-                }
-            }
-            finally {
-                //Make sure we close the socket if its open
-                requestSocket.Close();
-            }
-        }
-
-        /// <summary>
-        /// Created for testing purposes
-        /// </summary>
-        /// <returns></returns>
+        /// <summary>Created for testing purposes.</summary>
         public ActiveDirectorySecurityDescriptor MakeSecurityDescriptor() {
             return new ActiveDirectorySecurityDescriptor(new ActiveDirectorySecurity());
         }
 
+        // ── Local / domain controller helpers ────────────────────────────────────
+
         public async Task<(bool Success, TypedPrincipal Principal)> ConvertLocalWellKnownPrincipal(
-            SecurityIdentifier sid,
-            string computerDomainSid, string computerDomain) {
-            if (!WellKnownPrincipal.GetWellKnownPrincipal(sid.Value, out var common)) return (false, null);
-            //The "Everyone" and "Authenticated Users" principals are special and will be converted to the domain equivalent
-            if (sid.Value is "S-1-1-0" or "S-1-5-11") {
-                return await GetWellKnownPrincipal(sid.Value, computerDomain);
-            }
-
-            //Use the computer object id + the RID of the sid we looked up to create our new principal
-            var principal = new TypedPrincipal {
-                ObjectIdentifier = $"{computerDomainSid}-{sid.Rid()}",
-                ObjectType = common.ObjectType switch {
-                    Label.User => Label.LocalUser,
-                    Label.Group => Label.LocalGroup,
-                    _ => common.ObjectType
-                }
-            };
-
-            return (true, principal);
+            SecurityIdentifier sid, string computerDomainSid, string computerDomain) {
+            return await _wkpService.ConvertLocalWellKnownPrincipal(sid, computerDomainSid, computerDomain);
         }
 
         public async Task<bool> IsDomainController(string computerObjectId, string domainName) {
-            if (_domainControllers.Contains(computerObjectId)) {
-                return true;
-            }
-
-            var resDomain = await GetDomainNameFromSid(domainName) is (false, var tempDomain) ? tempDomain : domainName;
-            var filter = new LdapFilter().AddFilter(CommonFilters.SpecificSID(computerObjectId), true)
-                .AddFilter(CommonFilters.DomainControllers, true);
-            var result = await Query(new LdapQueryParameters() {
-                DomainName = resDomain,
-                Attributes = CommonProperties.ObjectID,
-                LDAPFilter = filter.GetFilter(),
-            }).DefaultIfEmpty(LdapResult<IDirectoryObject>.Fail()).FirstOrDefaultAsync();
-            if (result.IsSuccess) {
-                _domainControllers.Add(computerObjectId);
-            }
-
-            return result.IsSuccess;
+            return await _principalResolver.IsDomainController(computerObjectId, domainName);
         }
 
-        public async Task<(bool Success, TypedPrincipal Principal)> ResolveDistinguishedName(string distinguishedName) {
-            if (_distinguishedNameCache.TryGetValue(distinguishedName, out var principal)) {
-                return (true, principal);
-            }
-
-            if (_unresolvablePrincipals.Contains(distinguishedName)) {
-                return (false, default);
-            }
-
-            var domain = Helpers.DistinguishedNameToDomain(distinguishedName);
-            var result = await Query(new LdapQueryParameters {
-                DomainName = domain,
-                Attributes = CommonProperties.TypeResolutionProps,
-                SearchBase = distinguishedName,
-                SearchScope = SearchScope.Base,
-                LDAPFilter = new LdapFilter().AddAllObjects().GetFilter()
-            }).DefaultIfEmpty(LdapResult<IDirectoryObject>.Fail()).FirstOrDefaultAsync();
-
-            if (result.IsSuccess && result.Value.GetObjectIdentifier(out var id)) {
-                var entry = result.Value;
-
-                if (await GetWellKnownPrincipal(id, domain) is (true, var wellKnownPrincipal)) {
-                    _distinguishedNameCache.TryAdd(distinguishedName, wellKnownPrincipal);
-                    return (true, wellKnownPrincipal);
-                }
-
-                entry.GetLabel(out var type);
-                principal = new TypedPrincipal(id, type);
-                _distinguishedNameCache.TryAdd(distinguishedName, principal);
-                return (true, principal);
-            }
-
-            try {
-                using (var ctx = new PrincipalContext(ContextType.Domain)) {
-                    // Blocking External Call
-                    var lookupPrincipal =
-                        Principal.FindByIdentity(ctx, IdentityType.DistinguishedName, distinguishedName);
-                    if (lookupPrincipal != null) {
-                        // Blocking External Call
-                        var entry = ((DirectoryEntry)lookupPrincipal.GetUnderlyingObject()).ToDirectoryObject();
-                        if (entry.GetObjectIdentifier(out var identifier) && entry.GetLabel(out var label)) {
-                            if (await GetWellKnownPrincipal(identifier, domain) is (true, var wellKnownPrincipal)) {
-                                _distinguishedNameCache.TryAdd(distinguishedName, wellKnownPrincipal);
-                                return (true, wellKnownPrincipal);
-                            }
-
-                            principal = new TypedPrincipal(identifier, label);
-                            _distinguishedNameCache.TryAdd(distinguishedName, principal);
-                            return (true, new TypedPrincipal(identifier, label));
-                        }
-                    }
-
-                    return (false, default);
-                }
-            }
-            catch {
-                _unresolvablePrincipals.Add(distinguishedName);
-                _metric.Observe(LdapMetricDefinitions.UnresolvablePrincipals, 1, new LabelValues([nameof(LdapUtils)]));
-                return (false, default);
-            }
+        public async Task<(bool Success, TypedPrincipal Principal)> ResolveDistinguishedName(
+            string distinguishedName) {
+            return await _principalResolver.ResolveDistinguishedName(distinguishedName);
         }
 
         public async Task<(bool Success, string DSHeuristics)> GetDSHueristics(string domain, string dn) {
@@ -1001,79 +464,27 @@ namespace SharpHoundCommonLib {
             return (false, null);
         }
 
+        // ── Domain controller tracking ────────────────────────────────────────────
+
         public void AddDomainController(string domainControllerSID) {
-            _domainControllers.Add(domainControllerSID);
+            _principalResolver.AddDomainController(domainControllerSID);
         }
 
-        public async IAsyncEnumerable<OutputBase> GetWellKnownPrincipalOutput() {
-            foreach (var wkp in SeenWellKnownPrincipals) {
-                WellKnownPrincipal.GetWellKnownPrincipal(wkp.Value.WkpId, out var principal);
-                OutputBase output = principal.ObjectType switch {
-                    Label.User => new User(),
-                    Label.Computer => new Computer(),
-                    Label.Group => new Group(),
-                    Label.GPO => new GPO(),
-                    Label.Domain => new OutputTypes.Domain(),
-                    Label.OU => new OU(),
-                    Label.Container => new Container(),
-                    Label.Configuration => new Container(),
-                    _ => throw new ArgumentOutOfRangeException()
-                };
+        // ── WKP output generation ─────────────────────────────────────────────────
 
-                output.Properties.Add("name", $"{principal.ObjectIdentifier}@{wkp.Value.DomainName}".ToUpper());
-                if (await GetDomainSidFromDomainName(wkp.Value.DomainName) is (true, var sid)) {
-                    output.Properties.Add("domainsid", sid);
-                }
-
-                output.Properties.Add("domain", wkp.Value.DomainName.ToUpper());
-                output.ObjectIdentifier = wkp.Key;
-                yield return output;
-            }
-
-            await foreach (var entdc in GetEnterpriseDCGroups()) {
-                yield return entdc;
-            }
+        public IAsyncEnumerable<OutputBase> GetWellKnownPrincipalOutput() {
+            return _wkpService.GetWellKnownPrincipalOutput();
         }
 
-        private async IAsyncEnumerable<Group> GetEnterpriseDCGroups() {
-            var grouped = new ConcurrentDictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
-            var forestSidToName = new ConcurrentDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            foreach (var domainSid in _domainControllers.Values().GroupBy(x =>
-                         new SecurityIdentifier(x).AccountDomainSid.Value)) {
-                if (await GetDomainNameFromSid(domainSid.Key) is (true, var domainName) &&
-                    await GetForest(domainName) is (true, var forestName) &&
-                    await GetDomainSidFromDomainName(forestName) is (true, var forestDomainSid)) {
-                    forestSidToName.TryAdd(forestDomainSid, forestName);
-                    if (!grouped.ContainsKey(forestDomainSid)) {
-                        grouped[forestDomainSid] = new();
-                    }
-
-                    foreach (var k in domainSid) {
-                        grouped[forestDomainSid].Add(k);
-                    }
-                }
-            }
-
-            foreach (var f in grouped) {
-                if (!forestSidToName.TryGetValue(f.Key, out var forestName)) {
-                    _log.LogWarning("Could not get a mapped value for well known principal {Key}", f.Key);
-                    continue;
-                }
-
-                var group = new Group { ObjectIdentifier = $"{forestName}-S-1-5-9" };
-                group.Properties.Add("name", $"ENTERPRISE DOMAIN CONTROLLERS@{forestName}".ToUpper());
-                group.Properties.Add("domainsid", f.Key);
-                group.Properties.Add("domain", forestName);
-                group.Members = f.Value.Select(x => new TypedPrincipal(x, Label.Computer)).ToArray();
-                yield return group;
-            }
-        }
+        // ── Configuration / lifecycle ─────────────────────────────────────────────
 
         public void SetLdapConfig(LdapConfig config) {
             _ldapConfig = config;
             _log.LogInformation("New LDAP Config Set:\n {ConfigString}", config.ToString());
             _connectionPool.Dispose();
             _connectionPool = new ConnectionPoolManager(_ldapConfig, scanner: _portScanner);
+            // Propagate new credentials so the fallback DirectoryEntry calls use them.
+            _principalResolver.UpdateConfig(config);
         }
 
         public Task<(bool Success, string Message)> TestLdapConnection(string domain) {
@@ -1135,12 +546,22 @@ namespace SharpHoundCommonLib {
         }
 
         public void ResetUtils() {
-            _unresolvablePrincipals = new ConcurrentHashSet(StringComparer.OrdinalIgnoreCase);
+            // Reset static domain-name caches owned by LdapUtils itself.
             _domainCache = new ConcurrentDictionary<string, Domain>();
-            _domainControllers = new ConcurrentHashSet(StringComparer.OrdinalIgnoreCase);
+
+            // Delegate resets to the owning service classes.
+            _principalResolver.Reset();
+            _domainControllerRegistry.Reset();
+
+            // Recreate the connection pool.
             _connectionPool?.Dispose();
             _connectionPool = new ConnectionPoolManager(_ldapConfig, scanner: _portScanner);
-            
+
+            // Rebuild the PrincipalResolver so it picks up the new connection pool reference
+            // via ILdapUtils.Query which routes through the updated _connectionPool.
+            _principalResolver = new PrincipalResolver(this, _wkpService, _domainControllerRegistry,
+                _ldapConfig, _log, _metric);
+
             // Metrics
             LdapMetrics.ResetInFlight();
         }
