@@ -1130,15 +1130,7 @@ namespace SharpHoundCommonLib {
         public void SetLdapConfig(LdapConfig config) {
             _ldapConfig = config;
             _log.LogInformation("New LDAP Config Set:\n {ConfigString}", config.ToString());
-            // _currentDomain was resolved under the previous credentials/server, both of which
-            // can have just changed. Drop it so the next GetDomain(out _) re-resolves against the
-            // new auth context instead of returning a stale Domain bound to the old config.
-            lock (_currentDomainLock) {
-                _currentDomain?.Dispose();
-                _currentDomain = null;
-            }
-            _connectionPool.Dispose();
-            _connectionPool = new ConnectionPoolManager(_ldapConfig, scanner: _portScanner);
+            ResetUtils();;
         }
 
         public Task<(bool Success, string Message)> TestLdapConnection(string domain) {
@@ -2401,6 +2393,7 @@ namespace SharpHoundCommonLib {
             LdapConnectionPool.ResetCaches();
             _connectionPool?.Dispose();
             _connectionPool = new ConnectionPoolManager(_ldapConfig, scanner: _portScanner);
+            _inFlightDomainResolutions.Clear();
 
             // Metrics
             LdapMetrics.ResetInFlight();
