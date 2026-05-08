@@ -47,7 +47,7 @@ jobs:
           sleet push ./pkgs
 
       #the prune command deletes older -dev package versions to avoid clutter
-      #it deletes any versions of the $packageIds with "-dev" that are older than the first $maxDevVersions
+      #it deletes any versions of the $packageIds with "-dev" that are older than the last $maxDevVersions
       #set $dryRun to true for debugging without deleting any packages
       - name: Prune old -dev packages
         env:
@@ -56,7 +56,7 @@ jobs:
         shell: pwsh
         run: |
           $dryRun = $false
-          $packageIndexUrl = 'https://s3.amazonaws.com/bloodhound-ad/sleet.packageindex.json'
+          $packageIndexUrl = 'https://s3.amazonaws.com/shcommon-nuget/sleet.packageindex.json'
           $packageIds = @('SharpHoundCommon', 'SharpHoundRPC')
           $maxDevVersions = 5
           
