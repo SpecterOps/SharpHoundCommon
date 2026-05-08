@@ -100,8 +100,8 @@ namespace CommonLibTest
             }
 
             // Check that each of userFilter and computerFilter are accounted for
-            Assert.Single(filters.Where(f => f.Contains(userFilter)));
-            Assert.Single(filters.Where(f => f.Contains(computerFilter)));
+            Assert.Single(filters, f => f.Contains(userFilter));
+            Assert.Single(filters, f => f.Contains(computerFilter));
 
             Assert.Equal(2, filters.Count());
         }
