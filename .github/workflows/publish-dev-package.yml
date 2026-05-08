@@ -3,7 +3,8 @@ name: Publish Dev Package
 on:
   push:
     branches:
-      - "v4"
+      - "lfalslev/bed-8241"
+      #- "v4"
 
 jobs:
   update-dev-package:
@@ -55,8 +56,8 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
         shell: pwsh
         run: |
-          $dryRun = $false
-          $packageIndexUrl = 'https://s3.amazonaws.com/bloodhound-ad/sleet.packageindex.json'
+          $dryRun = $true
+          $packageIndexUrl = 'https://s3.amazonaws.com/shcommon-nuget/sleet.packageindex.json'
           $packageIds = @('SharpHoundCommon', 'SharpHoundRPC')
           $maxDevVersions = 5
           
