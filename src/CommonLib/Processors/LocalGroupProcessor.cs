@@ -302,9 +302,9 @@ namespace SharpHoundCommonLib.Processors
                             var (name, use) = lookupUserResult.Value;
                             var objectType = use switch
                             {
-                                SharedEnums.SidNameUse.User => Label.LocalUser,
-                                SharedEnums.SidNameUse.Group => Label.LocalGroup,
-                                SharedEnums.SidNameUse.Alias => Label.LocalGroup,
+                                SharedEnums.SidNameUse.User => Label.ADLocalUser,
+                                SharedEnums.SidNameUse.Group => Label.ADLocalGroup,
+                                SharedEnums.SidNameUse.Alias => Label.ADLocalGroup,
                                 _ => Label.Base
                             };
 
@@ -312,7 +312,7 @@ namespace SharpHoundCommonLib.Processors
                             typeCache.TryAdd(sidValue, new CachedLocalItem(name, objectType));
                             
                             // Throw out local users
-                            if (objectType == Label.LocalUser)
+                            if (objectType == Label.ADLocalUser)
                                 continue;
 
                             var newSid = $"{computerObjectId}-{securityIdentifier.Rid()}";

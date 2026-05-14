@@ -19,6 +19,7 @@ using SharpHoundCommonLib.OutputTypes;
 using SharpHoundCommonLib.Processors;
 using Xunit;
 using Xunit.Abstractions;
+using AsyncEnumerable = SharpHoundCommonLib.AsyncEnumerable;
 
 namespace CommonLibTest {
     [SuppressMessage("Interoperability", "CA1416:Validate platform compatibility")]

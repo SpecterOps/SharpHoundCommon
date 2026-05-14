@@ -1082,8 +1082,8 @@ namespace CommonLibTest.Facades
                     ObjectIdentifier = $"{computerDomainSid}-{sid.Rid()}",
                     ObjectType = common.ObjectType switch
                     {
-                        Label.User => Label.LocalUser,
-                        Label.Group => Label.LocalGroup,
+                        Label.User => Label.ADLocalUser,
+                        Label.Group => Label.ADLocalGroup,
                         _ => common.ObjectType
                     }
                 };
