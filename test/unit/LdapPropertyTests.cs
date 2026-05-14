@@ -139,7 +139,7 @@ namespace CommonLibTest
 
         [SupportedOSPlatform("windows")]
         [WindowsOnlyFact]
-        public async Task LDAPPropertyProcessor_ReadOUProperties_SkipsCustomDenyAces_WhenLdapConfigRequestsIt()
+        public async Task LDAPPropertyProcessor_ReadOUProperties_SkipsCustomDenyAceCounts_WhenLdapConfigRequestsIt()
         {
             var denyAce = new CommonAce(AceFlags.None, AceQualifier.AccessDenied, (int)ActiveDirectoryRights.Delete,
                 new SecurityIdentifier("S-1-5-21-3130019616-2776909439-2417379446-2500"), false, null);

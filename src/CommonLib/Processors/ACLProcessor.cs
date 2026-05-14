@@ -23,6 +23,8 @@ namespace SharpHoundCommonLib.Processors {
         private readonly ConcurrentHashSet _builtDomainCaches = new(StringComparer.OrdinalIgnoreCase);
         private readonly ConcurrentDictionary<string, string[]> _exchangeTrusteeSidCache = new(StringComparer.OrdinalIgnoreCase);
         private readonly object _lock = new();
+        private const string CustomExplicitDenyAcesCountProperty = "customexplicitdenyacescount";
+        private const string CustomInheritedDenyAcesCountProperty = "custominheriteddenyacescount";
         // These Exchange principals commonly carry product-added deny ACEs that we intentionally suppress.
         private static readonly HashSet<string> ExchangeTrusteeNames = new(StringComparer.OrdinalIgnoreCase) {
             "Exchange Windows Permissions",
@@ -901,21 +903,6 @@ namespace SharpHoundCommonLib.Processors {
             }
         }
 
-        public Task<string[]> GetCustomDenyAces(ResolvedSearchResult result, IDirectoryObject searchResult) {
-            if (!searchResult.TryGetByteProperty(LDAPProperties.SecurityDescriptor, out var descriptor)) {
-                return Task.FromResult(Array.Empty<string>());
-            }
-
-            searchResult.TryGetDistinguishedName(out var distinguishedName);
-            return GetCustomDenyAces(
-                descriptor,
-                result.Domain,
-                result.ObjectType,
-                distinguishedName,
-                searchResult.IsMSA() || searchResult.IsGMSA(),
-                result.DisplayName);
-        }
-
         public Task<CustomDenyAceCounts> GetCustomDenyAceCounts(ResolvedSearchResult result,
             IDirectoryObject searchResult) {
             if (!searchResult.TryGetByteProperty(LDAPProperties.SecurityDescriptor, out var descriptor)) {
@@ -932,39 +919,11 @@ namespace SharpHoundCommonLib.Processors {
                 result.DisplayName);
         }
 
-        public async Task<string[]> GetCustomDenyAces(byte[] ntSecurityDescriptor, string objectDomain,
-            Label objectType, string distinguishedName = null, bool isMSA = false, string objectName = "") {
-            var customDenyAces = await GetCustomDenyAceData(ntSecurityDescriptor, objectDomain, objectType,
-                distinguishedName, isMSA, objectName, true);
-
-            return customDenyAces.Sddl.Count == 0 ? Array.Empty<string>() : customDenyAces.Sddl.ToArray();
-        }
-
         public async Task<CustomDenyAceCounts> GetCustomDenyAceCounts(byte[] ntSecurityDescriptor,
             string objectDomain, Label objectType, string distinguishedName = null, bool isMSA = false,
             string objectName = "") {
-            var customDenyAces = await GetCustomDenyAceData(ntSecurityDescriptor, objectDomain, objectType,
-                distinguishedName, isMSA, objectName, false);
-
-            return new CustomDenyAceCounts(customDenyAces.ExplicitCount, customDenyAces.InheritedCount);
-        }
-
-        public async Task AddCustomDenyAcesProperty(Dictionary<string, object> props, byte[] ntSecurityDescriptor,
-            string objectDomain, Label objectType, string distinguishedName = null, bool isMSA = false,
-            string objectName = "") {
-            var counts = await GetCustomDenyAceCounts(ntSecurityDescriptor, objectDomain, objectType,
-                distinguishedName, isMSA, objectName);
-
-            if (counts.Total > 0) {
-                props["customexplicitdenyacescount"] = counts.ExplicitCount;
-                props["custominheriteddenyacescount"] = counts.InheritedCount;
-            }
-        }
-
-        private async Task<CustomDenyAceData> GetCustomDenyAceData(byte[] ntSecurityDescriptor, string objectDomain,
-            Label objectType, string distinguishedName, bool isMSA, string objectName, bool collectSddl) {
             if (ntSecurityDescriptor == null) {
-                return new CustomDenyAceData();
+                return new CustomDenyAceCounts();
             }
 
             RawSecurityDescriptor descriptor;
@@ -975,16 +934,16 @@ namespace SharpHoundCommonLib.Processors {
                 _log.LogWarning(
                     "Security descriptor on object {Name} exceeds maximum allowable length. Unable to process custom deny ACEs",
                     objectName);
-                return new CustomDenyAceData();
+                return new CustomDenyAceCounts();
             }
 
             if (descriptor.DiscretionaryAcl == null || descriptor.DiscretionaryAcl.Count == 0) {
-                return new CustomDenyAceData();
+                return new CustomDenyAceCounts();
             }
 
-            var results = new CustomDenyAceData();
+            var explicitCount = 0;
+            var inheritedCount = 0;
 
-            // Walk the raw DACL so we can preserve deny ACE ordering and serialize each ACE back to SDDL verbatim.
             foreach (GenericAce ace in descriptor.DiscretionaryAcl) {
                 if (!TryGetDenyAceData(ace, out var principalSid, out var rights, out var objectAceType)) {
                     continue;
@@ -996,26 +955,25 @@ namespace SharpHoundCommonLib.Processors {
                 }
 
                 if ((ace.AceFlags & AceFlags.Inherited) == AceFlags.Inherited) {
-                    results.InheritedCount++;
+                    inheritedCount++;
                 } else {
-                    results.ExplicitCount++;
-                }
-
-                if (collectSddl) {
-                    var sddl = SerializeAceToSddl(ace);
-                    if (!string.IsNullOrWhiteSpace(sddl)) {
-                        results.Sddl.Add(sddl);
-                    }
+                    explicitCount++;
                 }
             }
 
-            return results;
+            return new CustomDenyAceCounts(explicitCount, inheritedCount);
         }
 
-        private class CustomDenyAceData {
-            public List<string> Sddl { get; } = new();
-            public int ExplicitCount { get; set; }
-            public int InheritedCount { get; set; }
+        public async Task AddCustomDenyAcesProperty(Dictionary<string, object> props, byte[] ntSecurityDescriptor,
+            string objectDomain, Label objectType, string distinguishedName = null, bool isMSA = false,
+            string objectName = "") {
+            var counts = await GetCustomDenyAceCounts(ntSecurityDescriptor, objectDomain, objectType,
+                distinguishedName, isMSA, objectName);
+
+            if (counts.Total > 0) {
+                props[CustomExplicitDenyAcesCountProperty] = counts.ExplicitCount;
+                props[CustomInheritedDenyAcesCountProperty] = counts.InheritedCount;
+            }
         }
 
         private static bool TryGetDenyAceData(GenericAce ace, out string principalSid, out ActiveDirectoryRights rights,
@@ -1100,24 +1058,6 @@ namespace SharpHoundCommonLib.Processors {
             _exchangeTrusteeSidCache.TryAdd(objectDomain, exchangeTrusteeSids);
             return exchangeTrusteeSids.Contains(principalSid, StringComparer.OrdinalIgnoreCase);
         }
-
-        private static string SerializeAceToSddl(GenericAce ace) {
-            // Rehydrate the ACE inside a one-entry DACL and let the framework emit the canonical ACE SDDL for us.
-            var acl = new RawAcl(ace is ObjectAce ? GenericAcl.AclRevisionDS : GenericAcl.AclRevision, 1);
-            acl.InsertAce(0, CloneAce(ace));
-
-            var descriptor = new RawSecurityDescriptor(ControlFlags.DiscretionaryAclPresent, null, null, null, acl);
-            var sddl = descriptor.GetSddlForm(AccessControlSections.Access);
-
-            return sddl.StartsWith("D:", StringComparison.OrdinalIgnoreCase) ? sddl.Substring(2) : sddl;
-        }
-
-        private static GenericAce CloneAce(GenericAce ace) {
-            var buffer = new byte[ace.BinaryLength];
-            ace.GetBinaryForm(buffer, 0);
-            return GenericAce.CreateFromBinaryForm(buffer, 0);
-        }
-
 
         /// <summary>
         ///     Helper function to use commonlib types and pass to ProcessGMSAReaders

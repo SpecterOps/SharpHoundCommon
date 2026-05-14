@@ -2140,117 +2140,100 @@ namespace CommonLibTest {
         }
 
         [WindowsOnlyFact]
-        public async Task ACLProcessor_GetCustomDenyAces_EmitsQualifyingDenyAce() {
+        public async Task ACLProcessor_GetCustomDenyAceCounts_CountsQualifyingExplicitDenyAce() {
             var ace = CreateCommonDenyAce("S-1-5-21-3130019616-2776909439-2417379446-2500",
                 ActiveDirectoryRights.Delete);
             var processor = CreateCustomDenyAceProcessor();
 
-            var result = await processor.GetCustomDenyAces(CreateSecurityDescriptorBytes(ace), _testDomainName,
+            var result = await processor.GetCustomDenyAceCounts(CreateSecurityDescriptorBytes(ace), _testDomainName,
                 Label.User, "CN=TEST USER,CN=USERS,DC=TESTLAB,DC=LOCAL");
 
-            Assert.Single(result);
-            Assert.Equal(SerializeAce(ace), result[0]);
+            AssertCustomDenyAceCounts(result, 1, 0);
         }
 
         [WindowsOnlyFact]
-        public async Task ACLProcessor_GetCustomDenyAces_SkipsExchangeTrusteeDenyAce() {
+        public async Task ACLProcessor_GetCustomDenyAceCounts_SkipsExchangeTrusteeDenyAce() {
             var ace = CreateCommonDenyAce("S-1-5-21-3130019616-2776909439-2417379446-2600",
                 ActiveDirectoryRights.Delete);
             var processor = CreateCustomDenyAceProcessor(("S-1-5-21-3130019616-2776909439-2417379446-2600",
                 "Exchange Windows Permissions"));
 
-            var result = await processor.GetCustomDenyAces(CreateSecurityDescriptorBytes(ace), _testDomainName,
+            var result = await processor.GetCustomDenyAceCounts(CreateSecurityDescriptorBytes(ace), _testDomainName,
                 Label.User, "CN=TEST USER,CN=USERS,DC=TESTLAB,DC=LOCAL");
 
-            Assert.Empty(result);
+            AssertCustomDenyAceCounts(result, 0, 0);
         }
 
         [WindowsOnlyFact]
-        public async Task ACLProcessor_GetCustomDenyAces_SkipsOrganizationManagementDenyAce() {
+        public async Task ACLProcessor_GetCustomDenyAceCounts_SkipsOrganizationManagementDenyAce() {
             var ace = CreateCommonDenyAce("S-1-5-21-3130019616-2776909439-2417379446-2601",
                 ActiveDirectoryRights.Delete);
             var processor = CreateCustomDenyAceProcessor(("S-1-5-21-3130019616-2776909439-2417379446-2601",
                 "Organization Management"));
 
-            var result = await processor.GetCustomDenyAces(CreateSecurityDescriptorBytes(ace), _testDomainName,
+            var result = await processor.GetCustomDenyAceCounts(CreateSecurityDescriptorBytes(ace), _testDomainName,
                 Label.User, "CN=TEST USER,CN=USERS,DC=TESTLAB,DC=LOCAL");
 
-            Assert.Empty(result);
+            AssertCustomDenyAceCounts(result, 0, 0);
         }
 
         [WindowsOnlyFact]
-        public async Task ACLProcessor_GetCustomDenyAces_SkipsExchangeConfigurationPath() {
+        public async Task ACLProcessor_GetCustomDenyAceCounts_SkipsExchangeConfigurationPath() {
             var ace = CreateCommonDenyAce("S-1-5-21-3130019616-2776909439-2417379446-2700",
                 ActiveDirectoryRights.Delete);
             var processor = CreateCustomDenyAceProcessor();
 
-            var result = await processor.GetCustomDenyAces(CreateSecurityDescriptorBytes(ace), _testDomainName,
+            var result = await processor.GetCustomDenyAceCounts(CreateSecurityDescriptorBytes(ace), _testDomainName,
                 Label.Container,
                 "CN=Mailbox Database,CN=Microsoft Exchange,CN=Services,CN=Configuration,DC=TESTLAB,DC=LOCAL");
 
-            Assert.Empty(result);
+            AssertCustomDenyAceCounts(result, 0, 0);
         }
 
         [WindowsOnlyFact]
-        public async Task ACLProcessor_GetCustomDenyAces_SkipsAccidentalDeletionProtection() {
+        public async Task ACLProcessor_GetCustomDenyAceCounts_SkipsAccidentalDeletionProtection() {
             var ace = CreateCommonDenyAce("S-1-1-0",
                 ActiveDirectoryRights.Delete | ActiveDirectoryRights.DeleteTree);
             var processor = CreateCustomDenyAceProcessor();
 
-            var result = await processor.GetCustomDenyAces(CreateSecurityDescriptorBytes(ace), _testDomainName,
+            var result = await processor.GetCustomDenyAceCounts(CreateSecurityDescriptorBytes(ace), _testDomainName,
                 Label.OU, "OU=TEST,DC=TESTLAB,DC=LOCAL");
 
-            Assert.Empty(result);
+            AssertCustomDenyAceCounts(result, 0, 0);
         }
 
         [WindowsOnlyFact]
-        public async Task ACLProcessor_GetCustomDenyAces_SkipsDefaultAdDenyPatterns() {
+        public async Task ACLProcessor_GetCustomDenyAceCounts_SkipsDefaultAdDenyPatterns() {
             var msaAce = CreateObjectDenyAce("S-1-1-0", ActiveDirectoryRights.ExtendedRight,
                 new Guid(ACEGuids.UserForceChangePassword));
             var domainAce = CreateCommonDenyAce("S-1-1-0", ActiveDirectoryRights.DeleteChild);
             var processor = CreateCustomDenyAceProcessor();
 
-            var msaResult = await processor.GetCustomDenyAces(CreateSecurityDescriptorBytes(msaAce), _testDomainName,
-                Label.User, "CN=TEST MSA,CN=Managed Service Accounts,DC=TESTLAB,DC=LOCAL", true);
-            var domainResult = await processor.GetCustomDenyAces(CreateSecurityDescriptorBytes(domainAce),
+            var msaResult = await processor.GetCustomDenyAceCounts(CreateSecurityDescriptorBytes(msaAce),
+                _testDomainName, Label.User, "CN=TEST MSA,CN=Managed Service Accounts,DC=TESTLAB,DC=LOCAL", true);
+            var domainResult = await processor.GetCustomDenyAceCounts(CreateSecurityDescriptorBytes(domainAce),
                 _testDomainName, Label.Domain, "DC=TESTLAB,DC=LOCAL");
 
-            Assert.Empty(msaResult);
-            Assert.Empty(domainResult);
+            AssertCustomDenyAceCounts(msaResult, 0, 0);
+            AssertCustomDenyAceCounts(domainResult, 0, 0);
         }
 
         [WindowsOnlyFact]
-        public async Task ACLProcessor_GetCustomDenyAces_EmitsMultipleQualifyingAces() {
+        public async Task ACLProcessor_GetCustomDenyAceCounts_CountsMultipleExplicitDenyAces() {
             var ace1 = CreateCommonDenyAce("S-1-5-21-3130019616-2776909439-2417379446-2800",
                 ActiveDirectoryRights.Delete);
             var ace2 = CreateCommonDenyAce("S-1-5-21-3130019616-2776909439-2417379446-2801",
                 ActiveDirectoryRights.DeleteChild);
             var processor = CreateCustomDenyAceProcessor();
 
-            var result = await processor.GetCustomDenyAces(CreateSecurityDescriptorBytes(ace1, ace2), _testDomainName,
-                Label.User, "CN=TEST USER,CN=USERS,DC=TESTLAB,DC=LOCAL");
+            var result = await processor.GetCustomDenyAceCounts(CreateSecurityDescriptorBytes(ace1, ace2),
+                _testDomainName, Label.User, "CN=TEST USER,CN=USERS,DC=TESTLAB,DC=LOCAL");
 
-            Assert.Equal(2, result.Length);
-            Assert.Equal(SerializeAce(ace1), result[0]);
-            Assert.Equal(SerializeAce(ace2), result[1]);
+            AssertCustomDenyAceCounts(result, 2, 0);
         }
 
         [WindowsOnlyFact]
-        public async Task ACLProcessor_GetCustomDenyAces_PreservesDeterministicOrdering() {
-            var ace1 = CreateCommonDenyAce("S-1-5-21-3130019616-2776909439-2417379446-2901",
-                ActiveDirectoryRights.DeleteChild);
-            var ace2 = CreateCommonDenyAce("S-1-5-21-3130019616-2776909439-2417379446-2900",
-                ActiveDirectoryRights.Delete);
-            var processor = CreateCustomDenyAceProcessor();
-
-            var result = await processor.GetCustomDenyAces(CreateSecurityDescriptorBytes(ace1, ace2), _testDomainName,
-                Label.User, "CN=TEST USER,CN=USERS,DC=TESTLAB,DC=LOCAL");
-
-            Assert.Equal(new[] { SerializeAce(ace1), SerializeAce(ace2) }, result);
-        }
-
-        [WindowsOnlyFact]
-        public async Task ACLProcessor_GetCustomDenyAceCounts_SplitsExplicitAndInheritedAces() {
+        public async Task ACLProcessor_GetCustomDenyAceCounts_SplitsExplicitAndInheritedDenyAces() {
             var explicitAce = CreateCommonDenyAce("S-1-5-21-3130019616-2776909439-2417379446-3000",
                 ActiveDirectoryRights.Delete);
             var inheritedAce = CreateCommonDenyAce("S-1-5-21-3130019616-2776909439-2417379446-3001",
@@ -2260,9 +2243,7 @@ namespace CommonLibTest {
             var result = await processor.GetCustomDenyAceCounts(CreateSecurityDescriptorBytes(explicitAce, inheritedAce),
                 _testDomainName, Label.User, "CN=TEST USER,CN=USERS,DC=TESTLAB,DC=LOCAL");
 
-            Assert.Equal(1, result.ExplicitCount);
-            Assert.Equal(1, result.InheritedCount);
-            Assert.Equal(2, result.Total);
+            AssertCustomDenyAceCounts(result, 1, 1);
         }
 
         [WindowsOnlyFact]
@@ -2310,6 +2291,13 @@ namespace CommonLibTest {
             return new ACLProcessor(mockLdapUtils.Object);
         }
 
+        private static void AssertCustomDenyAceCounts(ACLProcessor.CustomDenyAceCounts result,
+            int expectedExplicitCount, int expectedInheritedCount) {
+            Assert.Equal(expectedExplicitCount, result.ExplicitCount);
+            Assert.Equal(expectedInheritedCount, result.InheritedCount);
+            Assert.Equal(expectedExplicitCount + expectedInheritedCount, result.Total);
+        }
+
         private static byte[] CreateSecurityDescriptorBytes(params GenericAce[] aces) {
             var acl = new RawAcl(GenericAcl.AclRevisionDS, aces.Length);
             for (var i = 0; i < aces.Length; i++) {
@@ -2331,13 +2319,6 @@ namespace CommonLibTest {
         private static ObjectAce CreateObjectDenyAce(string sid, ActiveDirectoryRights rights, Guid objectType) {
             return new ObjectAce(AceFlags.None, AceQualifier.AccessDenied, (int)rights,
                 new SecurityIdentifier(sid), ObjectAceFlags.ObjectAceTypePresent, objectType, Guid.Empty, false, null);
-        }
-
-        private static string SerializeAce(GenericAce ace) {
-            var acl = new RawAcl(GenericAcl.AclRevisionDS, 1);
-            acl.InsertAce(0, ace);
-            var descriptor = new RawSecurityDescriptor(ControlFlags.DiscretionaryAclPresent, null, null, null, acl);
-            return descriptor.GetSddlForm(AccessControlSections.Access).Substring(2);
         }
     }
 }
