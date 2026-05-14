@@ -13,7 +13,7 @@ namespace SharpHoundCommonLib
         public bool ForceSSL { get; set; } = false;
         public bool DisableSigning { get; set; } = false;
         public bool DisableCertVerification { get; set; } = false;
-        public bool SkipDenyAces { get; set; } = false;
+        public bool SkipDenyAcesCount { get; set; } = false;
         public AuthType AuthType { get; set; } = AuthType.Kerberos;
         public int MaxConcurrentQueries { get; set; } = 15;
 
@@ -42,7 +42,7 @@ namespace SharpHoundCommonLib
             sb.AppendLine($"LdapPort: {GetPort(false)}");
             sb.AppendLine($"LdapSSLPort: {GetPort(true)}");
             sb.AppendLine($"ForceSSL: {ForceSSL}");
-            sb.AppendLine($"SkipDenyAces: {SkipDenyAces}");
+            sb.AppendLine($"SkipDenyAcesCount: {SkipDenyAcesCount}");
             sb.AppendLine($"AuthType: {AuthType.ToString()}");
             sb.AppendLine($"MaxConcurrentQueries: {MaxConcurrentQueries}");
             if (!string.IsNullOrWhiteSpace(Username)) {

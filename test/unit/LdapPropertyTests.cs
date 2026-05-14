@@ -159,7 +159,7 @@ namespace CommonLibTest
 
             var ldapUtils = new MockLdapUtils();
             ldapUtils.SetLdapConfig(new LdapConfig {
-                SkipDenyAces = true
+                SkipDenyAcesCount = true
             });
 
             var processor = new LdapPropertyProcessor(ldapUtils);

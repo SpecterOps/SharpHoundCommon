@@ -1011,7 +1011,7 @@ namespace CommonLibTest.Facades
             _ldapConfig = config;
         }
 
-        public bool SkipDenyAces => _ldapConfig.SkipDenyAces;
+        public bool SkipDenyAcesCount => _ldapConfig.SkipDenyAcesCount;
 
         public Task<(bool Success, string Message)> TestLdapConnection(string domain) {
             throw new NotImplementedException();

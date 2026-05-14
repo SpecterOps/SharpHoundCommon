@@ -669,7 +669,7 @@ namespace SharpHoundCommonLib.Processors {
 
         private async Task AddCustomDenyAceProperty(Dictionary<string, object> props, IDirectoryObject entry,
             string domain, Label objectType) {
-            if (_utils.SkipDenyAces) {
+            if (_utils.SkipDenyAcesCount) {
                 return;
             }
 
