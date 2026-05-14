@@ -151,7 +151,11 @@ namespace CommonLibTest
 
             var baselineProcessor = new LdapPropertyProcessor(new MockLdapUtils());
             var baseline = await baselineProcessor.ReadOUProperties(mock);
-            Assert.Contains("customdenyaces", baseline.Keys);
+            Assert.DoesNotContain("customdenyaces", baseline.Keys);
+            Assert.Contains("customexplicitdenyacescount", baseline.Keys);
+            Assert.Contains("custominheriteddenyacescount", baseline.Keys);
+            Assert.Equal(1, baseline["customexplicitdenyacescount"]);
+            Assert.Equal(0, baseline["custominheriteddenyacescount"]);
 
             var ldapUtils = new MockLdapUtils();
             ldapUtils.SetLdapConfig(new LdapConfig {
@@ -162,6 +166,8 @@ namespace CommonLibTest
             var test = await processor.ReadOUProperties(mock);
 
             Assert.DoesNotContain("customdenyaces", test.Keys);
+            Assert.DoesNotContain("customexplicitdenyacescount", test.Keys);
+            Assert.DoesNotContain("custominheriteddenyacescount", test.Keys);
         }
 
         [Fact]

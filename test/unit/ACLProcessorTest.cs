@@ -2139,7 +2139,7 @@ namespace CommonLibTest {
             Assert.Equal(actual.RightName, expectedRightName);
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public async Task ACLProcessor_GetCustomDenyAces_EmitsQualifyingDenyAce() {
             var ace = CreateCommonDenyAce("S-1-5-21-3130019616-2776909439-2417379446-2500",
                 ActiveDirectoryRights.Delete);
@@ -2152,7 +2152,7 @@ namespace CommonLibTest {
             Assert.Equal(SerializeAce(ace), result[0]);
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public async Task ACLProcessor_GetCustomDenyAces_SkipsExchangeTrusteeDenyAce() {
             var ace = CreateCommonDenyAce("S-1-5-21-3130019616-2776909439-2417379446-2600",
                 ActiveDirectoryRights.Delete);
@@ -2165,7 +2165,7 @@ namespace CommonLibTest {
             Assert.Empty(result);
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public async Task ACLProcessor_GetCustomDenyAces_SkipsOrganizationManagementDenyAce() {
             var ace = CreateCommonDenyAce("S-1-5-21-3130019616-2776909439-2417379446-2601",
                 ActiveDirectoryRights.Delete);
@@ -2178,7 +2178,7 @@ namespace CommonLibTest {
             Assert.Empty(result);
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public async Task ACLProcessor_GetCustomDenyAces_SkipsExchangeConfigurationPath() {
             var ace = CreateCommonDenyAce("S-1-5-21-3130019616-2776909439-2417379446-2700",
                 ActiveDirectoryRights.Delete);
@@ -2191,7 +2191,7 @@ namespace CommonLibTest {
             Assert.Empty(result);
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public async Task ACLProcessor_GetCustomDenyAces_SkipsAccidentalDeletionProtection() {
             var ace = CreateCommonDenyAce("S-1-1-0",
                 ActiveDirectoryRights.Delete | ActiveDirectoryRights.DeleteTree);
@@ -2203,7 +2203,7 @@ namespace CommonLibTest {
             Assert.Empty(result);
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public async Task ACLProcessor_GetCustomDenyAces_SkipsDefaultAdDenyPatterns() {
             var msaAce = CreateObjectDenyAce("S-1-1-0", ActiveDirectoryRights.ExtendedRight,
                 new Guid(ACEGuids.UserForceChangePassword));
@@ -2219,7 +2219,7 @@ namespace CommonLibTest {
             Assert.Empty(domainResult);
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public async Task ACLProcessor_GetCustomDenyAces_EmitsMultipleQualifyingAces() {
             var ace1 = CreateCommonDenyAce("S-1-5-21-3130019616-2776909439-2417379446-2800",
                 ActiveDirectoryRights.Delete);
@@ -2235,7 +2235,7 @@ namespace CommonLibTest {
             Assert.Equal(SerializeAce(ace2), result[1]);
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public async Task ACLProcessor_GetCustomDenyAces_PreservesDeterministicOrdering() {
             var ace1 = CreateCommonDenyAce("S-1-5-21-3130019616-2776909439-2417379446-2901",
                 ActiveDirectoryRights.DeleteChild);
@@ -2249,7 +2249,40 @@ namespace CommonLibTest {
             Assert.Equal(new[] { SerializeAce(ace1), SerializeAce(ace2) }, result);
         }
 
-        [Fact]
+        [WindowsOnlyFact]
+        public async Task ACLProcessor_GetCustomDenyAceCounts_SplitsExplicitAndInheritedAces() {
+            var explicitAce = CreateCommonDenyAce("S-1-5-21-3130019616-2776909439-2417379446-3000",
+                ActiveDirectoryRights.Delete);
+            var inheritedAce = CreateCommonDenyAce("S-1-5-21-3130019616-2776909439-2417379446-3001",
+                ActiveDirectoryRights.DeleteChild, AceFlags.Inherited);
+            var processor = CreateCustomDenyAceProcessor();
+
+            var result = await processor.GetCustomDenyAceCounts(CreateSecurityDescriptorBytes(explicitAce, inheritedAce),
+                _testDomainName, Label.User, "CN=TEST USER,CN=USERS,DC=TESTLAB,DC=LOCAL");
+
+            Assert.Equal(1, result.ExplicitCount);
+            Assert.Equal(1, result.InheritedCount);
+            Assert.Equal(2, result.Total);
+        }
+
+        [WindowsOnlyFact]
+        public async Task ACLProcessor_AddCustomDenyAcesProperty_EmitsExplicitAndInheritedCounts() {
+            var props = new Dictionary<string, object>();
+            var explicitAce = CreateCommonDenyAce("S-1-5-21-3130019616-2776909439-2417379446-3100",
+                ActiveDirectoryRights.Delete);
+            var inheritedAce = CreateCommonDenyAce("S-1-5-21-3130019616-2776909439-2417379446-3101",
+                ActiveDirectoryRights.DeleteChild, AceFlags.Inherited);
+            var processor = CreateCustomDenyAceProcessor();
+
+            await processor.AddCustomDenyAcesProperty(props, CreateSecurityDescriptorBytes(explicitAce, inheritedAce),
+                _testDomainName, Label.User, "CN=TEST USER,CN=USERS,DC=TESTLAB,DC=LOCAL");
+
+            Assert.DoesNotContain("customdenyaces", props.Keys);
+            Assert.Equal(1, props["customexplicitdenyacescount"]);
+            Assert.Equal(1, props["custominheriteddenyacescount"]);
+        }
+
+        [WindowsOnlyFact]
         public async Task ACLProcessor_AddCustomDenyAcesProperty_DoesNotEmitWhenEmpty() {
             var props = new Dictionary<string, object>();
             var ace = CreateCommonDenyAce("S-1-1-0",
@@ -2260,6 +2293,8 @@ namespace CommonLibTest {
                 Label.OU, "OU=TEST,DC=TESTLAB,DC=LOCAL");
 
             Assert.DoesNotContain("customdenyaces", props.Keys);
+            Assert.DoesNotContain("customexplicitdenyacescount", props.Keys);
+            Assert.DoesNotContain("custominheriteddenyacescount", props.Keys);
         }
 
         private ACLProcessor CreateCustomDenyAceProcessor(params (string Sid, string Name)[] principals) {
@@ -2287,8 +2322,9 @@ namespace CommonLibTest {
             return buffer;
         }
 
-        private static CommonAce CreateCommonDenyAce(string sid, ActiveDirectoryRights rights) {
-            return new CommonAce(AceFlags.None, AceQualifier.AccessDenied, (int)rights,
+        private static CommonAce CreateCommonDenyAce(string sid, ActiveDirectoryRights rights,
+            AceFlags aceFlags = AceFlags.None) {
+            return new CommonAce(aceFlags, AceQualifier.AccessDenied, (int)rights,
                 new SecurityIdentifier(sid), false, null);
         }
 
