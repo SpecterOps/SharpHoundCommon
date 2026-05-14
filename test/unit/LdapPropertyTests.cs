@@ -1448,7 +1448,7 @@ namespace CommonLibTest
                 new Dictionary<string, object>
                 {
                     {"description", "Test"},
-                    {"useraccountcontrol", 0x1000000.ToString()},
+                    {"useraccountcontrol", 0x200.ToString()},
                     {LDAPProperties.LastLogon, "132673011142753043"},
                     {LDAPProperties.LastLogonTimestamp, "132670318095676525"},
                     {"homedirectory", @"\\win10\testdir"},
@@ -1507,7 +1507,7 @@ namespace CommonLibTest
                 new Dictionary<string, object>
                 {
                     {"description", "Test"},
-                    {"useraccountcontrol", 0x1001000.ToString()},
+                    {"useraccountcontrol", 0x1000.ToString()},
                     {"lastlogon", "132673011142753043"},
                     {"lastlogontimestamp", "132670318095676525"},
                     {"operatingsystem", "Windows 10 Enterprise"},
