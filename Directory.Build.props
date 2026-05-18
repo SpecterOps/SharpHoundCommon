@@ -7,7 +7,7 @@
         <Company>SpecterOps</Company>
         <PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
         <RepositoryUrl>https://github.com/SpecterOps/SharpHoundCommon</RepositoryUrl>
-        <Version>4.6.1</Version>
+        <Version>4.6.2-rc1</Version>
     </PropertyGroup>
     <ItemGroup>
         <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
