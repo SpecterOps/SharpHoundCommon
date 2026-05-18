@@ -1907,6 +1907,18 @@ references:
   commentId: T:SharpHoundCommonLib.Enums.Label
   fullName: SharpHoundCommonLib.Enums.Label
   nameWithType: Label
+- uid: SharpHoundCommonLib.Enums.Label.ADLocalGroup
+  name: ADLocalGroup
+  href: api/SharpHoundCommonLib.Enums.Label.html#SharpHoundCommonLib_Enums_Label_ADLocalGroup
+  commentId: F:SharpHoundCommonLib.Enums.Label.ADLocalGroup
+  fullName: SharpHoundCommonLib.Enums.Label.ADLocalGroup
+  nameWithType: Label.ADLocalGroup
+- uid: SharpHoundCommonLib.Enums.Label.ADLocalUser
+  name: ADLocalUser
+  href: api/SharpHoundCommonLib.Enums.Label.html#SharpHoundCommonLib_Enums_Label_ADLocalUser
+  commentId: F:SharpHoundCommonLib.Enums.Label.ADLocalUser
+  fullName: SharpHoundCommonLib.Enums.Label.ADLocalUser
+  nameWithType: Label.ADLocalUser
 - uid: SharpHoundCommonLib.Enums.Label.AIACA
   name: AIACA
   href: api/SharpHoundCommonLib.Enums.Label.html#SharpHoundCommonLib_Enums_Label_AIACA
@@ -1973,18 +1985,6 @@ references:
   commentId: F:SharpHoundCommonLib.Enums.Label.IssuancePolicy
   fullName: SharpHoundCommonLib.Enums.Label.IssuancePolicy
   nameWithType: Label.IssuancePolicy
-- uid: SharpHoundCommonLib.Enums.Label.LocalGroup
-  name: LocalGroup
-  href: api/SharpHoundCommonLib.Enums.Label.html#SharpHoundCommonLib_Enums_Label_LocalGroup
-  commentId: F:SharpHoundCommonLib.Enums.Label.LocalGroup
-  fullName: SharpHoundCommonLib.Enums.Label.LocalGroup
-  nameWithType: Label.LocalGroup
-- uid: SharpHoundCommonLib.Enums.Label.LocalUser
-  name: LocalUser
-  href: api/SharpHoundCommonLib.Enums.Label.html#SharpHoundCommonLib_Enums_Label_LocalUser
-  commentId: F:SharpHoundCommonLib.Enums.Label.LocalUser
-  fullName: SharpHoundCommonLib.Enums.Label.LocalUser
-  nameWithType: Label.LocalUser
 - uid: SharpHoundCommonLib.Enums.Label.NTAuthStore
   name: NTAuthStore
   href: api/SharpHoundCommonLib.Enums.Label.html#SharpHoundCommonLib_Enums_Label_NTAuthStore
