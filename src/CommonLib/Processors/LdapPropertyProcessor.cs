@@ -271,8 +271,7 @@ namespace SharpHoundCommonLib.Processors {
                 userProps.UnconstrainedDelegation = uacFlags.HasFlag(UacFlags.TrustedForDelegation);
                 
                 var comps = new List<TypedPrincipal>();
-                if (uacFlags.HasFlag(UacFlags.TrustedToAuthForDelegation) &&
-                    entry.TryGetArrayProperty(LDAPProperties.AllowedToDelegateTo, out var delegates)) {
+                if (entry.TryGetArrayProperty(LDAPProperties.AllowedToDelegateTo, out var delegates)) {
                     props.Add("allowedtodelegate", delegates);
 
                     foreach (var d in delegates) {
@@ -390,8 +389,7 @@ namespace SharpHoundCommonLib.Processors {
             props.Add("admincount", ac != 0);
 
             var comps = new List<TypedPrincipal>();
-            if (flags.HasFlag(UacFlags.TrustedToAuthForDelegation) &&
-                entry.TryGetArrayProperty(LDAPProperties.AllowedToDelegateTo, out var delegates)) {
+            if (entry.TryGetArrayProperty(LDAPProperties.AllowedToDelegateTo, out var delegates)) {
                 props.Add("allowedtodelegate", delegates);
 
                 foreach (var d in delegates) {
