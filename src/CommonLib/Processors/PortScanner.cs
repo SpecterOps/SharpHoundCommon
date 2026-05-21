@@ -44,7 +44,7 @@ namespace SharpHoundCommonLib.Processors {
                 using var client = new TcpClient();
                 var ca = await _adaptiveTimeout.ExecuteWithTimeout((_) => client.ConnectAsync(hostname, port));
                 if (!ca.IsSuccess) {
-                    _log.LogDebug("{HostName} did not respond to scan on port {Port} within {Timeout}ms", hostname, port, _adaptiveTimeout.GetAdaptiveTimeout());
+                    _log.LogDebug("{HostName} did not respond to scan on port {Port} within {TimeoutMs}ms", hostname, port, _adaptiveTimeout.GetAdaptiveTimeout().TotalMilliseconds);
                     if (throwError) {
                         throw new TimeoutException(ca.Error);
                     }

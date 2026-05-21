@@ -22,19 +22,6 @@ namespace SharpHoundRPC.Wrappers
 
         public string ComputerName { get; }
 
-        public static Result<SAMServer> OpenServer(string computerName, SAMEnums.SamAccessMasks requestedConnectAccess =
-            SAMEnums.SamAccessMasks.SamServerConnect |
-            SAMEnums.SamAccessMasks
-                .SamServerEnumerateDomains |
-            SAMEnums.SamAccessMasks.SamServerLookupDomain)
-        {
-            var (status, handle) = SAMMethods.SamConnect(computerName, requestedConnectAccess);
-
-            return status.IsError()
-                ? status
-                : new SAMServer(handle, computerName);
-        }
-
         public Result<IEnumerable<(string Name, int Rid)>> GetDomains()
         {
             var (status, rids, count) = SAMMethods.SamEnumerateDomainsInSamServer(Handle);

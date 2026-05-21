@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.DirectoryServices.Protocols;
 using System.IO;
 using System.Linq;
+using System.Runtime.Versioning;
 using System.Threading;
 using System.Threading.Tasks;
 using CommonLibTest.Facades;
@@ -155,6 +156,147 @@ namespace CommonLibTest {
             Assert.Equal("teapot", actual.ObjectIdentifier);
         }
 
+        [Fact]
+        public async Task GPOLocalGroupProcessor_ReadGPOLocalGroups_Does_Not_Skip_Enabled_And_Skips_Disabled_GPOs() {
+            // Setup
+            var mockLDAPUtils = new Mock<ILdapUtils>(MockBehavior.Loose);
+            var gpcFileSysPath = Path.GetTempPath();
+
+            var groupsXmlPath = Path.Join(gpcFileSysPath, "MACHINE", "Preferences", "Groups", "Groups.xml");
+            Directory.CreateDirectory(Path.GetDirectoryName(groupsXmlPath));
+            await File.WriteAllTextAsync(groupsXmlPath, GroupXmlContent);
+            
+            var gptTmplPath = Path.Join(gpcFileSysPath, "MACHINE", "Microsoft", "Windows NT", "SecEdit", "GptTmpl.inf");
+            Directory.CreateDirectory(Path.GetDirectoryName(gptTmplPath));
+            await File.WriteAllTextAsync(gptTmplPath, GpttmplInfContent); 
+            
+            var mockComputerEntry = new Mock<IDirectoryObject>();
+            var mockSearchResultEntry = new Mock<IDirectoryObject>();
+            var sid = "teapot";
+            mockSearchResultEntry.Setup(x => x.TryGetSecurityIdentifier(out sid)).Returns(true);
+            var mockResult = LdapResult<IDirectoryObject>.Ok(mockSearchResultEntry.Object);
+            var mockSearchResults = new List<LdapResult<IDirectoryObject>> { mockResult };
+            mockLDAPUtils
+                .Setup(x => x.Query(
+                    It.Is<LdapQueryParameters>(y =>
+                        y.LDAPFilter.Equals(new LdapFilter().AddComputersNoMSAs().GetFilter()) &&
+                        y.Attributes.Equals(CommonProperties.ObjectSID)),
+                    It.IsAny<CancellationToken>())).Returns(mockSearchResults.ToAsyncEnumerable);
+            mockComputerEntry.Setup(x => x.TryGetSecurityIdentifier(out sid)).Returns(true);
+            mockLDAPUtils.Setup(x => x.ResolveAccountName(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync((true, new TypedPrincipal("S-1-5-21-3130019616-2776909439-2417379446-513", Label.User)));
+            
+            // Enabled
+            var mockDirectory0 = new MockDirectoryObject("CN=Users,DC=testlab,DC=local", null, "",
+                "ECAD920E-8EB1-4E31-A80E-DD36367F81F4");
+            mockDirectory0.Properties = new Dictionary<string, string>() {
+                { LDAPProperties.GPCFileSYSPath, gpcFileSysPath },
+                { LDAPProperties.Flags, "0"}
+            };
+            var result0 = new List<LdapResult<IDirectoryObject>> {
+                LdapResult<IDirectoryObject>.Ok(mockDirectory0),
+            };
+            // User Configuration Disabled
+            var mockDirectory1 = new MockDirectoryObject("CN=Users,DC=testlab,DC=local", null, "",
+                "ECAD920E-8EB1-4E31-A80E-DD36367F81F4");
+            mockDirectory1.Properties = new Dictionary<string, string>() {
+                { LDAPProperties.GPCFileSYSPath, gpcFileSysPath },
+                { LDAPProperties.Flags, "1"}
+            };
+            var result1 = new List<LdapResult<IDirectoryObject>> {
+                LdapResult<IDirectoryObject>.Ok(mockDirectory1),
+            };
+            // Computer Configuration Disabled -- Skipped
+            var mockDirectory2 = new MockDirectoryObject("CN=Users,DC=testlab,DC=local", null, "",
+                "ECAD920E-8EB1-4E31-A80E-DD36367F81F4");
+            mockDirectory2.Properties = new Dictionary<string, string>() {
+                { LDAPProperties.GPCFileSYSPath, gpcFileSysPath },
+                { LDAPProperties.Flags, "2"}
+            };
+            var result2 = new List<LdapResult<IDirectoryObject>> {
+                LdapResult<IDirectoryObject>.Ok(mockDirectory2),
+            };
+            // Disabled -- Skipped
+            var mockDirectory3 = new MockDirectoryObject("CN=Users,DC=testlab,DC=local", null, "",
+                "ECAD920E-8EB1-4E31-A80E-DD36367F81F4");
+            mockDirectory3.Properties = new Dictionary<string, string>() {
+                { LDAPProperties.GPCFileSYSPath, gpcFileSysPath },
+                { LDAPProperties.Flags, "3"}
+            };
+            var result3 = new List<LdapResult<IDirectoryObject>> {
+                LdapResult<IDirectoryObject>.Ok(mockDirectory3),
+            };
+            
+            mockLDAPUtils
+                .Setup(x => x.Query(
+                    It.Is<LdapQueryParameters>(y =>
+                        y.LDAPFilter.Equals(new LdapFilter().AddAllObjects().GetFilter()) &&
+                        y.SearchScope.Equals(SearchScope.Base) &&
+                        y.Attributes.Contains(LDAPProperties.GPCFileSYSPath) &&
+                        y.Attributes.Contains(LDAPProperties.Flags) &&
+                        y.SearchBase.Equals("cn=foouser (blah)123/dc=somedomain", StringComparison.OrdinalIgnoreCase) &&
+                        y.DomainName.Equals("somedomain", StringComparison.OrdinalIgnoreCase)),
+                    It.IsAny<CancellationToken>()))
+                .Returns(result0.ToAsyncEnumerable);
+            mockLDAPUtils
+                .Setup(x => x.Query(
+                    It.Is<LdapQueryParameters>(y =>
+                        y.LDAPFilter.Equals(new LdapFilter().AddAllObjects().GetFilter()) &&
+                        y.SearchScope.Equals(SearchScope.Base) &&
+                        y.Attributes.Contains(LDAPProperties.GPCFileSYSPath) &&
+                        y.Attributes.Contains(LDAPProperties.Flags) &&
+                        y.SearchBase.Equals("cn=foouser (blah)123/dc=someotherdomain", StringComparison.OrdinalIgnoreCase) &&
+                        y.DomainName.Equals("someotherdomain", StringComparison.OrdinalIgnoreCase)),
+                    It.IsAny<CancellationToken>()))
+                .Returns(result1.ToAsyncEnumerable);
+            mockLDAPUtils
+                .Setup(x => x.Query(
+                    It.Is<LdapQueryParameters>(y =>
+                        y.LDAPFilter.Equals(new LdapFilter().AddAllObjects().GetFilter()) &&
+                        y.SearchScope.Equals(SearchScope.Base) &&
+                        y.Attributes.Contains(LDAPProperties.GPCFileSYSPath) &&
+                        y.Attributes.Contains(LDAPProperties.Flags) &&
+                        y.SearchBase.Equals("cn=foouser (blah)123/dc=somethirddomain", StringComparison.OrdinalIgnoreCase) &&
+                        y.DomainName.Equals("somethirddomain", StringComparison.OrdinalIgnoreCase)),
+                    It.IsAny<CancellationToken>()))
+                .Returns(result2.ToAsyncEnumerable);
+            mockLDAPUtils
+                .Setup(x => x.Query(
+                    It.Is<LdapQueryParameters>(y =>
+                        y.LDAPFilter.Equals(new LdapFilter().AddAllObjects().GetFilter()) &&
+                        y.SearchScope.Equals(SearchScope.Base) &&
+                        y.Attributes.Contains(LDAPProperties.GPCFileSYSPath) &&
+                        y.Attributes.Contains(LDAPProperties.Flags) &&
+                        y.SearchBase.Equals("cn=foouser (blah)123/dc=somefourthdomain", StringComparison.OrdinalIgnoreCase) &&
+                        y.DomainName.Equals("somefourthdomain", StringComparison.OrdinalIgnoreCase)),
+                    It.IsAny<CancellationToken>()))
+                .Returns(result3.ToAsyncEnumerable);
+            
+            var processor = new GPOLocalGroupProcessor(mockLDAPUtils.Object);
+            var testGPLinkProperty0 = "[LDAP:/o=foo/ou=foo Group (ABC123)/cn=foouser (blah)123/dc=somedomain;0;]";
+            var testGPLinkProperty1 = "[LDAP:/o=foo/ou=foo Group (ABC123)/cn=foouser (blah)123/dc=someotherdomain;0;]";
+            var testGPLinkProperty2 = "[LDAP:/o=foo/ou=foo Group (ABC123)/cn=foouser (blah)123/dc=somethirddomain;0;]";
+            var testGPLinkProperty3 = "[LDAP:/o=foo/ou=foo Group (ABC123)/cn=foouser (blah)123/dc=somefourthdomain;0;]";
+            
+            // Act
+            var act0 = await processor.ReadGPOLocalGroups(testGPLinkProperty0, "DC=Testlab,DC=Local");
+            var act1 = await processor.ReadGPOLocalGroups(testGPLinkProperty1, "DC=Testlab,DC=Local");
+            var act2 = await processor.ReadGPOLocalGroups(testGPLinkProperty2, "DC=Testlab,DC=Local");
+            var act3 = await processor.ReadGPOLocalGroups(testGPLinkProperty3, "DC=Testlab,DC=Local");
+            
+            // Assert
+            Assert.Single(act0.AffectedComputers);
+            Assert.Single(act1.AffectedComputers);
+            Assert.Single(act2.AffectedComputers);
+            Assert.Single(act3.AffectedComputers);
+            
+            Assert.Single(act0.LocalAdmins);
+            Assert.Single(act1.LocalAdmins);
+            Assert.Empty(act2.LocalAdmins);
+            Assert.Empty(act3.LocalAdmins);
+        }
+
+        [SupportedOSPlatform("windows")]
         [WindowsOnlyFact]
         public async Task GPOLocalGroupProcessor_ReadGPOLocalGroups() {
             var mockLDAPUtils = new Mock<ILdapUtils>(MockBehavior.Loose);

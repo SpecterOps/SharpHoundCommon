@@ -41,7 +41,7 @@ namespace CommonLibTest {
                 receivedStatus.Add(status);
                 return Task.CompletedTask;
             };
-            var results = await mockProcessor.Scan("primary.testlab.local");
+            var results = await mockProcessor.Scan("primary.testlab.local", "");
 
             Assert.Single(receivedStatus);
             var status = receivedStatus[0];

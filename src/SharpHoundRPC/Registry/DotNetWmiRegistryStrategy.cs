@@ -26,7 +26,6 @@ namespace SharpHoundRPC.Registry {
         /// </summary>
         public bool UseKerberos { get; set; } = true;
 
-
         /// <summary>
         /// Creates a new WMI registry strategy
         /// </summary>
@@ -38,6 +37,9 @@ namespace SharpHoundRPC.Registry {
         }
 
         public async Task<(bool, string)> CanExecute(string targetMachine) {
+            if (string.IsNullOrEmpty(targetMachine)) {
+                throw new ArgumentException("Target machine cannot be null or empty", nameof(targetMachine));
+            }
             try {
                 var isOpen = await _portScanner.CheckPort(targetMachine, EpMapperPort, throwError: true);
                 return (isOpen, string.Empty);

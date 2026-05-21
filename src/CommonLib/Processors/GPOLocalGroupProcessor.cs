@@ -131,7 +131,7 @@ namespace SharpHoundCommonLib.Processors {
                     var result = await _utils.Query(new LdapQueryParameters() {
                         LDAPFilter = new LdapFilter().AddAllObjects().GetFilter(),
                         SearchScope = SearchScope.Base,
-                        Attributes = CommonProperties.GPCFileSysPath,
+                        Attributes = [LDAPProperties.GPCFileSYSPath, LDAPProperties.Flags],
                         SearchBase = linkDn,
                         DomainName = gpoDomain
                     }).DefaultIfEmpty(LdapResult<IDirectoryObject>.Fail()).FirstOrDefaultAsync();
@@ -140,7 +140,9 @@ namespace SharpHoundCommonLib.Processors {
                         continue;
                     }
 
-                    if (!result.Value.TryGetProperty(LDAPProperties.GPCFileSYSPath, out var filePath)) {
+                    if (!result.Value.TryGetProperty(LDAPProperties.GPCFileSYSPath, out var filePath) || 
+                        // Filter out GPOs that are disabled or the computer configuration is disabled
+                        (result.Value.TryGetProperty(LDAPProperties.Flags, out var flags) && flags is "2" or "3")) {
                         GpoActionCache.TryAdd(linkDn, actions);
                         continue;
                     }

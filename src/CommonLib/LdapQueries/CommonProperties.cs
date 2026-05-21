@@ -31,7 +31,7 @@
         {
             LDAPProperties.SAMAccountName, LDAPProperties.DistinguishedName, LDAPProperties.DNSHostName,
             LDAPProperties.SAMAccountType, LDAPProperties.OperatingSystem, LDAPProperties.PasswordLastSet,
-            LDAPProperties.LastLogonTimestamp
+            LDAPProperties.LastLogonTimestamp, LDAPProperties.ObjectGUID
         };
 
         public static readonly string[] ACLProps =

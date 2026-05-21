@@ -7,10 +7,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using SharpHoundCommonLib.Enums;
 using Microsoft.Extensions.Logging;
-using System.IO;
-using System.Security;
-using SharpHoundCommonLib.Processors;
-using Microsoft.Win32;
 using System.Threading.Tasks;
 
 namespace SharpHoundCommonLib {
@@ -151,7 +147,7 @@ namespace SharpHoundCommonLib {
         }
 
         /// <summary>
-        /// Converts a domain name to a distinguished name using simple string substitution
+        ///     Converts a domain name to a distinguished name using simple string substitution
         /// </summary>
         /// <param name="domainName"></param>
         /// <returns></returns>
@@ -258,44 +254,6 @@ namespace SharpHoundCommonLib {
             return false;
         }
 
-        public static RegistryResult GetRegistryKeyData(string target, string subkey, string subvalue, ILogger log) {
-            var data = new RegistryResult();
-
-            try {
-                var baseKey = OpenRemoteRegistry(target);
-                var value = baseKey.GetValue(subkey, subvalue);
-                data.Value = value;
-
-                data.Collected = true;
-            }
-            catch (IOException e) {
-                log.LogDebug(e, "Error getting data from registry for {Target}: {RegSubKey}:{RegValue}",
-                    target, subkey, subvalue);
-                data.FailureReason = "Target machine was not found or not connectable";
-            }
-            catch (SecurityException e) {
-                log.LogDebug(e, "Error getting data from registry for {Target}: {RegSubKey}:{RegValue}",
-                    target, subkey, subvalue);
-                data.FailureReason = "User does not have the proper permissions to perform this operation";
-            }
-            catch (UnauthorizedAccessException e) {
-                log.LogDebug(e, "Error getting data from registry for {Target}: {RegSubKey}:{RegValue}",
-                    target, subkey, subvalue);
-                data.FailureReason = "User does not have the necessary registry rights";
-            }
-            catch (Exception e) {
-                log.LogDebug(e, "Error getting data from registry for {Target}: {RegSubKey}:{RegValue}",
-                    target, subkey, subvalue);
-                data.FailureReason = e.Message;
-            }
-
-            return data;
-        }
-
-        public static IRegistryKey OpenRemoteRegistry(string target) {
-            return SHRegistryKey.Connect(RegistryHive.LocalMachine, target).GetAwaiter().GetResult();
-        }
-
         public static string[] AuthenticationOIDs = new string[] {
             CommonOids.ClientAuthentication,
             CommonOids.PKINITClientAuthentication,
@@ -316,6 +274,29 @@ namespace SharpHoundCommonLib {
             }
 
             return builder.ToString();
+        }
+
+        /// <summary>
+        /// Attempt an action a number of times, quietly eating a specific exception until the last attempt if it throws.
+        /// </summary>
+        /// <param name="action"></param>
+        /// <param name="retryCount"></param>
+        /// <param name="logger"></param>
+        public static async Task RetryOnException<T>(Func<Task> action, int retryCount, ILogger logger = null) where T : Exception {
+            int attempt = 0;
+            bool success = false;
+            do {
+                try {
+                    await action();
+                    success = true;
+                }
+                catch (T e) {
+                    attempt++;
+                    logger?.LogDebug(e, "Exception caught, retrying attempt {Attempt}", attempt);
+                    if (attempt >= retryCount)
+                        throw;
+                }
+            } while (!success && attempt < retryCount);
         }
     }
 

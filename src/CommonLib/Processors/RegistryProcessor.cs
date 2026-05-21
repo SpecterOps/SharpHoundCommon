@@ -6,19 +6,24 @@ using SharpHoundRPC.Registry;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using static SharpHoundCommonLib.Helpers;
 
 namespace SharpHoundCommonLib.Processors;
 
 public class RegistryProcessor {
+    public delegate Task ComputerStatusDelegate(CSVComputerStatus status);
+    
     private readonly ILogger _log;
     private readonly IPortScanner _portScanner;
+    private readonly IStrategyExecutor _registryCollector; 
+    private readonly AdaptiveTimeout _registryAdaptiveTimeout = new(maxTimeout:TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ReadRegistrySettings)));
     private readonly ICollectionStrategy<RegistryQueryResult, RegistryQuery>[] _strategies;
     private readonly RegistryQuery[] _queries;
 
-    public RegistryProcessor(ILogger log, string domain) {
+    public RegistryProcessor(ILogger log, IStrategyExecutor registryCollector, string domain) {
         _log = log ?? Logging.LogProvider.CreateLogger("RegistryProcessor");
         _portScanner = new PortScanner();
+        _registryCollector = registryCollector;
+        
         _strategies = [
             // Higher priority at the top of the list
             new DotNetWmiRegistryStrategy(_portScanner, domain),
@@ -49,14 +54,47 @@ public class RegistryProcessor {
         ];
     }
 
+    public event ComputerStatusDelegate ComputerStatusEvent;
+
     public async Task<APIResult<RegistryData>> ReadRegistrySettings(string targetMachine) {
         var output = new RegistryData();
 
         try {
-            var registryCollector = new StrategyExecutor();
-            var collectedData = await registryCollector
+            var result = await _registryAdaptiveTimeout.ExecuteWithTimeout(async (_) => await _registryCollector
                 .CollectAsync(targetMachine, _queries, _strategies)
-                .ConfigureAwait(false);
+                .ConfigureAwait(false));
+
+            if (!result.IsSuccess) {
+                return APIResult<RegistryData>.Failure($"Timeout when grabbing registry data from {targetMachine}");
+            }
+
+            var collectedData = result.Value;
+
+            foreach (var attempt in collectedData.FailureAttempts ?? []) {
+                _log.LogTrace("ReadRegistry failed on {ComputerName} using {Strategy}: {Error}", targetMachine, attempt.StrategyType.Name, attempt.FailureReason);
+                await SendComputerStatus(new CSVComputerStatus
+                {
+                    Task = $"{nameof(ReadRegistrySettings)} - {attempt.StrategyType.Name}",
+                    ComputerName = targetMachine,
+                    Status = attempt.FailureReason
+                });
+            }
+            
+            if (!collectedData.WasSuccessful) {
+                var msg = collectedData.FailureAttempts is null 
+                    ? "Failed to read registry settings"
+                    : string.Join("\n",
+                        collectedData.FailureAttempts.Select(a => $"{a.StrategyType.Name}: {a.FailureReason ?? ""}"));
+                
+                return APIResult<RegistryData>.Failure(msg);
+            }
+            
+            await SendComputerStatus(new CSVComputerStatus
+            {
+                Task = $"{nameof(ReadRegistrySettings)} - {collectedData.SuccessfulStrategy?.Name ?? ""}",
+                ComputerName = targetMachine,
+                Status = CSVComputerStatus.StatusSuccess
+            });
 
             foreach (var key in collectedData.Results ?? []) {
                 if (!key.ValueExists)
@@ -94,13 +132,6 @@ public class RegistryProcessor {
                 }
             }
 
-            // If all strategies failed, need to report errors.
-            if (collectedData.FailureAttempts.Count() == _strategies.Length) {
-                string msg = string.Join("\n",
-                    collectedData.FailureAttempts.Select(a => $"{a.StrategyType.Name}: {a.FailureReason ?? ""}"));
-                return APIResult<RegistryData>.Failure(msg);
-            }
-
             return APIResult<RegistryData>.Success(output);
         } catch (Exception ex) {
             _log.LogError(
@@ -110,5 +141,9 @@ public class RegistryProcessor {
 
             return APIResult<RegistryData>.Failure(ex.ToString());
         }
+    }
+
+    private async Task SendComputerStatus(CSVComputerStatus status) {
+        if (ComputerStatusEvent is not null) await ComputerStatusEvent.Invoke(status);
     }
 }

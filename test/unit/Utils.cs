@@ -90,4 +90,10 @@ namespace CommonLibTest
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) Skip = "Ignore on non-Windows platforms";
         }
     }
+
+    public sealed class WindowsOnlyTheory : TheoryAttribute {
+        public WindowsOnlyTheory() {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) Skip = "Ignore on non-Windows platforms";
+        }
+    }
 }

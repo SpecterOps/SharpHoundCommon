@@ -744,7 +744,7 @@ namespace CommonLibTest.Facades
 
             return (!results.IsNullOrEmpty(), results);
         }
-
+        
         public Task<(bool Success, TypedPrincipal Principal)> ResolveCertTemplateByProperty(string propValue, string propName, string domainName) {
             throw new NotImplementedException();
         }
@@ -1079,8 +1079,8 @@ namespace CommonLibTest.Facades
                     ObjectIdentifier = $"{computerDomainSid}-{sid.Rid()}",
                     ObjectType = common.ObjectType switch
                     {
-                        Label.User => Label.LocalUser,
-                        Label.Group => Label.LocalGroup,
+                        Label.User => Label.ADLocalUser,
+                        Label.Group => Label.ADLocalGroup,
                         _ => common.ObjectType
                     }
                 };

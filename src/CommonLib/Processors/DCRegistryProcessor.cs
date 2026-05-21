@@ -1,5 +1,4 @@
 ﻿using SharpHoundCommonLib.OutputTypes;
-using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -9,12 +8,15 @@ namespace SharpHoundCommonLib.Processors
     public class DCRegistryProcessor
     {
         private readonly ILogger _log;
+        private readonly IRegistryAccessor _registryAccessor;
+        
         public readonly ILdapUtils _utils;
         public delegate Task ComputerStatusDelegate(CSVComputerStatus status);
 
         public DCRegistryProcessor(ILdapUtils utils, ILogger log = null)
         {
             _utils = utils;
+            _registryAccessor = new RegistryAccessor(log);
             _log = log ?? Logging.LogProvider.CreateLogger("DCRegProc");
         }
 
@@ -30,7 +32,7 @@ namespace SharpHoundCommonLib.Processors
             var ret = new IntRegistryAPIResult();
             const string subKey = @"SYSTEM\CurrentControlSet\Control\SecurityProviders\Schannel";
             const string subValue = "CertificateMappingMethods";
-            var data = Helpers.GetRegistryKeyData(target, subKey, subValue, _log);
+            var data = _registryAccessor.GetRegistryKeyData(target, subKey, subValue);
 
             ret.Collected = data.Collected;
             if (!data.Collected)
@@ -62,7 +64,7 @@ namespace SharpHoundCommonLib.Processors
             var ret = new IntRegistryAPIResult();
             const string subKey = @"SYSTEM\CurrentControlSet\Services\Kdc";
             const string subValue = "StrongCertificateBindingEnforcement";
-            var data = Helpers.GetRegistryKeyData(target, subKey, subValue, _log);
+            var data = _registryAccessor.GetRegistryKeyData(target, subKey, subValue);
 
             ret.Collected = data.Collected;
             if (!data.Collected)
@@ -78,6 +80,37 @@ namespace SharpHoundCommonLib.Processors
             }
 
             ret.Value = (int)data.Value;
+
+            return ret;
+        }
+
+        /// <summary>
+        /// This function gets the VulnerableChannelAllowList registry value stored on DCs.
+        /// </summary>
+        /// <remarks>https://support.microsoft.com/en-us/topic/how-to-manage-the-changes-in-netlogon-secure-channel-connections-associated-with-cve-2020-1472-f7e8cc17-0309-1d6a-304e-5ba73cd1a11e</remarks>
+        /// <param name="target"></param>
+        /// <returns>StrRegistryAPIResult</returns>
+        [ExcludeFromCodeCoverage]
+        public StrRegistryAPIResult GetVulnerableNetlogonSecurityDescriptor(string target)
+        {
+            var ret = new StrRegistryAPIResult();
+            const string subKey = @"SYSTEM\CurrentControlSet\Services\Netlogon\Parameters";
+            const string subValue = "VulnerableChannelAllowList";
+            var data = _registryAccessor.GetRegistryKeyData(target, subKey, subValue);
+
+            ret.Collected = data.Collected;
+            if (!data.Collected)
+            {
+                ret.FailureReason = data.FailureReason;
+                return ret;
+            }
+
+            if (data.Value == null)
+            {
+                return ret;
+            }
+
+            ret.Value = (string)data.Value;
 
             return ret;
         }

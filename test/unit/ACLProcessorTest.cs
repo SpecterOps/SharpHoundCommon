@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.DirectoryServices;
 using System.Linq;
+using System.Runtime.Versioning;
 using System.Security.AccessControl;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,6 +16,7 @@ using SharpHoundCommonLib.OutputTypes;
 using SharpHoundCommonLib.Processors;
 using Xunit;
 using Xunit.Abstractions;
+using AsyncEnumerable = SharpHoundCommonLib.AsyncEnumerable;
 
 namespace CommonLibTest {
     [SuppressMessage("Interoperability", "CA1416:Validate platform compatibility")]
@@ -60,6 +62,7 @@ namespace CommonLibTest {
             Assert.False(result);
         }
 
+        [SupportedOSPlatform("windows")]
         [WindowsOnlyFact]
         public async Task ACLProcessor_TestKnownDataAddMember() {
             var mockLdapUtils = new MockLdapUtils();
@@ -253,10 +256,10 @@ namespace CommonLibTest {
 
             Assert.Single(result);
             var actual = result.First();
-            Assert.Equal(actual.PrincipalSID, expectedSID);
-            Assert.Equal(actual.PrincipalType, expectedPrincipalType);
+            Assert.Equal(expectedSID, actual.PrincipalSID);
+            Assert.Equal(expectedPrincipalType, actual.PrincipalType);
             Assert.False(actual.IsInherited);
-            Assert.Equal(actual.RightName, EdgeNames.Owns);
+            Assert.Equal(EdgeNames.Owns, actual.RightName);
         }
 
         [Fact]
@@ -437,10 +440,10 @@ namespace CommonLibTest {
 
             Assert.Single(result);
             var actual = result.First();
-            Assert.Equal(actual.PrincipalType, expectedPrincipalType);
-            Assert.Equal(actual.PrincipalSID, expectedPrincipalSID);
+            Assert.Equal(expectedPrincipalType, actual.PrincipalType);
+            Assert.Equal(expectedPrincipalSID, actual.PrincipalSID);
             Assert.False(actual.IsInherited);
-            Assert.Equal(actual.RightName, EdgeNames.GenericAll);
+            Assert.Equal(EdgeNames.GenericAll, actual.RightName);
         }
 
         [Fact]
@@ -475,10 +478,10 @@ namespace CommonLibTest {
 
             Assert.Single(result);
             var actual = result.First();
-            Assert.Equal(actual.PrincipalType, expectedPrincipalType);
-            Assert.Equal(actual.PrincipalSID, expectedPrincipalSID);
+            Assert.Equal(expectedPrincipalType, actual.PrincipalType);
+            Assert.Equal(expectedPrincipalSID, actual.PrincipalSID);
             Assert.False(actual.IsInherited);
-            Assert.Equal(actual.RightName, EdgeNames.WriteSPN);
+            Assert.Equal(EdgeNames.WriteSPN, actual.RightName);
         }
 
         [Fact]
@@ -513,10 +516,10 @@ namespace CommonLibTest {
 
             Assert.Single(result);
             var actual = result.First();
-            Assert.Equal(actual.PrincipalType, expectedPrincipalType);
-            Assert.Equal(actual.PrincipalSID, expectedPrincipalSID);
+            Assert.Equal(expectedPrincipalType, actual.PrincipalType);
+            Assert.Equal(expectedPrincipalSID, actual.PrincipalSID);
             Assert.False(actual.IsInherited);
-            Assert.Equal(actual.RightName, EdgeNames.ForceChangePassword);
+            Assert.Equal(EdgeNames.ForceChangePassword, actual.RightName);
         }
 
         [Fact]
@@ -586,10 +589,10 @@ namespace CommonLibTest {
 
             Assert.Single(result);
             var actual = result.First();
-            Assert.Equal(actual.PrincipalType, expectedPrincipalType);
-            Assert.Equal(actual.PrincipalSID, expectedPrincipalSID);
+            Assert.Equal(expectedPrincipalType, actual.PrincipalType);
+            Assert.Equal(expectedPrincipalSID, actual.PrincipalSID);
             Assert.False(actual.IsInherited);
-            Assert.Equal(actual.RightName, expectedRightName.ToString());
+            Assert.Equal(expectedRightName.ToString(), actual.RightName);
         }
 
         [Fact]
@@ -659,10 +662,10 @@ namespace CommonLibTest {
 
             Assert.Single(result);
             var actual = result.First();
-            Assert.Equal(actual.PrincipalType, expectedPrincipalType);
-            Assert.Equal(actual.PrincipalSID, expectedPrincipalSID);
+            Assert.Equal(expectedPrincipalType, actual.PrincipalType);
+            Assert.Equal(expectedPrincipalSID, actual.PrincipalSID);
             Assert.False(actual.IsInherited);
-            Assert.Equal(actual.RightName, expectedRightName.ToString());
+            Assert.Equal(expectedRightName.ToString(), actual.RightName);
         }
 
         [Fact]
@@ -732,10 +735,10 @@ namespace CommonLibTest {
 
             Assert.Single(result);
             var actual = result.First();
-            Assert.Equal(actual.PrincipalType, expectedPrincipalType);
-            Assert.Equal(actual.PrincipalSID, expectedPrincipalSID);
+            Assert.Equal(expectedPrincipalType, actual.PrincipalType);
+            Assert.Equal(expectedPrincipalSID, actual.PrincipalSID);
             Assert.False(actual.IsInherited);
-            Assert.Equal(actual.RightName, expectedRightName);
+            Assert.Equal(expectedRightName, actual.RightName);
         }
 
         [Fact]
@@ -771,10 +774,10 @@ namespace CommonLibTest {
 
             Assert.Single(result);
             var actual = result.First();
-            Assert.Equal(actual.PrincipalType, expectedPrincipalType);
-            Assert.Equal(actual.PrincipalSID, expectedPrincipalSID);
+            Assert.Equal(expectedPrincipalType, actual.PrincipalType);
+            Assert.Equal(expectedPrincipalSID, actual.PrincipalSID);
             Assert.False(actual.IsInherited);
-            Assert.Equal(actual.RightName, expectedRightName);
+            Assert.Equal(expectedRightName, actual.RightName);
         }
 
         [Fact]
@@ -875,10 +878,10 @@ namespace CommonLibTest {
 
             Assert.Single(result);
             var actual = result.First();
-            Assert.Equal(actual.PrincipalType, expectedPrincipalType);
-            Assert.Equal(actual.PrincipalSID, expectedPrincipalSID);
+            Assert.Equal(expectedPrincipalType, actual.PrincipalType);
+            Assert.Equal(expectedPrincipalSID, actual.PrincipalSID);
             Assert.False(actual.IsInherited);
-            Assert.Equal(actual.RightName, expectedRightName);
+            Assert.Equal(expectedRightName, actual.RightName);
         }
 
         [Fact]
@@ -913,10 +916,10 @@ namespace CommonLibTest {
 
             Assert.Single(result);
             var actual = result.First();
-            Assert.Equal(actual.PrincipalType, expectedPrincipalType);
-            Assert.Equal(actual.PrincipalSID, expectedPrincipalSID);
+            Assert.Equal(expectedPrincipalType, actual.PrincipalType);
+            Assert.Equal(expectedPrincipalSID, actual.PrincipalSID);
             Assert.False(actual.IsInherited);
-            Assert.Equal(actual.RightName, expectedRightName);
+            Assert.Equal(expectedRightName, actual.RightName);
         }
 
         [Fact]
@@ -954,10 +957,10 @@ namespace CommonLibTest {
 
             Assert.Single(result);
             var actual = result.First();
-            Assert.Equal(actual.PrincipalType, expectedPrincipalType);
-            Assert.Equal(actual.PrincipalSID, expectedPrincipalSID);
+            Assert.Equal(expectedPrincipalType, actual.PrincipalType);
+            Assert.Equal(expectedPrincipalSID, actual.PrincipalSID);
             Assert.False(actual.IsInherited);
-            Assert.Equal(actual.RightName, expectedRightName);
+            Assert.Equal(expectedRightName, actual.RightName);
         }
 
         [Fact]
@@ -1421,6 +1424,7 @@ namespace CommonLibTest {
             Assert.False(result);
         }
 
+        [SupportedOSPlatform("windows")]
         [WindowsOnlyFact]
         public void ACLProcessor_CalculateImplicitACLHash_ValidInput_ReturnsCorrectHash()
         {
@@ -1439,6 +1443,7 @@ namespace CommonLibTest {
             Assert.Equal(expectedHash, result);
         }
 
+        [SupportedOSPlatform("windows")]
         [WindowsOnlyFact]
         public void ACLProcessor_CalculateImplicitACLHash_DifferentInputs_ProducesUniqueHashes()
         {
@@ -1458,6 +1463,7 @@ namespace CommonLibTest {
             Assert.NotEqual(protectedResult, adminsdResult);
         }
 
+        [SupportedOSPlatform("windows")]
         [WindowsOnlyFact]
         public void ACLProcessor_NullAdminSDHolderHash_Returns_Null_Bool()
         {
@@ -1476,6 +1482,7 @@ namespace CommonLibTest {
         }
 
 
+        [SupportedOSPlatform("windows")]
         [WindowsOnlyFact]
         public void ACLProcessor_AdminSDHolderHash_Returns_Match()
         {
@@ -1595,10 +1602,10 @@ namespace CommonLibTest {
 
             Assert.Single(result);
             var actual = result.First();
-            Assert.Equal(actual.PrincipalType, expectedPrincipalType);
-            Assert.Equal(actual.PrincipalSID, expectedPrincipalSID);
+            Assert.Equal(expectedPrincipalType, actual.PrincipalType);
+            Assert.Equal(expectedPrincipalSID, actual.PrincipalSID);
             Assert.False(actual.IsInherited);
-            Assert.Equal(actual.RightName, expectedRightName);
+            Assert.Equal(expectedRightName, actual.RightName);
         }
 
         [Fact]
@@ -1634,10 +1641,10 @@ namespace CommonLibTest {
 
             Assert.Single(result);
             var actual = result.First();
-            Assert.Equal(actual.PrincipalType, expectedPrincipalType);
-            Assert.Equal(actual.PrincipalSID, expectedPrincipalSID);
+            Assert.Equal(expectedPrincipalType, actual.PrincipalType);
+            Assert.Equal(expectedPrincipalSID, actual.PrincipalSID);
             Assert.False(actual.IsInherited);
-            Assert.Equal(actual.RightName, expectedRightName);
+            Assert.Equal(expectedRightName, actual.RightName);
         }
 
         [Fact]
@@ -1673,10 +1680,10 @@ namespace CommonLibTest {
 
             Assert.Single(result);
             var actual = result.First();
-            Assert.Equal(actual.PrincipalType, expectedPrincipalType);
-            Assert.Equal(actual.PrincipalSID, expectedPrincipalSID);
+            Assert.Equal(expectedPrincipalType, actual.PrincipalType);
+            Assert.Equal(expectedPrincipalSID, actual.PrincipalSID);
             Assert.False(actual.IsInherited);
-            Assert.Equal(actual.RightName, expectedRightName);
+            Assert.Equal(expectedRightName, actual.RightName);
         }
 
         [Fact]
@@ -1712,10 +1719,10 @@ namespace CommonLibTest {
 
             Assert.Single(result);
             var actual = result.First();
-            Assert.Equal(actual.PrincipalType, expectedPrincipalType);
-            Assert.Equal(actual.PrincipalSID, expectedPrincipalSID);
+            Assert.Equal(expectedPrincipalType, actual.PrincipalType);
+            Assert.Equal(expectedPrincipalSID, actual.PrincipalSID);
             Assert.False(actual.IsInherited);
-            Assert.Equal(actual.RightName, expectedRightName);
+            Assert.Equal(expectedRightName, actual.RightName);
         }
 
         [Fact]
@@ -1751,10 +1758,10 @@ namespace CommonLibTest {
 
             Assert.Single(result);
             var actual = result.First();
-            Assert.Equal(actual.PrincipalType, expectedPrincipalType);
-            Assert.Equal(actual.PrincipalSID, expectedPrincipalSID);
+            Assert.Equal(expectedPrincipalType, actual.PrincipalType);
+            Assert.Equal(expectedPrincipalSID, actual.PrincipalSID);
             Assert.False(actual.IsInherited);
-            Assert.Equal(actual.RightName, expectedRightName);
+            Assert.Equal(expectedRightName, actual.RightName);
         }
 
         [Fact]
@@ -1790,10 +1797,10 @@ namespace CommonLibTest {
 
             Assert.Single(result);
             var actual = result.First();
-            Assert.Equal(actual.PrincipalType, expectedPrincipalType);
-            Assert.Equal(actual.PrincipalSID, expectedPrincipalSID);
+            Assert.Equal(expectedPrincipalType, actual.PrincipalType);
+            Assert.Equal(expectedPrincipalSID, actual.PrincipalSID);
             Assert.False(actual.IsInherited);
-            Assert.Equal(actual.RightName, expectedRightName);
+            Assert.Equal(expectedRightName, actual.RightName);
         }
 
         [Fact]
@@ -1829,10 +1836,10 @@ namespace CommonLibTest {
 
             Assert.Single(result);
             var actual = result.First();
-            Assert.Equal(actual.PrincipalType, expectedPrincipalType);
-            Assert.Equal(actual.PrincipalSID, expectedPrincipalSID);
+            Assert.Equal(expectedPrincipalType, actual.PrincipalType);
+            Assert.Equal(expectedPrincipalSID, actual.PrincipalSID);
             Assert.False(actual.IsInherited);
-            Assert.Equal(actual.RightName, expectedRightName);
+            Assert.Equal(expectedRightName, actual.RightName);
         }
 
         [Fact]
@@ -1868,10 +1875,10 @@ namespace CommonLibTest {
 
             Assert.Single(result);
             var actual = result.First();
-            Assert.Equal(actual.PrincipalType, expectedPrincipalType);
-            Assert.Equal(actual.PrincipalSID, expectedPrincipalSID);
+            Assert.Equal(expectedPrincipalType, actual.PrincipalType);
+            Assert.Equal(expectedPrincipalSID, actual.PrincipalSID);
             Assert.False(actual.IsInherited);
-            Assert.Equal(actual.RightName, expectedRightName);
+            Assert.Equal(expectedRightName, actual.RightName);
         }
 
         [Fact]
@@ -1918,10 +1925,10 @@ namespace CommonLibTest {
 
             Assert.Single(result);
             var actual = result.First();
-            Assert.Equal(actual.PrincipalType, expectedPrincipalType);
-            Assert.Equal(actual.PrincipalSID, expectedPrincipalSID);
+            Assert.Equal(expectedPrincipalType, actual.PrincipalType);
+            Assert.Equal(expectedPrincipalSID, actual.PrincipalSID);
             Assert.False(actual.IsInherited);
-            Assert.Equal(actual.RightName, expectedRightName);
+            Assert.Equal(expectedRightName, actual.RightName);
         }
 
         [Fact]
@@ -1968,10 +1975,10 @@ namespace CommonLibTest {
 
             Assert.Single(result);
             var actual = result.First();
-            Assert.Equal(actual.PrincipalType, expectedPrincipalType);
-            Assert.Equal(actual.PrincipalSID, expectedPrincipalSID);
+            Assert.Equal(expectedPrincipalType, actual.PrincipalType);
+            Assert.Equal(expectedPrincipalSID, actual.PrincipalSID);
             Assert.False(actual.IsInherited);
-            Assert.Equal(actual.RightName, expectedRightName);
+            Assert.Equal(expectedRightName, actual.RightName);
         }
 
         [Fact]
@@ -2007,10 +2014,10 @@ namespace CommonLibTest {
 
             Assert.Single(result);
             var actual = result.First();
-            Assert.Equal(actual.PrincipalType, expectedPrincipalType);
-            Assert.Equal(actual.PrincipalSID, expectedPrincipalSID);
+            Assert.Equal(expectedPrincipalType, actual.PrincipalType);
+            Assert.Equal(expectedPrincipalSID, actual.PrincipalSID);
             Assert.False(actual.IsInherited);
-            Assert.Equal(actual.RightName, expectedRightName);
+            Assert.Equal(expectedRightName, actual.RightName);
         }
 
         [Fact]
@@ -2046,10 +2053,10 @@ namespace CommonLibTest {
 
             Assert.Single(result);
             var actual = result.First();
-            Assert.Equal(actual.PrincipalType, expectedPrincipalType);
-            Assert.Equal(actual.PrincipalSID, expectedPrincipalSID);
+            Assert.Equal(expectedPrincipalType, actual.PrincipalType);
+            Assert.Equal(expectedPrincipalSID, actual.PrincipalSID);
             Assert.False(actual.IsInherited);
-            Assert.Equal(actual.RightName, expectedRightName);
+            Assert.Equal(expectedRightName, actual.RightName);
         }
 
         [Fact]
@@ -2085,10 +2092,10 @@ namespace CommonLibTest {
 
             Assert.Single(result);
             var actual = result.First();
-            Assert.Equal(actual.PrincipalType, expectedPrincipalType);
-            Assert.Equal(actual.PrincipalSID, expectedPrincipalSID);
+            Assert.Equal(expectedPrincipalType, actual.PrincipalType);
+            Assert.Equal(expectedPrincipalSID, actual.PrincipalSID);
             Assert.False(actual.IsInherited);
-            Assert.Equal(actual.RightName, expectedRightName);
+            Assert.Equal(expectedRightName, actual.RightName);
         }
 
         [Fact]
@@ -2124,10 +2131,10 @@ namespace CommonLibTest {
 
             Assert.Single(result);
             var actual = result.First();
-            Assert.Equal(actual.PrincipalType, expectedPrincipalType);
-            Assert.Equal(actual.PrincipalSID, expectedPrincipalSID);
+            Assert.Equal(expectedPrincipalType, actual.PrincipalType);
+            Assert.Equal(expectedPrincipalSID, actual.PrincipalSID);
             Assert.False(actual.IsInherited);
-            Assert.Equal(actual.RightName, expectedRightName);
+            Assert.Equal(expectedRightName, actual.RightName);
         }
 
         [Fact]

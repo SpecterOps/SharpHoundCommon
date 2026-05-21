@@ -1,0 +1,95 @@
+name: Publish Dev Package
+
+on:
+  push:
+    branches:
+      - "v4"
+
+jobs:
+  update-dev-package:
+    name: update-dev-package
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # ratchet:actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # ratchet:actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+      
+      #Derive the dev version by incrementing the patch of the stable version e.g. 4.6.0 → 4.6.1-dev*
+      - name: Compute dev version
+        id: version
+        shell: pwsh
+        run: |
+          $base_version = dotnet msbuild Directory.Build.props --getProperty:Version
+          $parts = $base_version.Split('.')
+          $parts[2] = [int]$parts[2] + 1
+          $next_version = $parts -join '.'
+          $date_stamp = Get-Date -Format 'yyyyMMddHHmm'
+          "dev_version=$next_version-dev.$date_stamp" >> $env:GITHUB_OUTPUT
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Pack
+        run: |
+          mkdir pkgs
+          dotnet pack --no-restore -c Release -p:PackageVersion=${{ steps.version.outputs.dev_version }} -o ./pkgs
+
+      - name: Publish to SpecterOps Packages
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
+        run: |
+          dotnet tool install -g sleet
+          sleet push ./pkgs
+
+      #the prune command deletes older -dev package versions to avoid clutter
+      #it deletes any versions of the $packageIds with "-dev" that are older than the last $maxDevVersions
+      #set $dryRun to true for debugging without deleting any packages
+      - name: Prune old -dev packages
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
+        shell: pwsh
+        run: |
+          $dryRun = $false
+          $packageIndexUrl = 'https://s3.amazonaws.com/shcommon-nuget/sleet.packageindex.json'
+          $packageIds = @('SharpHoundCommon', 'SharpHoundRPC')
+          $maxDevVersions = 5
+          
+          $packageIndex = Invoke-RestMethod -Uri $packageIndexUrl
+          
+          foreach ($packageId in $packageIds) {
+            #get all -dev packages sorted by descending versions
+            $devPackages = @(
+              foreach ($version in ($packageIndex.packages.$packageId | Where-Object { $_ -like '*-dev.*' })) {
+                try {
+                  [pscustomobject]@{
+                    PackageId = $packageId
+                    Version   = $version
+                    SemVer    = [System.Management.Automation.SemanticVersion]$version
+                  }
+                } catch {
+                  Write-Warning "Skipping unparseable version: $packageId $version"
+                }
+              }
+            ) | Sort-Object SemVer -Descending
+              
+            Write-Host "($($devPackages.Length)) $packageId -dev versions in feed:"
+            $devPackages | Format-Table -AutoSize
+            
+            Write-Host "Beginning prune:"
+          
+            #skip $maxDevVersions and delete remaining -dev packages
+            $devPackages | Select-Object -Skip $maxDevVersions | ForEach-Object {
+              if ($dryRun) {
+                Write-Host "[DRY RUN] sleet delete --id $($_.PackageId) --version $($_.Version)"
+              }
+              else {
+                sleet delete --id $_.PackageId --version $_.Version --reason "Prune old dev build"
+              }
+            }
+          }

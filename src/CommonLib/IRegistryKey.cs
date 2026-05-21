@@ -1,18 +1,16 @@
 ﻿using System;
-using System.Threading.Tasks;
 using Microsoft.Win32;
 
 namespace SharpHoundCommonLib {
-    public interface IRegistryKey {
+    public interface IRegistryKey: IDisposable {
         public object GetValue(string subkey, string name);
         public string[] GetSubKeyNames();
     }
 
-    public class SHRegistryKey : IRegistryKey, IDisposable {
+    public class SHRegistryKey : IRegistryKey {
         private readonly RegistryKey _currentKey;
-        private static readonly AdaptiveTimeout _adaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromSeconds(10), Logging.LogProvider.CreateLogger(nameof(SHRegistryKey)));
-
-        private SHRegistryKey(RegistryKey registryKey) {
+        
+        public SHRegistryKey(RegistryKey registryKey) {
             _currentKey = registryKey;
         }
 
@@ -23,39 +21,8 @@ namespace SharpHoundCommonLib {
 
         public string[] GetSubKeyNames() => _currentKey.GetSubKeyNames();
 
-        /// <summary>
-        /// Gets a handle to a remote registry.
-        /// </summary>
-        /// <param name="hive"></param>
-        /// <param name="machineName"></param>
-        /// <returns></returns>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="ArgumentException"></exception>
-        /// <exception cref="System.IO.IOException"></exception>
-        /// <exception cref="ArgumentNullException"></exception>
-        /// <exception cref="System.Security.SecurityException"></exception>
-        /// <exception cref="UnauthorizedAccessException"></exception>
-        public static async Task<SHRegistryKey> Connect(RegistryHive hive, string machineName) {
-            var remoteKey = await _adaptiveTimeout.ExecuteWithTimeout((_) => RegistryKey.OpenRemoteBaseKey(hive, machineName));
-            if (remoteKey.IsSuccess)
-                return new SHRegistryKey(remoteKey.Value);
-            else
-                throw new TimeoutException($"Failed to connect to registry on {machineName}: {remoteKey.Error}");
-        }
-
         public void Dispose() {
             _currentKey.Dispose();
-        }
-    }
-
-    public class MockRegistryKey : IRegistryKey {
-        public virtual object GetValue(string subkey, string name) {
-            //Unimplemented
-            return default;
-        }
-
-        public virtual string[] GetSubKeyNames() {
-            throw new NotImplementedException();
         }
     }
 }
