@@ -31,7 +31,7 @@ namespace CommonLibTest
         }
 
         [Fact]
-        public async void LDAPPropertyProcessor_ReadDomainProperties_TestGoodData()
+        public async Task LDAPPropertyProcessor_ReadDomainProperties_TestGoodData()
         {
             var mock = new MockDirectoryObject("DC\u003dtestlab,DC\u003dlocal", new Dictionary<string, object>
             {
@@ -48,7 +48,7 @@ namespace CommonLibTest
         }
 
         [Fact]
-        public async void LDAPPropertyProcessor_ReadDomainProperties_TestBadFunctionalLevel()
+        public async Task LDAPPropertyProcessor_ReadDomainProperties_TestBadFunctionalLevel()
         {
             var mock = new MockDirectoryObject("DC\u003dtestlab,DC\u003dlocal", new Dictionary<string, object>
             {
@@ -1206,7 +1206,7 @@ namespace CommonLibTest
 
         [Theory]
         [MemberData(nameof(ReadDomainPropertiesData))]
-        public async void LDAPPropertyProcessor_ReadDomainProperties<T>(MockDirectoryObject mock,
+        public async Task LDAPPropertyProcessor_ReadDomainProperties<T>(MockDirectoryObject mock,
             string expectedProp, T expectedValue)
         {
             var processor = new LdapPropertyProcessor(new MockLdapUtils());
@@ -1328,7 +1328,7 @@ namespace CommonLibTest
             };
         
         [Fact]
-        public async void LDAPPropertyProcessor_ReadDomainProperties_ConvertNanoDuration_TestNull()
+        public async Task LDAPPropertyProcessor_ReadDomainProperties_ConvertNanoDuration_TestNull()
         {
             var mock = new MockDirectoryObject("DC\u003dtestlab,DC\u003dlocal", new Dictionary<string, object>
             {
@@ -1342,7 +1342,7 @@ namespace CommonLibTest
         
         [Theory]
         [MemberData(nameof(ReadUserPropertiesData))]
-        public async void LDAPPropertyProcessor_ReadUserProperties<T>(MockDirectoryObject mock,
+        public async Task LDAPPropertyProcessor_ReadUserProperties<T>(MockDirectoryObject mock,
             string expectedProp, T expectedValue)
         {
             var processor = new LdapPropertyProcessor(new MockLdapUtils());
@@ -1619,7 +1619,7 @@ namespace CommonLibTest
         
         [Theory]
         [MemberData(nameof(ConvertEncryptionTypesData))]
-        public async void LDAPPropertyProcessor_ConvertEncryptionTypes(MockDirectoryObject mock,
+        public async Task LDAPPropertyProcessor_ConvertEncryptionTypes(MockDirectoryObject mock,
             string expectedProp, List<String> expectedValue)
         {
             var processor = new LdapPropertyProcessor(new MockLdapUtils());

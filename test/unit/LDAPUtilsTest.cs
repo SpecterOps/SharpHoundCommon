@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.DirectoryServices.ActiveDirectory;
 using System.Runtime.Versioning;
 using System.Threading.Tasks;
 using CommonLibTest.Facades;
@@ -60,7 +59,7 @@ namespace CommonLibTest {
         }
 
         [Fact]
-        public async void ResolveIDAndType_WellKnownAdministrators_ReturnsConvertedSID() {
+        public async Task ResolveIDAndType_WellKnownAdministrators_ReturnsConvertedSID() {
             var test = await _utils.ResolveIDAndType("S-1-5-32-544", "TESTLAB.LOCAL");
             Assert.True(test.Success);
             Assert.NotNull(test.Principal);
@@ -69,7 +68,7 @@ namespace CommonLibTest {
         }
 
         [Fact]
-        public async void GetWellKnownPrincipal_EnterpriseDomainControllers_ReturnsCorrectedSID()
+        public async Task GetWellKnownPrincipal_EnterpriseDomainControllers_ReturnsCorrectedSID()
         {
             var mock = new Mock<LdapUtils>();
             mock.Setup(x => x.GetForest(It.IsAny<string>())).ReturnsAsync((true, _testForestName));
@@ -80,14 +79,14 @@ namespace CommonLibTest {
         }
 
         [Fact]
-        public async void GetWellKnownPrincipal_NonWellKnown_ReturnsNull() {
+        public async Task GetWellKnownPrincipal_NonWellKnown_ReturnsNull() {
             var result = await _utils.GetWellKnownPrincipal("S-1-5-21-123456-78910", _testDomainName);
             Assert.False(result.Success);
             Assert.Null(result.WellKnownPrincipal);
         }
 
         [Fact]
-        public async void GetWellKnownPrincipal_WithDomain_ConvertsSID() {
+        public async Task GetWellKnownPrincipal_WithDomain_ConvertsSID() {
             var result =
                 await _utils.GetWellKnownPrincipal("S-1-5-32-544", _testDomainName);
             Assert.True(result.Success);
