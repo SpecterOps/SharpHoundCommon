@@ -43,7 +43,14 @@ namespace SharpHoundCommonLib.Processors
         {
             if (subnetProperties.TryGetValue("siteObject", out var siteObject))
             {
-                return await GetContainingSiteForSubnet(siteObject.ToString());
+                if (siteObject == null)
+                    return (false, default);
+
+                var siteObjectDn = siteObject.ToString();
+                if (string.IsNullOrWhiteSpace(siteObjectDn))
+                    return (false, default);
+
+                return await GetContainingSiteForSubnet(siteObjectDn);
             }
             return (false, default);
         }
