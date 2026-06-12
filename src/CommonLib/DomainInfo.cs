@@ -48,5 +48,22 @@ namespace SharpHoundCommonLib
             PrimaryDomainController = primaryDomainController;
             DomainControllers = domainControllers ?? Array.Empty<string>();
         }
+
+        /// <summary>
+        /// Counts the populated fields on this instance as a coarse measure of how much information
+        /// a particular domain resolution tier produced. <see cref="DomainControllers"/> is treated
+        /// as populated only when non-empty because the constructor coalesces null to an empty array.
+        /// </summary>
+        internal int CompletenessScore() {
+            var score = 0;
+            if (!string.IsNullOrEmpty(Name)) score++;
+            if (!string.IsNullOrEmpty(DistinguishedName)) score++;
+            if (!string.IsNullOrEmpty(ForestName)) score++;
+            if (!string.IsNullOrEmpty(DomainSid)) score++;
+            if (!string.IsNullOrEmpty(NetBiosName)) score++;
+            if (!string.IsNullOrEmpty(PrimaryDomainController)) score++;
+            if (DomainControllers != null && DomainControllers.Count > 0) score++;
+            return score;
+        }
     }
 }

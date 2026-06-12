@@ -1181,30 +1181,9 @@ namespace SharpHoundCommonLib {
         }
 
         /// <summary>
-        /// Counts the populated fields on a <see cref="DomainInfo"/> as a coarse measure of how
-        /// much information a particular resolution tier produced. Used by <see cref="CacheDomainInfo"/>
-        /// to ensure a richer record published by a later tier replaces a sparser record published
-        /// by an earlier tier, instead of being dropped by <c>ConcurrentDictionary.TryAdd</c>'s
-        /// first-writer-wins semantics. <see cref="DomainInfo.DomainControllers"/> is treated as
-        /// "populated" only when non-empty because the constructor coalesces null to an empty array.
-        /// </summary>
-        internal static int CompletenessScore(DomainInfo info) {
-            if (info == null) return -1;
-            var score = 0;
-            if (!string.IsNullOrEmpty(info.Name)) score++;
-            if (!string.IsNullOrEmpty(info.DistinguishedName)) score++;
-            if (!string.IsNullOrEmpty(info.ForestName)) score++;
-            if (!string.IsNullOrEmpty(info.DomainSid)) score++;
-            if (!string.IsNullOrEmpty(info.NetBiosName)) score++;
-            if (!string.IsNullOrEmpty(info.PrimaryDomainController)) score++;
-            if (info.DomainControllers != null && info.DomainControllers.Count > 0) score++;
-            return score;
-        }
-
-        /// <summary>
         /// Inserts <paramref name="candidate"/> at <paramref name="key"/> in
         /// <see cref="_domainInfoCache"/>, replacing any existing entry only when the candidate has
-        /// strictly more populated fields (per <see cref="CompletenessScore"/>). Equal scores
+        /// strictly more populated fields (per <see cref="DomainInfo.CompletenessScore"/>). Equal scores
         /// preserve the existing entry to keep cache writes idempotent under concurrent resolution.
         /// </summary>
         /// <remarks>
@@ -1231,7 +1210,7 @@ namespace SharpHoundCommonLib {
             if (!KeyMatchesCandidate(key, candidate)) return;
 
             DomainInfo PickRicher(string _, DomainInfo existing)
-                => CompletenessScore(candidate) > CompletenessScore(existing) ? candidate : existing;
+                => candidate.CompletenessScore() > (existing?.CompletenessScore() ?? -1) ? candidate : existing;
 
             _domainInfoCache.AddOrUpdate(key, candidate, PickRicher);
 
@@ -1264,7 +1243,7 @@ namespace SharpHoundCommonLib {
         /// earlier tier. Returns <paramref name="seed"/> unchanged when <paramref name="enriched"/>
         /// is null, when the two records describe different canonical domain names, or when the
         /// enriched record does not have strictly more populated fields per
-        /// <see cref="CompletenessScore"/>.
+        /// <see cref="DomainInfo.CompletenessScore"/>.
         /// </summary>
         /// <remarks>
         /// The name-equality guard is deliberately strict: an enrichment retry that binds to the
@@ -1284,7 +1263,7 @@ namespace SharpHoundCommonLib {
             if (!string.Equals(seed.Name, enriched.Name, StringComparison.OrdinalIgnoreCase)) {
                 return seed;
             }
-            return CompletenessScore(enriched) > CompletenessScore(seed) ? enriched : seed;
+            return enriched.CompletenessScore() > seed.CompletenessScore() ? enriched : seed;
         }
 
         /// <summary>
@@ -1365,7 +1344,7 @@ namespace SharpHoundCommonLib {
         /// <para>
         /// Any cached record satisfies this lookup regardless of which tier produced it. Upgrade
         /// from a sparser seed to a richer record happens at write time via
-        /// <see cref="CompletenessScore"/> in <see cref="CacheDomainInfo"/>; the read path does not
+        /// <see cref="DomainInfo.CompletenessScore"/> in <see cref="CacheDomainInfo"/>; the read path does not
         /// re-resolve a cached domain just because some attribute (e.g. <see cref="DomainInfo.NetBiosName"/>)
         /// is absent, since attributes that are unreachable for the configured credentials would
         /// otherwise trigger an unbounded re-resolution loop on every call.
@@ -2146,7 +2125,7 @@ namespace SharpHoundCommonLib {
         /// </summary>
         /// <remarks>
         /// Skips the bind entirely when the seed already has a maximum
-        /// <see cref="CompletenessScore"/>, when no bind target can be derived (no
+        /// <see cref="DomainInfo.CompletenessScore"/>, when no bind target can be derived (no
         /// <see cref="LdapConfig.Server"/> pin, no <see cref="DomainInfo.PrimaryDomainController"/>,
         /// and an empty <see cref="DomainInfo.DomainControllers"/> list), or when every attempted
         /// bind fails. In any of these cases the original seed is returned unchanged.
@@ -2169,7 +2148,7 @@ namespace SharpHoundCommonLib {
         internal static async Task<DomainInfo> TryEnrichDomainInfoViaDirectLdapAsync(
             string domainName, DomainInfo seed, LdapConfig config, ILogger log) {
             if (seed == null) return null;
-            if (CompletenessScore(seed) >= 7 || string.IsNullOrWhiteSpace(domainName) || config == null) return seed;
+            if (seed.CompletenessScore() >= 7 || string.IsNullOrWhiteSpace(domainName) || config == null) return seed;
 
             IReadOnlyList<string> candidates;
             if (!string.IsNullOrWhiteSpace(config.Server)) {

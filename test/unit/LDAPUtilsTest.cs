@@ -812,17 +812,12 @@ namespace CommonLibTest {
         }
 
         // ---------------------------------------------------------------------------
-        // CompletenessScore / CacheDomainInfo (H-1 regression coverage)
+        // DomainInfo.CompletenessScore / CacheDomainInfo (H-1 regression coverage)
         // ---------------------------------------------------------------------------
 
         [Fact]
-        public void CompletenessScore_NullInfo_ReturnsNegativeOne() {
-            Assert.Equal(-1, LdapUtils.CompletenessScore(null));
-        }
-
-        [Fact]
         public void CompletenessScore_EmptyInfo_ReturnsZero() {
-            Assert.Equal(0, LdapUtils.CompletenessScore(new DomainInfo()));
+            Assert.Equal(0, new DomainInfo().CompletenessScore());
         }
 
         [Fact]
@@ -835,19 +830,19 @@ namespace CommonLibTest {
                 netBiosName: "CONTOSO",
                 primaryDomainController: "dc01.contoso.local",
                 domainControllers: new[] { "dc01.contoso.local" });
-            Assert.Equal(7, LdapUtils.CompletenessScore(info));
+            Assert.Equal(7, info.CompletenessScore());
         }
 
         [Fact]
         public void CompletenessScore_EmptyDomainControllersList_ContributesZero() {
             var info = new DomainInfo(name: "CONTOSO.LOCAL", domainControllers: Array.Empty<string>());
-            Assert.Equal(1, LdapUtils.CompletenessScore(info));
+            Assert.Equal(1, info.CompletenessScore());
         }
 
         [Fact]
         public void CompletenessScore_EmptyStringFields_ContributeZero() {
             var info = new DomainInfo(name: "", distinguishedName: "", forestName: "");
-            Assert.Equal(0, LdapUtils.CompletenessScore(info));
+            Assert.Equal(0, info.CompletenessScore());
         }
 
         [Fact]
