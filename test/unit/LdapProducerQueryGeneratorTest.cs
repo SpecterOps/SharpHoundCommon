@@ -9,11 +9,32 @@ namespace CommonLibTest;
 public class LdapProducerQueryGeneratorTest
 {
     [Fact]
+    public void GenerateDefaultPartitionParameters_Container_IncludesBuiltinDomainFilter()
+    {
+        var expectedFilter = new LdapFilter()
+            .AddComputers()
+            .AddDomains()
+            .AddUsers()
+            .AddContainers()
+            .AddBuiltinDomains()
+            .AddGPOs()
+            .AddOUs()
+            .AddGroups()
+            .GetFilter();
+
+        var result = LdapProducerQueryGenerator.GenerateDefaultPartitionParameters(CollectionMethod.Container);
+
+        Assert.Equal(expectedFilter, result.Filter.GetFilter());
+        Assert.Contains("(objectClass=builtinDomain)", result.Filter.GetFilter());
+    }
+
+    [Fact]
     public void GenerateConfigurationPartitionParameters_Site_IncludesSiteFiltersAndProperties()
     {
         var expectedFilter = new LdapFilter()
             .AddContainers()
             .AddConfiguration()
+            .AddSitesContainer()
             .AddSites()
             .AddSiteServers()
             .AddSiteSubnets()
@@ -36,6 +57,7 @@ public class LdapProducerQueryGeneratorTest
         var expectedFilter = new LdapFilter()
             .AddContainers()
             .AddConfiguration()
+            .AddSitesContainer()
             .AddCertificateTemplates()
             .AddCertificateAuthorities()
             .AddEnterpriseCertificationAuthorities()
@@ -58,6 +80,7 @@ public class LdapProducerQueryGeneratorTest
         var expectedFilter = new LdapFilter()
             .AddContainers()
             .AddConfiguration()
+            .AddSitesContainer()
             .AddCertificateTemplates()
             .AddCertificateAuthorities()
             .AddEnterpriseCertificationAuthorities()

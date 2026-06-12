@@ -110,6 +110,7 @@ namespace CommonLibTest
         [InlineData("site", "(objectClass=site)", "(&(objectClass=site)(name=Test))")]
         [InlineData("server", "(objectClass=server)", "(&(objectClass=server)(name=Test))")]
         [InlineData("subnet", "(objectClass=subnet)", "(&(objectClass=subnet)(name=Test))")]
+        [InlineData("sitesContainer", "(objectClass=sitesContainer)", "(&(objectClass=sitesContainer)(name=Test))")]
         public void LDAPFilter_SiteFilters_FilterCorrect(string objectClass, string expectedFilter,
             string expectedFilterWithCondition)
         {
@@ -118,6 +119,7 @@ namespace CommonLibTest
                 "site" => new LdapFilter().AddSites(),
                 "server" => new LdapFilter().AddSiteServers(),
                 "subnet" => new LdapFilter().AddSiteSubnets(),
+                "sitesContainer" => new LdapFilter().AddSitesContainer(),
                 _ => throw new ArgumentOutOfRangeException(nameof(objectClass))
             };
 
@@ -126,11 +128,22 @@ namespace CommonLibTest
                 "site" => new LdapFilter().AddSites("name=Test"),
                 "server" => new LdapFilter().AddSiteServers("name=Test"),
                 "subnet" => new LdapFilter().AddSiteSubnets("name=Test"),
+                "sitesContainer" => new LdapFilter().AddSitesContainer("name=Test"),
                 _ => throw new ArgumentOutOfRangeException(nameof(objectClass))
             };
 
             Assert.Equal(expectedFilter, test.GetFilter());
             Assert.Equal(expectedFilterWithCondition, testWithCondition.GetFilter());
+        }
+
+        [Fact]
+        public void LDAPFilter_BuiltinDomain_FilterCorrect()
+        {
+            var test = new LdapFilter().AddBuiltinDomains();
+            var testWithCondition = new LdapFilter().AddBuiltinDomains("name=Builtin");
+
+            Assert.Equal("(objectClass=builtinDomain)", test.GetFilter());
+            Assert.Equal("(&(objectClass=builtinDomain)(name=Builtin))", testWithCondition.GetFilter());
         }
 
         #endregion

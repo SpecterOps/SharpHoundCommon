@@ -15,7 +15,8 @@ public class LdapProducerQueryGenerator {
 
         if (methods.HasFlag(CollectionMethod.ObjectProps) || methods.HasFlag(CollectionMethod.ACL) ||
             methods.HasFlag(CollectionMethod.Container)) {
-            filter = filter.AddComputers().AddDomains().AddUsers().AddContainers().AddGPOs().AddOUs().AddGroups();
+            filter = filter.AddComputers().AddDomains().AddUsers().AddContainers().AddBuiltinDomains().AddGPOs()
+                .AddOUs().AddGroups();
 
             if (methods.HasFlag(CollectionMethod.Container)) {
                 properties.AddRange(CommonProperties.ContainerProps);
@@ -110,7 +111,8 @@ public class LdapProducerQueryGenerator {
         if (collectBroadConfigObjects || methods.HasFlag(CollectionMethod.CertServices) ||
             methods.HasFlag(CollectionMethod.Site)) {
             filter = filter.AddContainers()
-                .AddConfiguration();
+                .AddConfiguration()
+                .AddSitesContainer();
 
             if (collectBroadConfigObjects || methods.HasFlag(CollectionMethod.CertServices)) {
                 filter.AddCertificateTemplates()

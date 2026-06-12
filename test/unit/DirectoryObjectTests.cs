@@ -255,6 +255,21 @@ namespace CommonLibTest {
             Assert.Equal(Label.Configuration, label);
         }
 
+        [Theory]
+        [InlineData(ObjectClass.BuiltinDomainClass)]
+        [InlineData(ObjectClass.SitesContainerClass)]
+        public void Test_GetLabel_AdditionalContainerClasses(string objectClass) {
+            var attribs = new Dictionary<string, object> {
+                { LDAPProperties.ObjectClass, new[] { "top", objectClass } },
+            };
+
+            var mock = new MockDirectoryObject("abc", attribs,
+                "123456", new Guid().ToString());
+
+            Assert.True(mock.GetLabel(out var label));
+            Assert.Equal(Label.Container, label);
+        }
+
         [Fact]
         public void Test_GetLabel_CertTemplateObjects() {
             var attribs = new Dictionary<string, object> {

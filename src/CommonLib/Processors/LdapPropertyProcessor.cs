@@ -45,6 +45,9 @@ namespace SharpHoundCommonLib.Processors {
 
         private static Dictionary<string, object> GetCommonProps(IDirectoryObject entry) {
             var ret = new Dictionary<string, object>();
+            entry.TryGetArrayProperty(LDAPProperties.ObjectClass, out var objectClasses);
+            ret["objectClass"] = objectClasses;
+
             if (entry.TryGetProperty(LDAPProperties.Description, out var description)) {
                 ret["description"] = description;
             }

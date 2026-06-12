@@ -1197,6 +1197,10 @@ namespace SharpHoundCommonLib {
                 type = Label.Container;
             else if (objectClasses.Contains(ObjectClass.ConfigurationClass, StringComparer.OrdinalIgnoreCase))
                 type = Label.Configuration;
+            else if (objectClasses.Contains(ObjectClass.BuiltinDomainClass, StringComparer.OrdinalIgnoreCase))
+                type = Label.Container;
+            else if (objectClasses.Contains(ObjectClass.SitesContainerClass, StringComparer.OrdinalIgnoreCase))
+                type = Label.Container;
             else if (objectClasses.Contains(ObjectClass.PKICertificateTemplateClass, StringComparer.OrdinalIgnoreCase))
                 type = Label.CertTemplate;
             else if (objectClasses.Contains(ObjectClass.PKIEnrollmentServiceClass, StringComparer.OrdinalIgnoreCase))

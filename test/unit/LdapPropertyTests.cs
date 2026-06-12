@@ -120,6 +120,34 @@ namespace CommonLibTest
         }
 
         [Fact]
+        public void LDAPPropertyProcessor_ReadContainerProperties_IncludesObjectClass()
+        {
+            var objectClasses = new[] { "top", ObjectClass.ContainerClass };
+            var mock = new MockDirectoryObject("CN=Users,DC=testlab,DC=local",
+                new Dictionary<string, object>
+                {
+                    {LDAPProperties.ObjectClass, objectClasses}
+                }, "", "ECAD920E-8EB1-4E31-A80E-DD36367F81F4");
+
+            var test = LdapPropertyProcessor.ReadContainerProperties(mock);
+
+            Assert.True(test.TryGetValue("objectClass", out var actual));
+            Assert.Equal(objectClasses, Assert.IsType<string[]>(actual));
+        }
+
+        [Fact]
+        public void LDAPPropertyProcessor_ReadOUProperties_ObjectClassDefaultsToEmptyArray()
+        {
+            var mock = new MockDirectoryObject("OU=TestOU,DC=testlab,DC=local",
+                new Dictionary<string, object>(), "", "2A374493-816A-4193-BEFD-D2F4132C6DCA");
+
+            var test = LdapPropertyProcessor.ReadOUProperties(mock);
+
+            Assert.True(test.TryGetValue("objectClass", out var actual));
+            Assert.Empty(Assert.IsType<string[]>(actual));
+        }
+
+        [Fact]
         public async Task LDAPPropertyProcessor_ReadGroupProperties_TestGoodData()
         {
             var mock = new MockDirectoryObject("CN\u003dDomain Admins,CN\u003dUsers,DC\u003dtestlab,DC\u003dlocal",
