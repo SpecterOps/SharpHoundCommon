@@ -1435,27 +1435,30 @@ namespace SharpHoundCommonLib {
                     }
                 case Label.SiteServer:
                     {
-                        // Not specifying @{domain} here since Site servers may belong to other domains, so this might confuse the user
-                        if (directoryObject.TryGetProperty(LDAPProperties.Name, out var name))
+                        if (directoryObject.TryGetProperty(LDAPProperties.DNSHostName, out var dnsHostName) &&
+                            !string.IsNullOrWhiteSpace(dnsHostName))
                         {
-                            displayName = $"{name}";
+                            displayName = dnsHostName;
+                        }
+                        else if (directoryObject.TryGetProperty(LDAPProperties.Name, out var name))
+                        {
+                            displayName = $"{name}@{domain}";
                         }
                         else
                         {
-                            displayName = $"UNKNOWN";
+                            displayName = $"UNKNOWN@{domain}";
                         }
                         break;
                     }
                 case Label.SiteSubnet:
                     {
-                        // Not specifying @{domain} here since subnets are not domain-specific
                         if (directoryObject.TryGetProperty(LDAPProperties.Name, out var name))
                         {
-                            displayName = $"{name}";
+                            displayName = $"{name}@{domain}";
                         }
                         else
                         {
-                            displayName = $"UNKNOWN";
+                            displayName = $"UNKNOWN@{domain}";
                         }
                         break;
                     }

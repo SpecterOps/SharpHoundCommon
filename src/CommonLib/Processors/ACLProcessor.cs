@@ -743,9 +743,7 @@ namespace SharpHoundCommonLib.Processors {
                         or Label.AIACA
                         or Label.NTAuthStore
                         or Label.IssuancePolicy
-                        or Label.Site
-                        or Label.SiteServer
-                        or Label.SiteSubnet)
+                        or Label.Site)
                         if (aceType is ACEGuids.AllGuid or "")
                             yield return new ACE {
                                 PrincipalType = resolvedPrincipal.ObjectType,

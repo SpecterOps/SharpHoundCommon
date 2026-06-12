@@ -2,6 +2,6 @@
 {
     public class SiteServer : OutputBase
     {
-        public TypedPrincipal SeverIs { get; set; }
+        public TypedPrincipal ServerIs { get; set; }
     }
 }

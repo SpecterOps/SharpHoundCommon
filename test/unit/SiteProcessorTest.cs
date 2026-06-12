@@ -155,9 +155,19 @@ namespace CommonLibTest
         }
 
         [Fact]
-        public void SiteServer_SeverIs_EdgeNameMatchesOutputProperty()
+        public void Site_DefaultRelationships_AreEmpty()
         {
-            Assert.Equal(nameof(SiteServer.SeverIs), EdgeNames.SeverIs);
+            var site = new Site();
+
+            Assert.Empty(site.ChildObjects);
+            Assert.Empty(site.Links);
+            Assert.Empty(site.InheritanceHashes);
+        }
+
+        [Fact]
+        public void SiteServer_ServerIs_EdgeNameMatchesOutputProperty()
+        {
+            Assert.Equal(nameof(SiteServer.ServerIs), EdgeNames.ServerIs);
         }
 
         [Fact]
