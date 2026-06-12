@@ -34,6 +34,7 @@ namespace SharpHoundCommonLib {
             new(StringComparer.OrdinalIgnoreCase);
         private static ConcurrentHashSet _domainControllers = new(StringComparer.OrdinalIgnoreCase);
         private static ConcurrentHashSet _unresolvablePrincipals = new(StringComparer.OrdinalIgnoreCase);
+        private const int MaxEnrichmentBindAttempts = 5;
 
         // Coalesces concurrent first-time domain resolutions issued through the instance
         // GetDomainInfoAsync path so N callers asking for the same domain trigger one pool-driven
@@ -2202,8 +2203,6 @@ namespace SharpHoundCommonLib {
 
             return seed;
         }
-
-        private const int MaxEnrichmentBindAttempts = 5;
 
         /// <summary>
         /// Synchronous body of <see cref="TryResolveDomainInfoViaDirectLdapAsync"/>. Uses
