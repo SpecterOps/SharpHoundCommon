@@ -106,6 +106,33 @@ namespace CommonLibTest
             Assert.Equal(2, filters.Count);
         }
 
+        [Theory]
+        [InlineData("site", "(objectClass=site)", "(&(objectClass=site)(name=Test))")]
+        [InlineData("server", "(objectClass=server)", "(&(objectClass=server)(name=Test))")]
+        [InlineData("subnet", "(objectClass=subnet)", "(&(objectClass=subnet)(name=Test))")]
+        public void LDAPFilter_SiteFilters_FilterCorrect(string objectClass, string expectedFilter,
+            string expectedFilterWithCondition)
+        {
+            var test = objectClass switch
+            {
+                "site" => new LdapFilter().AddSites(),
+                "server" => new LdapFilter().AddSiteServers(),
+                "subnet" => new LdapFilter().AddSiteSubnets(),
+                _ => throw new ArgumentOutOfRangeException(nameof(objectClass))
+            };
+
+            var testWithCondition = objectClass switch
+            {
+                "site" => new LdapFilter().AddSites("name=Test"),
+                "server" => new LdapFilter().AddSiteServers("name=Test"),
+                "subnet" => new LdapFilter().AddSiteSubnets("name=Test"),
+                _ => throw new ArgumentOutOfRangeException(nameof(objectClass))
+            };
+
+            Assert.Equal(expectedFilter, test.GetFilter());
+            Assert.Equal(expectedFilterWithCondition, testWithCondition.GetFilter());
+        }
+
         #endregion
     }
 }

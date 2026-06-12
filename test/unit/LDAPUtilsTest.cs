@@ -249,6 +249,38 @@ namespace CommonLibTest {
             Assert.False(result.Deleted);
         }
 
+        [Theory]
+        [InlineData(ObjectClass.SiteClass, Label.Site,
+            "CN=Default-First-Site-Name,CN=Sites,CN=Configuration,DC=TESTLAB,DC=LOCAL",
+            "Default-First-Site-Name", "DEFAULT-FIRST-SITE-NAME@TESTLAB.LOCAL")]
+        [InlineData(ObjectClass.SiteServerClass, Label.SiteServer,
+            "CN=PRIMARY,CN=Servers,CN=Default-First-Site-Name,CN=Sites,CN=Configuration,DC=TESTLAB,DC=LOCAL",
+            "primary.testlab.local", "PRIMARY.TESTLAB.LOCAL")]
+        [InlineData(ObjectClass.SiteSubnetClass, Label.SiteSubnet,
+            "CN=10.0.0.0/24,CN=Subnets,CN=Sites,CN=Configuration,DC=TESTLAB,DC=LOCAL",
+            "10.0.0.0/24", "10.0.0.0/24")]
+        public async Task Test_ResolveSearchResult_SiteObjects(string objectClass, Label expectedLabel,
+            string distinguishedName, string name, string expectedDisplayName) {
+            var utils = new MockLdapUtils();
+            var guid = new Guid().ToString();
+            var attribs = new Dictionary<string, object> {
+                { LDAPProperties.ObjectClass, new[] { "top", objectClass } },
+                { LDAPProperties.Name, name }
+            };
+
+            var mock = new MockDirectoryObject(distinguishedName, attribs, "", guid);
+
+            var (success, result) = await LdapUtils.ResolveSearchResult(mock, utils);
+
+            Assert.True(success);
+            Assert.Equal(guid, result.ObjectId);
+            Assert.Equal(expectedLabel, result.ObjectType);
+            Assert.Equal(expectedDisplayName, result.DisplayName);
+            Assert.Equal("S-1-5-21-3130019616-2776909439-2417379446", result.DomainSid);
+            Assert.Equal("TESTLAB.LOCAL", result.Domain);
+            Assert.False(result.Deleted);
+        }
+
         [Fact]
         public async Task Test_ResolveHostToSid_BlankHost() {
             var spn = "MSSQLSvc/:1433";
