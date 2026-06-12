@@ -230,6 +230,24 @@ namespace CommonLibTest {
             Assert.Empty(result);
         }
 
+        [Theory]
+        [InlineData(Label.SiteServer)]
+        [InlineData(Label.SiteSubnet)]
+        public async Task ACLProcessor_ProcessACL_SiteServerAndSiteSubnet_ReturnsNothing(Label objectType)
+        {
+            var mockLDAPUtils = new Mock<ILdapUtils>();
+            var processor = new ACLProcessor(mockLDAPUtils.Object);
+            var bytes = Utils.B64ToBytes(UnProtectedUserNtSecurityDescriptor);
+
+            var result = await processor.ProcessACL(bytes, _testDomainName, objectType, false).ToArrayAsync();
+
+            Assert.Empty(result);
+            mockLDAPUtils.Verify(x => x.PagedQuery(It.IsAny<LdapQueryParameters>(), It.IsAny<CancellationToken>()),
+                Times.Never);
+            mockLDAPUtils.Verify(x => x.MakeSecurityDescriptor(), Times.Never);
+            mockLDAPUtils.Verify(x => x.ResolveIDAndType(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        }
+
         [Fact]
         public async Task ACLProcessor_ProcessACL_Yields_Owns_ACE() {
             var expectedSID = "S-1-5-21-3130019616-2776909439-2417379446-512";

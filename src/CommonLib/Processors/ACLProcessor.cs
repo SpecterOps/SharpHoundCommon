@@ -452,6 +452,11 @@ namespace SharpHoundCommonLib.Processors {
 
         public async IAsyncEnumerable<ACE> ProcessACL(byte[] ntSecurityDescriptor, string objectDomain,
             Label objectType, bool hasLaps, bool checkForOwnerRights, string objectName) {
+            if (objectType is Label.SiteServer or Label.SiteSubnet) {
+                _log.LogDebug("Skipping ACL processing for {ObjectType} object {ObjectName}", objectType, objectName);
+                yield break;
+            }
+
             await BuildGuidCache(objectDomain);
 
             if (ntSecurityDescriptor == null) {
