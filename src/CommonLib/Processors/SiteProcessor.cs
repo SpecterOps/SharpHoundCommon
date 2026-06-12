@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using SharpHoundCommonLib.Enums;
 using SharpHoundCommonLib.OutputTypes;
 
 namespace SharpHoundCommonLib.Processors
@@ -55,6 +56,27 @@ namespace SharpHoundCommonLib.Processors
             return (false, default);
         }
 
+        public async Task<(bool Success, TypedPrincipal principal)> GetReferencedComputerForServer(IDirectoryObject entry)
+        {
+            if (entry.TryGetProperty(LDAPProperties.ServerReference, out var serverReference))
+            {
+                return await GetReferencedComputerForServer(serverReference);
+            }
+
+            return (false, default);
+        }
+
+        public async Task<(bool Success, TypedPrincipal principal)> GetReferencedComputerForServer(Dictionary<string, object> serverProperties)
+        {
+            if (!serverProperties.TryGetValue(LDAPProperties.ServerReference, out var serverReference) ||
+                serverReference == null)
+            {
+                return (false, default);
+            }
+
+            return await GetReferencedComputerForServer(serverReference.ToString());
+        }
+
         /// <summary>
         /// Uses the distinguishedname of a site server object to get its containing site by stripping the two first parts and using the remainder to find the container object
         /// Saves lots of LDAP calls compared to enumerating container info directly
@@ -76,6 +98,22 @@ namespace SharpHoundCommonLib.Processors
         public async Task<(bool Success, TypedPrincipal Principal)> GetContainingSiteForSubnet(string siteObject)
         {
             return await _utils.ResolveDistinguishedName(siteObject);
+        }
+
+        public async Task<(bool Success, TypedPrincipal Principal)> GetReferencedComputerForServer(string serverReference)
+        {
+            if (string.IsNullOrWhiteSpace(serverReference))
+            {
+                return (false, default);
+            }
+
+            var resolved = await _utils.ResolveDistinguishedName(serverReference);
+            if (!resolved.Success || resolved.Principal == null || resolved.Principal.ObjectType != Label.Computer)
+            {
+                return (false, default);
+            }
+
+            return resolved;
         }
 
         public IAsyncEnumerable<GPLink> ReadSiteGPLinks(ResolvedSearchResult result, IDirectoryObject entry)

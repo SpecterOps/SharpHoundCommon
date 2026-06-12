@@ -84,6 +84,82 @@ namespace CommonLibTest
             utils.Verify(x => x.ResolveDistinguishedName(siteDn), Times.Once);
         }
 
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("   ")]
+        public async Task SiteProcessor_GetReferencedComputerForServer_InvalidServerReference_ReturnsFalse(string serverReference)
+        {
+            var utils = new Mock<ILdapUtils>(MockBehavior.Strict);
+            var processor = new SiteProcessor(utils.Object);
+
+            var (success, principal) = await processor.GetReferencedComputerForServer(new Dictionary<string, object>
+            {
+                [LDAPProperties.ServerReference] = serverReference
+            });
+
+            Assert.False(success);
+            Assert.Null(principal);
+            utils.Verify(x => x.ResolveDistinguishedName(It.IsAny<string>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task SiteProcessor_GetReferencedComputerForServer_ValidServerReference_ResolvesComputer()
+        {
+            const string serverReference = "CN=PRIMARY,OU=DOMAIN CONTROLLERS,DC=TESTLAB,DC=LOCAL";
+            var expected = new TypedPrincipal("S-1-5-21-3130019616-2776909439-2417379446-1001", Label.Computer);
+            var utils = new Mock<ILdapUtils>();
+            utils.Setup(x => x.ResolveDistinguishedName(serverReference)).ReturnsAsync((true, expected));
+            var processor = new SiteProcessor(utils.Object);
+
+            var (success, principal) = await processor.GetReferencedComputerForServer(new Dictionary<string, object>
+            {
+                [LDAPProperties.ServerReference] = serverReference
+            });
+
+            Assert.True(success);
+            Assert.Equal(expected, principal);
+            utils.Verify(x => x.ResolveDistinguishedName(serverReference), Times.Once);
+        }
+
+        [Fact]
+        public async Task SiteProcessor_GetReferencedComputerForServer_NonComputerReference_ReturnsFalse()
+        {
+            const string serverReference = "CN=ADMINISTRATORS,CN=BUILTIN,DC=TESTLAB,DC=LOCAL";
+            var utils = new Mock<ILdapUtils>();
+            utils.Setup(x => x.ResolveDistinguishedName(serverReference))
+                .ReturnsAsync((true, new TypedPrincipal("TESTLAB.LOCAL-S-1-5-32-544", Label.Group)));
+            var processor = new SiteProcessor(utils.Object);
+
+            var (success, principal) = await processor.GetReferencedComputerForServer(serverReference);
+
+            Assert.False(success);
+            Assert.Null(principal);
+            utils.Verify(x => x.ResolveDistinguishedName(serverReference), Times.Once);
+        }
+
+        [Fact]
+        public async Task SiteProcessor_GetReferencedComputerForServer_DirectoryObject_UsesServerReference()
+        {
+            const string serverReference = "CN=PRIMARY,OU=DOMAIN CONTROLLERS,DC=TESTLAB,DC=LOCAL";
+            var processor = new SiteProcessor(new MockLdapUtils());
+            var entry = new MockDirectoryObject("", new Dictionary<string, object>
+            {
+                [LDAPProperties.ServerReference] = serverReference
+            }, "", "");
+
+            var (success, principal) = await processor.GetReferencedComputerForServer(entry);
+
+            Assert.True(success);
+            Assert.Equal(new TypedPrincipal("S-1-5-21-3130019616-2776909439-2417379446-1001", Label.Computer), principal);
+        }
+
+        [Fact]
+        public void SiteServer_SeverIs_EdgeNameMatchesOutputProperty()
+        {
+            Assert.Equal(nameof(SiteServer.SeverIs), EdgeNames.SeverIs);
+        }
+
         [Fact]
         public async Task SiteProcessor_ReadSiteGPLinks_IgnoresNull()
         {
