@@ -2449,7 +2449,10 @@ namespace SharpHoundCommonLib {
         }
 
         public void Dispose() {
-            ResetUtils();
+            lock (_currentDomainLock) {
+                _currentDomain?.Dispose();
+                _currentDomain = null;
+            }
             _connectionPool?.Dispose();
         }
 
