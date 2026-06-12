@@ -1,5 +1,4 @@
 ﻿using SharpHoundCommonLib.OutputTypes;
-using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -9,12 +8,15 @@ namespace SharpHoundCommonLib.Processors
     public class DCRegistryProcessor
     {
         private readonly ILogger _log;
+        private readonly IRegistryAccessor _registryAccessor;
+        
         public readonly ILdapUtils _utils;
         public delegate Task ComputerStatusDelegate(CSVComputerStatus status);
 
         public DCRegistryProcessor(ILdapUtils utils, ILogger log = null)
         {
             _utils = utils;
+            _registryAccessor = new RegistryAccessor(log);
             _log = log ?? Logging.LogProvider.CreateLogger("DCRegProc");
         }
 
@@ -30,7 +32,7 @@ namespace SharpHoundCommonLib.Processors
             var ret = new IntRegistryAPIResult();
             const string subKey = @"SYSTEM\CurrentControlSet\Control\SecurityProviders\Schannel";
             const string subValue = "CertificateMappingMethods";
-            var data = Helpers.GetRegistryKeyData(target, subKey, subValue, _log);
+            var data = _registryAccessor.GetRegistryKeyData(target, subKey, subValue);
 
             ret.Collected = data.Collected;
             if (!data.Collected)
@@ -62,7 +64,7 @@ namespace SharpHoundCommonLib.Processors
             var ret = new IntRegistryAPIResult();
             const string subKey = @"SYSTEM\CurrentControlSet\Services\Kdc";
             const string subValue = "StrongCertificateBindingEnforcement";
-            var data = Helpers.GetRegistryKeyData(target, subKey, subValue, _log);
+            var data = _registryAccessor.GetRegistryKeyData(target, subKey, subValue);
 
             ret.Collected = data.Collected;
             if (!data.Collected)
@@ -94,7 +96,7 @@ namespace SharpHoundCommonLib.Processors
             var ret = new StrRegistryAPIResult();
             const string subKey = @"SYSTEM\CurrentControlSet\Services\Netlogon\Parameters";
             const string subValue = "VulnerableChannelAllowList";
-            var data = Helpers.GetRegistryKeyData(target, subKey, subValue, _log);
+            var data = _registryAccessor.GetRegistryKeyData(target, subKey, subValue);
 
             ret.Collected = data.Collected;
             if (!data.Collected)

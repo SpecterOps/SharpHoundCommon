@@ -1,14 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net472</TargetFramework>
-        <OutputType>library</OutputType>
         <PackageId>SharpHoundRPC</PackageId>
-        <LangVersion>default</LangVersion>
-        <Authors>Rohan Vazarkar</Authors>
-        <Company>SpecterOps</Company>
         <PackageDescription>SAM/LSA Wrapper for C# BloodHound tasks</PackageDescription>
-        <PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
-        <Version>4.5.0</Version>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
         <AssemblyName>SharpHoundRPC</AssemblyName>
         <RootNamespace>SharpHoundRPC</RootNamespace>
     </PropertyGroup>
@@ -20,9 +14,9 @@
         <PackageReference Include="System.ValueTuple" Version="4.5.0"/>
     </ItemGroup>
     <ItemGroup>
-        <Folder Include="Properties"/>
+        <Reference Include="System.Management" />
     </ItemGroup>
     <ItemGroup>
-        <Reference Include="System.Management" />
+        <None Include="README.md" Pack="true" PackagePath="" />
     </ItemGroup>
 </Project>

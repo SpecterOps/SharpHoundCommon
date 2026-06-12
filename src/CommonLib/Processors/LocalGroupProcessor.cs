@@ -16,6 +16,7 @@ namespace SharpHoundCommonLib.Processors
         public delegate Task ComputerStatusDelegate(CSVComputerStatus status);
         private readonly ILogger _log;
         private readonly ILdapUtils _utils;
+        private readonly ISAMServerAccessor _samServerAccessor;
         private readonly AdaptiveTimeout _getMachineSidAdaptiveTimeout;
         private readonly AdaptiveTimeout _openSamServerAdaptiveTimeout;
         private readonly AdaptiveTimeout _getDomainsAdaptiveTimeout;
@@ -27,14 +28,16 @@ namespace SharpHoundCommonLib.Processors
 
         public LocalGroupProcessor(ILdapUtils utils, ILogger log = null) {
             _utils = utils;
+            _samServerAccessor = new SAMServerAccessor();
             _log = log ?? Logging.LogProvider.CreateLogger("LocalGroupProcessor");
             _getMachineSidAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ISAMServer.GetMachineSid)));
-            _openSamServerAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(SAMServer.OpenServer)));
+            _openSamServerAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ISAMServerAccessor.OpenServer)));
             _getDomainsAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ISAMServer.GetDomains)));
             _openDomainAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ISAMServer.OpenDomain)));
             _getAliasesAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ISAMDomain.GetAliases)));
             _openAliasAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ISAMDomain.OpenAlias)));
-            _getMembersAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ISAMAlias.GetMembers)));
+            // Disabling adaptive timeout for GetMembers as it can be very chatty and we don't want timeouts to cause us to miss groups entirely. We can re-enable adaptive timeouts here in the future if we find a good way to handle timeouts without losing entire groups
+            _getMembersAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ISAMAlias.GetMembers)), useAdaptiveTimeout: false);
             _lookupPrincipalBySidAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ISAMServer.LookupPrincipalBySid)));
         }
 
@@ -42,7 +45,7 @@ namespace SharpHoundCommonLib.Processors
 
         public virtual SharpHoundRPC.Result<ISAMServer> OpenSamServer(string computerName)
         {
-            var result = _openSamServerAdaptiveTimeout.ExecuteRPCWithTimeout((_) => SAMServer.OpenServer(computerName)).GetAwaiter().GetResult();
+            var result = _openSamServerAdaptiveTimeout.ExecuteRPCWithTimeout((_) => _samServerAccessor.OpenServer(computerName)).GetAwaiter().GetResult();
             if (result.IsFailed)
             {
                 return SharpHoundRPC.Result<ISAMServer>.Fail(result.SError);
@@ -299,9 +302,9 @@ namespace SharpHoundCommonLib.Processors
                             var (name, use) = lookupUserResult.Value;
                             var objectType = use switch
                             {
-                                SharedEnums.SidNameUse.User => Label.LocalUser,
-                                SharedEnums.SidNameUse.Group => Label.LocalGroup,
-                                SharedEnums.SidNameUse.Alias => Label.LocalGroup,
+                                SharedEnums.SidNameUse.User => Label.ADLocalUser,
+                                SharedEnums.SidNameUse.Group => Label.ADLocalGroup,
+                                SharedEnums.SidNameUse.Alias => Label.ADLocalGroup,
                                 _ => Label.Base
                             };
 
@@ -309,7 +312,7 @@ namespace SharpHoundCommonLib.Processors
                             typeCache.TryAdd(sidValue, new CachedLocalItem(name, objectType));
                             
                             // Throw out local users
-                            if (objectType == Label.LocalUser)
+                            if (objectType == Label.ADLocalUser)
                                 continue;
 
                             var newSid = $"{computerObjectId}-{securityIdentifier.Rid()}";

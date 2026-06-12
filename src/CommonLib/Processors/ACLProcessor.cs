@@ -587,7 +587,7 @@ namespace SharpHoundCommonLib.Processors {
                 if (aceRights.HasFlag(ActiveDirectoryRights.Self) &&
                     !aceRights.HasFlag(ActiveDirectoryRights.WriteProperty) &&
                     !aceRights.HasFlag(ActiveDirectoryRights.GenericWrite) && objectType == Label.Group &&
-                    aceType is ACEGuids.WriteMember or ACEGuids.AllGuid)
+                    aceType is ACEGuids.WriteMember or ACEGuids.MembershipPropertySet or ACEGuids.AllGuid)
                     yield return new ACE {
                         PrincipalType = resolvedPrincipal.ObjectType,
                         PrincipalSID = resolvedPrincipal.ObjectIdentifier,
@@ -792,7 +792,7 @@ namespace SharpHoundCommonLib.Processors {
                             IsPermissionForOwnerRightsSid = isPermissionForOwnerRightsSid,
                             IsInheritedPermissionForOwnerRightsSid = isInheritedPermissionForOwnerRightsSid,
                         };
-                    else if (objectType == Label.Group && aceType == ACEGuids.WriteMember)
+                    else if (objectType == Label.Group && (aceType is ACEGuids.WriteMember or ACEGuids.MembershipPropertySet))
                         yield return new ACE {
                             PrincipalType = resolvedPrincipal.ObjectType,
                             PrincipalSID = resolvedPrincipal.ObjectIdentifier,
@@ -808,6 +808,27 @@ namespace SharpHoundCommonLib.Processors {
                             PrincipalSID = resolvedPrincipal.ObjectIdentifier,
                             IsInherited = inherited,
                             RightName = EdgeNames.AddKeyCredentialLink,
+                            InheritanceHash = aceInheritanceHash,
+                            IsPermissionForOwnerRightsSid = isPermissionForOwnerRightsSid,
+                            IsInheritedPermissionForOwnerRightsSid = isInheritedPermissionForOwnerRightsSid,
+                        };
+                        else if (objectType is Label.User or Label.Computer && aceType == ACEGuids.WriteAltSecurityIdentities)
+                            yield return new ACE {
+                                PrincipalType = resolvedPrincipal.ObjectType,
+                                PrincipalSID = resolvedPrincipal.ObjectIdentifier,
+                                IsInherited = inherited,
+                                RightName = EdgeNames.WriteAltSecurityIdentities,
+                                InheritanceHash = aceInheritanceHash,
+                                IsPermissionForOwnerRightsSid = isPermissionForOwnerRightsSid,
+                                IsInheritedPermissionForOwnerRightsSid = isInheritedPermissionForOwnerRightsSid,
+                            };
+                        else if (objectType is Label.User or Label.Computer && aceType == ACEGuids.WritePublicInformation)
+                        yield return new ACE
+                        {
+                            PrincipalType = resolvedPrincipal.ObjectType,
+                            PrincipalSID = resolvedPrincipal.ObjectIdentifier,
+                            IsInherited = inherited,
+                            RightName = EdgeNames.WritePublicInformation,
                             InheritanceHash = aceInheritanceHash,
                             IsPermissionForOwnerRightsSid = isPermissionForOwnerRightsSid,
                             IsInheritedPermissionForOwnerRightsSid = isInheritedPermissionForOwnerRightsSid,

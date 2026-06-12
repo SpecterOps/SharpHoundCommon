@@ -36,9 +36,11 @@ namespace SharpHoundCommonLib.Processors {
         }
 
         private readonly ILdapUtils _utils;
+        private readonly ILogger _log;
 
-        public LdapPropertyProcessor(ILdapUtils utils) {
+        public LdapPropertyProcessor(ILdapUtils utils, ILogger log = null) {
             _utils = utils;
+            _log = log ?? Logging.LogProvider.CreateLogger(nameof(LdapPropertyProcessor));
         }
 
         private static Dictionary<string, object> GetCommonProps(IDirectoryObject entry) {
@@ -49,6 +51,21 @@ namespace SharpHoundCommonLib.Processors {
 
             if (entry.TryGetProperty(LDAPProperties.WhenCreated, out var wc)) {
                 ret["whencreated"] = Helpers.ConvertTimestampToUnixEpoch(wc);
+            }
+
+            if (entry.TryGetByteProperty(LDAPProperties.ObjectGUID, out var objectguid)) {
+                if (objectguid != null && objectguid.Length == 16)
+                {
+                    try
+                    {
+                        Guid guid = new Guid(objectguid);
+                        ret["objectguid"] = guid.ToString().ToUpperInvariant();
+                    }
+                    catch
+                    {
+                        // Skip malformed GUID bytes
+                    }
+                }
             }
 
             return ret;
@@ -233,55 +250,56 @@ namespace SharpHoundCommonLib.Processors {
             var userProps = new UserProperties();
             var props = GetCommonProps(entry);
 
-            var uacFlags = (UacFlags)0;
             if (entry.TryGetLongProperty(LDAPProperties.UserAccountControl, out var uac)) {
-                uacFlags = (UacFlags)uac;
-            }
+              var uacFlags = (UacFlags)uac;
+                props.Add("sensitive", uacFlags.HasFlag(UacFlags.NotDelegated));
+                props.Add("dontreqpreauth", uacFlags.HasFlag(UacFlags.DontReqPreauth));
+                props.Add("passwordnotreqd", uacFlags.HasFlag(UacFlags.PasswordNotRequired));
+                props.Add("unconstraineddelegation", uacFlags.HasFlag(UacFlags.TrustedForDelegation));
+                props.Add("pwdneverexpires", uacFlags.HasFlag(UacFlags.DontExpirePassword));
+                props.Add("enabled", !uacFlags.HasFlag(UacFlags.AccountDisable));
+                props.Add("trustedtoauth", uacFlags.HasFlag(UacFlags.TrustedToAuthForDelegation));
+                props.Add("smartcardrequired", uacFlags.HasFlag(UacFlags.SmartcardRequired));
+                props.Add("encryptedtextpwdallowed", uacFlags.HasFlag(UacFlags.EncryptedTextPwdAllowed));
+                props.Add("usedeskeyonly", uacFlags.HasFlag(UacFlags.UseDesKeyOnly));
+                props.Add("logonscriptenabled", uacFlags.HasFlag(UacFlags.Script));
+                props.Add("lockedout", uacFlags.HasFlag(UacFlags.Lockout));
+                props.Add("passwordcantchange", uacFlags.HasFlag(UacFlags.PasswordCantChange));
+                props.Add("passwordexpired", uacFlags.HasFlag(UacFlags.PasswordExpired));
+                props.Add("useraccountcontrol", uac);
 
-            props.Add("sensitive", uacFlags.HasFlag(UacFlags.NotDelegated));
-            props.Add("dontreqpreauth", uacFlags.HasFlag(UacFlags.DontReqPreauth));
-            props.Add("passwordnotreqd", uacFlags.HasFlag(UacFlags.PasswordNotRequired));
-            props.Add("unconstraineddelegation", uacFlags.HasFlag(UacFlags.TrustedForDelegation));
-            props.Add("pwdneverexpires", uacFlags.HasFlag(UacFlags.DontExpirePassword));
-            props.Add("enabled", !uacFlags.HasFlag(UacFlags.AccountDisable));
-            props.Add("trustedtoauth", uacFlags.HasFlag(UacFlags.TrustedToAuthForDelegation));
-            props.Add("smartcardrequired", uacFlags.HasFlag(UacFlags.SmartcardRequired));
-            props.Add("encryptedtextpwdallowed", uacFlags.HasFlag(UacFlags.EncryptedTextPwdAllowed));
-            props.Add("usedeskeyonly", uacFlags.HasFlag(UacFlags.UseDesKeyOnly));
-            props.Add("logonscriptenabled", uacFlags.HasFlag(UacFlags.Script));
-            props.Add("lockedout", uacFlags.HasFlag(UacFlags.Lockout));
-            props.Add("passwordcantchange", uacFlags.HasFlag(UacFlags.PasswordCantChange));
-            props.Add("passwordexpired", uacFlags.HasFlag(UacFlags.PasswordExpired));
+                userProps.UnconstrainedDelegation = uacFlags.HasFlag(UacFlags.TrustedForDelegation);
+                
+                var comps = new List<TypedPrincipal>();
+                if (entry.TryGetArrayProperty(LDAPProperties.AllowedToDelegateTo, out var delegates)) {
+                    props.Add("allowedtodelegate", delegates);
 
-            userProps.UnconstrainedDelegation = uacFlags.HasFlag(UacFlags.TrustedForDelegation);
+                    foreach (var d in delegates) {
+                        if (d == null)
+                            continue;
 
-            var comps = new List<TypedPrincipal>();
-            if (uacFlags.HasFlag(UacFlags.TrustedToAuthForDelegation) &&
-                entry.TryGetArrayProperty(LDAPProperties.AllowedToDelegateTo, out var delegates)) {
-                props.Add("allowedtodelegate", delegates);
-
-                foreach (var d in delegates) {
-                    if (d == null)
-                        continue;
-
-                    var resolvedHost = await _utils.ResolveHostToSid(d, domain);
-                    if (resolvedHost.Success && resolvedHost.SecurityIdentifier.Contains("S-1"))
-                    {
+                        var resolvedHost = await _utils.ResolveHostToSid(d, domain);
+                        if (!resolvedHost.Success || !resolvedHost.SecurityIdentifier.StartsWith("S-1-5-")) continue;
                         await SendComputerStatus(new CSVComputerStatus {
                             Status = CSVComputerStatus.StatusSuccess,
                             Task = nameof(ReadUserProperties),
                             ComputerName = Helpers.StripServicePrincipalName(d).ToUpper().TrimEnd('$'),
                             ObjectId = resolvedHost.SecurityIdentifier,
                         });
+                            
                         comps.Add(new TypedPrincipal {
                             ObjectIdentifier = resolvedHost.SecurityIdentifier,
                             ObjectType = Label.Computer
                         });
                     }
                 }
-            }
 
-            userProps.AllowedToDelegate = comps.Distinct().ToArray();
+                userProps.AllowedToDelegate = comps.Distinct().ToArray();
+            }
+            else {
+                entry.TryGetSecurityIdentifier(out var sid);
+                _log.LogWarning("Unable to collect UserAccountControl flags for {SecurityIdentifier}.", sid);
+            }
 
             if (!entry.TryGetProperty(LDAPProperties.LastLogon, out var lastLogon)) {
                 lastLogon = null;
@@ -313,7 +331,6 @@ namespace SharpHoundCommonLib.Processors {
             props.Add("unicodepassword", entry.GetProperty(LDAPProperties.UnicodePassword));
             props.Add("sfupassword", entry.GetProperty(LDAPProperties.MsSFU30Password));
             props.Add("logonscript", entry.GetProperty(LDAPProperties.ScriptPath));
-            props.Add("useraccountcontrol", uac);
             props.Add("profilepath", entry.GetProperty(LDAPProperties.ProfilePath));
 
             entry.TryGetLongProperty(LDAPProperties.AdminCount, out var ac);
@@ -372,8 +389,7 @@ namespace SharpHoundCommonLib.Processors {
             props.Add("admincount", ac != 0);
 
             var comps = new List<TypedPrincipal>();
-            if (flags.HasFlag(UacFlags.TrustedToAuthForDelegation) &&
-                entry.TryGetArrayProperty(LDAPProperties.AllowedToDelegateTo, out var delegates)) {
+            if (entry.TryGetArrayProperty(LDAPProperties.AllowedToDelegateTo, out var delegates)) {
                 props.Add("allowedtodelegate", delegates);
 
                 foreach (var d in delegates) {
@@ -381,19 +397,17 @@ namespace SharpHoundCommonLib.Processors {
                         continue;
 
                     var resolvedHost = await _utils.ResolveHostToSid(d, domain);
-                    if (resolvedHost.Success && resolvedHost.SecurityIdentifier.Contains("S-1"))
-                    {
-                        await SendComputerStatus(new CSVComputerStatus {
-                            Status = CSVComputerStatus.StatusSuccess,
-                            Task = nameof(ReadComputerProperties),
-                            ComputerName = d,
-                            ObjectId = resolvedHost.SecurityIdentifier,
-                        });
-                        comps.Add(new TypedPrincipal {
-                            ObjectIdentifier = resolvedHost.SecurityIdentifier,
-                            ObjectType = Label.Computer
-                        });
-                    }
+                    if (!resolvedHost.Success || !resolvedHost.SecurityIdentifier.StartsWith("S-1-5-")) continue;
+                    await SendComputerStatus(new CSVComputerStatus {
+                        Status = CSVComputerStatus.StatusSuccess,
+                        Task = nameof(ReadComputerProperties),
+                        ComputerName = d,
+                        ObjectId = resolvedHost.SecurityIdentifier,
+                    });
+                    comps.Add(new TypedPrincipal {
+                        ObjectIdentifier = resolvedHost.SecurityIdentifier,
+                        ObjectType = Label.Computer
+                    });
                 }
             }
 
@@ -440,20 +454,6 @@ namespace SharpHoundCommonLib.Processors {
                 }
             }
 
-            var objectGuidBytes = entry.GetByteProperty(LDAPProperties.ObjectGUID);
-            if (objectGuidBytes != null && objectGuidBytes.Length == 16)
-            {
-                try
-                {
-                    Guid guid = new Guid(objectGuidBytes);
-                    props.Add(LDAPProperties.ObjectGUID, guid.ToString().ToUpper());
-                }
-                catch
-                {
-                    // Skip malformed GUID bytes
-                }
-            }
-
             compProps.DumpSMSAPassword = smsaPrincipals.ToArray();
 
             compProps.Props = props;
@@ -470,7 +470,7 @@ namespace SharpHoundCommonLib.Processors {
             var props = GetCommonProps(entry);
 
             // Certificate
-            if (entry.TryGetByteProperty(LDAPProperties.CACertificate, out var rawCertificate)) {
+            if (entry.TryGetByteProperty(LDAPProperties.CACertificate, out var rawCertificate) && HasBytes(rawCertificate)) {
                 var cert = new ParsedCertificate(rawCertificate);
                 props.Add("certthumbprint", cert.Thumbprint);
                 props.Add("certname", cert.Name);
@@ -496,7 +496,7 @@ namespace SharpHoundCommonLib.Processors {
             props.Add("hascrosscertificatepair", hasCrossCertificatePair);
 
             // Certificate
-            if (entry.TryGetByteProperty(LDAPProperties.CACertificate, out var rawCertificate)) {
+            if (entry.TryGetByteProperty(LDAPProperties.CACertificate, out var rawCertificate) && HasBytes(rawCertificate)) {
                 var cert = new ParsedCertificate(rawCertificate);
                 props.Add("certthumbprint", cert.Thumbprint);
                 props.Add("certname", cert.Name);
@@ -508,6 +508,11 @@ namespace SharpHoundCommonLib.Processors {
             return props;
         }
 
+        /// <summary>
+        /// Returns the properties associated with the EnterpriseCA
+        /// </summary>
+        /// <param name="entry"></param>
+        /// <returns>Returns a dictionary with the common properties and the caname, hostname, and flags properties of the EnterpriseCA</returns>
         public static Dictionary<string, object> ReadEnterpriseCAProperties(IDirectoryObject entry) {
             var props = GetCommonProps(entry);
             if (entry.TryGetLongProperty("flags", out var flags))
@@ -516,7 +521,7 @@ namespace SharpHoundCommonLib.Processors {
             props.Add("dnshostname", entry.GetProperty(LDAPProperties.DNSHostName));
 
             // Certificate
-            if (entry.TryGetByteProperty(LDAPProperties.CACertificate, out var rawCertificate)) {
+            if (entry.TryGetByteProperty(LDAPProperties.CACertificate, out var rawCertificate) && HasBytes(rawCertificate)) {
                 var cert = new ParsedCertificate(rawCertificate);
                 props.Add("certthumbprint", cert.Thumbprint);
                 props.Add("certname", cert.Name);
@@ -952,6 +957,11 @@ namespace SharpHoundCommonLib.Processors {
             {
                 return "Unknown";
             }
+        }
+        
+        private static bool HasBytes(byte[] data) {
+            return data.Length > 0
+                   && !(data.Length == 1 && data[0] == 0x00);
         }
 
         [DllImport("Advapi32", SetLastError = false)]

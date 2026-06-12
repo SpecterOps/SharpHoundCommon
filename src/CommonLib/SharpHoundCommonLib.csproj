@@ -1,17 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net472</TargetFramework>
-        <OutputType>library</OutputType>
         <PackageId>SharpHoundCommon</PackageId>
-        <LangVersion>default</LangVersion>
-        <Authors>Rohan Vazarkar</Authors>
-        <Company>SpecterOps</Company>
         <PackageDescription>Common library for C# BloodHound enumeration tasks</PackageDescription>
-        <PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
-        <RepositoryUrl>https://github.com/BloodHoundAD/SharpHoundCommon</RepositoryUrl>
-        <Version>4.5.0</Version>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
         <AssemblyName>SharpHoundCommonLib</AssemblyName>
         <RootNamespace>SharpHoundCommonLib</RootNamespace>
+        <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     </PropertyGroup>
     <PropertyGroup>
         <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
@@ -29,28 +23,9 @@
         <Reference Include="System.Net.Http" />
     </ItemGroup>
     <ItemGroup>
-        <Folder Include="Properties" />
+        <ProjectReference Include="..\SharpHoundRPC\SharpHoundRPC.csproj" />
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="..\SharpHoundRPC\SharpHoundRPC.csproj" PrivateAssets="All" />
+        <None Include="README.md" Pack="true" PackagePath="" />
     </ItemGroup>
-    <PropertyGroup>
-        <TargetsForTfmSpecificBuildOutput>
-            $(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
-        <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
-    </PropertyGroup>
-    <Target Name="CopyProjectReferencesToPackage" DependsOnTargets="BuildOnlySettings;ResolveReferences">
-        <ItemGroup>
-            <!-- Filter out unnecessary files -->
-            <_ReferenceCopyLocalPaths Include="@(ReferenceCopyLocalPaths-&gt;WithMetadataValue('ReferenceSourceTarget', 'ProjectReference')-&gt;WithMetadataValue('PrivateAssets', 'All'))" />
-        </ItemGroup>
-
-        <!-- Print batches for debug purposes -->
-        <Message Text="Batch for .nupkg: ReferenceCopyLocalPaths = @(_ReferenceCopyLocalPaths), ReferenceCopyLocalPaths.DestinationSubDirectory = %(_ReferenceCopyLocalPaths.DestinationSubDirectory) Filename = %(_ReferenceCopyLocalPaths.Filename) Extension = %(_ReferenceCopyLocalPaths.Extension)" Importance="High" Condition="'@(_ReferenceCopyLocalPaths)' != ''" />
-
-        <ItemGroup>
-            <!-- Add file to package with consideration of sub folder. If empty, the root folder is chosen. -->
-            <BuildOutputInPackage Include="@(_ReferenceCopyLocalPaths)" TargetPath="%(_ReferenceCopyLocalPaths.DestinationSubDirectory)" />
-        </ItemGroup>
-    </Target>
 </Project>

@@ -8,13 +8,15 @@
         public const string UserForceChangePassword = "00299570-246d-11d0-a768-00aa006e0529";
         public const string AllGuid = "00000000-0000-0000-0000-000000000000";
         public const string WriteMember = "bf9679c0-0de6-11d0-a285-00aa003049e2";
+        public const string MembershipPropertySet = "bc0ac240-79a9-11d0-9020-00c04fc2d4cf";  // property set https://learn.microsoft.com/en-us/windows/win32/adschema/r-membership
         public const string WriteAllowedToAct = "3f78c3e5-f79a-46bd-a0b8-9d18116ddc79";
         public const string WriteSPN = "f3a64788-5306-11d1-a9c5-0000f80367c1";
         public const string AddKeyPrincipal = "5b47d60f-6090-40b2-9f37-2a4de88f3063";
         public const string UserAccountRestrictions = "4c164200-20c0-11d0-a768-00aa006e0529";
         public const string WriteGPLink = "f30e3bbe-9ff0-11d1-b603-0000f80367c1";
         public const string WriteTitle = "bf967a55-0de6-11d0-a285-00aa003049e2"; // Not an edge, just used for testing
-
+        public const string WriteAltSecurityIdentities = "00fbf30c-91fe-11d1-aebc-0000f80367c1";
+        public const string WritePublicInformation = "e48d0154-bcf8-11d1-8702-00c04fb96050";
 
         //Cert abuse ACEs
         public const string PKINameFlag = "ea1dddc4-60ff-416e-8cc0-17cee534bce7";

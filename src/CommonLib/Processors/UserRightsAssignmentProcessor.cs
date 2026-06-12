@@ -162,14 +162,14 @@ namespace SharpHoundCommonLib.Processors {
                         _log.LogTrace("Got local account {sid} on computer {Computer} for privilege {Privilege}",
                             sid.Value, computerName, privilege);
                         var objectType = use switch {
-                            SharedEnums.SidNameUse.User => Label.LocalUser,
-                            SharedEnums.SidNameUse.Group => Label.LocalGroup,
-                            SharedEnums.SidNameUse.Alias => Label.LocalGroup,
+                            SharedEnums.SidNameUse.User => Label.ADLocalUser,
+                            SharedEnums.SidNameUse.Group => Label.ADLocalGroup,
+                            SharedEnums.SidNameUse.Alias => Label.ADLocalGroup,
                             _ => Label.Base
                         };
 
                         //Throw out local user accounts
-                        if (objectType == Label.LocalUser)
+                        if (objectType == Label.ADLocalUser)
                             continue;
 
                         //The local group sid is computer machine sid - group rid.

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.DirectoryServices.Protocols;
 using System.IO;
 using System.Linq;
+using System.Runtime.Versioning;
 using System.Threading;
 using System.Threading.Tasks;
 using CommonLibTest.Facades;
@@ -295,6 +296,7 @@ namespace CommonLibTest {
             Assert.Empty(act3.LocalAdmins);
         }
 
+        [SupportedOSPlatform("windows")]
         [WindowsOnlyFact]
         public async Task GPOLocalGroupProcessor_ReadGPOLocalGroups() {
             var mockLDAPUtils = new Mock<ILdapUtils>(MockBehavior.Loose);

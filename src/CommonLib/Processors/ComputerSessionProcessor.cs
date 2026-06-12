@@ -24,6 +24,7 @@ namespace SharpHoundCommonLib.Processors {
         private readonly string _localAdminPassword;
         private readonly AdaptiveTimeout _readUserSessionsAdaptiveTimeout;
         private readonly AdaptiveTimeout _readUserSessionsPriviledgedAdaptiveTimeout;
+        private readonly IRegistryAccessor _registryAccessor;
 
         public ComputerSessionProcessor(ILdapUtils utils,
             NativeMethods nativeMethods = null, ILogger log = null, string currentUserName = null,
@@ -38,6 +39,7 @@ namespace SharpHoundCommonLib.Processors {
             _localAdminPassword = localAdminPassword;
             _readUserSessionsAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ReadUserSessions)));
             _readUserSessionsPriviledgedAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ReadUserSessionsPrivileged)));
+            _registryAccessor = new RegistryAccessor();
         }
 
         public event ComputerStatusDelegate ComputerStatusEvent;
@@ -293,7 +295,7 @@ namespace SharpHoundCommonLib.Processors {
             _log.LogDebug("Running RegSessionEnum for {ObjectName}", computerName);
 
             try {
-                using (var key = await SHRegistryKey.Connect(RegistryHive.Users, computerName)) {
+                using (var key = await _registryAccessor.Connect(RegistryHive.Users, computerName)) {
                     ret.Collected = true;
                     await SendComputerStatus(new CSVComputerStatus {
                         Status = CSVComputerStatus.StatusSuccess,
