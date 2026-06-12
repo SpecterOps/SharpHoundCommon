@@ -255,10 +255,10 @@ namespace CommonLibTest {
             "Default-First-Site-Name", "DEFAULT-FIRST-SITE-NAME@TESTLAB.LOCAL")]
         [InlineData(ObjectClass.SiteServerClass, Label.SiteServer,
             "CN=PRIMARY,CN=Servers,CN=Default-First-Site-Name,CN=Sites,CN=Configuration,DC=TESTLAB,DC=LOCAL",
-            "primary.testlab.local", "PRIMARY.TESTLAB.LOCAL")]
+            "primary.testlab.local", "PRIMARY.TESTLAB.LOCAL@TESTLAB.LOCAL")]
         [InlineData(ObjectClass.SiteSubnetClass, Label.SiteSubnet,
             "CN=10.0.0.0/24,CN=Subnets,CN=Sites,CN=Configuration,DC=TESTLAB,DC=LOCAL",
-            "10.0.0.0/24", "10.0.0.0/24")]
+            "10.0.0.0/24", "10.0.0.0/24@TESTLAB.LOCAL")]
         public async Task Test_ResolveSearchResult_SiteObjects(string objectClass, Label expectedLabel,
             string distinguishedName, string name, string expectedDisplayName) {
             var utils = new MockLdapUtils();
