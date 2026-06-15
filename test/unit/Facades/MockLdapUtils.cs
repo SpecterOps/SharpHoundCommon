@@ -431,6 +431,7 @@ namespace CommonLibTest.Facades
                     "S-1-5-21-3130019616-2776909439-2417379446-2105", Label.Computer),
                 "S-1-5-21-3130019616-2776909439-2417379446-2120" => new TypedPrincipal(
                     "S-1-5-21-3130019616-2776909439-2417379446-2120", Label.Computer),
+                "CN=BUILTIN,DC=TESTLAB,DC=LOCAL" => new TypedPrincipal("S-1-5-32", Label.Container),
                 "CN=REPLICATOR,CN=BUILTIN,DC=TESTLAB,DC=LOCAL" => new TypedPrincipal("TESTLAB.LOCAL-S-1-5-32-552",
                     Label.Group),
                 "CN=PRINT OPERATORS,CN=BUILTIN,DC=TESTLAB,DC=LOCAL" => new TypedPrincipal("TESTLAB.LOCAL-S-1-5-32-550",
@@ -762,6 +763,7 @@ namespace CommonLibTest.Facades
         public async Task<(bool Success, TypedPrincipal Principal)> ResolveDistinguishedName(string distinguishedName) {
             var result =  distinguishedName.ToUpper() switch
             {
+                "CN=BUILTIN,DC=TESTLAB,DC=LOCAL" => new TypedPrincipal("S-1-5-32", Label.Container),
                 "CN=REPLICATOR,CN=BUILTIN,DC=TESTLAB,DC=LOCAL" => new TypedPrincipal("TESTLAB.LOCAL-S-1-5-32-552",
                     Label.Group),
                 "CN=PRINT OPERATORS,CN=BUILTIN,DC=TESTLAB,DC=LOCAL" => new TypedPrincipal("TESTLAB.LOCAL-S-1-5-32-550",

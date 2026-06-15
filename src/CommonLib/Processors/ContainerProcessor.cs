@@ -57,18 +57,6 @@ namespace SharpHoundCommonLib.Processors
         {
             var containerDn = Helpers.RemoveDistinguishedNamePrefix(distinguishedName);
 
-            //If the container is the builtin container, we want to redirect the containing object to the domain of the object
-            if (containerDn.StartsWith("CN=BUILTIN", StringComparison.OrdinalIgnoreCase))
-            {
-                //This is always safe
-                var domain = Helpers.DistinguishedNameToDomain(distinguishedName);
-                if (await _utils.GetDomainSidFromDomainName(domain) is (true, var domainSid)) {
-                    return (true, new TypedPrincipal(domainSid, Label.Domain));    
-                }
-
-                return (false, default);
-            }
-
             return await _utils.ResolveDistinguishedName(containerDn);
         }
 
