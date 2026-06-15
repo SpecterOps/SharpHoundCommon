@@ -20,6 +20,7 @@ namespace CommonLibTest.Facades
     [SuppressMessage("Interoperability", "CA1416:Validate platform compatibility")]
     public class MockLdapUtils : ILdapUtils
     {
+        public const string BuiltinContainerGuid = "C8D73525-F9B2-4F68-B1D3-9457896B3C80";
         private readonly ConcurrentDictionary<string, byte> _domainControllers = new();
         private readonly Forest _forest;
         private readonly ConcurrentDictionary<string, string> _seenWellKnownPrincipals = new();
@@ -58,6 +59,7 @@ namespace CommonLibTest.Facades
                     "S-1-5-21-3130019616-2776909439-2417379446-512", Label.Group),
                 "S-1-5-21-3130019616-2776909439-2417379446-2606" => new TypedPrincipal(
                     "S-1-5-21-3130019616-2776909439-2417379446-2606", Label.User),
+                BuiltinContainerGuid => new TypedPrincipal(BuiltinContainerGuid, Label.Container),
                 "E32A6AC7-083B-4DD7-ACFF-6D9C2B1AFAF5" => new TypedPrincipal("E32A6AC7-083B-4DD7-ACFF-6D9C2B1AFAF5",
                     Label.Container),
                 "S-1-5-21-3130019616-2776909439-2417379446-519" => new TypedPrincipal(
@@ -431,7 +433,7 @@ namespace CommonLibTest.Facades
                     "S-1-5-21-3130019616-2776909439-2417379446-2105", Label.Computer),
                 "S-1-5-21-3130019616-2776909439-2417379446-2120" => new TypedPrincipal(
                     "S-1-5-21-3130019616-2776909439-2417379446-2120", Label.Computer),
-                "CN=BUILTIN,DC=TESTLAB,DC=LOCAL" => new TypedPrincipal("S-1-5-32", Label.Container),
+                "CN=BUILTIN,DC=TESTLAB,DC=LOCAL" => new TypedPrincipal(BuiltinContainerGuid, Label.Container),
                 "CN=REPLICATOR,CN=BUILTIN,DC=TESTLAB,DC=LOCAL" => new TypedPrincipal("TESTLAB.LOCAL-S-1-5-32-552",
                     Label.Group),
                 "CN=PRINT OPERATORS,CN=BUILTIN,DC=TESTLAB,DC=LOCAL" => new TypedPrincipal("TESTLAB.LOCAL-S-1-5-32-550",
@@ -763,7 +765,7 @@ namespace CommonLibTest.Facades
         public async Task<(bool Success, TypedPrincipal Principal)> ResolveDistinguishedName(string distinguishedName) {
             var result =  distinguishedName.ToUpper() switch
             {
-                "CN=BUILTIN,DC=TESTLAB,DC=LOCAL" => new TypedPrincipal("S-1-5-32", Label.Container),
+                "CN=BUILTIN,DC=TESTLAB,DC=LOCAL" => new TypedPrincipal(BuiltinContainerGuid, Label.Container),
                 "CN=REPLICATOR,CN=BUILTIN,DC=TESTLAB,DC=LOCAL" => new TypedPrincipal("TESTLAB.LOCAL-S-1-5-32-552",
                     Label.Group),
                 "CN=PRINT OPERATORS,CN=BUILTIN,DC=TESTLAB,DC=LOCAL" => new TypedPrincipal("TESTLAB.LOCAL-S-1-5-32-550",

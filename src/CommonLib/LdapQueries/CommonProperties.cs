@@ -9,7 +9,8 @@
             LDAPProperties.Flags
         };
 
-        public static readonly string[] ObjectID = { LDAPProperties.ObjectSID, LDAPProperties.ObjectGUID };
+        public static readonly string[] ObjectID =
+            { LDAPProperties.ObjectSID, LDAPProperties.ObjectGUID, LDAPProperties.ObjectClass };
         public static readonly string[] ObjectSID = { LDAPProperties.ObjectSID };
         public static readonly string[] GPCFileSysPath = { LDAPProperties.GPCFileSYSPath };
 

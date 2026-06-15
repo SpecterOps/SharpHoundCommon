@@ -168,7 +168,7 @@ namespace CommonLibTest
 
             (success, result) = await proc.GetContainingObject("CN=ADMINISTRATORS,CN=BUILTIN,DC=TESTLAB,DC=LOCAL");
             Assert.Equal(Label.Container, result.ObjectType);
-            Assert.Equal("S-1-5-32", result.ObjectIdentifier);
+            Assert.Equal(MockLdapUtils.BuiltinContainerGuid, result.ObjectIdentifier);
             Assert.True(success);
         }
 

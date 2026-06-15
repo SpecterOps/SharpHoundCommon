@@ -141,6 +141,20 @@ namespace CommonLibTest {
         }
 
         [Fact]
+        public void Test_GetObjectIdentifier_BuiltinContainer_UsesGuid() {
+            var expectedGuid = Guid.NewGuid().ToString().ToUpper();
+            var attribs = new Dictionary<string, object> {
+                { LDAPProperties.ObjectClass, new[] { "top", ObjectClass.BuiltinDomainClass } },
+            };
+
+            var mock = new MockDirectoryObject("CN=BuiltIn,DC=Testlab,DC=Local", attribs,
+                "S-1-5-32", expectedGuid);
+
+            Assert.True(mock.GetObjectIdentifier(out var objectIdentifier));
+            Assert.Equal(expectedGuid, objectIdentifier);
+        }
+
+        [Fact]
         public void Test_GetLabel_Computer_Objects() {
             var attribs = new Dictionary<string, object> {
                 { LDAPProperties.ObjectClass, new[] { "top", "msds-groupmanagedserviceaccount" } },
