@@ -928,8 +928,8 @@ namespace CommonLibTest {
             new LdapUtils().ResetUtils();
             const string key = "completeness-noop.test";
 
-            LdapUtils.CacheDomainInfo(null, new DomainInfo(name: "IGNORED"));
-            LdapUtils.CacheDomainInfo(key, null);
+            Assert.False(LdapUtils.CacheDomainInfo(null, new DomainInfo(name: "IGNORED")));
+            Assert.False(LdapUtils.CacheDomainInfo(key, null));
 
             // Static helper should fail through every tier because nothing was cached and the
             // server is unreachable with fallback disabled.
@@ -954,7 +954,7 @@ namespace CommonLibTest {
                 distinguishedName: "DC=h2-fabrikam,DC=test",
                 domainSid: "S-1-5-21-9-9-9",
                 netBiosName: "FABRIKAM");
-            LdapUtils.CacheDomainInfo(key, fabrikam);
+            Assert.False(LdapUtils.CacheDomainInfo(key, fabrikam));
 
             var (ok, cached) = await LdapUtils.GetDomainInfoStaticAsync(key, new LdapConfig {
                 Server = "unreachable.invalid.test",
@@ -976,7 +976,7 @@ namespace CommonLibTest {
                 distinguishedName: "DC=h2-netbios-match,DC=test",
                 domainSid: "S-1-5-21-1-1-1",
                 netBiosName: "H2NETBIOS");
-            LdapUtils.CacheDomainInfo(netBiosKey, info);
+            Assert.True(LdapUtils.CacheDomainInfo(netBiosKey, info));
 
             var (ok, cached) = await LdapUtils.GetDomainInfoStaticAsync(netBiosKey, new LdapConfig {
                 Server = "unreachable.invalid.test",
@@ -992,7 +992,7 @@ namespace CommonLibTest {
             const string lowerKey = "h2-case.test";
 
             var info = new DomainInfo(name: "H2-CASE.TEST", domainSid: "S-1-5-21-2-2-2");
-            LdapUtils.CacheDomainInfo(lowerKey, info);
+            Assert.True(LdapUtils.CacheDomainInfo(lowerKey, info));
 
             var (ok, cached) = await LdapUtils.GetDomainInfoStaticAsync(lowerKey, new LdapConfig {
                 Server = "unreachable.invalid.test",

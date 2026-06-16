@@ -1187,6 +1187,10 @@ namespace SharpHoundCommonLib {
         /// strictly more populated fields (per <see cref="DomainInfo.CompletenessScore"/>). Equal scores
         /// preserve the existing entry to keep cache writes idempotent under concurrent resolution.
         /// </summary>
+        /// <returns>
+        /// <c>true</c> when <paramref name="candidate"/> describes <paramref name="key"/> and is
+        /// therefore safe for callers to use; otherwise <c>false</c>.
+        /// </returns>
         /// <remarks>
         /// The four resolution tiers behind <see cref="GetDomainInfoAsync(string)"/> and
         /// <see cref="GetDomainInfoStaticAsync"/> populate different attribute subsets - notably
@@ -1206,19 +1210,21 @@ namespace SharpHoundCommonLib {
         /// same richest-available record.
         /// </para>
         /// </remarks>
-        internal static void CacheDomainInfo(string key, DomainInfo candidate) {
-            if (key == null || candidate == null) return;
-            if (!KeyMatchesCandidate(key, candidate)) return;
+        internal static bool CacheDomainInfo(string key, DomainInfo candidate) {
+            if (key == null || candidate == null) return false;
+            if (!KeyMatchesCandidate(key, candidate)) return false;
 
-            DomainInfo PickRicher(string _, DomainInfo existing)
-                => candidate.CompletenessScore() > (existing?.CompletenessScore() ?? -1) ? candidate : existing;
-
-            _domainInfoCache.AddOrUpdate(key, candidate, PickRicher);
+            _domainInfoCache.AddOrUpdate(key, candidate, PickBetterCandidate);
 
             if (!string.IsNullOrWhiteSpace(candidate.Name)
                 && !string.Equals(key, candidate.Name, StringComparison.OrdinalIgnoreCase)) {
-                _domainInfoCache.AddOrUpdate(candidate.Name, candidate, PickRicher);
+                _domainInfoCache.AddOrUpdate(candidate.Name, candidate, PickBetterCandidate);
             }
+
+            return true;
+
+            DomainInfo PickBetterCandidate(string _, DomainInfo existing)
+                => candidate.CompletenessScore() > (existing?.CompletenessScore() ?? -1) ? candidate : existing;
         }
 
         /// <summary>
@@ -1265,6 +1271,20 @@ namespace SharpHoundCommonLib {
                 return seed;
             }
             return enriched.CompletenessScore() > seed.CompletenessScore() ? enriched : seed;
+        }
+
+        private static bool TryAcceptResolvedDomainInfo(
+            string key, DomainInfo candidate, ILogger log, string tierName) {
+            if (CacheDomainInfo(key, candidate)) {
+                return true;
+            }
+
+            log?.LogDebug(
+                "{TierName} returned DomainInfo for {ResolvedDomain} while resolving {RequestedDomain}; ignoring result",
+                tierName,
+                candidate?.Name,
+                key);
+            return false;
         }
 
         /// <summary>
@@ -1398,30 +1418,34 @@ namespace SharpHoundCommonLib {
 
             if (pool != null) {
                 var (poolOk, poolInfo) = await ResolveDomainInfoControlledAsyncCore(domainName, pool, log);
-                if (poolOk) {
-                    CacheDomainInfo(domainName, poolInfo);
+                if (poolOk && TryAcceptResolvedDomainInfo(
+                        domainName, poolInfo, log, "Pool domain info resolution")) {
                     return (true, poolInfo);
                 }
             }
 
             var (directOk, directInfo) = await TryResolveDomainInfoViaDirectLdapAsync(domainName, config, log);
-            if (directOk) {
-                CacheDomainInfo(domainName, directInfo);
+            if (directOk && TryAcceptResolvedDomainInfo(
+                    domainName, directInfo, log, "Direct LDAP domain info resolution")) {
                 return (true, directInfo);
             }
 
             var (adsiOk, adsiInfo) = await TryResolveDomainInfoViaDirectoryEntryAsync(domainName, config, log);
             if (adsiOk) {
                 adsiInfo = await TryEnrichDomainInfoViaDirectLdapAsync(domainName, adsiInfo, config, log);
-                CacheDomainInfo(domainName, adsiInfo);
-                return (true, adsiInfo);
+                if (TryAcceptResolvedDomainInfo(
+                        domainName, adsiInfo, log, "DirectoryEntry domain info resolution")) {
+                    return (true, adsiInfo);
+                }
             }
 
             if (TryGetDomainInfoViaUncontrolledFallback(domainName, config, log, out var fallbackInfo)) {
                 fallbackInfo = await TryEnrichDomainInfoViaDirectLdapAsync(
                     domainName, fallbackInfo, config, log);
-                CacheDomainInfo(domainName, fallbackInfo);
-                return (true, fallbackInfo);
+                if (TryAcceptResolvedDomainInfo(
+                        domainName, fallbackInfo, log, "Uncontrolled domain info resolution")) {
+                    return (true, fallbackInfo);
+                }
             }
 
             return (false, null);
