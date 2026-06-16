@@ -30,7 +30,8 @@ namespace SharpHoundCommonLib.Processors {
         private static readonly Regex ExtractRid =
             new(@"S-1-5-32-([0-9]{3})", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        private static readonly ConcurrentDictionary<string, List<GroupAction>> GpoActionCache = new();
+        private static readonly ConcurrentDictionary<string, List<GroupAction>> GpoActionCache =
+            new(StringComparer.OrdinalIgnoreCase);
 
         private static readonly Dictionary<string, LocalGroupRids> ValidGroupNames =
             new(StringComparer.OrdinalIgnoreCase) {
@@ -66,13 +67,14 @@ namespace SharpHoundCommonLib.Processors {
             string domain;
             //If our dn is null, use our default domain
             if (string.IsNullOrEmpty(distinguishedName)) {
-                if (!_utils.GetDomain(out var domainResult)) {
+                var (ok, info) = await _utils.GetDomainInfoAsync();
+                if (!ok || string.IsNullOrEmpty(info?.Name)) {
                     return ret;
                 }
 
-                domain = domainResult.Name;
+                domain = info.Name;
             } else {
-                domain = Helpers.DistinguishedNameToDomain(distinguishedName);    
+                domain = Helpers.DistinguishedNameToDomain(distinguishedName);
             }
             
             // First lets check if this OU actually has computers that it contains. If not, then we'll ignore it.
@@ -124,7 +126,7 @@ namespace SharpHoundCommonLib.Processors {
             foreach (var rid in Enum.GetValues(typeof(LocalGroupRids))) data[(LocalGroupRids)rid] = new GroupResults();
 
             foreach (var linkDn in orderedLinks) {
-                if (!GpoActionCache.TryGetValue(linkDn.ToLower(), out var actions)) {
+                if (!GpoActionCache.TryGetValue(linkDn, out var actions)) {
                     actions = new List<GroupAction>();
 
                     var gpoDomain = Helpers.DistinguishedNameToDomain(linkDn);
@@ -153,7 +155,7 @@ namespace SharpHoundCommonLib.Processors {
                 }
 
                 //Cache the actions for this GPO for later
-                GpoActionCache.TryAdd(linkDn.ToLower(), actions);
+                GpoActionCache.TryAdd(linkDn, actions);
 
                 //If there are no actions, then we can move on from this GPO
                 if (actions.Count == 0)

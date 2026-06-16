@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.DirectoryServices.ActiveDirectory;
 using System.DirectoryServices.Protocols;
 using System.Linq;
 using System.Net;
@@ -37,13 +36,20 @@ namespace SharpHoundCommonLib {
         private static readonly TimeSpan MaxBackoffDelay = TimeSpan.FromSeconds(20);
         private const int BackoffDelayMultiplier = 2;
         private const int MaxRetries = 3;
-        private static readonly ConcurrentDictionary<string, NetAPIStructs.DomainControllerInfo?> DCInfoCache = new();
+        private static readonly ConcurrentDictionary<string, NetAPIStructs.DomainControllerInfo?> DCInfoCache = new(StringComparer.OrdinalIgnoreCase);
         
         // Metrics
         private readonly IMetricRouter _metric;
 
-        // Tracks domains we know we've determined we shouldn't try to connect to
-        private static readonly ConcurrentHashSet ExcludedDomains = new();
+        // Tracks domains we know we've determined we shouldn't try to connect to.
+        private static readonly ConcurrentHashSet ExcludedDomains = new(StringComparer.OrdinalIgnoreCase);
+
+        // Drops every exclusion record. Called from LdapUtils.ResetUtils so a fresh enumeration
+        // pass after a configuration change isn't shadowed by stale exclusion state.
+        internal static void ResetCaches() {
+            DCInfoCache.Clear();
+            ExcludedDomains.Clear();
+        }
 
         public LdapConnectionPool(string identifier, string poolIdentifier, LdapConfig config,
             IPortScanner scanner = null, NativeMethods nativeMethods = null, ILogger log = null, IMetricRouter metric = null) {
@@ -451,7 +457,7 @@ namespace SharpHoundCommonLib {
                 return result;
             }
 
-            var (searchRequestSuccess, searchRequest) = CreateSearchRequest(queryParameters, connectionWrapper);
+            var (searchRequestSuccess, searchRequest) = await CreateSearchRequestAsync(queryParameters, connectionWrapper);
             if (!searchRequestSuccess) {
                 result.Success = false;
                 result.Message = "Failed to create search request";
@@ -492,7 +498,7 @@ namespace SharpHoundCommonLib {
             };
             var connectionWrapper = connectionResult.ConnectionWrapper;
 
-            var (searchRequestSuccess, searchRequest) = CreateSearchRequest(queryParameters, connectionWrapper);
+            var (searchRequestSuccess, searchRequest) = await CreateSearchRequestAsync(queryParameters, connectionWrapper);
             if (!searchRequestSuccess) {
                 ReleaseConnection(connectionWrapper);
                 yield return Result<string>.Fail("Failed to create search request");
@@ -685,23 +691,30 @@ namespace SharpHoundCommonLib {
                 MaxBackoffDelay.TotalSeconds));
         }
 
-        private (bool, SearchRequest) CreateSearchRequest(LdapQueryParameters queryParameters,
+        private async Task<(bool, SearchRequest)> CreateSearchRequestAsync(LdapQueryParameters queryParameters,
             LdapConnectionWrapper connectionWrapper) {
             string basePath;
             if (!string.IsNullOrWhiteSpace(queryParameters.SearchBase)) {
                 basePath = queryParameters.SearchBase;
-            }
-            else if (!connectionWrapper.GetSearchBase(queryParameters.NamingContext, out basePath)) {
+            } else if (!connectionWrapper.GetSearchBase(queryParameters.NamingContext, out basePath)) {
                 string tempPath;
                 if (CallDsGetDcName(queryParameters.DomainName, out var info) && info != null) {
                     tempPath = Helpers.DomainNameToDistinguishedName(info.Value.DomainName);
-                    connectionWrapper.SaveContext(queryParameters.NamingContext, basePath);
-                }
-                else if (LdapUtils.GetDomain(queryParameters.DomainName, _ldapConfig, out var domainObject)) {
-                    tempPath = Helpers.DomainNameToDistinguishedName(domainObject.Name);
+                    connectionWrapper.SaveContext(queryParameters.NamingContext, tempPath);
                 }
                 else {
-                    return (false, null);
+                    // Controlled replacement for LdapUtils.GetDomain + DomainNameToDistinguishedName.
+                    // Pass null for the pool: this code runs *inside* an LdapConnectionPool, so
+                    // attempting controlled resolution via the pool would reenter us. The static
+                    // helper will fall through to the uncontrolled fallback, which itself honors
+                    // LdapConfig.AllowFallbackToUncontrolledLdap.
+                    var (ok, domainInfo) = await LdapUtils
+                        .GetDomainInfoStaticAsync(queryParameters.DomainName, _ldapConfig, _log);
+                    if (!ok || string.IsNullOrWhiteSpace(domainInfo?.DistinguishedName)) {
+                        return (false, null);
+                    }
+
+                    tempPath = domainInfo.DistinguishedName;
                 }
 
                 basePath = queryParameters.NamingContext switch {
@@ -873,16 +886,20 @@ namespace SharpHoundCommonLib {
                     }
                 }
 
-                if (!LdapUtils.GetDomain(_identifier, _ldapConfig, out var domainObject) || domainObject?.Name == null) {
+                // Controlled replacement for LdapUtils.GetDomain. The static helper still honors
+                // LdapConfig.AllowFallbackToUncontrolledLdap for the uncontrolled fallback.
+                var (infoOk, info) =
+                    await LdapUtils.GetDomainInfoStaticAsync(_identifier, _ldapConfig, _log);
+                if (!infoOk || string.IsNullOrEmpty(info?.Name)) {
                     //If we don't get a result here, we effectively have no other ways to resolve this domain, so we'll just have to exit out
                     _log.LogDebug(
-                        "Could not get domain object from GetDomain, unable to create ldap connection for domain {Domain}",
+                        "Could not resolve domain info, unable to create ldap connection for domain {Domain}",
                         _identifier);
                     ExcludedDomains.Add(_identifier);
-                    return (false, null, "Unable to get domain object for further strategies");
+                    return (false, null, "Unable to get domain info for further strategies");
                 }
 
-                tempDomainName = domainObject.Name.ToUpper().Trim();
+                tempDomainName = info.Name.ToUpper().Trim();
 
                 if (!tempDomainName.Equals(_identifier, StringComparison.OrdinalIgnoreCase) &&
                     await CreateLdapConnection(tempDomainName, globalCatalog) is (true, var connectionWrapper4)) {
@@ -892,24 +909,26 @@ namespace SharpHoundCommonLib {
                     return (true, connectionWrapper4, "");
                 }
 
-                var primaryDomainController = domainObject.PdcRoleOwner.Name;
-                var portConnectionResult =
-                    await CreateLDAPConnectionWithPortCheck(primaryDomainController, globalCatalog);
-                if (portConnectionResult.success) {
-                    _log.LogDebug(
-                        "Successfully created ldap connection for domain: {Domain} using strategy 5 with to pdc {Server}",
-                        _identifier, primaryDomainController);
-                    return (true, portConnectionResult.connection, "");
-                }
-
-                // Blocking External Call - Possible on domainObject.DomainControllers as it calls DsGetDcNameWrapper
-                foreach (DomainController dc in domainObject.DomainControllers) {
-                    portConnectionResult =
-                        await CreateLDAPConnectionWithPortCheck(dc.Name, globalCatalog);
+                if (!string.IsNullOrEmpty(info.PrimaryDomainController)) {
+                    var primaryDomainController = info.PrimaryDomainController;
+                    var portConnectionResult =
+                        await CreateLDAPConnectionWithPortCheck(primaryDomainController, globalCatalog);
                     if (portConnectionResult.success) {
                         _log.LogDebug(
-                            "Successfully created ldap connection for domain: {Domain} using strategy 6 with to pdc {Server}",
+                            "Successfully created ldap connection for domain: {Domain} using strategy 5 with to pdc {Server}",
                             _identifier, primaryDomainController);
+                        return (true, portConnectionResult.connection, "");
+                    }
+                }
+
+                foreach (var dcName in info.DomainControllers) {
+                    if (string.IsNullOrEmpty(dcName)) continue;
+                    var portConnectionResult =
+                        await CreateLDAPConnectionWithPortCheck(dcName, globalCatalog);
+                    if (portConnectionResult.success) {
+                        _log.LogDebug(
+                            "Successfully created ldap connection for domain: {Domain} using strategy 6 to dc {Server}",
+                            _identifier, dcName);
                         return (true, portConnectionResult.connection, "");
                     }
                 }

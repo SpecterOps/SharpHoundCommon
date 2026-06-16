@@ -96,5 +96,7 @@
         public const string LockOutObservationWindow = "lockoutobservationwindow";
         public const string PrincipalName = "msds-principalname";
         public const string GroupType = "grouptype";
+        public const string FSMORoleOwner = "fsmoroleowner";
+        public const string NCName = "ncname";
     }
 }

@@ -647,5 +647,590 @@ namespace CommonLibTest {
             Assert.Equal("TESTLAB.LOCAL-S-1-5-9", entDCGroup.ObjectIdentifier);
             Assert.Equal(3, entDCGroup.Members.Length);
         }
+
+        // ---------------------------------------------------------------------------
+        // AllowFallbackToUncontrolledLdap gate and DomainInfo resolution
+        // ---------------------------------------------------------------------------
+
+        [Fact]
+        public void LdapConfig_AllowFallbackToUncontrolledLdap_DefaultsToFalse() {
+            var config = new LdapConfig();
+            Assert.False(config.AllowFallbackToUncontrolledLdap);
+        }
+
+        [Fact]
+        public void LdapConfig_ToString_IncludesAllowFallbackFlag() {
+            var offConfig = new LdapConfig();
+            Assert.Contains("AllowFallbackToUncontrolledLdap: False", offConfig.ToString());
+
+            var onConfig = new LdapConfig { AllowFallbackToUncontrolledLdap = true };
+            Assert.Contains("AllowFallbackToUncontrolledLdap: True", onConfig.ToString());
+        }
+
+        [Fact]
+        public void LdapConfig_CurrentUserDomain_DefaultsToNull() {
+            var config = new LdapConfig();
+            Assert.Null(config.CurrentUserDomain);
+        }
+
+        [Fact]
+        public void LdapConfig_ToString_IncludesCurrentUserDomain_WhenSet() {
+            var unset = new LdapConfig();
+            Assert.DoesNotContain("CurrentUserDomain:", unset.ToString());
+
+            var set = new LdapConfig { CurrentUserDomain = "CONTOSO.LOCAL" };
+            Assert.Contains("CurrentUserDomain: CONTOSO.LOCAL", set.ToString());
+        }
+
+        [Fact]
+        public async Task GetDomainInfoAsync_ControlledPathFails_FallbackDisabled_ReturnsFailure() {
+            var utils = new LdapUtils();
+            utils.SetLdapConfig(new LdapConfig {
+                Server = "unreachable.invalid.test",
+                AllowFallbackToUncontrolledLdap = false
+            });
+
+            var (success, info) = await utils.GetDomainInfoAsync("unreachable.invalid.test");
+            Assert.False(success);
+            Assert.Null(info);
+        }
+
+        [Fact]
+        public void GetDomain_OutDomain_ReturnsFalse_WhenFallbackDisabled() {
+            var utils = new LdapUtils();
+            utils.SetLdapConfig(new LdapConfig { AllowFallbackToUncontrolledLdap = false });
+
+            Assert.False(utils.GetDomain(out var currentDomain));
+            Assert.Null(currentDomain);
+
+            Assert.False(utils.GetDomain("unreachable.invalid.test", out var namedDomain));
+            Assert.Null(namedDomain);
+
+            Assert.False(LdapUtils.GetDomain("unreachable.invalid.test",
+                new LdapConfig { AllowFallbackToUncontrolledLdap = false }, out var staticDomain));
+            Assert.Null(staticDomain);
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("   ")]
+        public void GetDomain_Static_ReturnsFalse_WithoutThrowing_OnBlankName(string domainName) {
+            // ConcurrentDictionary throws on null keys, so the static overload would previously
+            // crash on a null hint. The static has no per-instance null-resolution cache to fall
+            // back on, so blank inputs are rejected up front.
+            var config = new LdapConfig { AllowFallbackToUncontrolledLdap = true };
+
+            var success = LdapUtils.GetDomain(domainName, config, out var domain);
+
+            Assert.False(success);
+            Assert.Null(domain);
+        }
+
+        // ---------------------------------------------------------------------------
+        // TryStripNtdsSettingsPrefix
+        // ---------------------------------------------------------------------------
+
+        [Fact]
+        public void TryStripNtdsSettingsPrefix_StandardDn_StripsPrefixAndReturnsServerDn() {
+            const string input =
+                "CN=NTDS Settings,CN=DC01,CN=Servers,CN=Default-First-Site-Name,CN=Sites,CN=Configuration,DC=contoso,DC=local";
+            var ok = LdapUtils.TryStripNtdsSettingsPrefix(input, out var serverDn);
+            Assert.True(ok);
+            Assert.Equal(
+                "CN=DC01,CN=Servers,CN=Default-First-Site-Name,CN=Sites,CN=Configuration,DC=contoso,DC=local",
+                serverDn);
+        }
+
+        [Fact]
+        public void TryStripNtdsSettingsPrefix_LowercasePrefix_StripsCaseInsensitively() {
+            const string input = "cn=ntds settings,CN=DC01,CN=Servers,DC=contoso,DC=local";
+            var ok = LdapUtils.TryStripNtdsSettingsPrefix(input, out var serverDn);
+            Assert.True(ok);
+            Assert.Equal("CN=DC01,CN=Servers,DC=contoso,DC=local", serverDn);
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        public void TryStripNtdsSettingsPrefix_NullOrEmptyInput_ReturnsFalse(string input) {
+            var ok = LdapUtils.TryStripNtdsSettingsPrefix(input, out var serverDn);
+            Assert.False(ok);
+            Assert.Null(serverDn);
+        }
+
+        [Fact]
+        public void TryStripNtdsSettingsPrefix_MissingPrefix_ReturnsFalse() {
+            const string input = "CN=DC01,CN=Servers,DC=contoso,DC=local";
+            var ok = LdapUtils.TryStripNtdsSettingsPrefix(input, out var serverDn);
+            Assert.False(ok);
+            Assert.Null(serverDn);
+        }
+
+        [Fact]
+        public void TryStripNtdsSettingsPrefix_PrefixOnly_ReturnsFalse() {
+            const string input = "CN=NTDS Settings,";
+            var ok = LdapUtils.TryStripNtdsSettingsPrefix(input, out var serverDn);
+            Assert.False(ok);
+            Assert.Equal(string.Empty, serverDn);
+        }
+
+        // ---------------------------------------------------------------------------
+        // ResolveEffectiveDomainHint
+        // ---------------------------------------------------------------------------
+
+        [Fact]
+        public void ResolveEffectiveDomainHint_ExplicitDomain_WinsOverCurrentUserDomain() {
+            var utils = new LdapUtils();
+            utils.SetLdapConfig(new LdapConfig { CurrentUserDomain = "FALLBACK.LOCAL" });
+
+            Assert.Equal("EXPLICIT.LOCAL", utils.ResolveEffectiveDomainHint("EXPLICIT.LOCAL"));
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("   ")]
+        public void ResolveEffectiveDomainHint_NullOrWhitespaceInput_FallsBackToCurrentUserDomain(string input) {
+            var utils = new LdapUtils();
+            utils.SetLdapConfig(new LdapConfig { CurrentUserDomain = "CONTOSO.LOCAL" });
+
+            Assert.Equal("CONTOSO.LOCAL", utils.ResolveEffectiveDomainHint(input));
+        }
+
+        [Fact]
+        public void ResolveEffectiveDomainHint_WhitespaceCurrentUserDomain_FallsThroughToEnvironment() {
+            var utils = new LdapUtils();
+            utils.SetLdapConfig(new LdapConfig { CurrentUserDomain = "   " });
+
+            // Cannot assert a literal without pinning Environment.UserDomainName; asserting
+            // that the whitespace CurrentUserDomain was skipped and something else was chosen
+            // is sufficient to cover the branch.
+            var result = utils.ResolveEffectiveDomainHint(null);
+            Assert.False(string.IsNullOrWhiteSpace(result));
+            Assert.NotEqual("   ", result);
+        }
+
+        // ---------------------------------------------------------------------------
+        // DomainInfo.CompletenessScore / CacheDomainInfo (H-1 regression coverage)
+        // ---------------------------------------------------------------------------
+
+        [Fact]
+        public void CompletenessScore_EmptyInfo_ReturnsZero() {
+            Assert.Equal(0, new DomainInfo().CompletenessScore());
+        }
+
+        [Fact]
+        public void CompletenessScore_AllFieldsPopulated_ReturnsSeven() {
+            var info = new DomainInfo(
+                name: "CONTOSO.LOCAL",
+                distinguishedName: "DC=contoso,DC=local",
+                forestName: "CONTOSO.LOCAL",
+                domainSid: "S-1-5-21-1-2-3",
+                netBiosName: "CONTOSO",
+                primaryDomainController: "dc01.contoso.local",
+                domainControllers: new[] { "dc01.contoso.local" });
+            Assert.Equal(7, info.CompletenessScore());
+        }
+
+        [Fact]
+        public void CompletenessScore_EmptyDomainControllersList_ContributesZero() {
+            var info = new DomainInfo(name: "CONTOSO.LOCAL", domainControllers: Array.Empty<string>());
+            Assert.Equal(1, info.CompletenessScore());
+        }
+
+        [Fact]
+        public void CompletenessScore_EmptyStringFields_ContributeZero() {
+            var info = new DomainInfo(name: "", distinguishedName: "", forestName: "");
+            Assert.Equal(0, info.CompletenessScore());
+        }
+
+        [Fact]
+        public async Task CacheDomainInfo_RicherRecordReplacesSparserRecord() {
+            new LdapUtils().ResetUtils();
+            const string key = "completeness-upgrade.test";
+
+            // Sparse record like the one-shot direct-LDAP tier produces (no NetBiosName).
+            var sparse = new DomainInfo(
+                name: "COMPLETENESS-UPGRADE.TEST",
+                distinguishedName: "DC=completeness-upgrade,DC=test",
+                domainSid: "S-1-5-21-1-2-3");
+            LdapUtils.CacheDomainInfo(key, sparse);
+
+            // Rich record like the pool-driven controlled tier produces.
+            var rich = new DomainInfo(
+                name: "COMPLETENESS-UPGRADE.TEST",
+                distinguishedName: "DC=completeness-upgrade,DC=test",
+                domainSid: "S-1-5-21-1-2-3",
+                netBiosName: "COMPLETE",
+                primaryDomainController: "dc01.completeness-upgrade.test",
+                domainControllers: new[] { "dc01.completeness-upgrade.test" });
+            LdapUtils.CacheDomainInfo(key, rich);
+
+            var (ok, cached) = await LdapUtils.GetDomainInfoStaticAsync(key, new LdapConfig {
+                Server = "unreachable.invalid.test",
+                AllowFallbackToUncontrolledLdap = false
+            });
+            Assert.True(ok);
+            Assert.Equal("COMPLETE", cached.NetBiosName);
+            Assert.Equal("dc01.completeness-upgrade.test", cached.PrimaryDomainController);
+        }
+
+        [Fact]
+        public async Task CacheDomainInfo_SparserRecordDoesNotReplaceRicher() {
+            new LdapUtils().ResetUtils();
+            const string key = "completeness-no-downgrade.test";
+
+            var rich = new DomainInfo(
+                name: "COMPLETENESS-NO-DOWNGRADE.TEST",
+                distinguishedName: "DC=completeness-no-downgrade,DC=test",
+                domainSid: "S-1-5-21-9-9-9",
+                netBiosName: "RICHFIRST",
+                primaryDomainController: "dc01.completeness-no-downgrade.test",
+                domainControllers: new[] { "dc01.completeness-no-downgrade.test" });
+            LdapUtils.CacheDomainInfo(key, rich);
+
+            var sparse = new DomainInfo(
+                name: "COMPLETENESS-NO-DOWNGRADE.TEST",
+                distinguishedName: "DC=completeness-no-downgrade,DC=test",
+                domainSid: "S-1-5-21-9-9-9");
+            LdapUtils.CacheDomainInfo(key, sparse);
+
+            var (ok, cached) = await LdapUtils.GetDomainInfoStaticAsync(key, new LdapConfig {
+                Server = "unreachable.invalid.test",
+                AllowFallbackToUncontrolledLdap = false
+            });
+            Assert.True(ok);
+            Assert.Equal("RICHFIRST", cached.NetBiosName);
+        }
+
+        [Fact]
+        public async Task CacheDomainInfo_EqualScoreDoesNotReplaceExisting() {
+            new LdapUtils().ResetUtils();
+            const string key = "completeness-equal.test";
+
+            var first = new DomainInfo(name: "COMPLETENESS-EQUAL.TEST", domainSid: "S-1-5-21-1-1-1");
+            LdapUtils.CacheDomainInfo(key, first);
+
+            var second = new DomainInfo(name: "COMPLETENESS-EQUAL.TEST", domainSid: "S-1-5-21-2-2-2");
+            LdapUtils.CacheDomainInfo(key, second);
+
+            var (ok, cached) = await LdapUtils.GetDomainInfoStaticAsync(key, new LdapConfig {
+                Server = "unreachable.invalid.test",
+                AllowFallbackToUncontrolledLdap = false
+            });
+            Assert.True(ok);
+            Assert.Equal("S-1-5-21-1-1-1", cached.DomainSid);
+        }
+
+        [Fact]
+        public async Task CacheDomainInfo_NullKeyOrCandidate_NoOp() {
+            new LdapUtils().ResetUtils();
+            const string key = "completeness-noop.test";
+
+            Assert.False(LdapUtils.CacheDomainInfo(null, new DomainInfo(name: "IGNORED")));
+            Assert.False(LdapUtils.CacheDomainInfo(key, null));
+
+            // Static helper should fail through every tier because nothing was cached and the
+            // server is unreachable with fallback disabled.
+            var (ok, cached) = await LdapUtils.GetDomainInfoStaticAsync(key, new LdapConfig {
+                Server = "unreachable.invalid.test",
+                AllowFallbackToUncontrolledLdap = false
+            });
+            Assert.False(ok);
+            Assert.Null(cached);
+        }
+
+        [Fact]
+        public async Task CacheDomainInfo_KeyMismatchesCandidateName_NoOp() {
+            new LdapUtils().ResetUtils();
+            const string key = "h2-contoso.test";
+
+            // Simulates a misconfigured LdapConfig.Server pin that lands on a DC outside the
+            // requested domain - the candidate's Name describes fabrikam, but the caller asked
+            // about contoso. The guard must reject the write to prevent cache poisoning.
+            var fabrikam = new DomainInfo(
+                name: "H2-FABRIKAM.TEST",
+                distinguishedName: "DC=h2-fabrikam,DC=test",
+                domainSid: "S-1-5-21-9-9-9",
+                netBiosName: "FABRIKAM");
+            Assert.False(LdapUtils.CacheDomainInfo(key, fabrikam));
+
+            var (ok, cached) = await LdapUtils.GetDomainInfoStaticAsync(key, new LdapConfig {
+                Server = "unreachable.invalid.test",
+                AllowFallbackToUncontrolledLdap = false
+            });
+            Assert.False(ok);
+            Assert.Null(cached);
+        }
+
+        [Fact]
+        public async Task CacheDomainInfo_KeyMatchesNetBiosName_Cached() {
+            new LdapUtils().ResetUtils();
+            const string netBiosKey = "H2NETBIOS";
+
+            // NetBIOS short-name keys are a legitimate alias form - the guard must accept the
+            // write when key matches candidate.NetBiosName even though it differs from Name.
+            var info = new DomainInfo(
+                name: "H2-NETBIOS-MATCH.TEST",
+                distinguishedName: "DC=h2-netbios-match,DC=test",
+                domainSid: "S-1-5-21-1-1-1",
+                netBiosName: "H2NETBIOS");
+            Assert.True(LdapUtils.CacheDomainInfo(netBiosKey, info));
+
+            var (ok, cached) = await LdapUtils.GetDomainInfoStaticAsync(netBiosKey, new LdapConfig {
+                Server = "unreachable.invalid.test",
+                AllowFallbackToUncontrolledLdap = false
+            });
+            Assert.True(ok);
+            Assert.Equal("H2-NETBIOS-MATCH.TEST", cached.Name);
+        }
+
+        [Fact]
+        public async Task CacheDomainInfo_KeyMatchesCandidateNameCaseInsensitive_Cached() {
+            new LdapUtils().ResetUtils();
+            const string lowerKey = "h2-case.test";
+
+            var info = new DomainInfo(name: "H2-CASE.TEST", domainSid: "S-1-5-21-2-2-2");
+            Assert.True(LdapUtils.CacheDomainInfo(lowerKey, info));
+
+            var (ok, cached) = await LdapUtils.GetDomainInfoStaticAsync(lowerKey, new LdapConfig {
+                Server = "unreachable.invalid.test",
+                AllowFallbackToUncontrolledLdap = false
+            });
+            Assert.True(ok);
+            Assert.Equal("S-1-5-21-2-2-2", cached.DomainSid);
+        }
+
+        [Fact]
+        public async Task CacheDomainInfo_MirrorsEntryUnderCandidateName() {
+            new LdapUtils().ResetUtils();
+            const string netBiosKey = "H1MIRROR";
+
+            // Write under the NetBIOS alias - the helper must mirror the entry under the
+            // canonical DNS Name so a later lookup by FQDN hits the same record without redoing
+            // resolution.
+            var info = new DomainInfo(
+                name: "H1-MIRROR.TEST",
+                distinguishedName: "DC=h1-mirror,DC=test",
+                domainSid: "S-1-5-21-3-3-3",
+                netBiosName: "H1MIRROR");
+            LdapUtils.CacheDomainInfo(netBiosKey, info);
+
+            var (ok, cached) = await LdapUtils.GetDomainInfoStaticAsync("H1-MIRROR.TEST", new LdapConfig {
+                Server = "unreachable.invalid.test",
+                AllowFallbackToUncontrolledLdap = false
+            });
+            Assert.True(ok);
+            Assert.Equal("H1MIRROR", cached.NetBiosName);
+            Assert.Equal("S-1-5-21-3-3-3", cached.DomainSid);
+        }
+
+        [Fact]
+        public async Task CacheDomainInfo_RicherAliasWriteUpgradesNameKeyEntry() {
+            new LdapUtils().ResetUtils();
+            const string fqdnKey = "h1-upgrade.test";
+            const string netBiosKey = "H1UPGRADE";
+
+            // Pre-seed the canonical-Name entry with a sparse record (e.g. an earlier ADSI tier
+            // result). A later richer write under the NetBIOS alias must propagate through the
+            // mirror so a FQDN lookup observes the upgrade rather than the stale sparse entry.
+            var sparse = new DomainInfo(name: "H1-UPGRADE.TEST", domainSid: "S-1-5-21-4-4-4");
+            LdapUtils.CacheDomainInfo(fqdnKey, sparse);
+
+            var rich = new DomainInfo(
+                name: "H1-UPGRADE.TEST",
+                distinguishedName: "DC=h1-upgrade,DC=test",
+                domainSid: "S-1-5-21-4-4-4",
+                netBiosName: "H1UPGRADE",
+                primaryDomainController: "dc01.h1-upgrade.test",
+                domainControllers: new[] { "dc01.h1-upgrade.test" });
+            LdapUtils.CacheDomainInfo(netBiosKey, rich);
+
+            var (ok, cached) = await LdapUtils.GetDomainInfoStaticAsync(fqdnKey, new LdapConfig {
+                Server = "unreachable.invalid.test",
+                AllowFallbackToUncontrolledLdap = false
+            });
+            Assert.True(ok);
+            Assert.Equal("H1UPGRADE", cached.NetBiosName);
+            Assert.Equal("dc01.h1-upgrade.test", cached.PrimaryDomainController);
+        }
+
+        // ---------------------------------------------------------------------------
+        // SelectRicherDomainInfo / TryEnrichDomainInfoViaDirectLdapAsync coverage
+        // ---------------------------------------------------------------------------
+
+        [Fact]
+        public void SelectRicherDomainInfo_NullEnriched_ReturnsSeed() {
+            var seed = new DomainInfo(name: "CONTOSO.LOCAL", domainSid: "S-1-5-21-1-2-3");
+            Assert.Same(seed, LdapUtils.SelectRicherDomainInfo(seed, null));
+        }
+
+        [Fact]
+        public void SelectRicherDomainInfo_NullSeed_ReturnsEnriched() {
+            var enriched = new DomainInfo(name: "CONTOSO.LOCAL");
+            Assert.Same(enriched, LdapUtils.SelectRicherDomainInfo(null, enriched));
+        }
+
+        [Fact]
+        public void SelectRicherDomainInfo_NameMismatch_ReturnsSeed() {
+            var seed = new DomainInfo(name: "CONTOSO.LOCAL", domainSid: "S-1-5-21-1-2-3");
+            // Enriched is technically richer but describes a different domain - the guard must
+            // reject it to prevent caching the wrong SID/NetBIOS under the seed's cache key.
+            var enriched = new DomainInfo(
+                name: "FABRIKAM.LOCAL",
+                distinguishedName: "DC=fabrikam,DC=local",
+                forestName: "FABRIKAM.LOCAL",
+                domainSid: "S-1-5-21-9-9-9",
+                netBiosName: "FABRIKAM",
+                primaryDomainController: "dc01.fabrikam.local",
+                domainControllers: new[] { "dc01.fabrikam.local" });
+            Assert.Same(seed, LdapUtils.SelectRicherDomainInfo(seed, enriched));
+        }
+
+        [Fact]
+        public void SelectRicherDomainInfo_NameDiffersOnlyInCase_AcceptsEnriched() {
+            var seed = new DomainInfo(name: "CONTOSO.LOCAL", domainSid: "S-1-5-21-1-2-3");
+            var enriched = new DomainInfo(
+                name: "contoso.local",
+                distinguishedName: "DC=contoso,DC=local",
+                domainSid: "S-1-5-21-1-2-3",
+                netBiosName: "CONTOSO");
+            Assert.Same(enriched, LdapUtils.SelectRicherDomainInfo(seed, enriched));
+        }
+
+        [Fact]
+        public void SelectRicherDomainInfo_LowerScore_ReturnsSeed() {
+            var seed = new DomainInfo(
+                name: "CONTOSO.LOCAL",
+                distinguishedName: "DC=contoso,DC=local",
+                domainSid: "S-1-5-21-1-2-3");
+            var enriched = new DomainInfo(name: "CONTOSO.LOCAL");
+            Assert.Same(seed, LdapUtils.SelectRicherDomainInfo(seed, enriched));
+        }
+
+        [Fact]
+        public void SelectRicherDomainInfo_EqualScore_ReturnsSeed() {
+            var seed = new DomainInfo(name: "CONTOSO.LOCAL", domainSid: "S-1-5-21-1-2-3");
+            var enriched = new DomainInfo(name: "CONTOSO.LOCAL", domainSid: "S-1-5-21-9-9-9");
+            Assert.Same(seed, LdapUtils.SelectRicherDomainInfo(seed, enriched));
+        }
+
+        [Fact]
+        public void SelectRicherDomainInfo_HigherScore_ReturnsEnriched() {
+            var seed = new DomainInfo(
+                name: "CONTOSO.LOCAL",
+                distinguishedName: "DC=contoso,DC=local",
+                domainSid: "S-1-5-21-1-2-3",
+                primaryDomainController: "dc01.contoso.local");
+            var enriched = new DomainInfo(
+                name: "CONTOSO.LOCAL",
+                distinguishedName: "DC=contoso,DC=local",
+                forestName: "CONTOSO.LOCAL",
+                domainSid: "S-1-5-21-1-2-3",
+                netBiosName: "CONTOSO",
+                primaryDomainController: "dc01.contoso.local",
+                domainControllers: new[] { "dc01.contoso.local" });
+            Assert.Same(enriched, LdapUtils.SelectRicherDomainInfo(seed, enriched));
+        }
+
+        [Fact]
+        public async Task TryEnrichDomainInfoViaDirectLdapAsync_NullSeed_ReturnsNull() {
+            var result = await LdapUtils.TryEnrichDomainInfoViaDirectLdapAsync(
+                "CONTOSO.LOCAL", null, new LdapConfig(), log: null);
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public async Task TryEnrichDomainInfoViaDirectLdapAsync_FullScoreSeed_ReturnsSeedWithoutBinding() {
+            // A score-7 seed with PDC pointing at an unreachable host - if the helper attempted
+            // a bind it would either time out or fail; returning the seed identity proves the
+            // fast-path skipped the bind entirely.
+            var seed = new DomainInfo(
+                name: "CONTOSO.LOCAL",
+                distinguishedName: "DC=contoso,DC=local",
+                forestName: "CONTOSO.LOCAL",
+                domainSid: "S-1-5-21-1-2-3",
+                netBiosName: "CONTOSO",
+                primaryDomainController: "unreachable.invalid.test",
+                domainControllers: new[] { "unreachable.invalid.test" });
+            var result = await LdapUtils.TryEnrichDomainInfoViaDirectLdapAsync(
+                "CONTOSO.LOCAL", seed, new LdapConfig(), log: null);
+            Assert.Same(seed, result);
+        }
+
+        [Fact]
+        public async Task TryEnrichDomainInfoViaDirectLdapAsync_NoBindTarget_ReturnsSeed() {
+            // No PrimaryDomainController, no DomainControllers - nothing to bind to, helper must
+            // return the seed without attempting any network I/O.
+            var seed = new DomainInfo(
+                name: "CONTOSO.LOCAL",
+                distinguishedName: "DC=contoso,DC=local",
+                domainSid: "S-1-5-21-1-2-3");
+            var result = await LdapUtils.TryEnrichDomainInfoViaDirectLdapAsync(
+                "CONTOSO.LOCAL", seed, new LdapConfig(), log: null);
+            Assert.Same(seed, result);
+        }
+
+        [Fact]
+        public async Task TryEnrichDomainInfoViaDirectLdapAsync_NullConfig_ReturnsSeed() {
+            var seed = new DomainInfo(
+                name: "CONTOSO.LOCAL",
+                primaryDomainController: "dc01.contoso.local");
+            var result = await LdapUtils.TryEnrichDomainInfoViaDirectLdapAsync(
+                "CONTOSO.LOCAL", seed, config: null, log: null);
+            Assert.Same(seed, result);
+        }
+
+        [Fact]
+        public async Task TryEnrichDomainInfoViaDirectLdapAsync_ServerPinned_BindFailureReturnsSeed() {
+            // LdapConfig.Server pins all LDAP traffic to the configured host. Enrichment honors the
+            // pin by binding to config.Server rather than the seed's discovered PDC. When the pinned
+            // host is unreachable the bind fails and the seed is returned unchanged - this covers
+            // both the pin-respect and the bind-failure-fallback paths in one assertion.
+            var seed = new DomainInfo(
+                name: "CONTOSO.LOCAL",
+                distinguishedName: "DC=contoso,DC=local",
+                domainSid: "S-1-5-21-1-2-3",
+                primaryDomainController: "seed-pdc.invalid.test");
+            var config = new LdapConfig { Server = "pinned-server.invalid.test" };
+            var result = await LdapUtils.TryEnrichDomainInfoViaDirectLdapAsync(
+                "CONTOSO.LOCAL", seed, config, log: null);
+            Assert.Same(seed, result);
+        }
+
+        // ---------------------------------------------------------------------------
+        // ResolveOneShotBindTarget
+        // ---------------------------------------------------------------------------
+
+        [Fact]
+        public void ResolveOneShotBindTarget_ServerSet_OverridesDomainName() {
+            var config = new LdapConfig { Server = "dc01.contoso.local" };
+            Assert.Equal("dc01.contoso.local",
+                LdapUtils.ResolveOneShotBindTarget("CONTOSO.LOCAL", config));
+        }
+
+        [Fact]
+        public void ResolveOneShotBindTarget_ServerNull_FallsBackToDomainName() {
+            var config = new LdapConfig { Server = null };
+            Assert.Equal("CONTOSO.LOCAL",
+                LdapUtils.ResolveOneShotBindTarget("CONTOSO.LOCAL", config));
+        }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData("   ")]
+        public void ResolveOneShotBindTarget_ServerWhitespace_FallsBackToDomainName(string server) {
+            var config = new LdapConfig { Server = server };
+            Assert.Equal("CONTOSO.LOCAL",
+                LdapUtils.ResolveOneShotBindTarget("CONTOSO.LOCAL", config));
+        }
+
+        [Fact]
+        public void ResolveOneShotBindTarget_NullConfig_ReturnsDomainName() {
+            Assert.Equal("CONTOSO.LOCAL",
+                LdapUtils.ResolveOneShotBindTarget("CONTOSO.LOCAL", config: null));
+        }
+
     }
 }

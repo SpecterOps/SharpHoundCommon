@@ -89,6 +89,25 @@ namespace SharpHoundCommonLib {
         /// <returns>True if the domain was found, false if not</returns>
         bool GetDomain(out System.DirectoryServices.ActiveDirectory.Domain domain);
 
+        /// <summary>
+        /// Resolves a <see cref="DomainInfo"/> for the specified domain using controlled LDAP queries
+        /// that honor the configured <see cref="LdapConfig"/> (server, port, SSL, auth, signing, cert verification).
+        /// Falls back to <c>System.DirectoryServices.ActiveDirectory.Domain.GetDomain</c> only when
+        /// <see cref="LdapConfig.AllowFallbackToUncontrolledLdap"/> is enabled.
+        /// </summary>
+        /// <param name="domainName">The domain name to resolve</param>
+        /// <returns>A tuple containing success state as well as the populated DomainInfo if successful</returns>
+        Task<(bool Success, DomainInfo DomainInfo)> GetDomainInfoAsync(string domainName);
+
+        /// <summary>
+        /// Resolves a <see cref="DomainInfo"/> for the user's current domain using controlled LDAP queries
+        /// that honor the configured <see cref="LdapConfig"/>. Falls back to
+        /// <c>System.DirectoryServices.ActiveDirectory.Domain.GetDomain</c> only when
+        /// <see cref="LdapConfig.AllowFallbackToUncontrolledLdap"/> is enabled.
+        /// </summary>
+        /// <returns>A tuple containing success state as well as the populated DomainInfo if successful</returns>
+        Task<(bool Success, DomainInfo DomainInfo)> GetDomainInfoAsync();
+
         Task<(bool Success, string ForestName)> GetForest(string domain);
         /// <summary>
         /// Attempts to resolve an account name to its corresponding typed principal
