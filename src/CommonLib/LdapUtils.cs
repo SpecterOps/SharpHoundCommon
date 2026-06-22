@@ -1227,7 +1227,8 @@ namespace SharpHoundCommonLib {
             {
                 type = Label.Site;
             }
-            else if (objectClasses.Contains(ObjectClass.SiteServerClass, StringComparer.OrdinalIgnoreCase))
+            else if (objectClasses.Contains(ObjectClass.SiteServerClass, StringComparer.OrdinalIgnoreCase) &&
+                     IsUnderConfigurationSites(distinguishedName))
             {
                 type = Label.SiteServer;
             }
@@ -1237,6 +1238,19 @@ namespace SharpHoundCommonLib {
             }
 
             return type != Label.Base;
+        }
+
+        private static bool IsUnderConfigurationSites(string distinguishedName) {
+            var sitesPath = $"{DirectoryPaths.SitesLocation},{DirectoryPaths.ConfigLocation},";
+
+            for (var currentDn = distinguishedName; !string.IsNullOrWhiteSpace(currentDn);
+                 currentDn = Helpers.RemoveDistinguishedNamePrefix(currentDn)) {
+                if (currentDn.StartsWith(sitesPath, StringComparison.OrdinalIgnoreCase)) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public static async Task<(bool Success, ResolvedSearchResult ResolvedResult)> ResolveSearchResult(

@@ -346,6 +346,21 @@ namespace CommonLibTest {
             Assert.True(mock.GetLabel(out var label));
             Assert.Equal(expectedLabel, label);
         }
+
+        [Fact]
+        public void Test_GetLabel_SiteServerOutsideSitesContainer_ReturnsFalse() {
+            var attribs = new Dictionary<string, object> {
+                { LDAPProperties.ObjectClass, new[] { "top", ObjectClass.SiteServerClass } },
+            };
+
+            var mock = new MockDirectoryObject("CN=Test,CN=Servers,CN=Configuration,DC=Testlab,DC=local",
+                attribs,
+                "",
+                new Guid().ToString());
+
+            Assert.False(mock.GetLabel(out var label));
+            Assert.Equal(Label.Base, label);
+        }
         
         [Fact]
         public void Test_GetLabel_NTAuthCertificateObject() {
