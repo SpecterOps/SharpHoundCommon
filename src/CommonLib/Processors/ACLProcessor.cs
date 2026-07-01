@@ -23,8 +23,6 @@ namespace SharpHoundCommonLib.Processors {
         private readonly ConcurrentHashSet _builtDomainCaches = new(StringComparer.OrdinalIgnoreCase);
         private readonly ConcurrentDictionary<string, string[]> _exchangeTrusteeSidCache = new(StringComparer.OrdinalIgnoreCase);
         private readonly object _lock = new();
-        private const string CustomExplicitDenyAcesCountProperty = "customexplicitdenyacescount";
-        private const string CustomInheritedDenyAcesCountProperty = "custominheriteddenyacescount";
         // These Exchange principals commonly carry product-added deny ACEs that we intentionally suppress.
         private static readonly HashSet<string> ExchangeTrusteeNames = new(StringComparer.OrdinalIgnoreCase) {
             "Exchange Windows Permissions",
@@ -68,6 +66,33 @@ namespace SharpHoundCommonLib.Processors {
             public int ExplicitCount { get; }
             public int InheritedCount { get; }
             public int Total => ExplicitCount + InheritedCount;
+        }
+
+        public sealed class ACLProcessingResult {
+            public ACLProcessingResult(ACE[] aces, CustomDenyAceCounts customDenyAceCounts) {
+                Aces = aces;
+                CustomDenyAceCounts = customDenyAceCounts;
+            }
+
+            public ACE[] Aces { get; }
+            public CustomDenyAceCounts CustomDenyAceCounts { get; }
+        }
+
+        private sealed class CustomDenyAceAccumulator {
+            private int _explicitCount;
+            private int _inheritedCount;
+
+            public void Add(bool inherited) {
+                if (inherited) {
+                    _inheritedCount++;
+                } else {
+                    _explicitCount++;
+                }
+            }
+
+            public CustomDenyAceCounts ToCounts() {
+                return new CustomDenyAceCounts(_explicitCount, _inheritedCount);
+            }
         }
 
         /// Represents a lightweight Access Control Entry (ACE) used to compute hash values
@@ -454,6 +479,24 @@ namespace SharpHoundCommonLib.Processors {
         }
 
         /// <summary>
+        ///     Processes the regular ACL edges and custom deny ACE counts in one ACL traversal.
+        /// </summary>
+        /// <remarks>
+        ///     Callers that do not want custom deny ACE counts should continue to call <see cref="ProcessACL(ResolvedSearchResult, IDirectoryObject, bool)"/>.
+        /// </remarks>
+        public Task<ACLProcessingResult> ProcessACLWithCustomDenyAces(ResolvedSearchResult result,
+            IDirectoryObject searchResult, bool checkForOwnerRights = true) {
+            if (!searchResult.TryGetByteProperty(LDAPProperties.SecurityDescriptor, out var descriptor)) {
+                return Task.FromResult(new ACLProcessingResult(Array.Empty<ACE>(), new CustomDenyAceCounts()));
+            }
+
+            searchResult.TryGetDistinguishedName(out var distinguishedName);
+            return ProcessACLWithCustomDenyAces(descriptor, result.Domain, result.ObjectType, searchResult.HasLAPS(),
+                checkForOwnerRights, distinguishedName, searchResult.IsMSA() || searchResult.IsGMSA(),
+                result.DisplayName);
+        }
+
+        /// <summary>
         ///     Read's a raw ntSecurityDescriptor and processes the ACEs in the ACL, filtering out ACEs that
         ///     BloodHound is not interested in as well as principals we don't care about
         /// </summary>
@@ -469,8 +512,25 @@ namespace SharpHoundCommonLib.Processors {
             return ProcessACL(ntSecurityDescriptor, objectDomain, objectType, hasLaps, true, objectName);
         }
 
-        public async IAsyncEnumerable<ACE> ProcessACL(byte[] ntSecurityDescriptor, string objectDomain,
+        public IAsyncEnumerable<ACE> ProcessACL(byte[] ntSecurityDescriptor, string objectDomain,
             Label objectType, bool hasLaps, bool checkForOwnerRights, string objectName) {
+            return ProcessACLInternal(ntSecurityDescriptor, objectDomain, objectType, hasLaps, checkForOwnerRights,
+                objectName);
+        }
+
+        public async Task<ACLProcessingResult> ProcessACLWithCustomDenyAces(byte[] ntSecurityDescriptor,
+            string objectDomain, Label objectType, bool hasLaps, bool checkForOwnerRights = true,
+            string distinguishedName = null, bool isMSA = false, string objectName = "") {
+            var accumulator = new CustomDenyAceAccumulator();
+            var aces = await ProcessACLInternal(ntSecurityDescriptor, objectDomain, objectType, hasLaps,
+                checkForOwnerRights, objectName, accumulator, distinguishedName, isMSA).ToArrayAsync();
+            return new ACLProcessingResult(aces, accumulator.ToCounts());
+        }
+
+        private async IAsyncEnumerable<ACE> ProcessACLInternal(byte[] ntSecurityDescriptor, string objectDomain,
+            Label objectType, bool hasLaps, bool checkForOwnerRights, string objectName,
+            CustomDenyAceAccumulator customDenyAceAccumulator = null, string distinguishedName = null,
+            bool isMSA = false) {
             await BuildGuidCache(objectDomain);
 
             if (ntSecurityDescriptor == null) {
@@ -518,7 +578,19 @@ namespace SharpHoundCommonLib.Processors {
                 bool isPermissionForOwnerRightsSid = false;
                 bool isInheritedPermissionForOwnerRightsSid = false;
 
-                if (ace == null || ace.AccessControlType() == AccessControlType.Deny || !ace.IsAceInheritedFrom(BaseGuids[objectType])) {
+                if (ace == null) {
+                    continue;
+                }
+
+                if (ace.AccessControlType() == AccessControlType.Deny) {
+                    if (customDenyAceAccumulator != null) {
+                        await CountCustomDenyAce(ace, customDenyAceAccumulator, objectDomain, objectType,
+                            distinguishedName, isMSA);
+                    }
+                    continue;
+                }
+
+                if (!ace.IsAceInheritedFrom(BaseGuids[objectType])) {
                     continue;
                 }
 
@@ -964,16 +1036,20 @@ namespace SharpHoundCommonLib.Processors {
             return new CustomDenyAceCounts(explicitCount, inheritedCount);
         }
 
-        public async Task AddCustomDenyAcesProperty(Dictionary<string, object> props, byte[] ntSecurityDescriptor,
-            string objectDomain, Label objectType, string distinguishedName = null, bool isMSA = false,
-            string objectName = "") {
-            var counts = await GetCustomDenyAceCounts(ntSecurityDescriptor, objectDomain, objectType,
-                distinguishedName, isMSA, objectName);
-
-            if (counts.Total > 0) {
-                props[CustomExplicitDenyAcesCountProperty] = counts.ExplicitCount;
-                props[CustomInheritedDenyAcesCountProperty] = counts.InheritedCount;
+        private async Task CountCustomDenyAce(ActiveDirectoryRuleDescriptor ace,
+            CustomDenyAceAccumulator accumulator, string objectDomain, Label objectType, string distinguishedName,
+            bool isMSA) {
+            var principalSid = ace.IdentityReference();
+            if (string.IsNullOrWhiteSpace(principalSid)) {
+                return;
             }
+
+            if (await ShouldExcludeCustomDenyAce(principalSid, ace.ActiveDirectoryRights(), ace.ObjectType(),
+                    objectDomain, objectType, distinguishedName, isMSA)) {
+                return;
+            }
+
+            accumulator.Add(ace.IsInherited());
         }
 
         private static bool TryGetDenyAceData(GenericAce ace, out string principalSid, out ActiveDirectoryRights rights,

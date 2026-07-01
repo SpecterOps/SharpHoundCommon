@@ -1077,8 +1077,6 @@ namespace SharpHoundCommonLib {
             _connectionPool = new ConnectionPoolManager(_ldapConfig, scanner: _portScanner);
         }
 
-        public bool SkipDenyAcesCount => _ldapConfig.SkipDenyAcesCount;
-
         public Task<(bool Success, string Message)> TestLdapConnection(string domain) {
             return _connectionPool.TestDomainConnection(domain, false);
         }

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.DirectoryServices;
 using System.Runtime.Versioning;
-using System.Security.AccessControl;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
@@ -29,21 +28,6 @@ namespace CommonLibTest
         public LdapPropertyTests(ITestOutputHelper testOutputHelper)
         {
             _testOutputHelper = testOutputHelper;
-        }
-
-        [SupportedOSPlatform("windows")]
-        private static byte[] CreateSecurityDescriptorBytes(params GenericAce[] aces)
-        {
-            var acl = new RawAcl(GenericAcl.AclRevisionDS, aces.Length);
-            for (var i = 0; i < aces.Length; i++)
-            {
-                acl.InsertAce(i, aces[i]);
-            }
-
-            var descriptor = new RawSecurityDescriptor(ControlFlags.DiscretionaryAclPresent, null, null, null, acl);
-            var buffer = new byte[descriptor.BinaryLength];
-            descriptor.GetBinaryForm(buffer, 0);
-            return buffer;
         }
 
         [Fact]
@@ -98,7 +82,7 @@ namespace CommonLibTest
         }
 
         [Fact]
-        public async Task LDAPPropertyProcessor_ReadGPOProperties_TestGoodData()
+        public void LDAPPropertyProcessor_ReadGPOProperties_TestGoodData()
         {
             var mock = new MockDirectoryObject(
                 "CN\u003d{94DD0260-38B5-497E-8876-10E7A96E80D0},CN\u003dPolicies,CN\u003dSystem,DC\u003dtestlab,DC\u003dlocal",
@@ -112,8 +96,7 @@ namespace CommonLibTest
                     {"description", "Test"}
                 }, "S-1-5-21-3130019616-2776909439-2417379446","");
 
-            var processor = new LdapPropertyProcessor(new MockLdapUtils());
-            var test = await processor.ReadGPOProperties(mock);
+            var test = LdapPropertyProcessor.ReadGPOProperties(mock);
 
             Assert.Contains("description", test.Keys);
             Assert.Equal("Test", test["description"] as string);
@@ -123,7 +106,7 @@ namespace CommonLibTest
         }
 
         [Fact]
-        public async Task LDAPPropertyProcessor_ReadOUProperties_TestGoodData()
+        public void LDAPPropertyProcessor_ReadOUProperties_TestGoodData()
         {
             var mock = new MockDirectoryObject("OU\u003dTestOU,DC\u003dtestlab,DC\u003dlocal",
                 new Dictionary<string, object>
@@ -131,43 +114,9 @@ namespace CommonLibTest
                     {"description", "Test"}
                 },"", "2A374493-816A-4193-BEFD-D2F4132C6DCA");
 
-            var processor = new LdapPropertyProcessor(new MockLdapUtils());
-            var test = await processor.ReadOUProperties(mock);
+            var test = LdapPropertyProcessor.ReadOUProperties(mock);
             Assert.Contains("description", test.Keys);
             Assert.Equal("Test", test["description"] as string);
-        }
-
-        [SupportedOSPlatform("windows")]
-        [WindowsOnlyFact]
-        public async Task LDAPPropertyProcessor_ReadOUProperties_SkipsCustomDenyAceCounts_WhenLdapConfigRequestsIt()
-        {
-            var denyAce = new CommonAce(AceFlags.None, AceQualifier.AccessDenied, (int)ActiveDirectoryRights.Delete,
-                new SecurityIdentifier("S-1-5-21-3130019616-2776909439-2417379446-2500"), false, null);
-            var mock = new MockDirectoryObject("OU\u003dTestOU,DC\u003dtestlab,DC\u003dlocal",
-                new Dictionary<string, object>
-                {
-                    {LDAPProperties.SecurityDescriptor, CreateSecurityDescriptorBytes(denyAce)}
-                }, "", "2A374493-816A-4193-BEFD-D2F4132C6DCA");
-
-            var baselineProcessor = new LdapPropertyProcessor(new MockLdapUtils());
-            var baseline = await baselineProcessor.ReadOUProperties(mock);
-            Assert.DoesNotContain("customdenyaces", baseline.Keys);
-            Assert.Contains("customexplicitdenyacescount", baseline.Keys);
-            Assert.Contains("custominheriteddenyacescount", baseline.Keys);
-            Assert.Equal(1, baseline["customexplicitdenyacescount"]);
-            Assert.Equal(0, baseline["custominheriteddenyacescount"]);
-
-            var ldapUtils = new MockLdapUtils();
-            ldapUtils.SetLdapConfig(new LdapConfig {
-                SkipDenyAcesCount = true
-            });
-
-            var processor = new LdapPropertyProcessor(ldapUtils);
-            var test = await processor.ReadOUProperties(mock);
-
-            Assert.DoesNotContain("customdenyaces", test.Keys);
-            Assert.DoesNotContain("customexplicitdenyacescount", test.Keys);
-            Assert.DoesNotContain("custominheriteddenyacescount", test.Keys);
         }
 
         [Fact]
@@ -732,7 +681,7 @@ namespace CommonLibTest
         }
         
         [Fact]
-        public async Task LDAPPropertyProcessor_ReadRootCAProperties() {
+        public void LDAPPropertyProcessor_ReadRootCAProperties() {
             var ecdsa = ECDsa.Create();
             var req = new CertificateRequest("cn=foobar", ecdsa, HashAlgorithmName.SHA256);
             var cert = req.CreateSelfSigned(DateTimeOffset.Now, DateTimeOffset.Now.AddYears(5));
@@ -750,8 +699,7 @@ namespace CommonLibTest
                     {LDAPProperties.CACertificate, bytes}
                 }, "","2F9F3630-F46A-49BF-B186-6629994EBCF9");
 
-            var processor = new LdapPropertyProcessor(new MockLdapUtils());
-            var test = await processor.ReadRootCAProperties(mock);
+            var test = LdapPropertyProcessor.ReadRootCAProperties(mock);
             var keys = test.Keys;
 
             //These are not common properties
@@ -770,7 +718,7 @@ namespace CommonLibTest
 
         [Theory]
         [MemberData(nameof(EmptyCertBytes))]
-        public async Task LDAPPropertyProcessor_ReadRootCAProperties_NoCACertificate(byte[] CACertBytes) {
+        public void LDAPPropertyProcessor_ReadRootCAProperties_NoCACertificate(byte[] CACertBytes) {
             var mock = new MockDirectoryObject(
                 "CN\u003dDUMPSTER-DC01-CA,CN\u003dAIA,CN\u003dPUBLIC KEY SERVICES,CN\u003dSERVICES,CN\u003dCONFIGURATION,DC\u003dDUMPSTER,DC\u003dFIRE",
                 new Dictionary<string, object>
@@ -783,8 +731,7 @@ namespace CommonLibTest
                     {LDAPProperties.CACertificate, CACertBytes}
                 }, "","2F9F3630-F46A-49BF-B186-6629994EBCF9");
 
-            var processor = new LdapPropertyProcessor(new MockLdapUtils());
-            var test = await processor.ReadRootCAProperties(mock);
+            var test = LdapPropertyProcessor.ReadRootCAProperties(mock);
             var keys = test.Keys;
 
             //These are cert derived properties
@@ -798,7 +745,7 @@ namespace CommonLibTest
         }
 
         [Fact]
-        public async Task LDAPPropertyProcessor_ReadAIACAProperties() {
+        public void LDAPPropertyProcessor_ReadAIACAProperties() {
             var ecdsa = ECDsa.Create();
             var req = new CertificateRequest("cn=foobar", ecdsa, HashAlgorithmName.SHA256);
             var cert = req.CreateSelfSigned(DateTimeOffset.Now, DateTimeOffset.Now.AddYears(5));
@@ -817,8 +764,7 @@ namespace CommonLibTest
                     {LDAPProperties.CACertificate, bytes}
                 }, "","2F9F3630-F46A-49BF-B186-6629994EBCF9");
 
-            var processor = new LdapPropertyProcessor(new MockLdapUtils());
-            var test = await processor.ReadAIACAProperties(mock);
+            var test = LdapPropertyProcessor.ReadAIACAProperties(mock);
             var keys = test.Keys;
 
             //These are not common properties
@@ -841,7 +787,7 @@ namespace CommonLibTest
 
         [Theory]
         [MemberData(nameof(EmptyCertBytes))]
-        public async Task LDAPPropertyProcessor_ReadAIACAProperties_NoCACertificate(byte[] CACertBytes) {
+        public void LDAPPropertyProcessor_ReadAIACAProperties_NoCACertificate(byte[] CACertBytes) {
             var mock = new MockDirectoryObject(
                 "CN\u003dDUMPSTER-DC01-CA,CN\u003dAIA,CN\u003dPUBLIC KEY SERVICES,CN\u003dSERVICES,CN\u003dCONFIGURATION,DC\u003dDUMPSTER,DC\u003dFIRE",
                 new Dictionary<string, object>
@@ -855,8 +801,7 @@ namespace CommonLibTest
                     {LDAPProperties.CACertificate, CACertBytes}
                 }, "","2F9F3630-F46A-49BF-B186-6629994EBCF9");
 
-            var processor = new LdapPropertyProcessor(new MockLdapUtils());
-            var test = await processor.ReadAIACAProperties(mock);
+            var test = LdapPropertyProcessor.ReadAIACAProperties(mock);
             var keys = test.Keys;
 
             //These are cert derived properties
@@ -872,7 +817,7 @@ namespace CommonLibTest
         }
         
         [Fact]
-        public async Task LDAPPropertyProcessor_ReadEnterpriseCAProperties() {
+        public void LDAPPropertyProcessor_ReadEnterpriseCAProperties() {
             var ecdsa = ECDsa.Create();
             var req = new CertificateRequest("cn=foobar", ecdsa, HashAlgorithmName.SHA256);
             var cert = req.CreateSelfSigned(DateTimeOffset.Now, DateTimeOffset.Now.AddYears(5));
@@ -891,8 +836,7 @@ namespace CommonLibTest
                     {"flags", 1}
                 }, "","2F9F3630-F46A-49BF-B186-6629994EBCF9");
 
-            var processor = new LdapPropertyProcessor(new MockLdapUtils());
-            var test = await processor.ReadEnterpriseCAProperties(mock);
+            var test = LdapPropertyProcessor.ReadEnterpriseCAProperties(mock);
             var keys = test.Keys;
 
             //These are not common properties
@@ -916,7 +860,7 @@ namespace CommonLibTest
 
         [Theory]
         [MemberData(nameof(EmptyCertBytes))]
-        public async Task LDAPPropertyProcessor_ReadEnterpriseCAProperties_NoCACertificate(byte[] CACertBytes) {
+        public void LDAPPropertyProcessor_ReadEnterpriseCAProperties_NoCACertificate(byte[] CACertBytes) {
             var mock = new MockDirectoryObject(
                 "CN\u003dDUMPSTER-DC01-CA,CN\u003dAIA,CN\u003dPUBLIC KEY SERVICES,CN\u003dSERVICES,CN\u003dCONFIGURATION,DC\u003dDUMPSTER,DC\u003dFIRE",
                 new Dictionary<string, object>
@@ -930,8 +874,7 @@ namespace CommonLibTest
                     {"flags", 1}
                 }, "","2F9F3630-F46A-49BF-B186-6629994EBCF9");
 
-            var processor = new LdapPropertyProcessor(new MockLdapUtils());
-            var test = await processor.ReadEnterpriseCAProperties(mock);
+            var test = LdapPropertyProcessor.ReadEnterpriseCAProperties(mock);
             var keys = test.Keys;
 
             //These are cert derived properties
@@ -956,7 +899,7 @@ namespace CommonLibTest
             };
 
         [Fact]
-        public async Task LDAPPropertyProcessor_ReadNTAuthStoreProperties()
+        public void LDAPPropertyProcessor_ReadNTAuthStoreProperties()
         {
             var mock = new MockDirectoryObject("CN\u003dNTAUTHCERTIFICATES,CN\u003dPUBLIC KEY SERVICES,CN\u003dSERVICES,CN\u003dCONFIGURATION,DC\u003dDUMPSTER,DC\u003dFIRE",
                 new Dictionary<string, object>
@@ -968,8 +911,7 @@ namespace CommonLibTest
                     {"whencreated", 1683986131},
                 }, "","2F9F3630-F46A-49BF-B186-6629994EBCF9");
 
-            var processor = new LdapPropertyProcessor(new MockLdapUtils());
-            var test = await processor.ReadNTAuthStoreProperties(mock);
+            var test = LdapPropertyProcessor.ReadNTAuthStoreProperties(mock);
             var keys = test.Keys;
 
             //These are not common properties
@@ -981,7 +923,7 @@ namespace CommonLibTest
         }
 
         [Fact]
-        public async Task LDAPPropertyProcessor_ReadCertTemplateProperties()
+        public void LDAPPropertyProcessor_ReadCertTemplateProperties()
         {
             var mock = new MockDirectoryObject("CN\u003dWORKSTATION,CN\u003dCERTIFICATE TEMPLATES,CN\u003dPUBLIC KEY SERVICES,CN\u003dSERVICES,CN\u003dCONFIGURATION,DC\u003dEXTERNAL,DC\u003dLOCAL",
                 new Dictionary<string, object>
@@ -1019,8 +961,7 @@ namespace CommonLibTest
                     {LDAPProperties.PKIPrivateKeyFlag, 256},
                 }, "","2F9F3630-F46A-49BF-B186-6629994EBCF9");
 
-            var processor = new LdapPropertyProcessor(new MockLdapUtils());
-            var test = await processor.ReadCertTemplateProperties(mock);
+            var test = LdapPropertyProcessor.ReadCertTemplateProperties(mock);
             var keys = test.Keys;
 
             //These are not common properties

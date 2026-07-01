@@ -2247,36 +2247,34 @@ namespace CommonLibTest {
             AssertCustomDenyAceCounts(result, 1, 1);
         }
 
-        [WindowsOnlyFact]
-        public async Task ACLProcessor_AddCustomDenyAcesProperty_EmitsExplicitAndInheritedCounts() {
-            var props = new Dictionary<string, object>();
-            var explicitAce = CreateCommonDenyAce("S-1-5-21-3130019616-2776909439-2417379446-3100",
-                ActiveDirectoryRights.Delete);
-            var inheritedAce = CreateCommonDenyAce("S-1-5-21-3130019616-2776909439-2417379446-3101",
-                ActiveDirectoryRights.DeleteChild, AceFlags.Inherited);
-            var processor = CreateCustomDenyAceProcessor();
+        [Fact]
+        public async Task ACLProcessor_ProcessACLWithCustomDenyAces_ReturnsRegularAcesAndDenyCounts() {
+            var denyRule = CreateRuleDescriptor("S-1-5-21-3130019616-2776909439-2417379446-3100",
+                AccessControlType.Deny, ActiveDirectoryRights.Delete);
+            var allowRule = CreateRuleDescriptor("S-1-5-21-3130019616-2776909439-2417379446-3101",
+                AccessControlType.Allow, ActiveDirectoryRights.WriteDacl);
+            allowRule.Setup(x => x.IsAceInheritedFrom(It.IsAny<string>())).Returns(true);
 
-            await processor.AddCustomDenyAcesProperty(props, CreateSecurityDescriptorBytes(explicitAce, inheritedAce),
-                _testDomainName, Label.User, "CN=TEST USER,CN=USERS,DC=TESTLAB,DC=LOCAL");
+            var processor = CreateCombinedAclProcessor(new[] { denyRule.Object, allowRule.Object });
+            var result = await processor.ProcessACLWithCustomDenyAces(new byte[] { 1 }, _testDomainName, Label.User,
+                false);
 
-            Assert.DoesNotContain("customdenyaces", props.Keys);
-            Assert.Equal(1, props["customexplicitdenyacescount"]);
-            Assert.Equal(1, props["custominheriteddenyacescount"]);
+            Assert.Single(result.Aces);
+            Assert.Equal(EdgeNames.WriteDacl, result.Aces[0].RightName);
+            AssertCustomDenyAceCounts(result.CustomDenyAceCounts, 1, 0);
         }
 
-        [WindowsOnlyFact]
-        public async Task ACLProcessor_AddCustomDenyAcesProperty_DoesNotEmitWhenEmpty() {
-            var props = new Dictionary<string, object>();
-            var ace = CreateCommonDenyAce("S-1-1-0",
+        [Fact]
+        public async Task ACLProcessor_ProcessACLWithCustomDenyAces_DoesNotCountExcludedDenyAces() {
+            var denyRule = CreateRuleDescriptor(WellKnownPrincipal.EveryoneSid, AccessControlType.Deny,
                 ActiveDirectoryRights.Delete | ActiveDirectoryRights.DeleteTree);
-            var processor = CreateCustomDenyAceProcessor();
 
-            await processor.AddCustomDenyAcesProperty(props, CreateSecurityDescriptorBytes(ace), _testDomainName,
-                Label.OU, "OU=TEST,DC=TESTLAB,DC=LOCAL");
+            var processor = CreateCombinedAclProcessor(new[] { denyRule.Object });
+            var result = await processor.ProcessACLWithCustomDenyAces(new byte[] { 1 }, _testDomainName, Label.OU,
+                false);
 
-            Assert.DoesNotContain("customdenyaces", props.Keys);
-            Assert.DoesNotContain("customexplicitdenyacescount", props.Keys);
-            Assert.DoesNotContain("custominheriteddenyacescount", props.Keys);
+            Assert.Empty(result.Aces);
+            AssertCustomDenyAceCounts(result.CustomDenyAceCounts, 0, 0);
         }
 
         private ACLProcessor CreateCustomDenyAceProcessor(params (string Sid, string Name)[] principals) {
@@ -2290,6 +2288,33 @@ namespace CommonLibTest {
                 });
 
             return new ACLProcessor(mockLdapUtils.Object);
+        }
+
+        private ACLProcessor CreateCombinedAclProcessor(IEnumerable<ActiveDirectoryRuleDescriptor> rules) {
+            var mockLdapUtils = new Mock<ILdapUtils>();
+            var mockSecurityDescriptor = new Mock<ActiveDirectorySecurityDescriptor>(MockBehavior.Loose, null);
+            mockSecurityDescriptor.Setup(x => x.GetOwner(It.IsAny<Type>())).Returns((string)null);
+            mockSecurityDescriptor.Setup(x => x.GetAccessRules(It.IsAny<bool>(), It.IsAny<bool>(), It.IsAny<Type>()))
+                .Returns(rules.ToList());
+            mockLdapUtils.Setup(x => x.MakeSecurityDescriptor()).Returns(mockSecurityDescriptor.Object);
+            mockLdapUtils.Setup(x => x.PagedQuery(It.IsAny<LdapQueryParameters>(), It.IsAny<CancellationToken>()))
+                .Returns(AsyncEnumerable.Empty<LdapResult<IDirectoryObject>>());
+            mockLdapUtils.Setup(x => x.ResolveAccountName(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync((false, null));
+            mockLdapUtils.Setup(x => x.ResolveIDAndType(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync((string sid, string _) => (true, new TypedPrincipal(sid, Label.User)));
+            return new ACLProcessor(mockLdapUtils.Object);
+        }
+
+        private static Mock<ActiveDirectoryRuleDescriptor> CreateRuleDescriptor(string sid,
+            AccessControlType accessControlType, ActiveDirectoryRights rights, bool inherited = false) {
+            var rule = new Mock<ActiveDirectoryRuleDescriptor>(MockBehavior.Loose, null);
+            rule.Setup(x => x.IdentityReference()).Returns(sid);
+            rule.Setup(x => x.AccessControlType()).Returns(accessControlType);
+            rule.Setup(x => x.ActiveDirectoryRights()).Returns(rights);
+            rule.Setup(x => x.ObjectType()).Returns(Guid.Empty);
+            rule.Setup(x => x.IsInherited()).Returns(inherited);
+            return rule;
         }
 
         private static void AssertCustomDenyAceCounts(ACLProcessor.CustomDenyAceCounts result,
