@@ -2204,6 +2204,18 @@ namespace CommonLibTest {
         }
 
         [WindowsOnlyFact]
+        public async Task ACLProcessor_GetCustomDenyAceCounts_CountsAccidentalDeletionProtectionWithAdditionalRights() {
+            var ace = CreateCommonDenyAce("S-1-1-0",
+                ActiveDirectoryRights.Delete | ActiveDirectoryRights.DeleteTree | ActiveDirectoryRights.WriteDacl);
+            var processor = CreateCustomDenyAceProcessor();
+
+            var result = await processor.GetCustomDenyAceCounts(CreateSecurityDescriptorBytes(ace), _testDomainName,
+                Label.OU, "OU=TEST,DC=TESTLAB,DC=LOCAL");
+
+            AssertCustomDenyAceCounts(result, 1, 0);
+        }
+
+        [WindowsOnlyFact]
         public async Task ACLProcessor_GetCustomDenyAceCounts_SkipsDefaultAdDenyPatterns() {
             var msaAce = CreateObjectDenyAce("S-1-1-0", ActiveDirectoryRights.ExtendedRight,
                 new Guid(ACEGuids.UserForceChangePassword));
@@ -2275,6 +2287,19 @@ namespace CommonLibTest {
 
             Assert.Empty(result.Aces);
             AssertCustomDenyAceCounts(result.CustomDenyAceCounts, 0, 0);
+        }
+
+        [Fact]
+        public async Task ACLProcessor_ProcessACLWithCustomDenyAces_CountsAccidentalDeletionProtectionWithAdditionalRights() {
+            var denyRule = CreateRuleDescriptor(WellKnownPrincipal.EveryoneSid, AccessControlType.Deny,
+                ActiveDirectoryRights.Delete | ActiveDirectoryRights.DeleteTree | ActiveDirectoryRights.WriteDacl);
+
+            var processor = CreateCombinedAclProcessor(new[] { denyRule.Object });
+            var result = await processor.ProcessACLWithCustomDenyAces(new byte[] { 1 }, _testDomainName, Label.OU,
+                false);
+
+            Assert.Empty(result.Aces);
+            AssertCustomDenyAceCounts(result.CustomDenyAceCounts, 1, 0);
         }
 
         private ACLProcessor CreateCustomDenyAceProcessor(params (string Sid, string Name)[] principals) {

@@ -1088,8 +1088,7 @@ namespace SharpHoundCommonLib.Processors {
             // Filter default Everyone Deny ACEs
             if (principalSid.Equals(WellKnownPrincipal.EveryoneSid, StringComparison.OrdinalIgnoreCase)) {
                 if ((objectType is Label.OU or Label.Container) &&
-                    rights.HasFlag(ActiveDirectoryRights.Delete) &&
-                    rights.HasFlag(ActiveDirectoryRights.DeleteTree)) {
+                    rights == (ActiveDirectoryRights.Delete | ActiveDirectoryRights.DeleteTree)) {
                     return true;
                 }
 
