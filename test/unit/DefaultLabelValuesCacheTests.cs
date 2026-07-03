@@ -50,7 +50,7 @@ public class DefaultLabelValuesCacheTests {
     }
     
     [Fact]
-    public void LabelValuesCache_ReturnsSameReference_UnderConcurrency()
+    public async Task LabelValuesCache_ReturnsSameReference_UnderConcurrency()
     {
         // setup
         var cache = new DefaultLabelValuesCache();
@@ -72,7 +72,7 @@ public class DefaultLabelValuesCacheTests {
         }
 
         // act
-        Task.WaitAll(tasks);
+        await Task.WhenAll(tasks);
 
         // assert
         // Take the first reference
