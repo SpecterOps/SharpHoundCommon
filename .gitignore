@@ -20,6 +20,9 @@ coverage.*
 logs/
 *.log
 
+# Codex
+.codex
+
 ################
 # Boilerplate Settings (modify as needed)
 # (https://github.com/github/gitignore)
