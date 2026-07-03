@@ -2232,6 +2232,31 @@ namespace CommonLibTest {
         }
 
         [WindowsOnlyFact]
+        public async Task ACLProcessor_GetCustomDenyAceCounts_CountsMsaForceChangePasswordDenyWithAdditionalRights() {
+            var ace = CreateObjectDenyAce("S-1-1-0",
+                ActiveDirectoryRights.ExtendedRight | ActiveDirectoryRights.WriteDacl,
+                new Guid(ACEGuids.UserForceChangePassword));
+            var processor = CreateCustomDenyAceProcessor();
+
+            var result = await processor.GetCustomDenyAceCounts(CreateSecurityDescriptorBytes(ace),
+                _testDomainName, Label.User, "CN=TEST MSA,CN=Managed Service Accounts,DC=TESTLAB,DC=LOCAL", true);
+
+            AssertCustomDenyAceCounts(result, 1, 0);
+        }
+
+        [WindowsOnlyFact]
+        public async Task ACLProcessor_GetCustomDenyAceCounts_CountsDomainDeleteChildDenyWithAdditionalRights() {
+            var ace = CreateCommonDenyAce("S-1-1-0",
+                ActiveDirectoryRights.DeleteChild | ActiveDirectoryRights.WriteDacl);
+            var processor = CreateCustomDenyAceProcessor();
+
+            var result = await processor.GetCustomDenyAceCounts(CreateSecurityDescriptorBytes(ace), _testDomainName,
+                Label.Domain, "DC=TESTLAB,DC=LOCAL");
+
+            AssertCustomDenyAceCounts(result, 1, 0);
+        }
+
+        [WindowsOnlyFact]
         public async Task ACLProcessor_GetCustomDenyAceCounts_CountsMultipleExplicitDenyAces() {
             var ace1 = CreateCommonDenyAce("S-1-5-21-3130019616-2776909439-2417379446-2800",
                 ActiveDirectoryRights.Delete);
@@ -2302,6 +2327,33 @@ namespace CommonLibTest {
             AssertCustomDenyAceCounts(result.CustomDenyAceCounts, 1, 0);
         }
 
+        [Fact]
+        public async Task ACLProcessor_ProcessACLWithCustomDenyAces_CountsMsaForceChangePasswordDenyWithAdditionalRights() {
+            var denyRule = CreateRuleDescriptor(WellKnownPrincipal.EveryoneSid, AccessControlType.Deny,
+                ActiveDirectoryRights.ExtendedRight | ActiveDirectoryRights.WriteDacl,
+                objectType: new Guid(ACEGuids.UserForceChangePassword));
+
+            var processor = CreateCombinedAclProcessor(new[] { denyRule.Object });
+            var result = await processor.ProcessACLWithCustomDenyAces(new byte[] { 1 }, _testDomainName, Label.User,
+                false, isMSA: true);
+
+            Assert.Empty(result.Aces);
+            AssertCustomDenyAceCounts(result.CustomDenyAceCounts, 1, 0);
+        }
+
+        [Fact]
+        public async Task ACLProcessor_ProcessACLWithCustomDenyAces_CountsDomainDeleteChildDenyWithAdditionalRights() {
+            var denyRule = CreateRuleDescriptor(WellKnownPrincipal.EveryoneSid, AccessControlType.Deny,
+                ActiveDirectoryRights.DeleteChild | ActiveDirectoryRights.WriteDacl);
+
+            var processor = CreateCombinedAclProcessor(new[] { denyRule.Object });
+            var result = await processor.ProcessACLWithCustomDenyAces(new byte[] { 1 }, _testDomainName, Label.Domain,
+                false);
+
+            Assert.Empty(result.Aces);
+            AssertCustomDenyAceCounts(result.CustomDenyAceCounts, 1, 0);
+        }
+
         private ACLProcessor CreateCustomDenyAceProcessor(params (string Sid, string Name)[] principals) {
             var mockLdapUtils = new Mock<ILdapUtils>(MockBehavior.Strict);
             mockLdapUtils.Setup(x => x.ResolveAccountName(It.IsAny<string>(), It.IsAny<string>()))
@@ -2332,12 +2384,13 @@ namespace CommonLibTest {
         }
 
         private static Mock<ActiveDirectoryRuleDescriptor> CreateRuleDescriptor(string sid,
-            AccessControlType accessControlType, ActiveDirectoryRights rights, bool inherited = false) {
+            AccessControlType accessControlType, ActiveDirectoryRights rights, bool inherited = false,
+            Guid objectType = default) {
             var rule = new Mock<ActiveDirectoryRuleDescriptor>(MockBehavior.Loose, null);
             rule.Setup(x => x.IdentityReference()).Returns(sid);
             rule.Setup(x => x.AccessControlType()).Returns(accessControlType);
             rule.Setup(x => x.ActiveDirectoryRights()).Returns(rights);
-            rule.Setup(x => x.ObjectType()).Returns(Guid.Empty);
+            rule.Setup(x => x.ObjectType()).Returns(objectType);
             rule.Setup(x => x.IsInherited()).Returns(inherited);
             return rule;
         }

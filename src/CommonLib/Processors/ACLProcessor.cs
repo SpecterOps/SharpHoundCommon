@@ -1087,20 +1087,21 @@ namespace SharpHoundCommonLib.Processors {
 
             // Filter default Everyone Deny ACEs
             if (principalSid.Equals(WellKnownPrincipal.EveryoneSid, StringComparison.OrdinalIgnoreCase)) {
+                if (objectType is Label.Domain && rights.Equals(ActiveDirectoryRights.DeleteChild)) {
+                    return true;
+                }
+
                 if ((objectType is Label.OU or Label.Container) &&
-                    rights == (ActiveDirectoryRights.Delete | ActiveDirectoryRights.DeleteTree)) {
+                    rights.Equals(ActiveDirectoryRights.Delete | ActiveDirectoryRights.DeleteTree)) {
                     return true;
                 }
 
                 if (isMSA &&
-                    rights.HasFlag(ActiveDirectoryRights.ExtendedRight) &&
+                    rights.Equals(ActiveDirectoryRights.ExtendedRight) &&
                     objectAceType.Equals(new Guid(ACEGuids.UserForceChangePassword))) {
                     return true;
                 }
 
-                if (objectType == Label.Domain && rights.HasFlag(ActiveDirectoryRights.DeleteChild)) {
-                    return true;
-                }
             }
 
             return false;
