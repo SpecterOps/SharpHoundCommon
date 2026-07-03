@@ -996,67 +996,6 @@ namespace SharpHoundCommonLib.Processors {
             }
         }
 
-        public Task<CustomDenyAceCounts> GetCustomDenyAceCounts(ResolvedSearchResult result,
-            IDirectoryObject searchResult) {
-            if (!searchResult.TryGetByteProperty(LDAPProperties.SecurityDescriptor, out var descriptor)) {
-                return Task.FromResult(new CustomDenyAceCounts());
-            }
-
-            searchResult.TryGetDistinguishedName(out var distinguishedName);
-            return GetCustomDenyAceCounts(
-                descriptor,
-                result.Domain,
-                result.ObjectType,
-                distinguishedName,
-                searchResult.IsMSA() || searchResult.IsGMSA(),
-                result.DisplayName);
-        }
-
-        public async Task<CustomDenyAceCounts> GetCustomDenyAceCounts(byte[] ntSecurityDescriptor,
-            string objectDomain, Label objectType, string distinguishedName = null, bool isMSA = false,
-            string objectName = "") {
-            if (ntSecurityDescriptor == null) {
-                return new CustomDenyAceCounts();
-            }
-
-            RawSecurityDescriptor descriptor;
-            try {
-                descriptor = new RawSecurityDescriptor(ntSecurityDescriptor, 0);
-            }
-            catch (Exception e) when (e is OverflowException or ArgumentException) {
-                _log.LogWarning(
-                    "Security descriptor on object {Name} exceeds maximum allowable length. Unable to process custom deny ACEs",
-                    objectName);
-                return new CustomDenyAceCounts();
-            }
-
-            if (descriptor.DiscretionaryAcl == null || descriptor.DiscretionaryAcl.Count == 0) {
-                return new CustomDenyAceCounts();
-            }
-
-            var explicitCount = 0;
-            var inheritedCount = 0;
-
-            foreach (GenericAce ace in descriptor.DiscretionaryAcl) {
-                if (!TryGetDenyAceData(ace, out var principalSid, out var rights, out var objectAceType)) {
-                    continue;
-                }
-
-                if (await ShouldExcludeCustomDenyAce(principalSid, rights, objectAceType, objectDomain, objectType,
-                        distinguishedName, isMSA)) {
-                    continue;
-                }
-
-                if ((ace.AceFlags & AceFlags.Inherited) == AceFlags.Inherited) {
-                    inheritedCount++;
-                } else {
-                    explicitCount++;
-                }
-            }
-
-            return new CustomDenyAceCounts(explicitCount, inheritedCount);
-        }
-
         private async Task CountCustomDenyAce(ActiveDirectoryRuleDescriptor ace,
             CustomDenyAceAccumulator accumulator, string objectDomain, Label objectType, string distinguishedName,
             bool isMSA) {
@@ -1071,27 +1010,6 @@ namespace SharpHoundCommonLib.Processors {
             }
 
             accumulator.Add(ace.IsInherited());
-        }
-
-        private static bool TryGetDenyAceData(GenericAce ace, out string principalSid, out ActiveDirectoryRights rights,
-            out Guid objectAceType) {
-            principalSid = null;
-            rights = 0;
-            objectAceType = Guid.Empty;
-
-            switch (ace) {
-                case CommonAce commonAce when commonAce.AceQualifier == AceQualifier.AccessDenied:
-                    principalSid = commonAce.SecurityIdentifier?.Value;
-                    rights = (ActiveDirectoryRights)commonAce.AccessMask;
-                    return !string.IsNullOrWhiteSpace(principalSid);
-                case ObjectAce objectAce when objectAce.AceQualifier == AceQualifier.AccessDenied:
-                    principalSid = objectAce.SecurityIdentifier?.Value;
-                    rights = (ActiveDirectoryRights)objectAce.AccessMask;
-                    objectAceType = objectAce.ObjectAceType;
-                    return !string.IsNullOrWhiteSpace(principalSid);
-                default:
-                    return false;
-            }
         }
 
         private async Task<bool> ShouldExcludeCustomDenyAce(string principalSid, ActiveDirectoryRights rights,
