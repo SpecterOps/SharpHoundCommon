@@ -156,6 +156,7 @@ namespace CommonLibTest
                 new Dictionary<string, object>
                 {
                     {"description", "Test"},
+                    {"msds-aadobjectid", "b9b08d75-5bca-4fd4-a75d-7de9fdbe0cd3"},
                     {"admincount", "1"}
                 }, "S-1-5-21-3130019616-2776909439-2417379446-512","");
             var processor = new LdapPropertyProcessor(new MockLdapUtils());
@@ -166,6 +167,9 @@ namespace CommonLibTest
             Assert.Equal("Test", test["description"] as string);
             Assert.Contains("admincount", test.Keys);
             Assert.True((bool)test["admincount"]);
+            Assert.Contains("aadobjectid", test.Keys);
+            Assert.Equal("B9B08D75-5BCA-4FD4-A75D-7DE9FDBE0CD3", test["aadobjectid"] as string);
+            Assert.DoesNotContain("msds-aadobjectid", test.Keys);
         }
 
         [Fact]
@@ -349,6 +353,7 @@ namespace CommonLibTest
                     {"lastlogontimestamp", "132670318095676525"},
                     {"homedirectory", @"\\win10\testdir"},
                     {"mail", "test@testdomain.com"},
+                    {"msds-aadobjectid", "3b6ace22-ae1c-49b9-bb40-66b30c5bc9e5"},
                     {
                         "serviceprincipalname", new[]
                         {
@@ -385,6 +390,9 @@ namespace CommonLibTest
             Assert.Equal(@"\\win10\testdir", props["homedirectory"] as string);
             Assert.Contains("email", keys);
             Assert.Equal("test@testdomain.com", props["email"] as string);
+            Assert.Contains("aadobjectid", keys);
+            Assert.Equal("3B6ACE22-AE1C-49B9-BB40-66B30C5BC9E5", props["aadobjectid"] as string);
+            Assert.DoesNotContain("msds-aadobjectid", keys);
 
             //UAC stuff
             Assert.Contains("sensitive", keys);
@@ -1180,6 +1188,7 @@ namespace CommonLibTest
                     {"name", "NTAUTHCERTIFICATES@DUMPSTER.FIRE"},
                     {"domainsid", "S-1-5-21-2697957641-2271029196-387917394"},
                     {"whencreated", 1683986131},
+                    {"msds-aadobjectid", "b9b08d75-5bca-4fd4-a75d-7de9fdbe0cd3"},
                     {LDAPProperties.DSASignature, "jkr"}
                 }, "", "2F9F3630-F46A-49BF-B186-6629994EBCF9");
 
@@ -1191,6 +1200,7 @@ namespace CommonLibTest
             Assert.DoesNotContain("description", keys);
             Assert.DoesNotContain("whencreated", keys);
             Assert.DoesNotContain("name", keys);
+            Assert.DoesNotContain("msds-aadobjectid", keys);
             Assert.DoesNotContain(LDAPProperties.DSASignature, keys);
 
             Assert.Contains("domainsid", keys);
