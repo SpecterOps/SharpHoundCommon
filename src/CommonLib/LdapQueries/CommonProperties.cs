@@ -54,7 +54,7 @@
             LDAPProperties.DomainFunctionalLevel, LDAPProperties.ObjectGUID, LDAPProperties.Name,
             LDAPProperties.GroupPolicyOptions, LDAPProperties.AllowedToDelegateTo,
             LDAPProperties.AllowedToActOnBehalfOfOtherIdentity, LDAPProperties.WhenCreated,
-            LDAPProperties.HostServiceAccount, LDAPProperties.UnixUserPassword, LDAPProperties.MsSFU30Password,
+            LDAPProperties.AADObjectID, LDAPProperties.HostServiceAccount, LDAPProperties.UnixUserPassword, LDAPProperties.MsSFU30Password,
             LDAPProperties.UnicodePassword, LDAPProperties.ProfilePath, LDAPProperties.ScriptPath,
             LDAPProperties.ExpirePasswordsOnSmartCardOnlyAccounts, LDAPProperties.MachineAccountQuota, 
             LDAPProperties.SupportedEncryptionTypes, LDAPProperties.DSHeuristics,
