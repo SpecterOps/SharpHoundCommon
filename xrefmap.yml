@@ -1811,6 +1811,12 @@ references:
   commentId: F:SharpHoundCommonLib.Enums.EdgeNames.WriteAccountRestrictions
   fullName: SharpHoundCommonLib.Enums.EdgeNames.WriteAccountRestrictions
   nameWithType: EdgeNames.WriteAccountRestrictions
+- uid: SharpHoundCommonLib.Enums.EdgeNames.WriteAltSecurityIdentities
+  name: WriteAltSecurityIdentities
+  href: api/SharpHoundCommonLib.Enums.EdgeNames.html#SharpHoundCommonLib_Enums_EdgeNames_WriteAltSecurityIdentities
+  commentId: F:SharpHoundCommonLib.Enums.EdgeNames.WriteAltSecurityIdentities
+  fullName: SharpHoundCommonLib.Enums.EdgeNames.WriteAltSecurityIdentities
+  nameWithType: EdgeNames.WriteAltSecurityIdentities
 - uid: SharpHoundCommonLib.Enums.EdgeNames.WriteDacl
   name: WriteDacl
   href: api/SharpHoundCommonLib.Enums.EdgeNames.html#SharpHoundCommonLib_Enums_EdgeNames_WriteDacl
@@ -1841,6 +1847,12 @@ references:
   commentId: F:SharpHoundCommonLib.Enums.EdgeNames.WritePKINameFlag
   fullName: SharpHoundCommonLib.Enums.EdgeNames.WritePKINameFlag
   nameWithType: EdgeNames.WritePKINameFlag
+- uid: SharpHoundCommonLib.Enums.EdgeNames.WritePublicInformation
+  name: WritePublicInformation
+  href: api/SharpHoundCommonLib.Enums.EdgeNames.html#SharpHoundCommonLib_Enums_EdgeNames_WritePublicInformation
+  commentId: F:SharpHoundCommonLib.Enums.EdgeNames.WritePublicInformation
+  fullName: SharpHoundCommonLib.Enums.EdgeNames.WritePublicInformation
+  nameWithType: EdgeNames.WritePublicInformation
 - uid: SharpHoundCommonLib.Enums.EdgeNames.WriteSPN
   name: WriteSPN
   href: api/SharpHoundCommonLib.Enums.EdgeNames.html#SharpHoundCommonLib_Enums_EdgeNames_WriteSPN
@@ -9970,6 +9982,12 @@ references:
   commentId: F:SharpHoundCommonLib.Processors.ACEGuids.WriteAllowedToAct
   fullName: SharpHoundCommonLib.Processors.ACEGuids.WriteAllowedToAct
   nameWithType: ACEGuids.WriteAllowedToAct
+- uid: SharpHoundCommonLib.Processors.ACEGuids.WriteAltSecurityIdentities
+  name: WriteAltSecurityIdentities
+  href: api/SharpHoundCommonLib.Processors.ACEGuids.html#SharpHoundCommonLib_Processors_ACEGuids_WriteAltSecurityIdentities
+  commentId: F:SharpHoundCommonLib.Processors.ACEGuids.WriteAltSecurityIdentities
+  fullName: SharpHoundCommonLib.Processors.ACEGuids.WriteAltSecurityIdentities
+  nameWithType: ACEGuids.WriteAltSecurityIdentities
 - uid: SharpHoundCommonLib.Processors.ACEGuids.WriteGPLink
   name: WriteGPLink
   href: api/SharpHoundCommonLib.Processors.ACEGuids.html#SharpHoundCommonLib_Processors_ACEGuids_WriteGPLink
@@ -9982,6 +10000,12 @@ references:
   commentId: F:SharpHoundCommonLib.Processors.ACEGuids.WriteMember
   fullName: SharpHoundCommonLib.Processors.ACEGuids.WriteMember
   nameWithType: ACEGuids.WriteMember
+- uid: SharpHoundCommonLib.Processors.ACEGuids.WritePublicInformation
+  name: WritePublicInformation
+  href: api/SharpHoundCommonLib.Processors.ACEGuids.html#SharpHoundCommonLib_Processors_ACEGuids_WritePublicInformation
+  commentId: F:SharpHoundCommonLib.Processors.ACEGuids.WritePublicInformation
+  fullName: SharpHoundCommonLib.Processors.ACEGuids.WritePublicInformation
+  nameWithType: ACEGuids.WritePublicInformation
 - uid: SharpHoundCommonLib.Processors.ACEGuids.WriteSPN
   name: WriteSPN
   href: api/SharpHoundCommonLib.Processors.ACEGuids.html#SharpHoundCommonLib_Processors_ACEGuids_WriteSPN

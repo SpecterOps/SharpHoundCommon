@@ -393,7 +393,7 @@ var assemblies = [
       { "name": "SharpHoundCommonLib.OutputTypes.UserRightsAssignmentAPIResult", "rp": "SharpHoundCommonLib_UserRightsAssignmentAPIResult.html", "cl": 0, "ucl": 11, "cal": 11, "tl": 24, "cb": 0, "tb": 4, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "SharpHoundCommonLib.ParsedGPLink", "rp": "SharpHoundCommonLib_ParsedGPLink.html", "cl": 0, "ucl": 2, "cal": 2, "tl": 307, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "SharpHoundCommonLib.PassThroughLogger", "rp": "SharpHoundCommonLib_PassThroughLogger.html", "cl": 0, "ucl": 17, "cal": 17, "tl": 41, "cb": 0, "tb": 2, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "SharpHoundCommonLib.Processors.ACLProcessor", "rp": "SharpHoundCommonLib_ACLProcessor.html", "cl": 0, "ucl": 666, "cal": 666, "tl": 963, "cb": 0, "tb": 295, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "SharpHoundCommonLib.Processors.ACLProcessor", "rp": "SharpHoundCommonLib_ACLProcessor.html", "cl": 0, "ucl": 687, "cal": 687, "tl": 984, "cb": 0, "tb": 307, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "SharpHoundCommonLib.Processors.CachedLocalItem", "rp": "SharpHoundCommonLib_CachedLocalItem.html", "cl": 0, "ucl": 7, "cal": 7, "tl": 16, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "SharpHoundCommonLib.Processors.CAEnrollmentProcessor", "rp": "SharpHoundCommonLib_CAEnrollmentProcessor.html", "cl": 0, "ucl": 154, "cal": 154, "tl": 231, "cb": 0, "tb": 38, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "SharpHoundCommonLib.Processors.CertAbuseProcessor", "rp": "SharpHoundCommonLib_CertAbuseProcessor.html", "cl": 0, "ucl": 351, "cal": 351, "tl": 563, "cb": 0, "tb": 96, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
@@ -540,8 +540,8 @@ var riskHotspots = [
   {
     "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.Processors.ACLProcessor", "reportPath": "SharpHoundCommonLib_ACLProcessor.html", "methodName": "ProcessACL()", "methodShortName": "ProcessACL()", "fileIndex": 0, "line": 451,
     "metrics": [
-      { "value": 205, "exceeded": true },
-      { "value": 205, "exceeded": true },
+      { "value": 217, "exceeded": true },
+      { "value": 217, "exceeded": true },
     ]},
   {
     "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.Processors.GPOLocalGroupProcessor", "reportPath": "SharpHoundCommonLib_GPOLocalGroupProcessor.html", "methodName": "ReadGPOLocalGroups()", "methodShortName": "ReadGPOLocalGroups()", "fileIndex": 0, "line": 60,
