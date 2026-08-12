@@ -36,7 +36,7 @@ jobs:
       - name: Pack
         run: |
           mkdir pkgs
-          dotnet pack --no-restore -c Release -p:PackageVersion=${{ steps.version.outputs.dev_version }} -o ./pkgs
+          dotnet pack --no-restore -c Release -p:BuildDocFx=false -p:PackageVersion=${{ steps.version.outputs.dev_version }} -o ./pkgs
 
       - name: Publish to SpecterOps Packages
         env:
