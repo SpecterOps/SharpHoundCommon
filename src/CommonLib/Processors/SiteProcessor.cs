@@ -77,6 +77,22 @@ namespace SharpHoundCommonLib.Processors
             return await GetReferencedComputerForServer(serverReference.ToString());
         }
 
+        public async Task<(bool Success, TypedPrincipal Principal)> GetReferencedComputerForServer(string serverReference)
+        {
+            if (string.IsNullOrWhiteSpace(serverReference))
+            {
+                return (false, default);
+            }
+
+            var resolved = await _utils.ResolveDistinguishedName(serverReference);
+            if (!resolved.Success || resolved.Principal == null || resolved.Principal.ObjectType != Label.Computer)
+            {
+                return (false, default);
+            }
+
+            return resolved;
+        }
+
         /// <summary>
         /// Uses the distinguishedname of a site server object to get its containing site by stripping the two first parts and using the remainder to find the container object
         /// Saves lots of LDAP calls compared to enumerating container info directly
@@ -98,22 +114,6 @@ namespace SharpHoundCommonLib.Processors
         public async Task<(bool Success, TypedPrincipal Principal)> GetContainingSiteForSubnet(string siteObject)
         {
             return await _utils.ResolveDistinguishedName(siteObject);
-        }
-
-        public async Task<(bool Success, TypedPrincipal Principal)> GetReferencedComputerForServer(string serverReference)
-        {
-            if (string.IsNullOrWhiteSpace(serverReference))
-            {
-                return (false, default);
-            }
-
-            var resolved = await _utils.ResolveDistinguishedName(serverReference);
-            if (!resolved.Success || resolved.Principal == null || resolved.Principal.ObjectType != Label.Computer)
-            {
-                return (false, default);
-            }
-
-            return resolved;
         }
 
         public IAsyncEnumerable<GPLink> ReadSiteGPLinks(ResolvedSearchResult result, IDirectoryObject entry)
