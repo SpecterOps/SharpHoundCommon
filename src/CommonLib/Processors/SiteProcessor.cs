@@ -118,12 +118,7 @@ namespace SharpHoundCommonLib.Processors
 
         public IAsyncEnumerable<GPLink> ReadSiteGPLinks(ResolvedSearchResult result, IDirectoryObject entry)
         {
-            if (entry.TryGetProperty(LDAPProperties.GPLink, out var links))
-            {
-                return ReadSiteGPLinks(links);
-            }
-
-            return AsyncEnumerable.Empty<GPLink>();
+            return Helpers.ReadGPLinks(entry, _utils);
         }
 
         /// <summary>
@@ -131,26 +126,9 @@ namespace SharpHoundCommonLib.Processors
         /// </summary>
         /// <param name="gpLink"></param>
         /// <returns></returns>
-        public async IAsyncEnumerable<GPLink> ReadSiteGPLinks(string gpLink)
+        public IAsyncEnumerable<GPLink> ReadSiteGPLinks(string gpLink)
         {
-            if (gpLink == null)
-                yield break;
-
-            foreach (var link in Helpers.SplitGPLinkProperty(gpLink))
-            {
-                var enforced = link.Status.Equals("2");
-
-                var res = await _utils.ResolveDistinguishedName(link.DistinguishedName);
-
-                if (res.Success)
-                {
-                    yield return new GPLink
-                    {
-                        GUID = res.Principal.ObjectIdentifier,
-                        IsEnforced = enforced
-                    };
-                }
-            }
+            return Helpers.ReadGPLinks(gpLink, _utils);
         }
     }
 }
