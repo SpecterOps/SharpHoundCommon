@@ -32,6 +32,9 @@ namespace SharpHoundCommonLib.Processors {
             ReservedAttributes.UnionWith(CommonProperties.DomainTrustProps);
             ReservedAttributes.UnionWith(CommonProperties.GPOLocalGroupProps);
             ReservedAttributes.UnionWith(CommonProperties.CertAbuseProps);
+            ReservedAttributes.UnionWith(CommonProperties.SiteProps);
+            ReservedAttributes.UnionWith(CommonProperties.SiteServerProps);
+            ReservedAttributes.UnionWith(CommonProperties.SiteSubnetProps);
             ReservedAttributes.Add(LDAPProperties.DSASignature);
         }
 

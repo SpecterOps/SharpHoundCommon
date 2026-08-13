@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.DirectoryServices;
+using System.Linq;
 using System.Runtime.Versioning;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -10,6 +11,7 @@ using CommonLibTest.Facades;
 using Moq;
 using SharpHoundCommonLib;
 using SharpHoundCommonLib.Enums;
+using SharpHoundCommonLib.LDAPQueries;
 using SharpHoundCommonLib.OutputTypes;
 using SharpHoundCommonLib.Processors;
 using SharpHoundRPC;
@@ -1193,6 +1195,26 @@ namespace CommonLibTest
 
             Assert.Contains("domainsid", keys);
             Assert.Contains("domain", keys);
+        }
+
+        [Fact]
+        public void LDAPPropertyProcessor_ParseAllProperties_ExcludesSiteProperties()
+        {
+            var properties = CommonProperties.SiteProps
+                .Concat(CommonProperties.SiteServerProps)
+                .Concat(CommonProperties.SiteSubnetProps)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(property => property, _ => (object)"value", StringComparer.OrdinalIgnoreCase);
+            properties.Add("customattribute", "value");
+
+            var mock = new MockDirectoryObject("CN=TEST,CN=SITES,CN=CONFIGURATION,DC=TESTLAB,DC=LOCAL",
+                properties, "", "2F9F3630-F46A-49BF-B186-6629994EBCF9");
+
+            var processor = new LdapPropertyProcessor(new MockLdapUtils());
+            var parsedProperties = processor.ParseAllProperties(mock);
+
+            Assert.Single(parsedProperties);
+            Assert.Contains("customattribute", parsedProperties);
         }
 
         [Fact]
