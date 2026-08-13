@@ -43,22 +43,12 @@ public class LdapProducerQueryGeneratorTest
         var result = LdapProducerQueryGenerator.GenerateConfigurationPartitionParameters(CollectionMethod.Site);
 
         Assert.Equal(expectedFilter, result.Filter.GetFilter());
-        Assert.Equal(DirectoryPaths.SitesLocation, result.RelativeSearchBase);
         Assert.All(CommonProperties.SiteProps.Concat(CommonProperties.SiteServerProps).Concat(CommonProperties.SiteSubnetProps),
             attribute => Assert.Contains(attribute, result.Attributes));
         Assert.DoesNotContain("(objectclass=pKICertificateTemplate)", result.Filter.GetFilter());
         Assert.DoesNotContain("(objectClass=certificationAuthority)", result.Filter.GetFilter());
         Assert.DoesNotContain("(objectCategory=pKIEnrollmentService)", result.Filter.GetFilter());
         Assert.DoesNotContain("(objectClass=msPKI-Enterprise-Oid)", result.Filter.GetFilter());
-    }
-
-    [Fact]
-    public void GenerateConfigurationPartitionParameters_SiteWithDefaultPartitionMethods_UsesSitesRelativeSearchBase()
-    {
-        var result = LdapProducerQueryGenerator.GenerateConfigurationPartitionParameters(
-            CollectionMethod.Site | CollectionMethod.Group);
-
-        Assert.Equal(DirectoryPaths.SitesLocation, result.RelativeSearchBase);
     }
 
     [Fact]
@@ -77,7 +67,6 @@ public class LdapProducerQueryGeneratorTest
         var result = LdapProducerQueryGenerator.GenerateConfigurationPartitionParameters(CollectionMethod.CertServices);
 
         Assert.Equal(expectedFilter, result.Filter.GetFilter());
-        Assert.Null(result.RelativeSearchBase);
         Assert.All(CommonProperties.CertAbuseProps, attribute => Assert.Contains(attribute, result.Attributes));
         Assert.DoesNotContain(LDAPProperties.ServerReference, result.Attributes);
         Assert.DoesNotContain("(objectClass=site)", result.Filter.GetFilter());
@@ -105,6 +94,5 @@ public class LdapProducerQueryGeneratorTest
             CollectionMethod.Site | CollectionMethod.CertServices);
 
         Assert.Equal(expectedFilter, result.Filter.GetFilter());
-        Assert.Null(result.RelativeSearchBase);
     }
 }

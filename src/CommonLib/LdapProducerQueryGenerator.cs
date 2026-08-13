@@ -104,13 +104,10 @@ public class LdapProducerQueryGenerator {
         properties.AddRange(CommonProperties.BaseQueryProps);
         properties.AddRange(CommonProperties.TypeResolutionProps);
 
+        // These methods collect all supported object types from the configuration partition
         var collectBroadConfigObjects = methods.HasFlag(CollectionMethod.ACL) ||
                                         methods.HasFlag(CollectionMethod.ObjectProps) ||
                                         methods.HasFlag(CollectionMethod.Container);
-        var collectOnlySiteConfigObjects = methods.HasFlag(CollectionMethod.Site) &&
-                                           !collectBroadConfigObjects &&
-                                           !methods.HasFlag(CollectionMethod.CertServices) &&
-                                           !methods.HasFlag(CollectionMethod.CARegistry);
 
         if (collectBroadConfigObjects || methods.HasFlag(CollectionMethod.CertServices) ||
             methods.HasFlag(CollectionMethod.Site)) {
@@ -166,8 +163,7 @@ public class LdapProducerQueryGenerator {
 
             return new GeneratedLdapParameters {
                 Filter = filter,
-                Attributes = properties.Distinct().ToArray(),
-                RelativeSearchBase = collectOnlySiteConfigObjects ? DirectoryPaths.SitesLocation : null
+                Attributes = properties.Distinct().ToArray()
             };
         }
 
@@ -186,5 +182,4 @@ public class LdapProducerQueryGenerator {
 public class GeneratedLdapParameters {
     public string[] Attributes { get; set; }
     public LdapFilter Filter { get; set; }
-    public string RelativeSearchBase { get; set; }
 }
