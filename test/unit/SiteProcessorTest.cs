@@ -26,7 +26,7 @@ namespace CommonLibTest
 
             var (success, principal) = await processor.GetContainingSiteForSubnet(new Dictionary<string, object>
             {
-                ["siteObject"] = siteObject
+                [LDAPProperties.SiteObject] = siteObject
             });
 
             Assert.False(success);
@@ -45,8 +45,29 @@ namespace CommonLibTest
 
             var (success, principal) = await processor.GetContainingSiteForSubnet(new Dictionary<string, object>
             {
-                ["siteObject"] = siteObject
+                [LDAPProperties.SiteObject] = siteObject
             });
+
+            Assert.True(success);
+            Assert.Equal(expected, principal);
+            utils.Verify(x => x.ResolveDistinguishedName(siteObject), Times.Once);
+        }
+
+        [Fact]
+        public async Task SiteProcessor_GetContainingSiteForSubnet_PropertiesFromReader_ResolvesDistinguishedName()
+        {
+            const string siteObject = "CN=Default-First-Site-Name,CN=Sites,CN=Configuration,DC=testlab,DC=local";
+            var expected = new TypedPrincipal("TESTLAB.LOCAL-SITE", Label.Site);
+            var utils = new Mock<ILdapUtils>();
+            utils.Setup(x => x.ResolveDistinguishedName(siteObject)).ReturnsAsync((true, expected));
+            var processor = new SiteProcessor(utils.Object);
+            var entry = new MockDirectoryObject("", new Dictionary<string, object>
+            {
+                [LDAPProperties.SiteObject] = siteObject
+            }, "", "");
+
+            var properties = LdapPropertyProcessor.ReadSiteSubnetProperties(entry);
+            var (success, principal) = await processor.GetContainingSiteForSubnet(properties);
 
             Assert.True(success);
             Assert.Equal(expected, principal);

@@ -42,7 +42,7 @@ namespace SharpHoundCommonLib.Processors
         /// <returns></returns>
         public async Task<(bool Success, TypedPrincipal principal)> GetContainingSiteForSubnet(Dictionary<string, object> subnetProperties)
         {
-            if (subnetProperties.TryGetValue("siteObject", out var siteObject))
+            if (subnetProperties.TryGetValue(LDAPProperties.SiteObject, out var siteObject))
             {
                 if (siteObject == null)
                     return (false, default);

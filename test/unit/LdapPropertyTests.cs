@@ -1166,7 +1166,7 @@ namespace CommonLibTest
             Assert.Contains("description", keys);
             Assert.Contains("whencreated", keys);
             Assert.Equal(canonicalName, test["cn"]);
-            Assert.Equal(siteObject, test["siteObject"]);
+            Assert.Equal(siteObject, test[LDAPProperties.SiteObject]);
         }
 
         [Fact]
