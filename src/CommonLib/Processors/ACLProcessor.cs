@@ -38,7 +38,10 @@ namespace SharpHoundCommonLib.Processors {
                 { Label.EnterpriseCA, "ee4aa692-3bba-11d2-90cc-00c04fd91ab1" },
                 { Label.NTAuthStore, "3fdfee50-47f4-11d1-a9c3-0000f80367c1" },
                 { Label.CertTemplate, "e5209ca2-3bba-11d2-90cc-00c04fd91ab1" },
-                { Label.IssuancePolicy, "37cfd85c-6719-4ad8-8f9e-8678ba627563" }
+                { Label.IssuancePolicy, "37cfd85c-6719-4ad8-8f9e-8678ba627563" },
+                { Label.Site, "bf967ab3-0de6-11d0-a285-00aa003049e2" },
+                { Label.SiteServer, "bf967a92-0de6-11d0-a285-00aa003049e2" },
+                { Label.SiteSubnet, "b7b13124-b82e-11d0-afee-0000f80367c1" }
             };
         }
 
@@ -449,6 +452,13 @@ namespace SharpHoundCommonLib.Processors {
 
         public async IAsyncEnumerable<ACE> ProcessACL(byte[] ntSecurityDescriptor, string objectDomain,
             Label objectType, bool hasLaps, bool checkForOwnerRights, string objectName) {
+            
+            // Skipping objects with no known ACL attacks
+            if (objectType is Label.SiteServer or Label.SiteSubnet) {
+                _log.LogDebug("Skipping ACL processing for {ObjectType} object {ObjectName}", objectType, objectName);
+                yield break;
+            }
+
             await BuildGuidCache(objectDomain);
 
             if (ntSecurityDescriptor == null) {
@@ -734,7 +744,8 @@ namespace SharpHoundCommonLib.Processors {
                         or Label.EnterpriseCA
                         or Label.AIACA
                         or Label.NTAuthStore
-                        or Label.IssuancePolicy)
+                        or Label.IssuancePolicy
+                        or Label.Site)
                         if (aceType is ACEGuids.AllGuid or "")
                             yield return new ACE {
                                 PrincipalType = resolvedPrincipal.ObjectType,
@@ -776,7 +787,7 @@ namespace SharpHoundCommonLib.Processors {
                             IsPermissionForOwnerRightsSid = isPermissionForOwnerRightsSid,
                             IsInheritedPermissionForOwnerRightsSid = isInheritedPermissionForOwnerRightsSid,
                         };
-                    else if (objectType is Label.OU or Label.Domain && aceType == ACEGuids.WriteGPLink)
+                    else if (objectType is Label.OU or Label.Domain or Label.Site && aceType == ACEGuids.WriteGPLink)
                         yield return new ACE {
                             PrincipalType = resolvedPrincipal.ObjectType,
                             PrincipalSID = resolvedPrincipal.ObjectIdentifier,

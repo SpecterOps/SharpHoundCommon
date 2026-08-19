@@ -32,6 +32,9 @@ namespace SharpHoundCommonLib.Processors {
             ReservedAttributes.UnionWith(CommonProperties.DomainTrustProps);
             ReservedAttributes.UnionWith(CommonProperties.GPOLocalGroupProps);
             ReservedAttributes.UnionWith(CommonProperties.CertAbuseProps);
+            ReservedAttributes.UnionWith(CommonProperties.SiteProps);
+            ReservedAttributes.UnionWith(CommonProperties.SiteServerProps);
+            ReservedAttributes.UnionWith(CommonProperties.SiteSubnetProps);
             ReservedAttributes.Add(LDAPProperties.DSASignature);
         }
 
@@ -45,6 +48,9 @@ namespace SharpHoundCommonLib.Processors {
 
         private static Dictionary<string, object> GetCommonProps(IDirectoryObject entry) {
             var ret = new Dictionary<string, object>();
+            entry.TryGetArrayProperty(LDAPProperties.ObjectClass, out var objectClasses);
+            ret[LDAPProperties.ObjectClass] = objectClasses;
+
             if (entry.TryGetProperty(LDAPProperties.Description, out var description)) {
                 ret["description"] = description;
             }
@@ -646,6 +652,29 @@ namespace SharpHoundCommonLib.Processors {
 
             ret.Props = props;
             return ret;
+        }
+
+        public static Dictionary<string, object> ReadSiteProperties(IDirectoryObject entry)
+        {
+            var props = GetCommonProps(entry);
+            return props;
+        }
+
+
+        public static Dictionary<string, object> ReadSiteServerProperties(IDirectoryObject entry)
+        {
+            var props = GetCommonProps(entry);
+            props.Add("dnshostname", entry.GetProperty(LDAPProperties.DNSHostName));
+            props.Add("serverreference", entry.GetProperty(LDAPProperties.ServerReference));
+            return props;
+        }
+
+        public static Dictionary<string, object> ReadSiteSubnetProperties(IDirectoryObject entry)
+        {
+            var props = GetCommonProps(entry);
+            props.Add("cn", entry.GetProperty(LDAPProperties.CanonicalName));
+            props.Add("siteobject", entry.GetProperty(LDAPProperties.SiteObject));
+            return props;
         }
 
         /// <summary>

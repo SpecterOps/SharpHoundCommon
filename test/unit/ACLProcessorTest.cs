@@ -230,6 +230,24 @@ namespace CommonLibTest {
             Assert.Empty(result);
         }
 
+        [Theory]
+        [InlineData(Label.SiteServer)]
+        [InlineData(Label.SiteSubnet)]
+        public async Task ACLProcessor_ProcessACL_SiteServerAndSiteSubnet_ReturnsNothing(Label objectType)
+        {
+            var mockLDAPUtils = new Mock<ILdapUtils>();
+            var processor = new ACLProcessor(mockLDAPUtils.Object);
+            var bytes = Utils.B64ToBytes(UnProtectedUserNtSecurityDescriptor);
+
+            var result = await processor.ProcessACL(bytes, _testDomainName, objectType, false).ToArrayAsync();
+
+            Assert.Empty(result);
+            mockLDAPUtils.Verify(x => x.PagedQuery(It.IsAny<LdapQueryParameters>(), It.IsAny<CancellationToken>()),
+                Times.Never);
+            mockLDAPUtils.Verify(x => x.MakeSecurityDescriptor(), Times.Never);
+            mockLDAPUtils.Verify(x => x.ResolveIDAndType(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        }
+
         [Fact]
         public async Task ACLProcessor_ProcessACL_Yields_Owns_ACE() {
             var expectedSID = "S-1-5-21-3130019616-2776909439-2417379446-512";
@@ -1755,6 +1773,45 @@ namespace CommonLibTest {
             var processor = new ACLProcessor(mockLDAPUtils.Object);
             var bytes = Utils.B64ToBytes(UnProtectedUserNtSecurityDescriptor);
             var result = await processor.ProcessACL(bytes, _testDomainName, Label.OU, true).ToArrayAsync();
+
+            Assert.Single(result);
+            var actual = result.First();
+            Assert.Equal(expectedPrincipalType, actual.PrincipalType);
+            Assert.Equal(expectedPrincipalSID, actual.PrincipalSID);
+            Assert.False(actual.IsInherited);
+            Assert.Equal(expectedRightName, actual.RightName);
+        }
+
+        [Fact]
+        public async Task ACLProcessor_ProcessACL_GenericWrite_Site_WriteGPLink()
+        {
+            var expectedPrincipalType = Label.Group;
+            var expectedPrincipalSID = "S-1-5-21-3130019616-2776909439-2417379446-512";
+            var expectedRightName = EdgeNames.WriteGPLink;
+
+            var mockLDAPUtils = new Mock<ILdapUtils>();
+            var mockSecurityDescriptor = new Mock<ActiveDirectorySecurityDescriptor>(MockBehavior.Loose, null);
+            var mockRule = new Mock<ActiveDirectoryRuleDescriptor>(MockBehavior.Loose, null);
+            var collection = new List<ActiveDirectoryRuleDescriptor>();
+            mockRule.Setup(x => x.AccessControlType()).Returns(AccessControlType.Allow);
+            mockRule.Setup(x => x.IsAceInheritedFrom("bf967ab3-0de6-11d0-a285-00aa003049e2")).Returns(true);
+            mockRule.Setup(x => x.IdentityReference()).Returns(expectedPrincipalSID);
+            mockRule.Setup(x => x.ActiveDirectoryRights()).Returns(ActiveDirectoryRights.GenericWrite);
+            mockRule.Setup(x => x.ObjectType()).Returns(new Guid(ACEGuids.WriteGPLink));
+            collection.Add(mockRule.Object);
+
+            mockSecurityDescriptor.Setup(m => m.GetAccessRules(It.IsAny<bool>(), It.IsAny<bool>(), It.IsAny<Type>()))
+                .Returns(collection);
+            mockSecurityDescriptor.Setup(m => m.GetOwner(It.IsAny<Type>())).Returns((string)null);
+            mockLDAPUtils.Setup(x => x.MakeSecurityDescriptor()).Returns(mockSecurityDescriptor.Object);
+            mockLDAPUtils.Setup(x => x.ResolveIDAndType(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync((true, new TypedPrincipal(expectedPrincipalSID, expectedPrincipalType)));
+            mockLDAPUtils.Setup(x => x.PagedQuery(It.IsAny<LdapQueryParameters>(), It.IsAny<CancellationToken>()))
+                .Returns(Array.Empty<LdapResult<IDirectoryObject>>().ToAsyncEnumerable);
+
+            var processor = new ACLProcessor(mockLDAPUtils.Object);
+            var bytes = Utils.B64ToBytes(UnProtectedUserNtSecurityDescriptor);
+            var result = await processor.ProcessACL(bytes, _testDomainName, Label.Site, true).ToArrayAsync();
 
             Assert.Single(result);
             var actual = result.First();

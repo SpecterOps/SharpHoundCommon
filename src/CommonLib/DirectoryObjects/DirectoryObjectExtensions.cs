@@ -22,6 +22,13 @@ public static class DirectoryObjectExtensions {
     }
     
     public static bool GetObjectIdentifier(this IDirectoryObject directoryObject, out string objectIdentifier) {
+        // Builtin container has a SID (always "S-1-5-32"). We use the ObjectGUID as ID like for other containers 
+        if (directoryObject.TryGetArrayProperty(LDAPProperties.ObjectClass, out var objectClasses) &&
+            objectClasses.Contains(ObjectClass.BuiltinDomainClass, StringComparer.OrdinalIgnoreCase) &&
+            directoryObject.TryGetGuid(out objectIdentifier) && !string.IsNullOrWhiteSpace(objectIdentifier)) {
+            return true;
+        }
+
         if (directoryObject.TryGetSecurityIdentifier(out objectIdentifier) && !string.IsNullOrWhiteSpace(objectIdentifier)) {
             return true;
         }

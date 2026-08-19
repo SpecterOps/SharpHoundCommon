@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.DirectoryServices;
+using System.Linq;
 using System.Runtime.Versioning;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -10,6 +11,7 @@ using CommonLibTest.Facades;
 using Moq;
 using SharpHoundCommonLib;
 using SharpHoundCommonLib.Enums;
+using SharpHoundCommonLib.LDAPQueries;
 using SharpHoundCommonLib.OutputTypes;
 using SharpHoundCommonLib.Processors;
 using SharpHoundRPC;
@@ -117,6 +119,34 @@ namespace CommonLibTest
             var test = LdapPropertyProcessor.ReadOUProperties(mock);
             Assert.Contains("description", test.Keys);
             Assert.Equal("Test", test["description"] as string);
+        }
+
+        [Fact]
+        public void LDAPPropertyProcessor_ReadContainerProperties_IncludesObjectClass()
+        {
+            var objectClasses = new[] { "top", ObjectClass.ContainerClass };
+            var mock = new MockDirectoryObject("CN=Users,DC=testlab,DC=local",
+                new Dictionary<string, object>
+                {
+                    {LDAPProperties.ObjectClass, objectClasses}
+                }, "", "ECAD920E-8EB1-4E31-A80E-DD36367F81F4");
+
+            var test = LdapPropertyProcessor.ReadContainerProperties(mock);
+
+            Assert.True(test.TryGetValue(LDAPProperties.ObjectClass, out var actual));
+            Assert.Equal(objectClasses, Assert.IsType<string[]>(actual));
+        }
+
+        [Fact]
+        public void LDAPPropertyProcessor_ReadOUProperties_ObjectClassDefaultsToEmptyArray()
+        {
+            var mock = new MockDirectoryObject("OU=TestOU,DC=testlab,DC=local",
+                new Dictionary<string, object>(), "", "2A374493-816A-4193-BEFD-D2F4132C6DCA");
+
+            var test = LdapPropertyProcessor.ReadOUProperties(mock);
+
+            Assert.True(test.TryGetValue(LDAPProperties.ObjectClass, out var actual));
+            Assert.Empty(Assert.IsType<string[]>(actual));
         }
 
         [Fact]
@@ -1064,6 +1094,82 @@ namespace CommonLibTest
         }
 
         [Fact]
+        public void LDAPPropertyProcessor_ReadSiteProperties()
+        {
+            var mock = new MockDirectoryObject("CN=DEFAULT-FIRST-SITE-NAME,CN=SITES,CN=CONFIGURATION,DC=TESTLAB,DC=LOCAL",
+                new Dictionary<string, object>
+                {
+                    {LDAPProperties.Description, "Default site"},
+                    {LDAPProperties.WhenCreated, 1712567279},
+                    {"domain", "TESTLAB.LOCAL"},
+                    {"name", "DEFAULT-FIRST-SITE-NAME@TESTLAB.LOCAL"},
+                    {"domainsid", "S-1-5-21-3130019616-2776909439-2417379446"}
+                }, "", "2F9F3630-F46A-49BF-B186-6629994EBCF9");
+
+            var test = LdapPropertyProcessor.ReadSiteProperties(mock);
+            var keys = test.Keys;
+
+            Assert.DoesNotContain("domain", keys);
+            Assert.DoesNotContain("name", keys);
+            Assert.DoesNotContain("domainsid", keys);
+            Assert.Contains("description", keys);
+            Assert.Contains("whencreated", keys);
+        }
+
+        [Fact]
+        public void LDAPPropertyProcessor_ReadSiteServerProperties()
+        {
+            var serverReference = "CN=PRIMARY,OU=DOMAIN CONTROLLERS,DC=TESTLAB,DC=LOCAL";
+            var mock = new MockDirectoryObject("CN=PRIMARY,CN=SERVERS,CN=DEFAULT-FIRST-SITE-NAME,CN=SITES,CN=CONFIGURATION,DC=TESTLAB,DC=LOCAL",
+                new Dictionary<string, object>
+                {
+                    {LDAPProperties.Description, "Site server"},
+                    {LDAPProperties.WhenCreated, 1712567279},
+                    {LDAPProperties.DNSHostName, "primary.testlab.local"},
+                    {LDAPProperties.ServerReference, serverReference},
+                    {"domain", "TESTLAB.LOCAL"},
+                    {"name", "PRIMARY"}
+                }, "", "2F9F3630-F46A-49BF-B186-6629994EBCF9");
+
+            var test = LdapPropertyProcessor.ReadSiteServerProperties(mock);
+            var keys = test.Keys;
+
+            Assert.DoesNotContain("domain", keys);
+            Assert.DoesNotContain("name", keys);
+            Assert.Contains("description", keys);
+            Assert.Contains("whencreated", keys);
+            Assert.Equal("primary.testlab.local", test["dnshostname"]);
+            Assert.Equal(serverReference, test["serverreference"]);
+        }
+
+        [Fact]
+        public void LDAPPropertyProcessor_ReadSiteSubnetProperties()
+        {
+            var siteObject = "CN=DEFAULT-FIRST-SITE-NAME,CN=SITES,CN=CONFIGURATION,DC=TESTLAB,DC=LOCAL";
+            var canonicalName = "TESTLAB.LOCAL/Configuration/Sites/Subnets/10.0.0.0/24";
+            var mock = new MockDirectoryObject("CN=10.0.0.0/24,CN=SUBNETS,CN=SITES,CN=CONFIGURATION,DC=TESTLAB,DC=LOCAL",
+                new Dictionary<string, object>
+                {
+                    {LDAPProperties.Description, "Site subnet"},
+                    {LDAPProperties.WhenCreated, 1712567279},
+                    {LDAPProperties.CanonicalName, canonicalName},
+                    {LDAPProperties.SiteObject, siteObject},
+                    {"domain", "TESTLAB.LOCAL"},
+                    {"name", "10.0.0.0/24"}
+                }, "", "2F9F3630-F46A-49BF-B186-6629994EBCF9");
+
+            var test = LdapPropertyProcessor.ReadSiteSubnetProperties(mock);
+            var keys = test.Keys;
+
+            Assert.DoesNotContain("domain", keys);
+            Assert.DoesNotContain("name", keys);
+            Assert.Contains("description", keys);
+            Assert.Contains("whencreated", keys);
+            Assert.Equal(canonicalName, test["cn"]);
+            Assert.Equal(siteObject, test[LDAPProperties.SiteObject]);
+        }
+
+        [Fact]
         public void LDAPPropertyProcessor_ParseAllProperties()
         {
             var mock = new MockDirectoryObject("CN\u003dNTAUTHCERTIFICATES,CN\u003dPUBLIC KEY SERVICES,CN\u003dSERVICES,CN\u003dCONFIGURATION,DC\u003dDUMPSTER,DC\u003dFIRE",
@@ -1089,6 +1195,26 @@ namespace CommonLibTest
 
             Assert.Contains("domainsid", keys);
             Assert.Contains("domain", keys);
+        }
+
+        [Fact]
+        public void LDAPPropertyProcessor_ParseAllProperties_ExcludesSiteProperties()
+        {
+            var properties = CommonProperties.SiteProps
+                .Concat(CommonProperties.SiteServerProps)
+                .Concat(CommonProperties.SiteSubnetProps)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(property => property, _ => (object)"value", StringComparer.OrdinalIgnoreCase);
+            properties.Add("customattribute", "value");
+
+            var mock = new MockDirectoryObject("CN=TEST,CN=SITES,CN=CONFIGURATION,DC=TESTLAB,DC=LOCAL",
+                properties, "", "2F9F3630-F46A-49BF-B186-6629994EBCF9");
+
+            var processor = new LdapPropertyProcessor(new MockLdapUtils());
+            var parsedProperties = processor.ParseAllProperties(mock);
+
+            Assert.Single(parsedProperties);
+            Assert.Contains("customattribute", parsedProperties);
         }
 
         [Fact]

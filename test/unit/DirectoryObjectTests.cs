@@ -141,6 +141,20 @@ namespace CommonLibTest {
         }
 
         [Fact]
+        public void Test_GetObjectIdentifier_BuiltinContainer_UsesGuid() {
+            var expectedGuid = Guid.NewGuid().ToString().ToUpper();
+            var attribs = new Dictionary<string, object> {
+                { LDAPProperties.ObjectClass, new[] { "top", ObjectClass.BuiltinDomainClass } },
+            };
+
+            var mock = new MockDirectoryObject("CN=BuiltIn,DC=Testlab,DC=Local", attribs,
+                "S-1-5-32", expectedGuid);
+
+            Assert.True(mock.GetObjectIdentifier(out var objectIdentifier));
+            Assert.Equal(expectedGuid, objectIdentifier);
+        }
+
+        [Fact]
         public void Test_GetLabel_Computer_Objects() {
             var attribs = new Dictionary<string, object> {
                 { LDAPProperties.ObjectClass, new[] { "top", "msds-groupmanagedserviceaccount" } },
@@ -255,6 +269,21 @@ namespace CommonLibTest {
             Assert.Equal(Label.Configuration, label);
         }
 
+        [Theory]
+        [InlineData(ObjectClass.BuiltinDomainClass)]
+        [InlineData(ObjectClass.SitesContainerClass)]
+        public void Test_GetLabel_AdditionalContainerClasses(string objectClass) {
+            var attribs = new Dictionary<string, object> {
+                { LDAPProperties.ObjectClass, new[] { "top", objectClass } },
+            };
+
+            var mock = new MockDirectoryObject("abc", attribs,
+                "123456", new Guid().ToString());
+
+            Assert.True(mock.GetLabel(out var label));
+            Assert.Equal(Label.Container, label);
+        }
+
         [Fact]
         public void Test_GetLabel_CertTemplateObjects() {
             var attribs = new Dictionary<string, object> {
@@ -298,6 +327,39 @@ namespace CommonLibTest {
             mock.DistinguishedName = $"CN=Test,{DirectoryPaths.NTAuthStoreLocation.ToUpper()},DC=Testlab,DC=local";
             Assert.True(mock.GetLabel(out label));
             Assert.Equal(Label.NTAuthStore, label);
+        }
+
+        [Theory]
+        [InlineData(ObjectClass.SiteClass, Label.Site)]
+        [InlineData(ObjectClass.SiteServerClass, Label.SiteServer)]
+        [InlineData(ObjectClass.SiteSubnetClass, Label.SiteSubnet)]
+        public void Test_GetLabel_SiteObjects(string objectClass, Label expectedLabel) {
+            var attribs = new Dictionary<string, object> {
+                { LDAPProperties.ObjectClass, new[] { "top", objectClass } },
+            };
+
+            var mock = new MockDirectoryObject("CN=Test,CN=Sites,CN=Configuration,DC=Testlab,DC=local",
+                attribs,
+                "",
+                new Guid().ToString());
+
+            Assert.True(mock.GetLabel(out var label));
+            Assert.Equal(expectedLabel, label);
+        }
+
+        [Fact]
+        public void Test_GetLabel_SiteServerOutsideSitesContainer_ReturnsFalse() {
+            var attribs = new Dictionary<string, object> {
+                { LDAPProperties.ObjectClass, new[] { "top", ObjectClass.SiteServerClass } },
+            };
+
+            var mock = new MockDirectoryObject("CN=Test,CN=Servers,CN=Configuration,DC=Testlab,DC=local",
+                attribs,
+                "",
+                new Guid().ToString());
+
+            Assert.False(mock.GetLabel(out var label));
+            Assert.Equal(Label.Base, label);
         }
         
         [Fact]

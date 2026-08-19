@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using SharpHoundCommonLib.Enums;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
+using SharpHoundCommonLib.OutputTypes;
 
 namespace SharpHoundCommonLib {
     public static class Helpers {
@@ -76,6 +77,44 @@ namespace SharpHoundCommonLib {
                     Status = status.TrimStart().TrimEnd(),
                     DistinguishedName = dn.TrimStart().TrimEnd()
                 };
+            }
+        }
+
+        /// <summary>
+        ///     Reads the "gplink" property from a directory object and converts the links into the acceptable SharpHound format
+        /// </summary>
+        /// <param name="entry"></param>
+        /// <param name="utils"></param>
+        /// <returns></returns>
+        public static IAsyncEnumerable<GPLink> ReadGPLinks(IDirectoryObject entry, ILdapUtils utils) {
+            if (entry.TryGetProperty(LDAPProperties.GPLink, out var links)) {
+                return ReadGPLinks(links, utils);
+            }
+
+            return AsyncEnumerable.Empty<GPLink>();
+        }
+
+        /// <summary>
+        ///     Reads the "gplink" property and converts the links into the acceptable SharpHound format
+        /// </summary>
+        /// <param name="gpLink"></param>
+        /// <param name="utils"></param>
+        /// <returns></returns>
+        public static async IAsyncEnumerable<GPLink> ReadGPLinks(string gpLink, ILdapUtils utils) {
+            if (gpLink == null)
+                yield break;
+
+            foreach (var link in SplitGPLinkProperty(gpLink)) {
+                var enforced = link.Status.Equals("2");
+
+                var res = await utils.ResolveDistinguishedName(link.DistinguishedName);
+
+                if (res.Success) {
+                    yield return new GPLink {
+                        GUID = res.Principal.ObjectIdentifier,
+                        IsEnforced = enforced
+                    };
+                }
             }
         }
 
