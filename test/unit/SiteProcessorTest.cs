@@ -35,6 +35,22 @@ namespace CommonLibTest
         }
 
         [Fact]
+        public async Task SiteProcessor_GetContainingSiteForSubnet_NonStringSiteObject_ReturnsFalse()
+        {
+            var utils = new Mock<ILdapUtils>(MockBehavior.Strict);
+            var processor = new SiteProcessor(utils.Object);
+
+            var (success, principal) = await processor.GetContainingSiteForSubnet(new Dictionary<string, object>
+            {
+                [LDAPProperties.SiteObject] = new object()
+            });
+
+            Assert.False(success);
+            Assert.Null(principal);
+            utils.Verify(x => x.ResolveDistinguishedName(It.IsAny<string>()), Times.Never);
+        }
+
+        [Fact]
         public async Task SiteProcessor_GetContainingSiteForSubnet_ValidSiteObject_ResolvesDistinguishedName()
         {
             const string siteObject = "CN=Default-First-Site-Name,CN=Sites,CN=Configuration,DC=testlab,DC=local";

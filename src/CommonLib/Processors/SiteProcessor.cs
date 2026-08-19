@@ -42,18 +42,13 @@ namespace SharpHoundCommonLib.Processors
         /// <returns></returns>
         public async Task<(bool Success, TypedPrincipal principal)> GetContainingSiteForSubnet(Dictionary<string, object> subnetProperties)
         {
-            if (subnetProperties.TryGetValue(LDAPProperties.SiteObject, out var siteObject))
+            if (!subnetProperties.TryGetValue(LDAPProperties.SiteObject, out var siteObject) ||
+                siteObject is not string siteObjectDn || string.IsNullOrWhiteSpace(siteObjectDn))
             {
-                if (siteObject == null)
-                    return (false, default);
-
-                var siteObjectDn = siteObject.ToString();
-                if (string.IsNullOrWhiteSpace(siteObjectDn))
-                    return (false, default);
-
-                return await GetContainingSiteForSubnet(siteObjectDn);
+                return (false, default);
             }
-            return (false, default);
+
+            return await GetContainingSiteForSubnet(siteObjectDn);
         }
 
         public async Task<(bool Success, TypedPrincipal principal)> GetReferencedComputerForServer(IDirectoryObject entry)
