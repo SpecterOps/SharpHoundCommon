@@ -133,7 +133,7 @@ namespace CommonLibTest
 
             var test = LdapPropertyProcessor.ReadContainerProperties(mock);
 
-            Assert.True(test.TryGetValue("objectClass", out var actual));
+            Assert.True(test.TryGetValue(LDAPProperties.ObjectClass, out var actual));
             Assert.Equal(objectClasses, Assert.IsType<string[]>(actual));
         }
 
@@ -145,7 +145,7 @@ namespace CommonLibTest
 
             var test = LdapPropertyProcessor.ReadOUProperties(mock);
 
-            Assert.True(test.TryGetValue("objectClass", out var actual));
+            Assert.True(test.TryGetValue(LDAPProperties.ObjectClass, out var actual));
             Assert.Empty(Assert.IsType<string[]>(actual));
         }
 
