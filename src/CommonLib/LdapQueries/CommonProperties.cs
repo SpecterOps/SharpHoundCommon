@@ -103,7 +103,8 @@
         public static readonly string[] SiteProps =
         {
             LDAPProperties.DisplayName, LDAPProperties.Name, LDAPProperties.ObjectGUID, LDAPProperties.GPLink,
-            LDAPProperties.GroupPolicyOptions, LDAPProperties.ObjectClass
+            LDAPProperties.GroupPolicyOptions, LDAPProperties.ObjectClass, LDAPProperties.Description,
+            LDAPProperties.WhenCreated
         };
 
         public static readonly string[] SiteServerProps =

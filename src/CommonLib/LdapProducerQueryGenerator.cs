@@ -159,6 +159,7 @@ public class LdapProducerQueryGenerator {
                 properties.AddRange(CommonProperties.SiteProps);
                 properties.AddRange(CommonProperties.SiteServerProps);
                 properties.AddRange(CommonProperties.SiteSubnetProps);
+                properties.AddRange(CommonProperties.ACLProps);
             }
 
             return new GeneratedLdapParameters {

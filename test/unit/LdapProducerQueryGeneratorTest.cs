@@ -45,6 +45,9 @@ public class LdapProducerQueryGeneratorTest
         Assert.Equal(expectedFilter, result.Filter.GetFilter());
         Assert.All(CommonProperties.SiteProps.Concat(CommonProperties.SiteServerProps).Concat(CommonProperties.SiteSubnetProps),
             attribute => Assert.Contains(attribute, result.Attributes));
+        Assert.All(CommonProperties.ACLProps, attribute => Assert.Contains(attribute, result.Attributes));
+        Assert.Contains(LDAPProperties.Description, result.Attributes);
+        Assert.Contains(LDAPProperties.WhenCreated, result.Attributes);
         Assert.DoesNotContain("(objectclass=pKICertificateTemplate)", result.Filter.GetFilter());
         Assert.DoesNotContain("(objectClass=certificationAuthority)", result.Filter.GetFilter());
         Assert.DoesNotContain("(objectCategory=pKIEnrollmentService)", result.Filter.GetFilter());
