@@ -133,6 +133,9 @@ public class LdapProducerQueryGenerator {
 
             if (methods.HasFlag(CollectionMethod.ObjectProps)) {
                 properties.AddRange(CommonProperties.ObjectPropsProps);
+                properties.AddRange(CommonProperties.SiteProps);
+                properties.AddRange(CommonProperties.SiteServerProps);
+                properties.AddRange(CommonProperties.SiteSubnetProps);
             }
 
             if (methods.HasFlag(CollectionMethod.ACL)) {
@@ -141,6 +144,7 @@ public class LdapProducerQueryGenerator {
 
             if (methods.HasFlag(CollectionMethod.Container)) {
                 properties.AddRange(CommonProperties.ContainerProps);
+                properties.AddRange(CommonProperties.SiteSubnetProps);
             }
 
             if (methods.HasFlag(CollectionMethod.CertServices)) {

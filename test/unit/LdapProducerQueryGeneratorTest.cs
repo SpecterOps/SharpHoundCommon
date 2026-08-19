@@ -55,6 +55,26 @@ public class LdapProducerQueryGeneratorTest
     }
 
     [Fact]
+    public void GenerateConfigurationPartitionParameters_ObjectProps_IncludesSiteProperties()
+    {
+        var result = LdapProducerQueryGenerator.GenerateConfigurationPartitionParameters(CollectionMethod.ObjectProps);
+
+        Assert.All(CommonProperties.SiteProps
+                .Concat(CommonProperties.SiteServerProps)
+                .Concat(CommonProperties.SiteSubnetProps),
+            attribute => Assert.Contains(attribute, result.Attributes));
+    }
+
+    [Fact]
+    public void GenerateConfigurationPartitionParameters_Container_IncludesSiteSubnetProperties()
+    {
+        var result = LdapProducerQueryGenerator.GenerateConfigurationPartitionParameters(CollectionMethod.Container);
+
+        Assert.All(CommonProperties.SiteSubnetProps,
+            attribute => Assert.Contains(attribute, result.Attributes));
+    }
+
+    [Fact]
     public void GenerateConfigurationPartitionParameters_CertServices_IncludesCertFiltersAndProperties()
     {
         var expectedFilter = new LdapFilter()
