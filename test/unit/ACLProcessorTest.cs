@@ -59,6 +59,49 @@ namespace CommonLibTest {
         }
 
         [Fact]
+        public async Task ACLProcessor_BuildGuidCache_AcrossInstances_QueriesOncePerDomain() {
+            var mockLdapUtils = new Mock<ILdapUtils>();
+            mockLdapUtils
+                .Setup(x => x.PagedQuery(It.IsAny<LdapQueryParameters>(), It.IsAny<CancellationToken>()))
+                .Returns(Array.Empty<LdapResult<IDirectoryObject>>().ToAsyncEnumerable);
+            var domain = $"{Guid.NewGuid():N}.TEST";
+            var processors = Enumerable.Range(0, 50)
+                .Select(_ => new ACLProcessor(mockLdapUtils.Object))
+                .ToArray();
+
+            await Task.WhenAll(processors.Select(processor =>
+                processor.ProcessACL(null, domain, Label.Computer, false).ToArrayAsync()));
+
+            mockLdapUtils.Verify(
+                x => x.PagedQuery(It.Is<LdapQueryParameters>(parameters => parameters.DomainName == domain),
+                    It.IsAny<CancellationToken>()),
+                Times.Once);
+        }
+
+        [Fact]
+        public async Task ACLProcessor_BuildGuidCache_AcrossLdapUtils_QueriesOncePerUtility() {
+            var firstLdapUtils = new Mock<ILdapUtils>();
+            var secondLdapUtils = new Mock<ILdapUtils>();
+            foreach (var ldapUtils in new[] { firstLdapUtils, secondLdapUtils }) {
+                ldapUtils
+                    .Setup(x => x.PagedQuery(It.IsAny<LdapQueryParameters>(), It.IsAny<CancellationToken>()))
+                    .Returns(Array.Empty<LdapResult<IDirectoryObject>>().ToAsyncEnumerable);
+            }
+
+            var domain = $"{Guid.NewGuid():N}.TEST";
+            await Task.WhenAll(
+                new ACLProcessor(firstLdapUtils.Object).ProcessACL(null, domain, Label.Computer, false).ToArrayAsync(),
+                new ACLProcessor(secondLdapUtils.Object).ProcessACL(null, domain, Label.Computer, false).ToArrayAsync());
+
+            foreach (var ldapUtils in new[] { firstLdapUtils, secondLdapUtils }) {
+                ldapUtils.Verify(
+                    x => x.PagedQuery(It.Is<LdapQueryParameters>(parameters => parameters.DomainName == domain),
+                        It.IsAny<CancellationToken>()),
+                    Times.Once);
+            }
+        }
+
+        [Fact]
         public void ACLProcessor_IsACLProtected_NullNTSD_ReturnsFalse() {
             var processor = new ACLProcessor(new MockLdapUtils());
             var result = processor.IsACLProtected((byte[])null);
