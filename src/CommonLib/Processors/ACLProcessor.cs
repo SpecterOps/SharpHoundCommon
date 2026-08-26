@@ -12,15 +12,30 @@ using SharpHoundCommonLib.DirectoryObjects;
 using SharpHoundCommonLib.Enums;
 using SharpHoundCommonLib.OutputTypes;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Threading;
 
 namespace SharpHoundCommonLib.Processors {
     public class ACLProcessor {
         private static readonly Dictionary<Label, string> BaseGuids;
-        private readonly ConcurrentDictionary<string, string> _guidMap = new();
+        /// This is a shared cache of GUID mappings for each ILdapUtils instance. It allows multiple ACLProcessor instances to share the same GUID cache for a given ILdapUtils instance.
+        /// This resolves an issue from back when the guid cache was static and shared across all ILdapUtils instances, which was causing issues when domains were being processed in parallel for tests: https://github.com/SpecterOps/SharpHoundCommon/pull/169
+        /// Learn about Conditional Weak Tables https://learn.microsoft.com/en-us/dotnet/api/system.runtime.compilerservices.conditionalweaktable-2?view=netframework-4.7.2#examples
+        /// But the short version is that this allows us to have a shared cache for each ILdapUtils instance, but when the ILdapUtils instance is garbage collected, the cache will be garbage collected as well.
+        private static readonly ConditionalWeakTable<ILdapUtils, GuidCacheState> SharedGuidCaches = new();
         private readonly ILogger _log;
         private readonly ILdapUtils _utils;
-        private readonly ConcurrentHashSet _builtDomainCaches = new(StringComparer.OrdinalIgnoreCase);
-        private readonly object _lock = new();
+        private readonly GuidCacheState _guidCache;
+
+        private sealed class GuidCacheState {
+            // This is a mapping of GUIDs to their corresponding names for LDAP rights.
+            // The collection represents the response from the LDAP query Task kept in BuildTasks.
+            public readonly ConcurrentDictionary<string, string> GuidMap = new();
+            // This is a mapping of domains to their corresponding build tasks for the GUID cache.
+            // The Lazy<Task> ensures that the build task is only executed once per domain, even if multiple threads attempt to build the cache for the same domain simultaneously.
+            public readonly ConcurrentDictionary<string, Lazy<Task>> BuildTasks =
+                new(StringComparer.OrdinalIgnoreCase);
+        }
 
         static ACLProcessor() {
             //Create a dictionary with the base GUIDs of each object type
@@ -45,6 +60,7 @@ namespace SharpHoundCommonLib.Processors {
         public ACLProcessor(ILdapUtils utils, ILogger log = null)
         {
             _utils = utils;
+            _guidCache = SharedGuidCaches.GetValue(utils, _ => new GuidCacheState());
             _log = log ?? Logging.LogProvider.CreateLogger("ACLProc");
         }
 
@@ -73,14 +89,14 @@ namespace SharpHoundCommonLib.Processors {
         ///     LAPS
         /// </summary>
         private async Task BuildGuidCache(string domain) {
-            lock (_lock) {
-                if (_builtDomainCaches.Contains(domain)) {
-                    return;
-                }
+            var buildTask = _guidCache.BuildTasks.GetOrAdd(domain,
+                // The ExecutionAndPublication mode ensures that only one thread can execute the factory method at a time, and all other threads will wait for the result of that execution. This prevents multiple threads from building the cache simultaneously for the same domain.
+                _ => new Lazy<Task>(() => BuildGuidCacheCore(domain), LazyThreadSafetyMode.ExecutionAndPublication));
 
-                _builtDomainCaches.Add(domain);
-            }
+            await buildTask.Value;
+        }
 
+        private async Task BuildGuidCacheCore(string domain) {
             _log.LogInformation("Building GUID Cache for {Domain}", domain);
             await foreach (var result in _utils.PagedQuery(new LdapQueryParameters {
                 DomainName = domain,
@@ -108,7 +124,7 @@ namespace SharpHoundCommonLib.Processors {
 
                     if (name is LDAPProperties.LAPSPlaintextPassword or LDAPProperties.LAPSEncryptedPassword or LDAPProperties.LegacyLAPSPassword) {
                         _log.LogInformation("Found GUID for ACL Right {Name}: {Guid} in domain {Domain}", name, guid, domain);
-                        _guidMap.TryAdd(guid, name);
+                        _guidCache.GuidMap.TryAdd(guid, name);
                     }
                 } else {
                     _log.LogDebug("Error while building GUID cache for {Domain}: {Message}", domain, result.Error);
@@ -676,7 +692,7 @@ namespace SharpHoundCommonLib.Processors {
                                     IsPermissionForOwnerRightsSid = isPermissionForOwnerRightsSid,
                                     IsInheritedPermissionForOwnerRightsSid = isInheritedPermissionForOwnerRightsSid,
                                 };
-                            else if (_guidMap.TryGetValue(aceType, out var lapsAttribute)) {
+                            else if (_guidCache.GuidMap.TryGetValue(aceType, out var lapsAttribute)) {
                                 // Compare the retrieved attribute name against LDAPProperties values
                                 if (lapsAttribute == LDAPProperties.LegacyLAPSPassword ||
                                     lapsAttribute == LDAPProperties.LAPSPlaintextPassword ||
