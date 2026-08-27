@@ -12,29 +12,82 @@ using SharpHoundCommonLib.DirectoryObjects;
 using SharpHoundCommonLib.Enums;
 using SharpHoundCommonLib.OutputTypes;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace SharpHoundCommonLib.Processors {
+    /// <summary>
+    ///     Owns state shared by processor instances and gives that state an explicit lifetime.
+    /// </summary>
+    public sealed class ACLProcessorContext : IDisposable {
+        private readonly ACLProcessor.GuidCache _aclGuidCache = new();
+        private int _disposed;
+
+        /// <summary>
+        ///     Creates an <see cref="ACLProcessor"/> that shares its GUID cache with other
+        ///     ACL processors created by this context.
+        /// </summary>
+        public ACLProcessor CreateACLProcessor(ILdapUtils utils, ILogger log = null) {
+            if (Volatile.Read(ref _disposed) != 0) {
+                throw new ObjectDisposedException(nameof(ACLProcessorContext));
+            }
+
+            return new ACLProcessor(utils, _aclGuidCache, log);
+        }
+
+        /// <summary>
+        ///     Clears the shared processor state. Processors created by this context must not
+        ///     be used after the context is disposed.
+        /// </summary>
+        public void Dispose() {
+            if (Interlocked.Exchange(ref _disposed, 1) != 0) {
+                return;
+            }
+
+            _aclGuidCache.Dispose();
+        }
+    }
+
     public class ACLProcessor {
         private static readonly Dictionary<Label, string> BaseGuids;
-        /// This is a shared cache of GUID mappings for each ILdapUtils instance. It allows multiple ACLProcessor instances to share the same GUID cache for a given ILdapUtils instance.
-        /// This resolves an issue from back when the guid cache was static and shared across all ILdapUtils instances, which was causing issues when domains were being processed in parallel for tests: https://github.com/SpecterOps/SharpHoundCommon/pull/169
-        /// Learn about Conditional Weak Tables https://learn.microsoft.com/en-us/dotnet/api/system.runtime.compilerservices.conditionalweaktable-2?view=netframework-4.7.2#examples
-        /// But the short version is that this allows us to have a shared cache for each ILdapUtils instance, but when the ILdapUtils instance is garbage collected, the cache will be garbage collected as well.
-        private static readonly ConditionalWeakTable<ILdapUtils, GuidCacheState> SharedGuidCaches = new();
         private readonly ILogger _log;
         private readonly ILdapUtils _utils;
-        private readonly GuidCacheState _guidCache;
+        private readonly GuidCache _guidCache;
 
-        private sealed class GuidCacheState {
-            // This is a mapping of GUIDs to their corresponding names for LDAP rights.
-            // The collection represents the response from the LDAP query Task kept in BuildTasks.
-            public readonly ConcurrentDictionary<string, string> GuidMap = new();
-            // This is a mapping of domains to their corresponding build tasks for the GUID cache.
-            // The Lazy<Task> ensures that the build task is only executed once per domain, even if multiple threads attempt to build the cache for the same domain simultaneously.
-            public readonly ConcurrentDictionary<string, Lazy<Task>> BuildTasks =
+        internal sealed class GuidCache : IDisposable {
+            private readonly ConcurrentDictionary<string, string> _guidMap = new();
+            private readonly ConcurrentDictionary<string, Lazy<Task>> _buildTasks =
                 new(StringComparer.OrdinalIgnoreCase);
+            private int _disposed;
+
+            public Lazy<Task> GetOrAddBuildTask(string domain, Func<Lazy<Task>> buildTaskFactory) {
+                ThrowIfDisposed();
+                return _buildTasks.GetOrAdd(domain, _ => buildTaskFactory());
+            }
+
+            public void AddGuid(string guid, string name) {
+                ThrowIfDisposed();
+                _guidMap.TryAdd(guid, name);
+            }
+
+            public bool TryGetGuid(string guid, out string name) {
+                ThrowIfDisposed();
+                return _guidMap.TryGetValue(guid, out name);
+            }
+
+            public void Dispose() {
+                if (Interlocked.Exchange(ref _disposed, 1) != 0) {
+                    return;
+                }
+
+                _buildTasks.Clear();
+                _guidMap.Clear();
+            }
+
+            private void ThrowIfDisposed() {
+                if (Volatile.Read(ref _disposed) != 0) {
+                    throw new ObjectDisposedException(nameof(ACLProcessorContext));
+                }
+            }
         }
 
         static ACLProcessor() {
@@ -57,10 +110,12 @@ namespace SharpHoundCommonLib.Processors {
             };
         }
 
-        public ACLProcessor(ILdapUtils utils, ILogger log = null)
-        {
+        public ACLProcessor(ILdapUtils utils, ILogger log = null) : this(utils, new GuidCache(), log) {
+        }
+
+        internal ACLProcessor(ILdapUtils utils, GuidCache guidCache, ILogger log = null) {
             _utils = utils;
-            _guidCache = SharedGuidCaches.GetValue(utils, _ => new GuidCacheState());
+            _guidCache = guidCache;
             _log = log ?? Logging.LogProvider.CreateLogger("ACLProc");
         }
 
@@ -89,9 +144,9 @@ namespace SharpHoundCommonLib.Processors {
         ///     LAPS
         /// </summary>
         private async Task BuildGuidCache(string domain) {
-            var buildTask = _guidCache.BuildTasks.GetOrAdd(domain,
+            var buildTask = _guidCache.GetOrAddBuildTask(domain,
                 // The ExecutionAndPublication mode ensures that only one thread can execute the factory method at a time, and all other threads will wait for the result of that execution. This prevents multiple threads from building the cache simultaneously for the same domain.
-                _ => new Lazy<Task>(() => BuildGuidCacheCore(domain), LazyThreadSafetyMode.ExecutionAndPublication));
+                () => new Lazy<Task>(() => BuildGuidCacheCore(domain), LazyThreadSafetyMode.ExecutionAndPublication));
 
             await buildTask.Value;
         }
@@ -124,7 +179,7 @@ namespace SharpHoundCommonLib.Processors {
 
                     if (name is LDAPProperties.LAPSPlaintextPassword or LDAPProperties.LAPSEncryptedPassword or LDAPProperties.LegacyLAPSPassword) {
                         _log.LogInformation("Found GUID for ACL Right {Name}: {Guid} in domain {Domain}", name, guid, domain);
-                        _guidCache.GuidMap.TryAdd(guid, name);
+                        _guidCache.AddGuid(guid, name);
                     }
                 } else {
                     _log.LogDebug("Error while building GUID cache for {Domain}: {Message}", domain, result.Error);
@@ -692,7 +747,7 @@ namespace SharpHoundCommonLib.Processors {
                                     IsPermissionForOwnerRightsSid = isPermissionForOwnerRightsSid,
                                     IsInheritedPermissionForOwnerRightsSid = isInheritedPermissionForOwnerRightsSid,
                                 };
-                            else if (_guidCache.GuidMap.TryGetValue(aceType, out var lapsAttribute)) {
+                            else if (_guidCache.TryGetGuid(aceType, out var lapsAttribute)) {
                                 // Compare the retrieved attribute name against LDAPProperties values
                                 if (lapsAttribute == LDAPProperties.LegacyLAPSPassword ||
                                     lapsAttribute == LDAPProperties.LAPSPlaintextPassword ||

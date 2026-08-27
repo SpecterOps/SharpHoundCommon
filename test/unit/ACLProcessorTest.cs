@@ -56,14 +56,15 @@ namespace CommonLibTest {
         }
 
         [Fact]
-        public async Task ACLProcessor_BuildGuidCache_AcrossInstances_QueriesOncePerDomain() {
+        public async Task ProcessorContext_ACLProcessors_QueryOncePerDomain() {
             var mockLdapUtils = new Mock<ILdapUtils>();
             mockLdapUtils
                 .Setup(x => x.PagedQuery(It.IsAny<LdapQueryParameters>(), It.IsAny<CancellationToken>()))
                 .Returns(Array.Empty<LdapResult<IDirectoryObject>>().ToAsyncEnumerable);
             var domain = $"{Guid.NewGuid():N}.TEST";
+            using var context = new ACLProcessorContext();
             var processors = Enumerable.Range(0, 50)
-                .Select(_ => new ACLProcessor(mockLdapUtils.Object))
+                .Select(_ => context.CreateACLProcessor(mockLdapUtils.Object))
                 .ToArray();
 
             await Task.WhenAll(processors.Select(processor =>
@@ -76,26 +77,43 @@ namespace CommonLibTest {
         }
 
         [Fact]
-        public async Task ACLProcessor_BuildGuidCache_AcrossLdapUtils_QueriesOncePerUtility() {
-            var firstLdapUtils = new Mock<ILdapUtils>();
-            var secondLdapUtils = new Mock<ILdapUtils>();
-            foreach (var ldapUtils in new[] { firstLdapUtils, secondLdapUtils }) {
-                ldapUtils
-                    .Setup(x => x.PagedQuery(It.IsAny<LdapQueryParameters>(), It.IsAny<CancellationToken>()))
-                    .Returns(Array.Empty<LdapResult<IDirectoryObject>>().ToAsyncEnumerable);
-            }
-
+        public async Task ProcessorContext_ACLProcessors_DoNotShareCacheAcrossContexts() {
+            var mockLdapUtils = new Mock<ILdapUtils>();
+            mockLdapUtils
+                .Setup(x => x.PagedQuery(It.IsAny<LdapQueryParameters>(), It.IsAny<CancellationToken>()))
+                .Returns(Array.Empty<LdapResult<IDirectoryObject>>().ToAsyncEnumerable);
             var domain = $"{Guid.NewGuid():N}.TEST";
-            await Task.WhenAll(
-                new ACLProcessor(firstLdapUtils.Object).ProcessACL(null, domain, Label.Computer, false).ToArrayAsync(),
-                new ACLProcessor(secondLdapUtils.Object).ProcessACL(null, domain, Label.Computer, false).ToArrayAsync());
+            using var firstContext = new ACLProcessorContext();
+            using var secondContext = new ACLProcessorContext();
 
-            foreach (var ldapUtils in new[] { firstLdapUtils, secondLdapUtils }) {
-                ldapUtils.Verify(
-                    x => x.PagedQuery(It.Is<LdapQueryParameters>(parameters => parameters.DomainName == domain),
-                        It.IsAny<CancellationToken>()),
-                    Times.Once);
-            }
+            await Task.WhenAll(
+                firstContext.CreateACLProcessor(mockLdapUtils.Object)
+                    .ProcessACL(null, domain, Label.Computer, false).ToArrayAsync(),
+                secondContext.CreateACLProcessor(mockLdapUtils.Object)
+                    .ProcessACL(null, domain, Label.Computer, false).ToArrayAsync());
+
+            mockLdapUtils.Verify(
+                x => x.PagedQuery(It.Is<LdapQueryParameters>(parameters => parameters.DomainName == domain),
+                    It.IsAny<CancellationToken>()),
+                Times.Exactly(2));
+        }
+
+        [Fact]
+        public void ProcessorContext_CreateACLProcessor_AfterDispose_Throws() {
+            var context = new ACLProcessorContext();
+            context.Dispose();
+
+            Assert.Throws<ObjectDisposedException>(() => context.CreateACLProcessor(new MockLdapUtils()));
+        }
+
+        [Fact]
+        public async Task ProcessorContext_ACLProcessor_AfterDispose_Throws() {
+            var context = new ACLProcessorContext();
+            var processor = context.CreateACLProcessor(new MockLdapUtils());
+            context.Dispose();
+
+            await Assert.ThrowsAsync<ObjectDisposedException>(() =>
+                processor.ProcessACL(null, "TEST.LOCAL", Label.Computer, false).ToArrayAsync());
         }
 
         [Fact]
