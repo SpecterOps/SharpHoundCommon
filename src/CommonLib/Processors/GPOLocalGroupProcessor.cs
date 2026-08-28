@@ -5,6 +5,7 @@ using System.DirectoryServices.Protocols;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.XPath;
 using Microsoft.Extensions.Logging;
@@ -13,6 +14,38 @@ using SharpHoundCommonLib.LDAPQueries;
 using SharpHoundCommonLib.OutputTypes;
 
 namespace SharpHoundCommonLib.Processors {
+    /// <summary>
+    ///     Owns state shared by GPOLocalGroupProcessor instances and gives that state an explicit lifetime.
+    /// </summary>
+    public sealed class GPOLocalGroupProcessorContext : IDisposable {
+        private readonly GPOLocalGroupProcessor.ActionCache _actionCache = new();
+        private int _disposed;
+
+        /// <summary>
+        ///     Creates a <see cref="GPOLocalGroupProcessor"/> that shares its GPO action cache with other
+        ///     processors created by this context.
+        /// </summary>
+        public GPOLocalGroupProcessor CreateGPOLocalGroupProcessor(ILdapUtils utils, ILogger log = null) {
+            if (Volatile.Read(ref _disposed) != 0) {
+                throw new ObjectDisposedException(nameof(GPOLocalGroupProcessorContext));
+            }
+
+            return new GPOLocalGroupProcessor(utils, _actionCache, log);
+        }
+
+        /// <summary>
+        ///     Clears the shared processor state. Processors created by this context must not
+        ///     be used after the context is disposed.
+        /// </summary>
+        public void Dispose() {
+            if (Interlocked.Exchange(ref _disposed, 1) != 0) {
+                return;
+            }
+
+            _actionCache.Dispose();
+        }
+    }
+
     public class GPOLocalGroupProcessor {
         private static readonly Regex KeyRegex = new(@"(.+?)\s*=(.*)", RegexOptions.Compiled);
 
@@ -30,8 +63,6 @@ namespace SharpHoundCommonLib.Processors {
         private static readonly Regex ExtractRid =
             new(@"S-1-5-32-([0-9]{3})", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        private static readonly ConcurrentDictionary<string, List<GroupAction>> GpoActionCache = new();
-
         private static readonly Dictionary<string, LocalGroupRids> ValidGroupNames =
             new(StringComparer.OrdinalIgnoreCase) {
                 { "Administrators", LocalGroupRids.Administrators },
@@ -43,9 +74,46 @@ namespace SharpHoundCommonLib.Processors {
         private readonly ILogger _log;
 
         private readonly ILdapUtils _utils;
+        private readonly ActionCache _actionCache;
 
-        public GPOLocalGroupProcessor(ILdapUtils utils, ILogger log = null) {
+        internal sealed class ActionCache : IDisposable {
+            private readonly ConcurrentDictionary<string, Lazy<Task<List<GroupAction>>>> _buildTasks =
+                new(StringComparer.OrdinalIgnoreCase);
+            private int _disposed;
+
+            public Lazy<Task<List<GroupAction>>> GetOrAddBuildTask(string distinguishedName,
+                Func<Lazy<Task<List<GroupAction>>>> buildTaskFactory) {
+                ThrowIfDisposed();
+                return _buildTasks.GetOrAdd(distinguishedName, _ => buildTaskFactory());
+            }
+
+            public void RemoveBuildTask(string distinguishedName, Lazy<Task<List<GroupAction>>> buildTask) {
+                ThrowIfDisposed();
+                ((ICollection<KeyValuePair<string, Lazy<Task<List<GroupAction>>>>>)_buildTasks).Remove(
+                    new KeyValuePair<string, Lazy<Task<List<GroupAction>>>>(distinguishedName, buildTask));
+            }
+
+            public void Dispose() {
+                if (Interlocked.Exchange(ref _disposed, 1) != 0) {
+                    return;
+                }
+
+                _buildTasks.Clear();
+            }
+
+            private void ThrowIfDisposed() {
+                if (Volatile.Read(ref _disposed) != 0) {
+                    throw new ObjectDisposedException(nameof(GPOLocalGroupProcessorContext));
+                }
+            }
+        }
+
+        public GPOLocalGroupProcessor(ILdapUtils utils, ILogger log = null) : this(utils, new ActionCache(), log) {
+        }
+
+        internal GPOLocalGroupProcessor(ILdapUtils utils, ActionCache actionCache, ILogger log = null) {
             _utils = utils;
+            _actionCache = actionCache;
             _log = log ?? Logging.LogProvider.CreateLogger("GPOLocalGroupProc");
         }
 
@@ -124,36 +192,22 @@ namespace SharpHoundCommonLib.Processors {
             foreach (var rid in Enum.GetValues(typeof(LocalGroupRids))) data[(LocalGroupRids)rid] = new GroupResults();
 
             foreach (var linkDn in orderedLinks) {
-                if (!GpoActionCache.TryGetValue(linkDn.ToLower(), out var actions)) {
-                    actions = new List<GroupAction>();
-
-                    var gpoDomain = Helpers.DistinguishedNameToDomain(linkDn);
-                    var result = await _utils.Query(new LdapQueryParameters() {
-                        LDAPFilter = new LdapFilter().AddAllObjects().GetFilter(),
-                        SearchScope = SearchScope.Base,
-                        Attributes = [LDAPProperties.GPCFileSYSPath, LDAPProperties.Flags],
-                        SearchBase = linkDn,
-                        DomainName = gpoDomain
-                    }).DefaultIfEmpty(LdapResult<IDirectoryObject>.Fail()).FirstOrDefaultAsync();
-
-                    if (!result.IsSuccess) {
-                        continue;
-                    }
-
-                    if (!result.Value.TryGetProperty(LDAPProperties.GPCFileSYSPath, out var filePath) || 
-                        // Filter out GPOs that are disabled or the computer configuration is disabled
-                        (result.Value.TryGetProperty(LDAPProperties.Flags, out var flags) && flags is "2" or "3")) {
-                        GpoActionCache.TryAdd(linkDn, actions);
-                        continue;
-                    }
-
-                    //Add the actions for each file. The GPO template file actions will override the XML file actions
-                    await foreach (var item  in ProcessGPOXmlFile(filePath, gpoDomain)) actions.Add(item);
-                    await foreach (var item in ProcessGPOTemplateFile(filePath, gpoDomain)) actions.Add(item);
+                var buildTask = _actionCache.GetOrAddBuildTask(linkDn,
+                    () => new Lazy<Task<List<GroupAction>>>(() => BuildGPOActionCache(linkDn),
+                        LazyThreadSafetyMode.ExecutionAndPublication));
+                List<GroupAction> actions;
+                try {
+                    actions = await buildTask.Value;
+                } catch {
+                    _actionCache.RemoveBuildTask(linkDn, buildTask);
+                    throw;
                 }
 
-                //Cache the actions for this GPO for later
-                GpoActionCache.TryAdd(linkDn.ToLower(), actions);
+                // Query failures are not cached so a later attempt can retry the GPO.
+                if (actions == null) {
+                    _actionCache.RemoveBuildTask(linkDn, buildTask);
+                    continue;
+                }
 
                 //If there are no actions, then we can move on from this GPO
                 if (actions.Count == 0)
@@ -246,6 +300,33 @@ namespace SharpHoundCommonLib.Processors {
             }
 
             return ret;
+        }
+
+        private async Task<List<GroupAction>> BuildGPOActionCache(string linkDn) {
+            var actions = new List<GroupAction>();
+            var gpoDomain = Helpers.DistinguishedNameToDomain(linkDn);
+            var result = await _utils.Query(new LdapQueryParameters() {
+                LDAPFilter = new LdapFilter().AddAllObjects().GetFilter(),
+                SearchScope = SearchScope.Base,
+                Attributes = [LDAPProperties.GPCFileSYSPath, LDAPProperties.Flags],
+                SearchBase = linkDn,
+                DomainName = gpoDomain
+            }).DefaultIfEmpty(LdapResult<IDirectoryObject>.Fail()).FirstOrDefaultAsync();
+
+            if (!result.IsSuccess) {
+                return null;
+            }
+
+            if (!result.Value.TryGetProperty(LDAPProperties.GPCFileSYSPath, out var filePath) ||
+                // Filter out GPOs that are disabled or the computer configuration is disabled
+                (result.Value.TryGetProperty(LDAPProperties.Flags, out var flags) && flags is "2" or "3")) {
+                return actions;
+            }
+
+            //Add the actions for each file. The GPO template file actions will override the XML file actions
+            await foreach (var item in ProcessGPOXmlFile(filePath, gpoDomain)) actions.Add(item);
+            await foreach (var item in ProcessGPOTemplateFile(filePath, gpoDomain)) actions.Add(item);
+            return actions;
         }
 
         /// <summary>

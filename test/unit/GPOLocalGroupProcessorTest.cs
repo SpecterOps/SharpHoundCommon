@@ -94,6 +94,86 @@ namespace CommonLibTest {
         }
 
         [Fact]
+        public async Task GPOLocalGroupProcessorContext_Processors_QueryGPOOnce() {
+            var (mockLdapUtils, gpLink, linkDn) = CreateContextTestData();
+            using var context = new GPOLocalGroupProcessorContext();
+            var processors = Enumerable.Range(0, 50)
+                .Select(_ => context.CreateGPOLocalGroupProcessor(mockLdapUtils.Object))
+                .ToArray();
+
+            await Task.WhenAll(processors.Select(processor =>
+                processor.ReadGPOLocalGroups(gpLink, "DC=TEST,DC=LOCAL")));
+
+            mockLdapUtils.Verify(x => x.Query(
+                It.Is<LdapQueryParameters>(parameters =>
+                    parameters.LDAPFilter == new LdapFilter().AddAllObjects().GetFilter() &&
+                    parameters.SearchBase == linkDn),
+                It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task GPOLocalGroupProcessorContext_Processors_DoNotShareCacheAcrossContexts() {
+            var (mockLdapUtils, gpLink, linkDn) = CreateContextTestData();
+            using var firstContext = new GPOLocalGroupProcessorContext();
+            using var secondContext = new GPOLocalGroupProcessorContext();
+
+            await Task.WhenAll(
+                firstContext.CreateGPOLocalGroupProcessor(mockLdapUtils.Object)
+                    .ReadGPOLocalGroups(gpLink, "DC=TEST,DC=LOCAL"),
+                secondContext.CreateGPOLocalGroupProcessor(mockLdapUtils.Object)
+                    .ReadGPOLocalGroups(gpLink, "DC=TEST,DC=LOCAL"));
+
+            mockLdapUtils.Verify(x => x.Query(
+                It.Is<LdapQueryParameters>(parameters =>
+                    parameters.LDAPFilter == new LdapFilter().AddAllObjects().GetFilter() &&
+                    parameters.SearchBase == linkDn),
+                It.IsAny<CancellationToken>()), Times.Exactly(2));
+        }
+
+        [Fact]
+        public async Task GPOLocalGroupProcessorContext_QueryFailure_IsRetried() {
+            var (mockLdapUtils, gpLink, linkDn) = CreateContextTestData();
+            mockLdapUtils.SetupSequence(x => x.Query(
+                    It.Is<LdapQueryParameters>(parameters =>
+                        parameters.LDAPFilter == new LdapFilter().AddAllObjects().GetFilter()),
+                    It.IsAny<CancellationToken>()))
+                .Returns(new[] { LdapResult<IDirectoryObject>.Fail() }.ToAsyncEnumerable)
+                .Returns(new[] { LdapResult<IDirectoryObject>.Ok(new Mock<IDirectoryObject>().Object) }
+                    .ToAsyncEnumerable);
+            using var context = new GPOLocalGroupProcessorContext();
+            var processor = context.CreateGPOLocalGroupProcessor(mockLdapUtils.Object);
+
+            await processor.ReadGPOLocalGroups(gpLink, "DC=TEST,DC=LOCAL");
+            await processor.ReadGPOLocalGroups(gpLink, "DC=TEST,DC=LOCAL");
+
+            mockLdapUtils.Verify(x => x.Query(
+                It.Is<LdapQueryParameters>(parameters =>
+                    parameters.LDAPFilter == new LdapFilter().AddAllObjects().GetFilter() &&
+                    parameters.SearchBase == linkDn),
+                It.IsAny<CancellationToken>()), Times.Exactly(2));
+        }
+
+        [Fact]
+        public void GPOLocalGroupProcessorContext_CreateProcessor_AfterDispose_Throws() {
+            var context = new GPOLocalGroupProcessorContext();
+            context.Dispose();
+
+            Assert.Throws<ObjectDisposedException>(() =>
+                context.CreateGPOLocalGroupProcessor(new MockLdapUtils()));
+        }
+
+        [Fact]
+        public async Task GPOLocalGroupProcessorContext_Processor_AfterDispose_Throws() {
+            var (mockLdapUtils, gpLink, _) = CreateContextTestData();
+            var context = new GPOLocalGroupProcessorContext();
+            var processor = context.CreateGPOLocalGroupProcessor(mockLdapUtils.Object);
+            context.Dispose();
+
+            await Assert.ThrowsAsync<ObjectDisposedException>(() =>
+                processor.ReadGPOLocalGroups(gpLink, "DC=TEST,DC=LOCAL"));
+        }
+
+        [Fact]
         public async Task GPOLocalGroupProcessor_ReadGPOLocalGroups_Null_GPLink() {
             var mockLDAPUtils = new Mock<ILdapUtils>();
             var processor = new GPOLocalGroupProcessor(mockLDAPUtils.Object);
@@ -349,6 +429,29 @@ namespace CommonLibTest {
             var actual = await processor.ProcessGPOXmlFile(gpcFileSysPath, "somedomain").ToArrayAsync();
             Assert.NotNull(actual);
             Assert.Empty(actual);
+        }
+
+        private static (Mock<ILdapUtils> LdapUtils, string GPLink, string LinkDn) CreateContextTestData() {
+            var mockLdapUtils = new Mock<ILdapUtils>();
+            var computerEntry = new Mock<IDirectoryObject>();
+            var computerSid = $"S-1-5-21-{Random.Shared.Next()}-{Random.Shared.Next()}-{Random.Shared.Next()}-1000";
+            computerEntry.Setup(x => x.TryGetSecurityIdentifier(out computerSid)).Returns(true);
+            var computerResults = new[] { LdapResult<IDirectoryObject>.Ok(computerEntry.Object) };
+            var gpoResults = new[] { LdapResult<IDirectoryObject>.Ok(new Mock<IDirectoryObject>().Object) };
+
+            mockLdapUtils.Setup(x => x.Query(
+                    It.Is<LdapQueryParameters>(parameters =>
+                        parameters.LDAPFilter == new LdapFilter().AddComputersNoMSAs().GetFilter()),
+                    It.IsAny<CancellationToken>()))
+                .Returns(computerResults.ToAsyncEnumerable);
+            mockLdapUtils.Setup(x => x.Query(
+                    It.Is<LdapQueryParameters>(parameters =>
+                        parameters.LDAPFilter == new LdapFilter().AddAllObjects().GetFilter()),
+                    It.IsAny<CancellationToken>()))
+                .Returns(gpoResults.ToAsyncEnumerable);
+
+            var linkDn = $"CN={Guid.NewGuid():N},CN=Policies,CN=System,DC=TEST,DC=LOCAL";
+            return (mockLdapUtils, $"[LDAP://{linkDn};0]", linkDn);
         }
 
         [Fact]
