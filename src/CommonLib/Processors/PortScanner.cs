@@ -1,23 +1,90 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using SharpHoundRPC.PortScanner;
 
 namespace SharpHoundCommonLib.Processors {
+    /// <summary>
+    ///     Owns state shared by PortScanner instances and gives that state an explicit lifetime.
+    /// </summary>
+    public sealed class PortScannerContext : IDisposable {
+        private readonly PortScanner.ScanCache _scanCache = new();
+        private int _disposed;
+
+        /// <summary>
+        ///     Creates a <see cref="PortScanner"/> that shares its scan cache with other scanners
+        ///     created by this context.
+        /// </summary>
+        public PortScanner CreatePortScanner(ILogger log = null, int maxTimeout = 10000) {
+            if (Volatile.Read(ref _disposed) != 0) {
+                throw new ObjectDisposedException(nameof(PortScannerContext));
+            }
+
+            return new PortScanner(_scanCache, log, maxTimeout);
+        }
+
+        /// <summary>
+        ///     Clears the shared scanner state. Scanners created by this context must not
+        ///     be used after the context is disposed.
+        /// </summary>
+        public void Dispose() {
+            if (Interlocked.Exchange(ref _disposed, 1) != 0) {
+                return;
+            }
+
+            _scanCache.Dispose();
+        }
+    }
+
     public class PortScanner : IPortScanner {
-        private static readonly ConcurrentDictionary<PingCacheKey, bool> PortScanCache = new();
         private readonly ILogger _log;
         private readonly AdaptiveTimeout _adaptiveTimeout;
+        private readonly ScanCache _scanCache;
 
-        public PortScanner() : this(null) {
+        internal sealed class ScanCache : IDisposable {
+            private readonly ConcurrentDictionary<PingCacheKey, bool> _portScanCache = new();
+            private int _disposed;
+
+            public bool TryGet(PingCacheKey key, out bool status) {
+                ThrowIfDisposed();
+                return _portScanCache.TryGetValue(key, out status);
+            }
+
+            public void Add(PingCacheKey key, bool status) {
+                ThrowIfDisposed();
+                _portScanCache.TryAdd(key, status);
+            }
+
+            public void Dispose() {
+                if (Interlocked.Exchange(ref _disposed, 1) != 0) {
+                    return;
+                }
+
+                _portScanCache.Clear();
+            }
+
+            private void ThrowIfDisposed() {
+                if (Volatile.Read(ref _disposed) != 0) {
+                    throw new ObjectDisposedException(nameof(PortScannerContext));
+                }
+            }
+        }
+
+        public PortScanner() : this((ILogger)null) {
             
         }
 
-        public PortScanner(ILogger log = null, int maxTimeout = 10000) {
+        public PortScanner(ILogger log = null, int maxTimeout = 10000) : this(
+            new ScanCache(), log, maxTimeout) {
+        }
+
+        internal PortScanner(ScanCache scanCache, ILogger log = null, int maxTimeout = 10000) {
+            _scanCache = scanCache;
             _log = log ?? Logging.LogProvider.CreateLogger("PortScanner");
-            _adaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMilliseconds(maxTimeout), _log);
+            _adaptiveTimeout = new AdaptiveTimeout(TimeSpan.FromMilliseconds(maxTimeout), _log);
         }
 
         /// <summary>
@@ -35,7 +102,7 @@ namespace SharpHoundCommonLib.Processors {
                 HostName = hostname
             };
 
-            if (PortScanCache.TryGetValue(key, out var status)) {
+            if (_scanCache.TryGet(key, out var status)) {
                 _log.LogTrace("Port scan cache hit for {HostName}:{Port}: {Status}", hostname, port, status);
                 return status;
             }
@@ -48,12 +115,12 @@ namespace SharpHoundCommonLib.Processors {
                     if (throwError) {
                         throw new TimeoutException(ca.Error);
                     }
-                    PortScanCache.TryAdd(key, false);
+                    _scanCache.Add(key, false);
                     return false;
                 }
 
                 _log.LogTrace("CheckPort Succeeded for {HostName}:{Port}", hostname, port);
-                PortScanCache.TryAdd(key, true);
+                _scanCache.Add(key, true);
                 return true;
             }
             catch (Exception e) {
@@ -63,16 +130,12 @@ namespace SharpHoundCommonLib.Processors {
                     throw;
                 }
 
-                PortScanCache.TryAdd(key, false);
+                _scanCache.Add(key, false);
                 return false;
             }
         }
 
-        public static void ClearCache() {
-            PortScanCache.Clear();
-        }
-
-        private class PingCacheKey {
+        internal class PingCacheKey {
             internal string HostName { get; set; }
             internal int Port { get; set; }
 
