@@ -1667,6 +1667,12 @@ references:
   commentId: F:SharpHoundCommonLib.Enums.DirectoryPaths.EnterpriseCALocation
   fullName: SharpHoundCommonLib.Enums.DirectoryPaths.EnterpriseCALocation
   nameWithType: DirectoryPaths.EnterpriseCALocation
+- uid: SharpHoundCommonLib.Enums.DirectoryPaths.ExchangeLocation
+  name: ExchangeLocation
+  href: api/SharpHoundCommonLib.Enums.DirectoryPaths.html#SharpHoundCommonLib_Enums_DirectoryPaths_ExchangeLocation
+  commentId: F:SharpHoundCommonLib.Enums.DirectoryPaths.ExchangeLocation
+  fullName: SharpHoundCommonLib.Enums.DirectoryPaths.ExchangeLocation
+  nameWithType: DirectoryPaths.ExchangeLocation
 - uid: SharpHoundCommonLib.Enums.DirectoryPaths.NTAuthStoreLocation
   name: NTAuthStoreLocation
   href: api/SharpHoundCommonLib.Enums.DirectoryPaths.html#SharpHoundCommonLib_Enums_DirectoryPaths_NTAuthStoreLocation
@@ -10037,6 +10043,54 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.Processors.ACLProcessor.ACLProcessor
   nameWithType: ACLProcessor.ACLProcessor
+- uid: SharpHoundCommonLib.Processors.ACLProcessor.ACLProcessingResult
+  name: ACLProcessor.ACLProcessingResult
+  href: api/SharpHoundCommonLib.Processors.ACLProcessor.ACLProcessingResult.html
+  commentId: T:SharpHoundCommonLib.Processors.ACLProcessor.ACLProcessingResult
+  fullName: SharpHoundCommonLib.Processors.ACLProcessor.ACLProcessingResult
+  nameWithType: ACLProcessor.ACLProcessingResult
+- uid: SharpHoundCommonLib.Processors.ACLProcessor.ACLProcessingResult.#ctor(SharpHoundCommonLib.OutputTypes.ACE[],SharpHoundCommonLib.Processors.ACLProcessor.CustomDenyAceCounts)
+  name: ACLProcessingResult(ACE[], ACLProcessor.CustomDenyAceCounts)
+  href: api/SharpHoundCommonLib.Processors.ACLProcessor.ACLProcessingResult.html#SharpHoundCommonLib_Processors_ACLProcessor_ACLProcessingResult__ctor_SharpHoundCommonLib_OutputTypes_ACE___SharpHoundCommonLib_Processors_ACLProcessor_CustomDenyAceCounts_
+  commentId: M:SharpHoundCommonLib.Processors.ACLProcessor.ACLProcessingResult.#ctor(SharpHoundCommonLib.OutputTypes.ACE[],SharpHoundCommonLib.Processors.ACLProcessor.CustomDenyAceCounts)
+  name.vb: ACLProcessingResult(ACE(), ACLProcessor.CustomDenyAceCounts)
+  fullName: SharpHoundCommonLib.Processors.ACLProcessor.ACLProcessingResult.ACLProcessingResult(SharpHoundCommonLib.OutputTypes.ACE[], SharpHoundCommonLib.Processors.ACLProcessor.CustomDenyAceCounts)
+  fullName.vb: SharpHoundCommonLib.Processors.ACLProcessor.ACLProcessingResult.ACLProcessingResult(SharpHoundCommonLib.OutputTypes.ACE(), SharpHoundCommonLib.Processors.ACLProcessor.CustomDenyAceCounts)
+  nameWithType: ACLProcessor.ACLProcessingResult.ACLProcessingResult(ACE[], ACLProcessor.CustomDenyAceCounts)
+  nameWithType.vb: ACLProcessor.ACLProcessingResult.ACLProcessingResult(ACE(), ACLProcessor.CustomDenyAceCounts)
+- uid: SharpHoundCommonLib.Processors.ACLProcessor.ACLProcessingResult.#ctor*
+  name: ACLProcessingResult
+  href: api/SharpHoundCommonLib.Processors.ACLProcessor.ACLProcessingResult.html#SharpHoundCommonLib_Processors_ACLProcessor_ACLProcessingResult__ctor_
+  commentId: Overload:SharpHoundCommonLib.Processors.ACLProcessor.ACLProcessingResult.#ctor
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Processors.ACLProcessor.ACLProcessingResult.ACLProcessingResult
+  nameWithType: ACLProcessor.ACLProcessingResult.ACLProcessingResult
+- uid: SharpHoundCommonLib.Processors.ACLProcessor.ACLProcessingResult.Aces
+  name: Aces
+  href: api/SharpHoundCommonLib.Processors.ACLProcessor.ACLProcessingResult.html#SharpHoundCommonLib_Processors_ACLProcessor_ACLProcessingResult_Aces
+  commentId: P:SharpHoundCommonLib.Processors.ACLProcessor.ACLProcessingResult.Aces
+  fullName: SharpHoundCommonLib.Processors.ACLProcessor.ACLProcessingResult.Aces
+  nameWithType: ACLProcessor.ACLProcessingResult.Aces
+- uid: SharpHoundCommonLib.Processors.ACLProcessor.ACLProcessingResult.Aces*
+  name: Aces
+  href: api/SharpHoundCommonLib.Processors.ACLProcessor.ACLProcessingResult.html#SharpHoundCommonLib_Processors_ACLProcessor_ACLProcessingResult_Aces_
+  commentId: Overload:SharpHoundCommonLib.Processors.ACLProcessor.ACLProcessingResult.Aces
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Processors.ACLProcessor.ACLProcessingResult.Aces
+  nameWithType: ACLProcessor.ACLProcessingResult.Aces
+- uid: SharpHoundCommonLib.Processors.ACLProcessor.ACLProcessingResult.CustomDenyAceCounts
+  name: CustomDenyAceCounts
+  href: api/SharpHoundCommonLib.Processors.ACLProcessor.ACLProcessingResult.html#SharpHoundCommonLib_Processors_ACLProcessor_ACLProcessingResult_CustomDenyAceCounts
+  commentId: P:SharpHoundCommonLib.Processors.ACLProcessor.ACLProcessingResult.CustomDenyAceCounts
+  fullName: SharpHoundCommonLib.Processors.ACLProcessor.ACLProcessingResult.CustomDenyAceCounts
+  nameWithType: ACLProcessor.ACLProcessingResult.CustomDenyAceCounts
+- uid: SharpHoundCommonLib.Processors.ACLProcessor.ACLProcessingResult.CustomDenyAceCounts*
+  name: CustomDenyAceCounts
+  href: api/SharpHoundCommonLib.Processors.ACLProcessor.ACLProcessingResult.html#SharpHoundCommonLib_Processors_ACLProcessor_ACLProcessingResult_CustomDenyAceCounts_
+  commentId: Overload:SharpHoundCommonLib.Processors.ACLProcessor.ACLProcessingResult.CustomDenyAceCounts
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Processors.ACLProcessor.ACLProcessingResult.CustomDenyAceCounts
+  nameWithType: ACLProcessor.ACLProcessingResult.CustomDenyAceCounts
 - uid: SharpHoundCommonLib.Processors.ACLProcessor.CalculateImplicitACLHash(System.Byte[],System.String)
   name: CalculateImplicitACLHash(Byte[], String)
   href: api/SharpHoundCommonLib.Processors.ACLProcessor.html#SharpHoundCommonLib_Processors_ACLProcessor_CalculateImplicitACLHash_System_Byte___System_String_
@@ -10053,6 +10107,64 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.Processors.ACLProcessor.CalculateImplicitACLHash
   nameWithType: ACLProcessor.CalculateImplicitACLHash
+- uid: SharpHoundCommonLib.Processors.ACLProcessor.CustomDenyAceCounts
+  name: ACLProcessor.CustomDenyAceCounts
+  href: api/SharpHoundCommonLib.Processors.ACLProcessor.CustomDenyAceCounts.html
+  commentId: T:SharpHoundCommonLib.Processors.ACLProcessor.CustomDenyAceCounts
+  fullName: SharpHoundCommonLib.Processors.ACLProcessor.CustomDenyAceCounts
+  nameWithType: ACLProcessor.CustomDenyAceCounts
+- uid: SharpHoundCommonLib.Processors.ACLProcessor.CustomDenyAceCounts.#ctor(System.Int32,System.Int32)
+  name: CustomDenyAceCounts(Int32, Int32)
+  href: api/SharpHoundCommonLib.Processors.ACLProcessor.CustomDenyAceCounts.html#SharpHoundCommonLib_Processors_ACLProcessor_CustomDenyAceCounts__ctor_System_Int32_System_Int32_
+  commentId: M:SharpHoundCommonLib.Processors.ACLProcessor.CustomDenyAceCounts.#ctor(System.Int32,System.Int32)
+  fullName: SharpHoundCommonLib.Processors.ACLProcessor.CustomDenyAceCounts.CustomDenyAceCounts(System.Int32, System.Int32)
+  nameWithType: ACLProcessor.CustomDenyAceCounts.CustomDenyAceCounts(Int32, Int32)
+- uid: SharpHoundCommonLib.Processors.ACLProcessor.CustomDenyAceCounts.#ctor*
+  name: CustomDenyAceCounts
+  href: api/SharpHoundCommonLib.Processors.ACLProcessor.CustomDenyAceCounts.html#SharpHoundCommonLib_Processors_ACLProcessor_CustomDenyAceCounts__ctor_
+  commentId: Overload:SharpHoundCommonLib.Processors.ACLProcessor.CustomDenyAceCounts.#ctor
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Processors.ACLProcessor.CustomDenyAceCounts.CustomDenyAceCounts
+  nameWithType: ACLProcessor.CustomDenyAceCounts.CustomDenyAceCounts
+- uid: SharpHoundCommonLib.Processors.ACLProcessor.CustomDenyAceCounts.ExplicitCount
+  name: ExplicitCount
+  href: api/SharpHoundCommonLib.Processors.ACLProcessor.CustomDenyAceCounts.html#SharpHoundCommonLib_Processors_ACLProcessor_CustomDenyAceCounts_ExplicitCount
+  commentId: P:SharpHoundCommonLib.Processors.ACLProcessor.CustomDenyAceCounts.ExplicitCount
+  fullName: SharpHoundCommonLib.Processors.ACLProcessor.CustomDenyAceCounts.ExplicitCount
+  nameWithType: ACLProcessor.CustomDenyAceCounts.ExplicitCount
+- uid: SharpHoundCommonLib.Processors.ACLProcessor.CustomDenyAceCounts.ExplicitCount*
+  name: ExplicitCount
+  href: api/SharpHoundCommonLib.Processors.ACLProcessor.CustomDenyAceCounts.html#SharpHoundCommonLib_Processors_ACLProcessor_CustomDenyAceCounts_ExplicitCount_
+  commentId: Overload:SharpHoundCommonLib.Processors.ACLProcessor.CustomDenyAceCounts.ExplicitCount
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Processors.ACLProcessor.CustomDenyAceCounts.ExplicitCount
+  nameWithType: ACLProcessor.CustomDenyAceCounts.ExplicitCount
+- uid: SharpHoundCommonLib.Processors.ACLProcessor.CustomDenyAceCounts.InheritedCount
+  name: InheritedCount
+  href: api/SharpHoundCommonLib.Processors.ACLProcessor.CustomDenyAceCounts.html#SharpHoundCommonLib_Processors_ACLProcessor_CustomDenyAceCounts_InheritedCount
+  commentId: P:SharpHoundCommonLib.Processors.ACLProcessor.CustomDenyAceCounts.InheritedCount
+  fullName: SharpHoundCommonLib.Processors.ACLProcessor.CustomDenyAceCounts.InheritedCount
+  nameWithType: ACLProcessor.CustomDenyAceCounts.InheritedCount
+- uid: SharpHoundCommonLib.Processors.ACLProcessor.CustomDenyAceCounts.InheritedCount*
+  name: InheritedCount
+  href: api/SharpHoundCommonLib.Processors.ACLProcessor.CustomDenyAceCounts.html#SharpHoundCommonLib_Processors_ACLProcessor_CustomDenyAceCounts_InheritedCount_
+  commentId: Overload:SharpHoundCommonLib.Processors.ACLProcessor.CustomDenyAceCounts.InheritedCount
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Processors.ACLProcessor.CustomDenyAceCounts.InheritedCount
+  nameWithType: ACLProcessor.CustomDenyAceCounts.InheritedCount
+- uid: SharpHoundCommonLib.Processors.ACLProcessor.CustomDenyAceCounts.Total
+  name: Total
+  href: api/SharpHoundCommonLib.Processors.ACLProcessor.CustomDenyAceCounts.html#SharpHoundCommonLib_Processors_ACLProcessor_CustomDenyAceCounts_Total
+  commentId: P:SharpHoundCommonLib.Processors.ACLProcessor.CustomDenyAceCounts.Total
+  fullName: SharpHoundCommonLib.Processors.ACLProcessor.CustomDenyAceCounts.Total
+  nameWithType: ACLProcessor.CustomDenyAceCounts.Total
+- uid: SharpHoundCommonLib.Processors.ACLProcessor.CustomDenyAceCounts.Total*
+  name: Total
+  href: api/SharpHoundCommonLib.Processors.ACLProcessor.CustomDenyAceCounts.html#SharpHoundCommonLib_Processors_ACLProcessor_CustomDenyAceCounts_Total_
+  commentId: Overload:SharpHoundCommonLib.Processors.ACLProcessor.CustomDenyAceCounts.Total
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Processors.ACLProcessor.CustomDenyAceCounts.Total
+  nameWithType: ACLProcessor.CustomDenyAceCounts.Total
 - uid: SharpHoundCommonLib.Processors.ACLProcessor.GetInheritedAceHashes(SharpHoundCommonLib.IDirectoryObject,SharpHoundCommonLib.ResolvedSearchResult)
   name: GetInheritedAceHashes(IDirectoryObject, ResolvedSearchResult)
   href: api/SharpHoundCommonLib.Processors.ACLProcessor.html#SharpHoundCommonLib_Processors_ACLProcessor_GetInheritedAceHashes_SharpHoundCommonLib_IDirectoryObject_SharpHoundCommonLib_ResolvedSearchResult_
@@ -10156,6 +10268,28 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.Processors.ACLProcessor.ProcessACL
   nameWithType: ACLProcessor.ProcessACL
+- uid: SharpHoundCommonLib.Processors.ACLProcessor.ProcessACLWithCustomDenyAces(SharpHoundCommonLib.ResolvedSearchResult,SharpHoundCommonLib.IDirectoryObject,System.Boolean)
+  name: ProcessACLWithCustomDenyAces(ResolvedSearchResult, IDirectoryObject, Boolean)
+  href: api/SharpHoundCommonLib.Processors.ACLProcessor.html#SharpHoundCommonLib_Processors_ACLProcessor_ProcessACLWithCustomDenyAces_SharpHoundCommonLib_ResolvedSearchResult_SharpHoundCommonLib_IDirectoryObject_System_Boolean_
+  commentId: M:SharpHoundCommonLib.Processors.ACLProcessor.ProcessACLWithCustomDenyAces(SharpHoundCommonLib.ResolvedSearchResult,SharpHoundCommonLib.IDirectoryObject,System.Boolean)
+  fullName: SharpHoundCommonLib.Processors.ACLProcessor.ProcessACLWithCustomDenyAces(SharpHoundCommonLib.ResolvedSearchResult, SharpHoundCommonLib.IDirectoryObject, System.Boolean)
+  nameWithType: ACLProcessor.ProcessACLWithCustomDenyAces(ResolvedSearchResult, IDirectoryObject, Boolean)
+- uid: SharpHoundCommonLib.Processors.ACLProcessor.ProcessACLWithCustomDenyAces(System.Byte[],System.String,SharpHoundCommonLib.Enums.Label,System.Boolean,System.Boolean,System.String,System.Boolean,System.String)
+  name: ProcessACLWithCustomDenyAces(Byte[], String, Label, Boolean, Boolean, String, Boolean, String)
+  href: api/SharpHoundCommonLib.Processors.ACLProcessor.html#SharpHoundCommonLib_Processors_ACLProcessor_ProcessACLWithCustomDenyAces_System_Byte___System_String_SharpHoundCommonLib_Enums_Label_System_Boolean_System_Boolean_System_String_System_Boolean_System_String_
+  commentId: M:SharpHoundCommonLib.Processors.ACLProcessor.ProcessACLWithCustomDenyAces(System.Byte[],System.String,SharpHoundCommonLib.Enums.Label,System.Boolean,System.Boolean,System.String,System.Boolean,System.String)
+  name.vb: ProcessACLWithCustomDenyAces(Byte(), String, Label, Boolean, Boolean, String, Boolean, String)
+  fullName: SharpHoundCommonLib.Processors.ACLProcessor.ProcessACLWithCustomDenyAces(System.Byte[], System.String, SharpHoundCommonLib.Enums.Label, System.Boolean, System.Boolean, System.String, System.Boolean, System.String)
+  fullName.vb: SharpHoundCommonLib.Processors.ACLProcessor.ProcessACLWithCustomDenyAces(System.Byte(), System.String, SharpHoundCommonLib.Enums.Label, System.Boolean, System.Boolean, System.String, System.Boolean, System.String)
+  nameWithType: ACLProcessor.ProcessACLWithCustomDenyAces(Byte[], String, Label, Boolean, Boolean, String, Boolean, String)
+  nameWithType.vb: ACLProcessor.ProcessACLWithCustomDenyAces(Byte(), String, Label, Boolean, Boolean, String, Boolean, String)
+- uid: SharpHoundCommonLib.Processors.ACLProcessor.ProcessACLWithCustomDenyAces*
+  name: ProcessACLWithCustomDenyAces
+  href: api/SharpHoundCommonLib.Processors.ACLProcessor.html#SharpHoundCommonLib_Processors_ACLProcessor_ProcessACLWithCustomDenyAces_
+  commentId: Overload:SharpHoundCommonLib.Processors.ACLProcessor.ProcessACLWithCustomDenyAces
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Processors.ACLProcessor.ProcessACLWithCustomDenyAces
+  nameWithType: ACLProcessor.ProcessACLWithCustomDenyAces
 - uid: SharpHoundCommonLib.Processors.ACLProcessor.ProcessGMSAReaders(SharpHoundCommonLib.ResolvedSearchResult,SharpHoundCommonLib.IDirectoryObject)
   name: ProcessGMSAReaders(ResolvedSearchResult, IDirectoryObject)
   href: api/SharpHoundCommonLib.Processors.ACLProcessor.html#SharpHoundCommonLib_Processors_ACLProcessor_ProcessGMSAReaders_SharpHoundCommonLib_ResolvedSearchResult_SharpHoundCommonLib_IDirectoryObject_
@@ -15440,6 +15574,12 @@ references:
   commentId: T:SharpHoundCommonLib.WellKnownPrincipal
   fullName: SharpHoundCommonLib.WellKnownPrincipal
   nameWithType: WellKnownPrincipal
+- uid: SharpHoundCommonLib.WellKnownPrincipal.EveryoneSid
+  name: EveryoneSid
+  href: api/SharpHoundCommonLib.WellKnownPrincipal.html#SharpHoundCommonLib_WellKnownPrincipal_EveryoneSid
+  commentId: F:SharpHoundCommonLib.WellKnownPrincipal.EveryoneSid
+  fullName: SharpHoundCommonLib.WellKnownPrincipal.EveryoneSid
+  nameWithType: WellKnownPrincipal.EveryoneSid
 - uid: SharpHoundCommonLib.WellKnownPrincipal.GetWellKnownPrincipal(System.String,SharpHoundCommonLib.OutputTypes.TypedPrincipal@)
   name: GetWellKnownPrincipal(String, out TypedPrincipal)
   href: api/SharpHoundCommonLib.WellKnownPrincipal.html#SharpHoundCommonLib_WellKnownPrincipal_GetWellKnownPrincipal_System_String_SharpHoundCommonLib_OutputTypes_TypedPrincipal__

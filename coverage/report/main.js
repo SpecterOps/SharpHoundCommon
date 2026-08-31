@@ -393,7 +393,7 @@ var assemblies = [
       { "name": "SharpHoundCommonLib.OutputTypes.UserRightsAssignmentAPIResult", "rp": "SharpHoundCommonLib_UserRightsAssignmentAPIResult.html", "cl": 0, "ucl": 11, "cal": 11, "tl": 24, "cb": 0, "tb": 4, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "SharpHoundCommonLib.ParsedGPLink", "rp": "SharpHoundCommonLib_ParsedGPLink.html", "cl": 0, "ucl": 2, "cal": 2, "tl": 307, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "SharpHoundCommonLib.PassThroughLogger", "rp": "SharpHoundCommonLib_PassThroughLogger.html", "cl": 0, "ucl": 17, "cal": 17, "tl": 41, "cb": 0, "tb": 2, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "SharpHoundCommonLib.Processors.ACLProcessor", "rp": "SharpHoundCommonLib_ACLProcessor.html", "cl": 0, "ucl": 687, "cal": 687, "tl": 984, "cb": 0, "tb": 307, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "SharpHoundCommonLib.Processors.ACLProcessor", "rp": "SharpHoundCommonLib_ACLProcessor.html", "cl": 0, "ucl": 789, "cal": 789, "tl": 1155, "cb": 0, "tb": 357, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "SharpHoundCommonLib.Processors.CachedLocalItem", "rp": "SharpHoundCommonLib_CachedLocalItem.html", "cl": 0, "ucl": 7, "cal": 7, "tl": 16, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "SharpHoundCommonLib.Processors.CAEnrollmentProcessor", "rp": "SharpHoundCommonLib_CAEnrollmentProcessor.html", "cl": 0, "ucl": 154, "cal": 154, "tl": 231, "cb": 0, "tb": 38, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "SharpHoundCommonLib.Processors.CertAbuseProcessor", "rp": "SharpHoundCommonLib_CertAbuseProcessor.html", "cl": 0, "ucl": 351, "cal": 351, "tl": 563, "cb": 0, "tb": 96, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
@@ -477,7 +477,7 @@ var assemblies = [
       { "name": "SharpHoundCommonLib.ThirdParty.PSOpenAD.SspiSecContext", "rp": "SharpHoundCommonLib_SspiSecContext.html", "cl": 0, "ucl": 14, "cal": 14, "tl": 680, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "SharpHoundCommonLib.ThirdParty.PSOpenAD.WinNTAuthIdentity", "rp": "SharpHoundCommonLib_WinNTAuthIdentity.html", "cl": 0, "ucl": 9, "cal": 9, "tl": 680, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "SharpHoundCommonLib.Timeout", "rp": "SharpHoundCommonLib_Timeout.html", "cl": 0, "ucl": 76, "cal": 76, "tl": 179, "cb": 0, "tb": 22, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "SharpHoundCommonLib.WellKnownPrincipal", "rp": "SharpHoundCommonLib_WellKnownPrincipal.html", "cl": 0, "ucl": 91, "cal": 91, "tl": 108, "cb": 0, "tb": 398, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "SharpHoundCommonLib.WellKnownPrincipal", "rp": "SharpHoundCommonLib_WellKnownPrincipal.html", "cl": 0, "ucl": 91, "cal": 91, "tl": 110, "cb": 0, "tb": 398, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
     ]},
   {
     "name": "SharpHoundRPC",
@@ -532,16 +532,16 @@ var riskHotspotMetrics = [
 
 var riskHotspots = [
   {
-    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.WellKnownPrincipal", "reportPath": "SharpHoundCommonLib_WellKnownPrincipal.html", "methodName": "System.Boolean SharpHoundCommonLib.WellKnownPrincipal::GetWellKnownPrincipal(System.String,SharpHoundCommonLib.OutputTypes.TypedPrincipal&)", "methodShortName": "GetWellKnownPrincipal(...)", "fileIndex": 0, "line": 15,
+    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.WellKnownPrincipal", "reportPath": "SharpHoundCommonLib_WellKnownPrincipal.html", "methodName": "System.Boolean SharpHoundCommonLib.WellKnownPrincipal::GetWellKnownPrincipal(System.String,SharpHoundCommonLib.OutputTypes.TypedPrincipal&)", "methodShortName": "GetWellKnownPrincipal(...)", "fileIndex": 0, "line": 17,
     "metrics": [
       { "value": 398, "exceeded": true },
       { "value": 398, "exceeded": true },
     ]},
   {
-    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.Processors.ACLProcessor", "reportPath": "SharpHoundCommonLib_ACLProcessor.html", "methodName": "ProcessACL()", "methodShortName": "ProcessACL()", "fileIndex": 0, "line": 451,
+    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.Processors.ACLProcessor", "reportPath": "SharpHoundCommonLib_ACLProcessor.html", "methodName": "ProcessACLInternal()", "methodShortName": "ProcessACLInternal()", "fileIndex": 0, "line": 533,
     "metrics": [
-      { "value": 217, "exceeded": true },
-      { "value": 217, "exceeded": true },
+      { "value": 219, "exceeded": true },
+      { "value": 219, "exceeded": true },
     ]},
   {
     "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.Processors.GPOLocalGroupProcessor", "reportPath": "SharpHoundCommonLib_GPOLocalGroupProcessor.html", "methodName": "ReadGPOLocalGroups()", "methodShortName": "ReadGPOLocalGroups()", "fileIndex": 0, "line": 60,
@@ -670,6 +670,12 @@ var riskHotspots = [
       { "value": 26, "exceeded": false },
     ]},
   {
+    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.Processors.ACLProcessor", "reportPath": "SharpHoundCommonLib_ACLProcessor.html", "methodName": "ShouldExcludeCustomDenyAce()", "methodShortName": "ShouldExcludeCustomDenyAce()", "fileIndex": 0, "line": 1016,
+    "metrics": [
+      { "value": 24, "exceeded": true },
+      { "value": 24, "exceeded": false },
+    ]},
+  {
     "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.ThirdParty.PSOpenAD.SSPI", "reportPath": "SharpHoundCommonLib_SSPI.html", "methodName": "SharpHoundCommonLib.ThirdParty.PSOpenAD.SspiSecContext SharpHoundCommonLib.ThirdParty.PSOpenAD.SSPI::InitializeSecurityContext(SharpHoundCommonLib.ThirdParty.PSOpenAD.SafeSspiCredentialHandle,SharpHoundCommonLib.ThirdParty.PSOpenAD.SafeSspiContextHandle,System.String,SharpHoundCommonLib.ThirdParty.PSOpenAD.InitiatorContextRequestFlags,SharpHoundCommonLib.ThirdParty.PSOpenAD.TargetDataRep,System.ReadOnlySpan`1<SharpHoundCommonLib.ThirdParty.PSOpenAD.Helpers/SecBuffer>,System.Collections.Generic.IList`1<SharpHoundCommonLib.ThirdParty.PSOpenAD.SecBufferType>)", "methodShortName": "InitializeSecurityContext(...)", "fileIndex": 0, "line": 318,
     "metrics": [
       { "value": 24, "exceeded": true },
@@ -766,7 +772,7 @@ var riskHotspots = [
       { "value": 18, "exceeded": false },
     ]},
   {
-    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.Processors.ACLProcessor", "reportPath": "SharpHoundCommonLib_ACLProcessor.html", "methodName": "BuildGuidCache()", "methodShortName": "BuildGuidCache()", "fileIndex": 0, "line": 75,
+    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.Processors.ACLProcessor", "reportPath": "SharpHoundCommonLib_ACLProcessor.html", "methodName": "BuildGuidCache()", "methodShortName": "BuildGuidCache()", "fileIndex": 0, "line": 122,
     "metrics": [
       { "value": 18, "exceeded": true },
       { "value": 18, "exceeded": false },
@@ -808,13 +814,13 @@ var riskHotspots = [
       { "value": 16, "exceeded": false },
     ]},
   {
-    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.Processors.ACLProcessor", "reportPath": "SharpHoundCommonLib_ACLProcessor.html", "methodName": "System.String SharpHoundCommonLib.Processors.ACLProcessor::CalculateImplicitACLHash(System.Byte[],System.String)", "methodShortName": "CalculateImplicitACLHash(...)", "fileIndex": 0, "line": 242,
+    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.Processors.ACLProcessor", "reportPath": "SharpHoundCommonLib_ACLProcessor.html", "methodName": "System.String SharpHoundCommonLib.Processors.ACLProcessor::CalculateImplicitACLHash(System.Byte[],System.String)", "methodShortName": "CalculateImplicitACLHash(...)", "fileIndex": 0, "line": 289,
     "metrics": [
       { "value": 16, "exceeded": true },
       { "value": 16, "exceeded": false },
     ]},
   {
-    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.Processors.ACLProcessor", "reportPath": "SharpHoundCommonLib_ACLProcessor.html", "methodName": "GetInheritedAceHashes()", "methodShortName": "GetInheritedAceHashes()", "fileIndex": 0, "line": 354,
+    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.Processors.ACLProcessor", "reportPath": "SharpHoundCommonLib_ACLProcessor.html", "methodName": "GetInheritedAceHashes()", "methodShortName": "GetInheritedAceHashes()", "fileIndex": 0, "line": 401,
     "metrics": [
       { "value": 16, "exceeded": true },
       { "value": 16, "exceeded": false },
