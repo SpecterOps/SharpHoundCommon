@@ -881,7 +881,7 @@ namespace SharpHoundCommonLib {
             string computerDomainSid, string computerDomain) {
             if (!WellKnownPrincipal.GetWellKnownPrincipal(sid.Value, out var common)) return (false, null);
             //The "Everyone" and "Authenticated Users" principals are special and will be converted to the domain equivalent
-            if (sid.Value is "S-1-1-0" or "S-1-5-11") {
+            if (sid.Value is WellKnownPrincipal.EveryoneSid or "S-1-5-11") {
                 return await GetWellKnownPrincipal(sid.Value, computerDomain);
             }
 

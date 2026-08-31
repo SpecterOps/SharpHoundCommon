@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using SharpHoundCommonLib.DirectoryObjects;
 using SharpHoundCommonLib.Enums;
+using SharpHoundCommonLib.LDAPQueries;
 using SharpHoundCommonLib.OutputTypes;
 using System.Linq;
 
@@ -20,7 +21,15 @@ namespace SharpHoundCommonLib.Processors {
         private readonly ILogger _log;
         private readonly ILdapUtils _utils;
         private readonly ConcurrentHashSet _builtDomainCaches = new(StringComparer.OrdinalIgnoreCase);
+        private readonly ConcurrentDictionary<string, string[]> _exchangeTrusteeSidCache = new(StringComparer.OrdinalIgnoreCase);
         private readonly object _lock = new();
+        // These Exchange principals commonly carry product-added deny ACEs that we intentionally suppress.
+        private static readonly HashSet<string> ExchangeTrusteeNames = new(StringComparer.OrdinalIgnoreCase) {
+            "Exchange Windows Permissions",
+            "Exchange Trusted Subsystem",
+            "Exchange Servers",
+            "Organization Management"
+        };
 
         static ACLProcessor() {
             //Create a dictionary with the base GUIDs of each object type
@@ -46,6 +55,44 @@ namespace SharpHoundCommonLib.Processors {
         {
             _utils = utils;
             _log = log ?? Logging.LogProvider.CreateLogger("ACLProc");
+        }
+
+        public readonly struct CustomDenyAceCounts {
+            public CustomDenyAceCounts(int explicitCount, int inheritedCount) {
+                ExplicitCount = explicitCount;
+                InheritedCount = inheritedCount;
+            }
+
+            public int ExplicitCount { get; }
+            public int InheritedCount { get; }
+            public int Total => ExplicitCount + InheritedCount;
+        }
+
+        public sealed class ACLProcessingResult {
+            public ACLProcessingResult(ACE[] aces, CustomDenyAceCounts customDenyAceCounts) {
+                Aces = aces;
+                CustomDenyAceCounts = customDenyAceCounts;
+            }
+
+            public ACE[] Aces { get; }
+            public CustomDenyAceCounts CustomDenyAceCounts { get; }
+        }
+
+        private sealed class CustomDenyAceAccumulator {
+            private int _explicitCount;
+            private int _inheritedCount;
+
+            public void Add(bool inherited) {
+                if (inherited) {
+                    _inheritedCount++;
+                } else {
+                    _explicitCount++;
+                }
+            }
+
+            public CustomDenyAceCounts ToCounts() {
+                return new CustomDenyAceCounts(_explicitCount, _inheritedCount);
+            }
         }
 
         /// Represents a lightweight Access Control Entry (ACE) used to compute hash values
@@ -432,6 +479,24 @@ namespace SharpHoundCommonLib.Processors {
         }
 
         /// <summary>
+        ///     Processes the regular ACL edges and custom deny ACE counts in one ACL traversal.
+        /// </summary>
+        /// <remarks>
+        ///     Callers that do not want custom deny ACE counts should continue to call <see cref="ProcessACL(ResolvedSearchResult, IDirectoryObject, bool)"/>.
+        /// </remarks>
+        public Task<ACLProcessingResult> ProcessACLWithCustomDenyAces(ResolvedSearchResult result,
+            IDirectoryObject searchResult, bool checkForOwnerRights = true) {
+            if (!searchResult.TryGetByteProperty(LDAPProperties.SecurityDescriptor, out var descriptor)) {
+                return Task.FromResult(new ACLProcessingResult(Array.Empty<ACE>(), new CustomDenyAceCounts()));
+            }
+
+            searchResult.TryGetDistinguishedName(out var distinguishedName);
+            return ProcessACLWithCustomDenyAces(descriptor, result.Domain, result.ObjectType, searchResult.HasLAPS(),
+                checkForOwnerRights, distinguishedName, searchResult.IsMSA() || searchResult.IsGMSA(),
+                result.DisplayName);
+        }
+
+        /// <summary>
         ///     Read's a raw ntSecurityDescriptor and processes the ACEs in the ACL, filtering out ACEs that
         ///     BloodHound is not interested in as well as principals we don't care about
         /// </summary>
@@ -447,8 +512,25 @@ namespace SharpHoundCommonLib.Processors {
             return ProcessACL(ntSecurityDescriptor, objectDomain, objectType, hasLaps, true, objectName);
         }
 
-        public async IAsyncEnumerable<ACE> ProcessACL(byte[] ntSecurityDescriptor, string objectDomain,
+        public IAsyncEnumerable<ACE> ProcessACL(byte[] ntSecurityDescriptor, string objectDomain,
             Label objectType, bool hasLaps, bool checkForOwnerRights, string objectName) {
+            return ProcessACLInternal(ntSecurityDescriptor, objectDomain, objectType, hasLaps, checkForOwnerRights,
+                objectName);
+        }
+
+        public async Task<ACLProcessingResult> ProcessACLWithCustomDenyAces(byte[] ntSecurityDescriptor,
+            string objectDomain, Label objectType, bool hasLaps, bool checkForOwnerRights = true,
+            string distinguishedName = null, bool isMSA = false, string objectName = "") {
+            var accumulator = new CustomDenyAceAccumulator();
+            var aces = await ProcessACLInternal(ntSecurityDescriptor, objectDomain, objectType, hasLaps,
+                checkForOwnerRights, objectName, accumulator, distinguishedName, isMSA).ToArrayAsync();
+            return new ACLProcessingResult(aces, accumulator.ToCounts());
+        }
+
+        private async IAsyncEnumerable<ACE> ProcessACLInternal(byte[] ntSecurityDescriptor, string objectDomain,
+            Label objectType, bool hasLaps, bool checkForOwnerRights, string objectName,
+            CustomDenyAceAccumulator customDenyAceAccumulator = null, string distinguishedName = null,
+            bool isMSA = false) {
             await BuildGuidCache(objectDomain);
 
             if (ntSecurityDescriptor == null) {
@@ -496,7 +578,19 @@ namespace SharpHoundCommonLib.Processors {
                 bool isPermissionForOwnerRightsSid = false;
                 bool isInheritedPermissionForOwnerRightsSid = false;
 
-                if (ace == null || ace.AccessControlType() == AccessControlType.Deny || !ace.IsAceInheritedFrom(BaseGuids[objectType])) {
+                if (ace == null) {
+                    continue;
+                }
+
+                if (ace.AccessControlType() == AccessControlType.Deny) {
+                    if (customDenyAceAccumulator != null) {
+                        await CountCustomDenyAce(ace, customDenyAceAccumulator, objectDomain, objectType,
+                            distinguishedName, isMSA);
+                    }
+                    continue;
+                }
+
+                if (!ace.IsAceInheritedFrom(BaseGuids[objectType])) {
                     continue;
                 }
 
@@ -902,6 +996,83 @@ namespace SharpHoundCommonLib.Processors {
             }
         }
 
+        private async Task CountCustomDenyAce(ActiveDirectoryRuleDescriptor ace,
+            CustomDenyAceAccumulator accumulator, string objectDomain, Label objectType, string distinguishedName,
+            bool isMSA) {
+            var principalSid = ace.IdentityReference();
+            if (string.IsNullOrWhiteSpace(principalSid)) {
+                return;
+            }
+
+            if (await ShouldExcludeCustomDenyAce(principalSid, ace.ActiveDirectoryRights(), ace.ObjectType(),
+                    objectDomain, objectType, distinguishedName, isMSA)) {
+                return;
+            }
+
+            accumulator.Add(ace.IsInherited());
+        }
+
+        private async Task<bool> ShouldExcludeCustomDenyAce(string principalSid, ActiveDirectoryRights rights,
+            Guid objectAceType, string objectDomain, Label objectType, string distinguishedName, bool isMSA) {
+            // Filter Exchange Deny ACEs
+            if (!string.IsNullOrWhiteSpace(distinguishedName) &&
+                distinguishedName.IndexOf(DirectoryPaths.ExchangeLocation, StringComparison.OrdinalIgnoreCase) >= 0) {
+                return true;
+            }
+
+            if (await IsExchangeTrustee(principalSid, objectDomain)) {
+                return true;
+            }
+
+            // Filter default Everyone Deny ACEs
+            if (principalSid.Equals(WellKnownPrincipal.EveryoneSid, StringComparison.OrdinalIgnoreCase)) {
+                if (objectType is Label.Domain && rights.Equals(ActiveDirectoryRights.DeleteChild)) {
+                    return true;
+                }
+
+                if ((objectType is Label.OU or Label.Container) &&
+                    rights.Equals(ActiveDirectoryRights.Delete | ActiveDirectoryRights.DeleteTree)) {
+                    return true;
+                }
+
+                if (isMSA &&
+                    rights.Equals(ActiveDirectoryRights.ExtendedRight) &&
+                    objectAceType.Equals(new Guid(ACEGuids.UserForceChangePassword))) {
+                    return true;
+                }
+
+            }
+
+            return false;
+        }
+
+        private async Task<bool> IsExchangeTrustee(string principalSid, string objectDomain) {
+            if (string.IsNullOrWhiteSpace(principalSid) || string.IsNullOrWhiteSpace(objectDomain)) {
+                return false;
+            }
+
+            if (_exchangeTrusteeSidCache.TryGetValue(objectDomain, out var cachedSids)) {
+                return cachedSids.Contains(principalSid, StringComparer.OrdinalIgnoreCase);
+            }
+
+            // Well-known principals never match the Exchange groups we are suppressing.
+            if (WellKnownPrincipal.GetWellKnownPrincipal(principalSid, out _)) {
+                return false;
+            }
+
+            // Resolve the small fixed set of Exchange trustee names once per domain using the shared name -> ID cache path.
+            var resolvedSids = new List<string>();
+            foreach (var trusteeName in ExchangeTrusteeNames) {
+                if (await _utils.ResolveAccountName(trusteeName, objectDomain) is (true, var principal) &&
+                    !string.IsNullOrWhiteSpace(principal.ObjectIdentifier)) {
+                    resolvedSids.Add(principal.ObjectIdentifier);
+                }
+            }
+
+            var exchangeTrusteeSids = resolvedSids.Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
+            _exchangeTrusteeSidCache.TryAdd(objectDomain, exchangeTrusteeSids);
+            return exchangeTrusteeSids.Contains(principalSid, StringComparer.OrdinalIgnoreCase);
+        }
 
         /// <summary>
         ///     Helper function to use commonlib types and pass to ProcessGMSAReaders
