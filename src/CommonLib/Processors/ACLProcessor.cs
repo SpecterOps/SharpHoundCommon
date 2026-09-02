@@ -73,6 +73,14 @@ namespace SharpHoundCommonLib.Processors {
                 return _buildTasks.GetOrAdd(domain, _ => buildTaskFactory());
             }
 
+            public bool RemoveBuildTask(string domain, Lazy<Task> buildTask) {
+                // Remove only this instance so a delayed fault cannot remove a newer retry task.
+                // _buildTasks.TryRemove does not guarantee that the value is the same as the one being removed, so we need to cast to ICollection and use Remove instead.
+                // This lets us conditionally remove the task only if it is the same instance as the one we expect.
+                return ((ICollection<KeyValuePair<string, Lazy<Task>>>)_buildTasks)
+                    .Remove(new KeyValuePair<string, Lazy<Task>>(domain, buildTask));
+            }
+
             public void AddGuid(string guid, string name) {
                 ThrowIfDisposed();
                 _guidMap.TryAdd(guid, name);
@@ -195,7 +203,13 @@ namespace SharpHoundCommonLib.Processors {
                 // The ExecutionAndPublication mode ensures that only one thread can execute the factory method at a time, and all other threads will wait for the result of that execution. This prevents multiple threads from building the cache simultaneously for the same domain.
                 () => new Lazy<Task>(() => BuildGuidCacheCore(domain), LazyThreadSafetyMode.ExecutionAndPublication));
 
-            await buildTask.Value;
+            try {
+                await buildTask.Value;
+            }
+            catch {
+                _guidCache.RemoveBuildTask(domain, buildTask);
+                throw;
+            }
         }
 
         private async Task BuildGuidCacheCore(string domain) {

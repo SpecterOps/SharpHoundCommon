@@ -80,6 +80,34 @@ namespace CommonLibTest {
         }
 
         [Fact]
+        public async Task ProcessorContext_ACLProcessors_RetriesGuidCacheBuildAfterFailure() {
+            var mockLdapUtils = new Mock<ILdapUtils>();
+            var queryAttempts = 0;
+            mockLdapUtils
+                .Setup(x => x.PagedQuery(It.IsAny<LdapQueryParameters>(), It.IsAny<CancellationToken>()))
+                .Returns(() => {
+                    if (Interlocked.Increment(ref queryAttempts) == 1) {
+                        throw new InvalidOperationException("Expected test failure");
+                    }
+
+                    return Array.Empty<LdapResult<IDirectoryObject>>().ToAsyncEnumerable();
+                });
+            var domain = $"{Guid.NewGuid():N}.TEST";
+            using var context = new ACLProcessorContext();
+            var processor = context.CreateACLProcessor(mockLdapUtils.Object);
+
+            await Assert.ThrowsAsync<InvalidOperationException>(() =>
+                processor.ProcessACL(null, domain, Label.Computer, false).ToArrayAsync());
+
+            await processor.ProcessACL(null, domain, Label.Computer, false).ToArrayAsync();
+
+            mockLdapUtils.Verify(
+                x => x.PagedQuery(It.Is<LdapQueryParameters>(parameters => parameters.DomainName == domain),
+                    It.IsAny<CancellationToken>()),
+                Times.Exactly(2));
+        }
+
+        [Fact]
         public async Task ProcessorContext_ACLProcessors_DoNotShareCacheAcrossContexts() {
             var mockLdapUtils = new Mock<ILdapUtils>();
             mockLdapUtils
