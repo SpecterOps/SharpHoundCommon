@@ -10321,6 +10321,38 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.Processors.ACLProcessor.ProcessGMSAReaders
   nameWithType: ACLProcessor.ProcessGMSAReaders
+- uid: SharpHoundCommonLib.Processors.ACLProcessorContext
+  name: ACLProcessorContext
+  href: api/SharpHoundCommonLib.Processors.ACLProcessorContext.html
+  commentId: T:SharpHoundCommonLib.Processors.ACLProcessorContext
+  fullName: SharpHoundCommonLib.Processors.ACLProcessorContext
+  nameWithType: ACLProcessorContext
+- uid: SharpHoundCommonLib.Processors.ACLProcessorContext.CreateACLProcessor(SharpHoundCommonLib.ILdapUtils,ILogger)
+  name: CreateACLProcessor(ILdapUtils, ILogger)
+  href: api/SharpHoundCommonLib.Processors.ACLProcessorContext.html#SharpHoundCommonLib_Processors_ACLProcessorContext_CreateACLProcessor_SharpHoundCommonLib_ILdapUtils_ILogger_
+  commentId: M:SharpHoundCommonLib.Processors.ACLProcessorContext.CreateACLProcessor(SharpHoundCommonLib.ILdapUtils,ILogger)
+  fullName: SharpHoundCommonLib.Processors.ACLProcessorContext.CreateACLProcessor(SharpHoundCommonLib.ILdapUtils, ILogger)
+  nameWithType: ACLProcessorContext.CreateACLProcessor(ILdapUtils, ILogger)
+- uid: SharpHoundCommonLib.Processors.ACLProcessorContext.CreateACLProcessor*
+  name: CreateACLProcessor
+  href: api/SharpHoundCommonLib.Processors.ACLProcessorContext.html#SharpHoundCommonLib_Processors_ACLProcessorContext_CreateACLProcessor_
+  commentId: Overload:SharpHoundCommonLib.Processors.ACLProcessorContext.CreateACLProcessor
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Processors.ACLProcessorContext.CreateACLProcessor
+  nameWithType: ACLProcessorContext.CreateACLProcessor
+- uid: SharpHoundCommonLib.Processors.ACLProcessorContext.Dispose
+  name: Dispose()
+  href: api/SharpHoundCommonLib.Processors.ACLProcessorContext.html#SharpHoundCommonLib_Processors_ACLProcessorContext_Dispose
+  commentId: M:SharpHoundCommonLib.Processors.ACLProcessorContext.Dispose
+  fullName: SharpHoundCommonLib.Processors.ACLProcessorContext.Dispose()
+  nameWithType: ACLProcessorContext.Dispose()
+- uid: SharpHoundCommonLib.Processors.ACLProcessorContext.Dispose*
+  name: Dispose
+  href: api/SharpHoundCommonLib.Processors.ACLProcessorContext.html#SharpHoundCommonLib_Processors_ACLProcessorContext_Dispose_
+  commentId: Overload:SharpHoundCommonLib.Processors.ACLProcessorContext.Dispose
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Processors.ACLProcessorContext.Dispose
+  nameWithType: ACLProcessorContext.Dispose
 - uid: SharpHoundCommonLib.Processors.CAEnrollmentProcessor
   name: CAEnrollmentProcessor
   href: api/SharpHoundCommonLib.Processors.CAEnrollmentProcessor.html
