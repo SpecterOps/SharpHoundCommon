@@ -98,7 +98,6 @@ namespace SharpHoundCommonLib.Processors {
                     Collected = false,
                     Privilege = privilege
                 };
-
                 //Ask for all principals with the specified privilege. 
                 var enumerateAccountsResult = await _getResolvedPrincipalWithPriviledgeAdaptiveTimeout.ExecuteRPCWithTimeout((_) => server.GetResolvedPrincipalsWithPrivilege(privilege));
                 if (enumerateAccountsResult.IsFailed) {

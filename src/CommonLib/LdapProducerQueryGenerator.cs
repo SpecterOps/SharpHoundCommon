@@ -44,6 +44,9 @@ public class LdapProducerQueryGenerator {
             if (methods.HasFlag(CollectionMethod.GPOLocalGroup))
                 properties.AddRange(CommonProperties.GPOLocalGroupProps);
 
+            if (methods.HasFlag(CollectionMethod.GPOUserRights))
+                properties.AddRange(CommonProperties.GPOUserRights);
+
             if (methods.HasFlag(CollectionMethod.SPNTargets))
                 properties.AddRange(CommonProperties.SPNTargetProps);
 
@@ -78,6 +81,11 @@ public class LdapProducerQueryGenerator {
         if (methods.HasFlag(CollectionMethod.GPOLocalGroup)) {
             filter = filter.AddOUs();
             properties.AddRange(CommonProperties.GPOLocalGroupProps);
+        }
+
+        if (methods.HasFlag(CollectionMethod.GPOUserRights)) {
+            filter = filter.AddOUs();
+            properties.AddRange(CommonProperties.GPOUserRights);
         }
 
         if (methods.HasFlag(CollectionMethod.DCRegistry) || methods.HasFlag(CollectionMethod.LdapServices)) {

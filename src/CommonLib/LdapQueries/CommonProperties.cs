@@ -86,6 +86,10 @@
             LDAPProperties.GPLink, LDAPProperties.Name
         };
 
+        public static readonly string[] GPOUserRights = {
+            LDAPProperties.GPLink, LDAPProperties.Name
+        };
+
         public static readonly string[] CertAbuseProps =
         {
             LDAPProperties.CertificateTemplates, LDAPProperties.Flags, LDAPProperties.DNSHostName, LDAPProperties.CACertificate, LDAPProperties.PKINameFlag,

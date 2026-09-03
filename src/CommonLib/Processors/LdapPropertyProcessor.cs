@@ -31,6 +31,7 @@ namespace SharpHoundCommonLib.Processors {
             ReservedAttributes.UnionWith(CommonProperties.SPNTargetProps);
             ReservedAttributes.UnionWith(CommonProperties.DomainTrustProps);
             ReservedAttributes.UnionWith(CommonProperties.GPOLocalGroupProps);
+            ReservedAttributes.UnionWith(CommonProperties.GPOUserRights);
             ReservedAttributes.UnionWith(CommonProperties.CertAbuseProps);
             ReservedAttributes.Add(LDAPProperties.DSASignature);
         }
