@@ -59,6 +59,95 @@ namespace CommonLibTest {
         }
 
         [Fact]
+        public async Task ProcessorContext_ACLProcessors_QueryOncePerDomain() {
+            var mockLdapUtils = new Mock<ILdapUtils>();
+            mockLdapUtils
+                .Setup(x => x.PagedQuery(It.IsAny<LdapQueryParameters>(), It.IsAny<CancellationToken>()))
+                .Returns(Array.Empty<LdapResult<IDirectoryObject>>().ToAsyncEnumerable);
+            var domain = $"{Guid.NewGuid():N}.TEST";
+            using var context = new ACLProcessorContext();
+            var processors = Enumerable.Range(0, 50)
+                .Select(_ => context.CreateACLProcessor(mockLdapUtils.Object))
+                .ToArray();
+
+            await Task.WhenAll(processors.Select(processor =>
+                processor.ProcessACL(null, domain, Label.Computer, false).ToArrayAsync()));
+
+            mockLdapUtils.Verify(
+                x => x.PagedQuery(It.Is<LdapQueryParameters>(parameters => parameters.DomainName == domain),
+                    It.IsAny<CancellationToken>()),
+                Times.Once);
+        }
+
+        [Fact]
+        public async Task ProcessorContext_ACLProcessors_RetriesGuidCacheBuildAfterFailure() {
+            var mockLdapUtils = new Mock<ILdapUtils>();
+            var queryAttempts = 0;
+            mockLdapUtils
+                .Setup(x => x.PagedQuery(It.IsAny<LdapQueryParameters>(), It.IsAny<CancellationToken>()))
+                .Returns(() => {
+                    if (Interlocked.Increment(ref queryAttempts) == 1) {
+                        throw new InvalidOperationException("Expected test failure");
+                    }
+
+                    return Array.Empty<LdapResult<IDirectoryObject>>().ToAsyncEnumerable();
+                });
+            var domain = $"{Guid.NewGuid():N}.TEST";
+            using var context = new ACLProcessorContext();
+            var processor = context.CreateACLProcessor(mockLdapUtils.Object);
+
+            await Assert.ThrowsAsync<InvalidOperationException>(() =>
+                processor.ProcessACL(null, domain, Label.Computer, false).ToArrayAsync());
+
+            await processor.ProcessACL(null, domain, Label.Computer, false).ToArrayAsync();
+
+            mockLdapUtils.Verify(
+                x => x.PagedQuery(It.Is<LdapQueryParameters>(parameters => parameters.DomainName == domain),
+                    It.IsAny<CancellationToken>()),
+                Times.Exactly(2));
+        }
+
+        [Fact]
+        public async Task ProcessorContext_ACLProcessors_DoNotShareCacheAcrossContexts() {
+            var mockLdapUtils = new Mock<ILdapUtils>();
+            mockLdapUtils
+                .Setup(x => x.PagedQuery(It.IsAny<LdapQueryParameters>(), It.IsAny<CancellationToken>()))
+                .Returns(Array.Empty<LdapResult<IDirectoryObject>>().ToAsyncEnumerable);
+            var domain = $"{Guid.NewGuid():N}.TEST";
+            using var firstContext = new ACLProcessorContext();
+            using var secondContext = new ACLProcessorContext();
+
+            await Task.WhenAll(
+                firstContext.CreateACLProcessor(mockLdapUtils.Object)
+                    .ProcessACL(null, domain, Label.Computer, false).ToArrayAsync(),
+                secondContext.CreateACLProcessor(mockLdapUtils.Object)
+                    .ProcessACL(null, domain, Label.Computer, false).ToArrayAsync());
+
+            mockLdapUtils.Verify(
+                x => x.PagedQuery(It.Is<LdapQueryParameters>(parameters => parameters.DomainName == domain),
+                    It.IsAny<CancellationToken>()),
+                Times.Exactly(2));
+        }
+
+        [Fact]
+        public void ProcessorContext_CreateACLProcessor_AfterDispose_Throws() {
+            var context = new ACLProcessorContext();
+            context.Dispose();
+
+            Assert.Throws<ObjectDisposedException>(() => context.CreateACLProcessor(new MockLdapUtils()));
+        }
+
+        [Fact]
+        public async Task ProcessorContext_ACLProcessor_AfterDispose_Throws() {
+            var context = new ACLProcessorContext();
+            var processor = context.CreateACLProcessor(new MockLdapUtils());
+            context.Dispose();
+
+            await Assert.ThrowsAsync<ObjectDisposedException>(() =>
+                processor.ProcessACL(null, "TEST.LOCAL", Label.Computer, false).ToArrayAsync());
+        }
+
+        [Fact]
         public void ACLProcessor_IsACLProtected_NullNTSD_ReturnsFalse() {
             var processor = new ACLProcessor(new MockLdapUtils());
             var result = processor.IsACLProtected((byte[])null);
