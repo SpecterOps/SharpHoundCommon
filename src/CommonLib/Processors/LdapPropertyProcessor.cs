@@ -16,6 +16,7 @@ using SharpHoundCommonLib.OutputTypes;
 
 namespace SharpHoundCommonLib.Processors {
     public class LdapPropertyProcessor {
+        private const string AADObjectIDProperty = "aadobjectid";
         private static readonly HashSet<string> ReservedAttributes = new();
         public delegate Task ComputerStatusDelegate(CSVComputerStatus status);
         public event ComputerStatusDelegate ComputerStatusEvent;
@@ -69,6 +70,13 @@ namespace SharpHoundCommonLib.Processors {
             }
 
             return ret;
+        }
+
+        private static void AddAADObjectIDProperty(Dictionary<string, object> props, IDirectoryObject entry) {
+            if (entry.TryGetProperty(LDAPProperties.AADObjectID, out var aadObjectID) &&
+                !string.IsNullOrWhiteSpace(aadObjectID)) {
+                props[AADObjectIDProperty] = aadObjectID.Trim().ToUpperInvariant();
+            }
         }
 
         /// <summary>
@@ -212,6 +220,7 @@ namespace SharpHoundCommonLib.Processors {
         {
             var groupProperties = new GroupProperties();
             var props = GetCommonProps(entry);
+            AddAADObjectIDProperty(props, entry);
             entry.TryGetLongProperty(LDAPProperties.AdminCount, out var ac);
             props.Add("admincount", ac != 0);
             entry.TryGetLongProperty(LDAPProperties.GroupType, out var groupType);
@@ -249,6 +258,7 @@ namespace SharpHoundCommonLib.Processors {
         public async Task<UserProperties> ReadUserProperties(IDirectoryObject entry, string domain) {
             var userProps = new UserProperties();
             var props = GetCommonProps(entry);
+            AddAADObjectIDProperty(props, entry);
 
             if (entry.TryGetLongProperty(LDAPProperties.UserAccountControl, out var uac)) {
               var uacFlags = (UacFlags)uac;
