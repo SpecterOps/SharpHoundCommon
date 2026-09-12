@@ -326,6 +326,33 @@ namespace SharpHoundCommonLib.Processors
             return ret;
         }
 
+        [ExcludeFromCodeCoverage]
+        public BoolRegistryAPIResult RPCEncryptionEnforced(string target, string caName)
+        {
+            var ret = new BoolRegistryAPIResult();
+            var subKey =
+                $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{caName}";
+            const string subValue = "InterfaceFlags";
+            var data = Helpers.GetRegistryKeyData(target, subKey, subValue, _log);
+
+            ret.Collected = data.Collected;
+            if (!data.Collected)
+            {
+                ret.FailureReason = data.FailureReason;
+                return ret;
+            }
+
+            if (data.Value == null)
+            {
+                return ret;
+            }
+
+            var interfaceFlags = (int)data.Value;
+            ret.Value = (interfaceFlags & 0x00000200) == 0x00000200;
+
+            return ret;
+        }
+
         /// <summary>
         /// This function checks a registry setting on the target host for the specified CA to see if role separation is enabled.
         /// If enabled, you cannot perform any CA actions if you have both ManageCA and ManageCertificates permissions. Only CA admins can modify the setting.
