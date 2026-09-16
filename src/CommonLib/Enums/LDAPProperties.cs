@@ -32,6 +32,7 @@
         public const string UserPassword = "userpassword";
         public const string SIDHistory = "sidhistory";
         public const string AllowedToActOnBehalfOfOtherIdentity = "msds-allowedtoactonbehalfofotheridentity";
+        public const string AADObjectID = "msds-aadobjectid";
         public const string OperatingSystem = "operatingsystem";
         public const string ServicePack = "operatingsystemservicepack";
         public const string DNSHostName = "dnshostname";
