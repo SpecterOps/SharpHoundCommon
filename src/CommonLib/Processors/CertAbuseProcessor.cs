@@ -257,10 +257,7 @@ namespace SharpHoundCommonLib.Processors
         /// <returns></returns>
         private RegistryResult GetCASecurity(string target, string caName)
         {
-            var regSubKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{caName}";
-            const string regValue = "Security";
-        
-            return _registryAccessor.GetRegistryKeyData(target, regSubKey, regValue);
+            return GetCAConfigurationValue(target, caName, "Security");
         }
 
         /// <summary>
@@ -271,10 +268,13 @@ namespace SharpHoundCommonLib.Processors
         /// <returns></returns>
         private RegistryResult GetEnrollmentAgentRights(string target, string caName)
         {
-            var regSubKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{caName}";
-            var regValue = "EnrollmentAgentRights";
+            return GetCAConfigurationValue(target, caName, "EnrollmentAgentRights");
+        }
 
-            return _registryAccessor.GetRegistryKeyData(target, regSubKey, regValue);
+        private RegistryResult GetCAConfigurationValue(string target, string caName, string valueName)
+        {
+            var configurationKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{caName}";
+            return _registryAccessor.GetRegistryKeyData(target, configurationKey, valueName);
         }
 
         /// <summary>
@@ -337,10 +337,7 @@ namespace SharpHoundCommonLib.Processors
         public async Task<BoolRegistryAPIResult> IsRPCEncryptionEnforced(string target, string caName, string computerObjectId)
         {
             var ret = new BoolRegistryAPIResult();
-            var regSubKey =
-                $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{caName}";
-            const string regValue = "InterfaceFlags";
-            var data = _registryAccessor.GetRegistryKeyData(target, regSubKey, regValue);
+            var data = GetCAConfigurationValue(target, caName, "InterfaceFlags");
 
             ret.Collected = data.Collected;
             if (!data.Collected)
@@ -387,9 +384,7 @@ namespace SharpHoundCommonLib.Processors
         public async Task<BoolRegistryAPIResult> IsRoleSeparationEnabled(string target, string caName, string computerObjectId)
         {
             var ret = new BoolRegistryAPIResult();
-            var regSubKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{caName}";
-            const string regValue = "RoleSeparationEnabled";
-            var data = _registryAccessor.GetRegistryKeyData(target, regSubKey, regValue);
+            var data = GetCAConfigurationValue(target, caName, "RoleSeparationEnabled");
 
             ret.Collected = data.Collected;
             if (!data.Collected)
