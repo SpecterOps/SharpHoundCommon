@@ -201,6 +201,26 @@ namespace CommonLibTest
         }
 
         [Fact]
+        public async Task CertAbuseProcessor_IsRPCEncryptionEnforced_ReturnsDefaultWhenValueIsMissing() {
+            const string subKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{CAName}";
+            const string subValue = "InterfaceFlags";
+
+            _mockRegistryAccessor
+                .Setup(ra => ra.GetRegistryKeyData(TargetName, subKey, subValue))
+                .Returns(new RegistryResult { Collected = true });
+
+            var results = await _certAbuseProcessor.IsRPCEncryptionEnforced(TargetName, CAName, TargetDomainSid);
+
+            Assert.True(results.Collected);
+            Assert.False(results.Value);
+            Assert.Null(results.FailureReason);
+            Assert.Equal(nameof(CertAbuseProcessor.IsRPCEncryptionEnforced), _receivedCompStatus.Task);
+            Assert.Equal(CSVComputerStatus.StatusSuccess, _receivedCompStatus.Status);
+            Assert.Equal(TargetName, _receivedCompStatus.ComputerName);
+            Assert.Equal(TargetDomainSid, _receivedCompStatus.ObjectId);
+        }
+
+        [Fact]
         public async Task CertAbuseProcessor_IsRPCEncryptionEnforced_HandlesFailedLookup() {
             const string subKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{CAName}";
             const string subValue = "InterfaceFlags";
