@@ -14,6 +14,7 @@ namespace SharpHoundCommonLib.Processors
 {
     public class CertAbuseProcessor
     {
+        private const string DefaultPolicyModule = "CertificateAuthority_MicrosoftDefault.Policy";
         private readonly ILogger _log;
         private readonly ILdapUtils _utils;
         private readonly AdaptiveTimeout _getMachineSidAdaptiveTimeout;
@@ -277,6 +278,21 @@ namespace SharpHoundCommonLib.Processors
             return _registryAccessor.GetRegistryKeyData(target, configurationKey, valueName);
         }
 
+        private RegistryResult GetActivePolicyValue(string target, string caName, string valueName)
+        {
+            var policyModulesKey =
+                $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{caName}\\PolicyModules";
+            var activePolicyResult = _registryAccessor.GetRegistryKeyData(target, policyModulesKey, "Active");
+
+            if (!activePolicyResult.Collected)
+            {
+                return activePolicyResult;
+            }
+
+            var activePolicy = activePolicyResult.Value as string ?? DefaultPolicyModule;
+            return _registryAccessor.GetRegistryKeyData(target, $"{policyModulesKey}\\{activePolicy}", valueName);
+        }
+
         /// <summary>
         /// This function checks a registry setting on the target host for the specified CA to see if a requesting user can specify any SAN they want, which overrides template settings.
         /// The ManageCA permission allows you to flip this bit as well. This appears to usually work, even if admin rights aren't available on the remote CA server
@@ -289,10 +305,7 @@ namespace SharpHoundCommonLib.Processors
         public async Task<BoolRegistryAPIResult> IsUserSpecifiesSanEnabled(string target, string caName, string computerObjectId)
         {
             var ret = new BoolRegistryAPIResult();
-            var regSubKey =
-                $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{caName}\\PolicyModules\\CertificateAuthority_MicrosoftDefault.Policy";
-            const string regValue = "EditFlags";
-            var data = _registryAccessor.GetRegistryKeyData(target, regSubKey, regValue);
+            var data = GetActivePolicyValue(target, caName, "EditFlags");
 
             ret.Collected = data.Collected;
             if (!data.Collected)
@@ -367,6 +380,47 @@ namespace SharpHoundCommonLib.Processors
 
             var interfaceFlags = (int)data.Value;
             ret.Value = (interfaceFlags & 0x00000200) == 0x00000200;
+
+            return ret;
+        }
+
+        /// <summary>
+        /// Gets certificate extensions disabled by the CA's active policy module.
+        /// </summary>
+        /// <param name="target"></param>
+        /// <param name="caName"></param>
+        /// <param name="computerObjectId"></param>
+        /// <returns></returns>
+        public async Task<StringArrayRegistryAPIResult> DisabledExtensions(string target, string caName, string computerObjectId)
+        {
+            var ret = new StringArrayRegistryAPIResult();
+            var data = GetActivePolicyValue(target, caName, "DisableExtensionList");
+
+            ret.Collected = data.Collected;
+            if (!data.Collected)
+            {
+                await SendComputerStatus(new CSVComputerStatus {
+                    Status = data.FailureReason,
+                    Task = nameof(DisabledExtensions),
+                    ComputerName = target,
+                    ObjectId = computerObjectId
+                });
+
+                ret.FailureReason = data.FailureReason;
+                return ret;
+            }
+
+            await SendComputerStatus(new CSVComputerStatus {
+                Status = CSVComputerStatus.StatusSuccess,
+                Task = nameof(DisabledExtensions),
+                ComputerName = target,
+                ObjectId = computerObjectId
+            });
+
+            if (data.Value is string[] disabledExtensions)
+            {
+                ret.Data = disabledExtensions;
+            }
 
             return ret;
         }
