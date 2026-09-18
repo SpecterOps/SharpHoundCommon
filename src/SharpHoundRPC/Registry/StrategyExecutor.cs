@@ -4,8 +4,15 @@ namespace SharpHoundRPC.Registry {
     using System.Collections.Generic;
     using System.Threading.Tasks;
 
-
-    public class StrategyExecutor {
+    public interface IStrategyExecutor
+    {
+        Task<StrategyExecutorResult<T>> CollectAsync<T, TQuery>(
+            string targetMachine,
+            IEnumerable<TQuery> queries,
+            IEnumerable<ICollectionStrategy<T, TQuery>> strategies);
+    }
+    
+    public class StrategyExecutor : IStrategyExecutor {
         public async Task<StrategyExecutorResult<T>> CollectAsync<T, TQuery>(
             string targetMachine,
             IEnumerable<TQuery> queries,
@@ -25,24 +32,26 @@ namespace SharpHoundRPC.Registry {
                 try {
                     var results = await strategy.ExecuteAsync(targetMachine, queries).ConfigureAwait(false);
 
-                    attempt.WasSuccessful = true;
-                    attempt.Results = results;
-
                     return new StrategyExecutorResult<T> {
                         Results = results,
                         FailureAttempts = attempts,
-                        WasSuccessful = true
+                        WasSuccessful = true,
+                        SuccessfulStrategy =  strategy.GetType()
                     };
                 } catch (Exception ex) {
-                    attempt.FailureReason = $"Collector failed: {ex.Message}.\nInner Exception: {ex.InnerException}";
+                    var innerException = ex.InnerException != null
+                        ? $"\nInner Exception: {ex.InnerException}"
+                        : string.Empty;
+
+                    attempt.FailureReason = $"Collector failed: {ex.Message}.{innerException}";
                 }
 
                 attempts.Add(attempt);
             }
 
             return new StrategyExecutorResult<T> {
-                Results = null,
-                FailureAttempts = attempts
+                FailureAttempts = attempts,
+                WasSuccessful = false,
             };
         }
     }

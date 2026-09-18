@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Docfx", "docfx\Docfx.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpHoundRPC", "src\SharpHoundRPC\SharpHoundRPC.csproj", "{4F06116D-88A7-4601-AB28-B48F2857D458}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RPCTest", "RPCTest\RPCTest.csproj", "{F1E6714E-72B3-4295-9940-0EAA69695201}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,5 +33,9 @@ Global
 		{4F06116D-88A7-4601-AB28-B48F2857D458}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4F06116D-88A7-4601-AB28-B48F2857D458}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4F06116D-88A7-4601-AB28-B48F2857D458}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F1E6714E-72B3-4295-9940-0EAA69695201}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F1E6714E-72B3-4295-9940-0EAA69695201}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F1E6714E-72B3-4295-9940-0EAA69695201}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F1E6714E-72B3-4295-9940-0EAA69695201}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

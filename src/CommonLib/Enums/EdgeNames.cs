@@ -22,6 +22,9 @@
         public const string SQLAdmin = "SQLAdmin";
         public const string WriteAccountRestrictions = "WriteAccountRestrictions";
         public const string WriteGPLink = "WriteGPLink";
+        public const string WriteAltSecurityIdentities = "WriteAltSecurityIdentities";
+        public const string WritePublicInformation = "WritePublicInformation";
+        public const string ServerIs = "ServerIs";
 
         //CertAbuse edges
         public const string WritePKIEnrollmentFlag = "WritePKIEnrollmentFlag";

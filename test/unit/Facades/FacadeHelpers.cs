@@ -1,5 +1,5 @@
 ﻿using System.Reflection;
-using System.Runtime.Serialization;
+using System.Runtime.CompilerServices;
 
 namespace CommonLibTest.Facades
 {
@@ -9,8 +9,8 @@ namespace CommonLibTest.Facades
         private const BindingFlags publicInstance = BindingFlags.Public | BindingFlags.Instance;
 
         internal static T GetUninitializedObject<T>()
-        {
-            return (T) FormatterServices.GetUninitializedObject(typeof(T));
+        { 
+            return (T)RuntimeHelpers.GetUninitializedObject(typeof(T));
         }
 
         internal static void SetField<T1, T2>(T1 obj, string propertyName, T2 propertyValue)

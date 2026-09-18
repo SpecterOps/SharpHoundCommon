@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.DirectoryServices.Protocols;
 using System.Linq;
+using System.Runtime.Versioning;
 using System.Threading;
 using System.Threading.Tasks;
 using CommonLibTest.Facades;
@@ -23,6 +24,7 @@ namespace CommonLibTest
             _testOutputHelper = testOutputHelper;
         }
 
+        [SupportedOSPlatform("windows")]
         [WindowsOnlyFact]
         public async Task DomainTrustProcessor_EnumerateDomainTrusts_HappyPath()
         {

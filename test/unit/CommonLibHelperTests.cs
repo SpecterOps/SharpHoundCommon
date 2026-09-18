@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.Versioning;
 using System.Text;
 using System.Threading.Tasks;
 using SharpHoundCommonLib;
@@ -292,6 +293,76 @@ namespace CommonLibTest {
             await Helpers.RetryOnException<ApplicationException>(throws, 3);
 
             Assert.True(success);
+        }
+        
+        [Fact]
+        public void DomainNameToDistinguishedName_DotsBecomeDcComponents()
+        {
+            var result = Helpers.DomainNameToDistinguishedName("test.local");
+            Assert.Equal("DC=test,DC=local", result);
+        }
+
+        [SupportedOSPlatform("windows")]
+        [WindowsOnlyTheory]
+        [InlineData("S-1-5-32-544", "\\01\\02\\00\\00\\00\\00\\00\\05\\20\\00\\00\\00\\20\\02\\00\\00")]
+        public void ConvertSidToHexSid_ValidSid_MatchesSecurityIdentifierBinaryForm(string sid, string expectedHexSid)
+        {
+            // Arrange & Act
+            var actual = Helpers.ConvertSidToHexSid(sid);
+
+            // Assert
+            Assert.Equal(expectedHexSid, actual);
+        }
+
+        [SupportedOSPlatform("windows")]
+        [WindowsOnlyFact]
+        public void ConvertSidToHexSid_InvalidSid_Throws()
+        {
+            Assert.ThrowsAny<ArgumentException>(() => Helpers.ConvertSidToHexSid("NOT-A-SID"));
+        }
+
+        [Theory]
+        [InlineData("s-1-5-18")]
+        [InlineData("S-1-5-18")]
+        public void IsSidFiltered_FilteredWellKnownSidsCaseInsensitive_ReturnsTrue(string sid)
+        {
+            Assert.True(Helpers.IsSidFiltered(sid));
+        }
+
+        [Theory]
+        [InlineData("S-1-5-80-1234567890")]
+        [InlineData("S-1-5-82-1234567890")] 
+        [InlineData("S-1-5-90-0")]
+        [InlineData("S-1-5-96-0")]
+        public void IsSidFiltered_FilteredPrefixes_ReturnsTrue(string sid)
+        {
+            Assert.True(Helpers.IsSidFiltered(sid));
+        }
+
+        [Theory]
+        [InlineData("S-1-5-21-1234567890")]
+        [InlineData("S-1-5-21")]
+        public void IsSidFiltered_ReturnsFalse(string sid)
+        {
+            Assert.False(Helpers.IsSidFiltered(sid));
+        }
+
+        [Fact]
+        public void ConvertLdapTimeToLong_Null_ReturnsMinusOne()
+        {
+            Assert.Equal(-1, Helpers.ConvertLdapTimeToLong(null));
+        }
+
+        [Fact]
+        public void ConvertLdapTimeToLong_InvalidNumber_ThrowsFormatException()
+        {
+            Assert.Throws<FormatException>(() => Helpers.ConvertLdapTimeToLong("not-a-number"));
+        }
+        
+        [Fact]
+        public void ConvertLdapTimeToLong_ValidNumber_Parses()
+        {
+            Assert.Equal(123456789L, Helpers.ConvertLdapTimeToLong("123456789"));
         }
     }
 }

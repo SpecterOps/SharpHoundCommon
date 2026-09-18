@@ -3,9 +3,9 @@
     {
       "name": "feed",
       "type": "s3",
-      "path": "https://s3.amazonaws.com/bloodhound-ad",
+      "path": "https://s3.amazonaws.com/shcommon-nuget",
       "region": "us-east-1",
-      "bucketName": "bloodhound-ad"
+      "bucketName": "shcommon-nuget"
     }
   ]
 }

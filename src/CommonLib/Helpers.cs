@@ -7,11 +7,8 @@ using System.Text;
 using System.Text.RegularExpressions;
 using SharpHoundCommonLib.Enums;
 using Microsoft.Extensions.Logging;
-using System.IO;
-using System.Security;
-using SharpHoundCommonLib.Processors;
-using Microsoft.Win32;
 using System.Threading.Tasks;
+using SharpHoundCommonLib.OutputTypes;
 
 namespace SharpHoundCommonLib {
     public static class Helpers {
@@ -84,6 +81,44 @@ namespace SharpHoundCommonLib {
         }
 
         /// <summary>
+        ///     Reads the "gplink" property from a directory object and converts the links into the acceptable SharpHound format
+        /// </summary>
+        /// <param name="entry"></param>
+        /// <param name="utils"></param>
+        /// <returns></returns>
+        public static IAsyncEnumerable<GPLink> ReadGPLinks(IDirectoryObject entry, ILdapUtils utils) {
+            if (entry.TryGetProperty(LDAPProperties.GPLink, out var links)) {
+                return ReadGPLinks(links, utils);
+            }
+
+            return AsyncEnumerable.Empty<GPLink>();
+        }
+
+        /// <summary>
+        ///     Reads the "gplink" property and converts the links into the acceptable SharpHound format
+        /// </summary>
+        /// <param name="gpLink"></param>
+        /// <param name="utils"></param>
+        /// <returns></returns>
+        public static async IAsyncEnumerable<GPLink> ReadGPLinks(string gpLink, ILdapUtils utils) {
+            if (gpLink == null)
+                yield break;
+
+            foreach (var link in SplitGPLinkProperty(gpLink)) {
+                var enforced = link.Status.Equals("2");
+
+                var res = await utils.ResolveDistinguishedName(link.DistinguishedName);
+
+                if (res.Success) {
+                    yield return new GPLink {
+                        GUID = res.Principal.ObjectIdentifier,
+                        IsEnforced = enforced
+                    };
+                }
+            }
+        }
+
+        /// <summary>
         ///     Attempts to convert a SamAccountType value to the appropriate type enum
         /// </summary>
         /// <param name="samAccountType"></param>
@@ -151,7 +186,7 @@ namespace SharpHoundCommonLib {
         }
 
         /// <summary>
-        /// Converts a domain name to a distinguished name using simple string substitution
+        ///     Converts a domain name to a distinguished name using simple string substitution
         /// </summary>
         /// <param name="domainName"></param>
         /// <returns></returns>
@@ -256,44 +291,6 @@ namespace SharpHoundCommonLib {
                 return true;
 
             return false;
-        }
-
-        public static RegistryResult GetRegistryKeyData(string target, string subkey, string subvalue, ILogger log) {
-            var data = new RegistryResult();
-
-            try {
-                var baseKey = OpenRemoteRegistry(target);
-                var value = baseKey.GetValue(subkey, subvalue);
-                data.Value = value;
-
-                data.Collected = true;
-            }
-            catch (IOException e) {
-                log.LogDebug(e, "Error getting data from registry for {Target}: {RegSubKey}:{RegValue}",
-                    target, subkey, subvalue);
-                data.FailureReason = "Target machine was not found or not connectable";
-            }
-            catch (SecurityException e) {
-                log.LogDebug(e, "Error getting data from registry for {Target}: {RegSubKey}:{RegValue}",
-                    target, subkey, subvalue);
-                data.FailureReason = "User does not have the proper permissions to perform this operation";
-            }
-            catch (UnauthorizedAccessException e) {
-                log.LogDebug(e, "Error getting data from registry for {Target}: {RegSubKey}:{RegValue}",
-                    target, subkey, subvalue);
-                data.FailureReason = "User does not have the necessary registry rights";
-            }
-            catch (Exception e) {
-                log.LogDebug(e, "Error getting data from registry for {Target}: {RegSubKey}:{RegValue}",
-                    target, subkey, subvalue);
-                data.FailureReason = e.Message;
-            }
-
-            return data;
-        }
-
-        public static IRegistryKey OpenRemoteRegistry(string target) {
-            return SHRegistryKey.Connect(RegistryHive.LocalMachine, target).GetAwaiter().GetResult();
         }
 
         public static string[] AuthenticationOIDs = new string[] {

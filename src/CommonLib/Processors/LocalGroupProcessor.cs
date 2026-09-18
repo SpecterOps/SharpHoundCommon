@@ -16,6 +16,7 @@ namespace SharpHoundCommonLib.Processors
         public delegate Task ComputerStatusDelegate(CSVComputerStatus status);
         private readonly ILogger _log;
         private readonly ILdapUtils _utils;
+        private readonly ISAMServerAccessor _samServerAccessor;
         private readonly AdaptiveTimeout _getMachineSidAdaptiveTimeout;
         private readonly AdaptiveTimeout _openSamServerAdaptiveTimeout;
         private readonly AdaptiveTimeout _getDomainsAdaptiveTimeout;
@@ -27,14 +28,16 @@ namespace SharpHoundCommonLib.Processors
 
         public LocalGroupProcessor(ILdapUtils utils, ILogger log = null) {
             _utils = utils;
+            _samServerAccessor = new SAMServerAccessor();
             _log = log ?? Logging.LogProvider.CreateLogger("LocalGroupProcessor");
             _getMachineSidAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ISAMServer.GetMachineSid)));
-            _openSamServerAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(SAMServer.OpenServer)));
+            _openSamServerAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ISAMServerAccessor.OpenServer)));
             _getDomainsAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ISAMServer.GetDomains)));
             _openDomainAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ISAMServer.OpenDomain)));
             _getAliasesAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ISAMDomain.GetAliases)));
             _openAliasAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ISAMDomain.OpenAlias)));
-            _getMembersAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ISAMAlias.GetMembers)));
+            // Disabling adaptive timeout for GetMembers as it can be very chatty and we don't want timeouts to cause us to miss groups entirely. We can re-enable adaptive timeouts here in the future if we find a good way to handle timeouts without losing entire groups
+            _getMembersAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ISAMAlias.GetMembers)), useAdaptiveTimeout: false);
             _lookupPrincipalBySidAdaptiveTimeout = new AdaptiveTimeout(maxTimeout: TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ISAMServer.LookupPrincipalBySid)));
         }
 
@@ -42,7 +45,7 @@ namespace SharpHoundCommonLib.Processors
 
         public virtual SharpHoundRPC.Result<ISAMServer> OpenSamServer(string computerName)
         {
-            var result = _openSamServerAdaptiveTimeout.ExecuteRPCWithTimeout((_) => SAMServer.OpenServer(computerName)).GetAwaiter().GetResult();
+            var result = _openSamServerAdaptiveTimeout.ExecuteRPCWithTimeout((_) => _samServerAccessor.OpenServer(computerName)).GetAwaiter().GetResult();
             if (result.IsFailed)
             {
                 return SharpHoundRPC.Result<ISAMServer>.Fail(result.SError);
@@ -77,7 +80,8 @@ namespace SharpHoundCommonLib.Processors
                 {
                     Task = "SamConnect",
                     ComputerName = computerName,
-                    Status = openServerResult.SError
+                    Status = openServerResult.SError,
+                    ObjectId = computerObjectId,
                 });
                 yield break;
             }
@@ -96,7 +100,8 @@ namespace SharpHoundCommonLib.Processors
                     {
                         Status = getMachineSidResult.SError,
                         ComputerName = computerName,
-                        Task = "GetMachineSid"
+                        Task = "GetMachineSid",
+                        ObjectId = computerObjectId,
                     });
                     //If we can't get a machine sid, we wont be able to make local principals with unique object ids, or differentiate local/domain objects
                     _log.LogWarning("Unable to get machineSid for {Computer}: {Status}. Abandoning local group processing", computerName, getMachineSidResult.SError);
@@ -120,7 +125,8 @@ namespace SharpHoundCommonLib.Processors
                 {
                     Task = "GetDomains",
                     ComputerName = computerName,
-                    Status = getDomainsResult.SError
+                    Status = getDomainsResult.SError,
+                    ObjectId = computerObjectId,
                 });
                 yield break;
             }
@@ -141,7 +147,8 @@ namespace SharpHoundCommonLib.Processors
                     {
                         Task = $"OpenDomain - {domainResult.Name}",
                         ComputerName = computerName,
-                        Status = openDomainResult.SError
+                        Status = openDomainResult.SError,
+                        ObjectId = computerObjectId,
                     });
                     if (openDomainResult.IsTimeout) {
                         yield break;
@@ -161,7 +168,8 @@ namespace SharpHoundCommonLib.Processors
                     {
                         Task = $"GetAliases - {domainResult.Name}",
                         ComputerName = computerName,
-                        Status = getAliasesResult.SError
+                        Status = getAliasesResult.SError,
+                        ObjectId = computerObjectId,
                     });
 
                     if (getAliasesResult.IsTimeout) {
@@ -193,7 +201,8 @@ namespace SharpHoundCommonLib.Processors
                         {
                             Task = $"OpenAlias - {alias.Name}",
                             ComputerName = computerName,
-                            Status = openAliasResult.SError
+                            Status = openAliasResult.SError,
+                            ObjectId = computerObjectId,
                         });
                         ret.Collected = false;
                         ret.FailureReason = $"SamOpenAliasInDomain failed with status {openAliasResult.SError}";
@@ -214,7 +223,8 @@ namespace SharpHoundCommonLib.Processors
                         {
                             Task = $"GetMembersInAlias - {alias.Name}",
                             ComputerName = computerName,
-                            Status = getMembersResult.SError
+                            Status = getMembersResult.SError,
+                            ObjectId = computerObjectId,
                         });
                         ret.Collected = false;
                         ret.FailureReason = $"SamGetMembersInAlias failed with status {getMembersResult.SError}";
@@ -229,7 +239,8 @@ namespace SharpHoundCommonLib.Processors
                     {
                         Task = $"GetMembersInAlias - {alias.Name}",
                         ComputerName = computerName,
-                        Status = CSVComputerStatus.StatusSuccess
+                        Status = CSVComputerStatus.StatusSuccess,
+                        ObjectId = computerObjectId,
                     });
                     
                     var results = new List<TypedPrincipal>();
@@ -291,9 +302,9 @@ namespace SharpHoundCommonLib.Processors
                             var (name, use) = lookupUserResult.Value;
                             var objectType = use switch
                             {
-                                SharedEnums.SidNameUse.User => Label.LocalUser,
-                                SharedEnums.SidNameUse.Group => Label.LocalGroup,
-                                SharedEnums.SidNameUse.Alias => Label.LocalGroup,
+                                SharedEnums.SidNameUse.User => Label.ADLocalUser,
+                                SharedEnums.SidNameUse.Group => Label.ADLocalGroup,
+                                SharedEnums.SidNameUse.Alias => Label.ADLocalGroup,
                                 _ => Label.Base
                             };
 
@@ -301,7 +312,7 @@ namespace SharpHoundCommonLib.Processors
                             typeCache.TryAdd(sidValue, new CachedLocalItem(name, objectType));
                             
                             // Throw out local users
-                            if (objectType == Label.LocalUser)
+                            if (objectType == Label.ADLocalUser)
                                 continue;
 
                             var newSid = $"{computerObjectId}-{securityIdentifier.Rid()}";

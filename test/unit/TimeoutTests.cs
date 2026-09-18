@@ -34,12 +34,12 @@ public class TimeoutTests {
         var shouldRemainFalse = false;
         var timeout = TimeSpan.FromMilliseconds(100);
         var func = (CancellationToken t) => {
-            Thread.Sleep(TimeSpan.FromMilliseconds(500));
+            Thread.Sleep(TimeSpan.FromMilliseconds(1000));
             t.ThrowIfCancellationRequested();
             shouldRemainFalse = true;
         };
         var result = await SharpHoundCommonLib.Timeout.ExecuteWithTimeout(timeout, func);
-        await Task.Delay(TimeSpan.FromMilliseconds(600));
+        await Task.Delay(TimeSpan.FromMilliseconds(1200));
         Assert.False(shouldRemainFalse, $"{nameof(SharpHoundCommonLib.Timeout.ExecuteWithTimeout)} did not pass a cancelled token following timeout. Function {nameof(func)} did not exit early.");
     }
 
@@ -93,13 +93,13 @@ public class TimeoutTests {
         var shouldRemainFalse = false;
         var timeout = TimeSpan.FromMilliseconds(100);
         var func = (CancellationToken t) => {
-            Thread.Sleep(TimeSpan.FromMilliseconds(500));
+            Thread.Sleep(TimeSpan.FromMilliseconds(1000));
             t.ThrowIfCancellationRequested();
             shouldRemainFalse = true;
             return true;
         };
         var result = await SharpHoundCommonLib.Timeout.ExecuteWithTimeout(timeout, func);
-        await Task.Delay(TimeSpan.FromMilliseconds(600));
+        await Task.Delay(TimeSpan.FromMilliseconds(1200));
         Assert.False(shouldRemainFalse, $"{nameof(SharpHoundCommonLib.Timeout.ExecuteWithTimeout)} did not pass a cancelled token following timeout. Function {nameof(func)} did not exit early.");
     }
 

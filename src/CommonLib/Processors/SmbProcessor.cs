@@ -25,14 +25,15 @@ namespace SharpHoundCommonLib.Processors {
         }
 
         public event ComputerStatusDelegate ComputerStatusEvent;
-        public virtual async Task<APIResult<SmbInfo>> Scan(string host) {
+        public virtual async Task<APIResult<SmbInfo>> Scan(string host, string securityIdentifier) {
             var result = await _scanHostAdaptiveTimeout.ExecuteRPCWithTimeout((timeoutToken) => _smbScanner.ScanHost(host, 445, timeoutToken));
 
             if (result.IsFailed) {
                 await SendComputerStatus(new CSVComputerStatus {
                     Status = result.Error,
                     Task = "SmbScan",
-                    ComputerName = host
+                    ComputerName = host,
+                    ObjectId = securityIdentifier,
                 });
                 _log.LogTrace("SmbScan failed on {ComputerName}: {Status}", host, result.Error);
                 return APIResult<SmbInfo>.Failure(result.Error);
@@ -43,7 +44,8 @@ namespace SharpHoundCommonLib.Processors {
                 await SendComputerStatus(new CSVComputerStatus {
                     Status = result.Error ?? "Unknown error",
                     Task = "SmbScan",
-                    ComputerName = host
+                    ComputerName = host,
+                    ObjectId = securityIdentifier,
                 });
                 _log.LogTrace("SmbScan failed on {ComputerName} - null result: {Status}", host, result.Status);
                 return APIResult<SmbInfo>.Failure(result.Error ?? "Unknown error");
@@ -53,7 +55,8 @@ namespace SharpHoundCommonLib.Processors {
             await SendComputerStatus(new CSVComputerStatus {
                 Status = CSVComputerStatus.StatusSuccess,
                 Task = "SmbScan",
-                ComputerName = host
+                ComputerName = host,
+                ObjectId = securityIdentifier,
             });
             
             var info = new SmbInfo() {

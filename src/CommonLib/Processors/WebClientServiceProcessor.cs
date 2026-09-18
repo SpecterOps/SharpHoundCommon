@@ -16,6 +16,7 @@ namespace SharpHoundCommonLib.Processors {
     /// <param name="log"></param>
     public class WebClientServiceProcessor(ILogger log = null) {
         private readonly ILogger _log = log ?? Logging.LogProvider.CreateLogger("WebClientServiceProcessor");
+        private readonly AdaptiveTimeout _createFileAdaptiveTimeout = new(maxTimeout:TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(IsWebClientRunning)));
 
         // Define constants
         public const uint MAXIMUM_ALLOWED = 0x02000000;
@@ -78,15 +79,21 @@ namespace SharpHoundCommonLib.Processors {
             // When the service is running, this named pipe is present
             var pipePath = @$"\\{computerName}\pipe\DAV RPC SERVICE";
 
-            return await Task.Run(() => {
+            var result = await _createFileAdaptiveTimeout.ExecuteWithTimeout((_) => {
                 try {
                     var exists = TestPathExists(pipePath);
-
                     return APIResult<bool>.Success(exists);
                 } catch (Exception ex) {
                     return APIResult<bool>.Failure(ex.ToString());
                 }
             });
+
+            //TODO: Not a big fan of nested result objects. We should look at this later to see if we can simplify the interface
+            if (result.IsSuccess) {
+                return result.Value;
+            }
+            
+            return APIResult<bool>.Failure($"Failed to check pipe on {computerName} due to timeout: {pipePath}");
         }
     }
 }

@@ -65,6 +65,7 @@ namespace SharpHoundCommonLib.OutputTypes {
     public class DCRegistryData {
         public IntRegistryAPIResult CertificateMappingMethods { get; set; }
         public IntRegistryAPIResult StrongCertificateBindingEnforcement { get; set; }
+        public StrRegistryAPIResult VulnerableNetlogonSecurityDescriptor { get; set; }
     }
 
     public class ComputerStatus {

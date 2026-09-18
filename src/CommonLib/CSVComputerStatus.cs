@@ -9,6 +9,7 @@ namespace SharpHoundCommonLib
         public string ComputerName { get; set; }
         public string Task { get; set; }
         public string Status { get; set; }
+        public string ObjectId { get; set; }
 
         /// <summary>
         ///     Converts to CSV format for output
@@ -16,7 +17,7 @@ namespace SharpHoundCommonLib
         /// <returns></returns>
         public string ToCsv()
         {
-            return $"{StringToCsvCell(ComputerName)}, {StringToCsvCell(Task)}, {StringToCsvCell(Status)}";
+            return $"{StringToCsvCell(ComputerName)}, {StringToCsvCell(Task)}, {StringToCsvCell(Status)}, {StringToCsvCell(ObjectId)}";
         }
 
         /// <summary>

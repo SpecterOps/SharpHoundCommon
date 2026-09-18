@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Versioning;
 using System.Threading;
 using System.Threading.Tasks;
+using CommonLibTest.CollectionDefinitions;
 using CommonLibTest.Facades;
 using CommonLibTest.Facades.LSAMocks.DCMocks;
 using CommonLibTest.Facades.LSAMocks.WorkstationMocks;
@@ -17,6 +19,7 @@ using Xunit.Abstractions;
 
 namespace CommonLibTest
 {
+    [Collection(nameof(CacheTestCollectionDefinition))]
     public class UserRightsAssignmentProcessorTest
     {
         private readonly ITestOutputHelper _testOutputHelper;
@@ -24,8 +27,12 @@ namespace CommonLibTest
         public UserRightsAssignmentProcessorTest(ITestOutputHelper testOutputHelper)
         {
             _testOutputHelper = testOutputHelper;
+            
+            //reseting cache
+            Cache.SetCacheInstance(null);
         }
 
+        [SupportedOSPlatform("windows")]
         [WindowsOnlyFact]
         public async Task UserRightsAssignmentProcessor_TestWorkstation()
         {
@@ -42,12 +49,13 @@ namespace CommonLibTest
             Assert.Equal(3, results[0].Results.Length);
             var adminResult = privilege.Results.First(x => x.ObjectIdentifier.EndsWith("-544"));
             Assert.Equal($"{machineDomainSid}-544", adminResult.ObjectIdentifier);
-            Assert.Equal(Label.LocalGroup, adminResult.ObjectType);
+            Assert.Equal(Label.ADLocalGroup, adminResult.ObjectType);
             var rdpResult = privilege.Results.First(x => x.ObjectIdentifier.EndsWith("-555"));
             Assert.Equal($"{machineDomainSid}-555", rdpResult.ObjectIdentifier);
-            Assert.Equal(Label.LocalGroup, rdpResult.ObjectType);
+            Assert.Equal(Label.ADLocalGroup, rdpResult.ObjectType);
         }
 
+        [SupportedOSPlatform("windows")]
         [WindowsOnlyFact]
         public async Task UserRightsAssignmentProcessor_TestDC()
         {
@@ -91,6 +99,7 @@ namespace CommonLibTest
         //     Assert.Equal("Timeout", status.Status);
         // }
 
+        [SupportedOSPlatform("windows")]
         [WindowsOnlyFact]
         public async Task UserRightsAssignmentProcessor_TestGetLocalDomainInformationFail()
         {
@@ -104,8 +113,9 @@ namespace CommonLibTest
             var processor = mockProcessor.Object;
             var machineDomainSid = $"{Consts.MockDomainSid}-1001";
             var receivedStatus = new List<CSVComputerStatus>();
-            processor.ComputerStatusEvent += async status =>  {
+            processor.ComputerStatusEvent += status => {
                 receivedStatus.Add(status);
+                return Task.CompletedTask;
             };
             var results = await processor.GetUserRightsAssignments("win10.testlab.local", machineDomainSid, "testlab.local", false)
                 .ToArrayAsync();
@@ -117,6 +127,7 @@ namespace CommonLibTest
             Assert.Equal("LSAGetMachineSID", status.Task);
         }
         
+        [SupportedOSPlatform("windows")]
         [WindowsOnlyFact]
         public async Task UserRightsAssignmentProcessor_TestGetResolvedPrincipalsWithPrivilegeFail()
         {
@@ -126,8 +137,9 @@ namespace CommonLibTest
             var processor = mockProcessor.Object;
             var machineDomainSid = $"{Consts.MockDomainSid}-1001";
             var receivedStatus = new List<CSVComputerStatus>();
-            processor.ComputerStatusEvent += async status =>  {
+            processor.ComputerStatusEvent += status => {
                 receivedStatus.Add(status);
+                return Task.CompletedTask;
             };
             var results = await processor.GetUserRightsAssignments("win10.testlab.local", machineDomainSid, "testlab.local", false)
                 .ToArrayAsync();
