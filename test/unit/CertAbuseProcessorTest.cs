@@ -169,6 +169,64 @@ namespace CommonLibTest
             Assert.Equal(TargetDomainSid, _receivedCompStatus.ObjectId);
         }
 
+        [Theory]
+        [InlineData(0x00000200, true)]
+        [InlineData(0x00000201, true)]
+        [InlineData(0x00000000, false)]
+        public async Task CertAbuseProcessor_IsRPCEncryptionEnforced_ReturnsResult(int interfaceFlags, bool expectedResult) {
+            const string subKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{CAName}";
+            const string subValue = "InterfaceFlags";
+
+            _mockRegistryAccessor
+                .Setup(ra => ra.GetRegistryKeyData(
+                    TargetName,
+                    subKey,
+                    subValue))
+                .Returns(new RegistryResult
+                {
+                    Collected = true,
+                    Value = interfaceFlags
+                });
+
+            var results = await _certAbuseProcessor.IsRPCEncryptionEnforced(TargetName, CAName, TargetDomainSid);
+
+            Assert.True(results.Collected);
+            Assert.Equal(expectedResult, results.Value);
+            Assert.Null(results.FailureReason);
+
+            Assert.Equal(TargetName, _receivedCompStatus.ComputerName);
+            Assert.Equal(nameof(CertAbuseProcessor.IsRPCEncryptionEnforced), _receivedCompStatus.Task);
+            Assert.Equal(CSVComputerStatus.StatusSuccess, _receivedCompStatus.Status);
+            Assert.Equal(TargetDomainSid, _receivedCompStatus.ObjectId);
+        }
+
+        [Fact]
+        public async Task CertAbuseProcessor_IsRPCEncryptionEnforced_HandlesFailedLookup() {
+            const string subKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{CAName}";
+            const string subValue = "InterfaceFlags";
+
+            _mockRegistryAccessor
+                .Setup(ra => ra.GetRegistryKeyData(
+                    TargetName,
+                    subKey,
+                    subValue))
+                .Returns(new RegistryResult
+                {
+                    Collected = false,
+                    FailureReason = FailureReason
+                });
+
+            var results = await _certAbuseProcessor.IsRPCEncryptionEnforced(TargetName, CAName, TargetDomainSid);
+
+            Assert.False(results.Collected);
+            Assert.Equal(FailureReason, results.FailureReason);
+
+            Assert.Equal(TargetName, _receivedCompStatus.ComputerName);
+            Assert.Equal(nameof(CertAbuseProcessor.IsRPCEncryptionEnforced), _receivedCompStatus.Task);
+            Assert.Equal(FailureReason, _receivedCompStatus.Status);
+            Assert.Equal(TargetDomainSid, _receivedCompStatus.ObjectId);
+        }
+
         [Fact]
         public async Task CertAbuseProcessor_ProcessEAPermissions_ReturnsEmptyResult() {
             const string subKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{CAName}";

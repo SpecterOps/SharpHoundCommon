@@ -326,21 +326,42 @@ namespace SharpHoundCommonLib.Processors
             return ret;
         }
 
-        [ExcludeFromCodeCoverage]
-        public BoolRegistryAPIResult RPCEncryptionEnforced(string target, string caName)
+        /// <summary>
+        /// This function checks whether the CA requires RPC-encrypted certificate requests.
+        /// </summary>
+        /// <remarks>IF_ENFORCEENCRYPTICERTREQUEST is bit 9 of the CA InterfaceFlags value.</remarks>
+        /// <param name="target"></param>
+        /// <param name="caName"></param>
+        /// <param name="computerObjectId"></param>
+        /// <returns></returns>
+        public async Task<BoolRegistryAPIResult> IsRPCEncryptionEnforced(string target, string caName, string computerObjectId)
         {
             var ret = new BoolRegistryAPIResult();
-            var subKey =
+            var regSubKey =
                 $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{caName}";
-            const string subValue = "InterfaceFlags";
-            var data = Helpers.GetRegistryKeyData(target, subKey, subValue, _log);
+            const string regValue = "InterfaceFlags";
+            var data = _registryAccessor.GetRegistryKeyData(target, regSubKey, regValue);
 
             ret.Collected = data.Collected;
             if (!data.Collected)
             {
+                await SendComputerStatus(new CSVComputerStatus {
+                    Status = data.FailureReason,
+                    Task = nameof(IsRPCEncryptionEnforced),
+                    ComputerName = target,
+                    ObjectId = computerObjectId
+                });
+
                 ret.FailureReason = data.FailureReason;
                 return ret;
             }
+
+            await SendComputerStatus(new CSVComputerStatus {
+                Status = CSVComputerStatus.StatusSuccess,
+                Task = nameof(IsRPCEncryptionEnforced),
+                ComputerName = target,
+                ObjectId = computerObjectId
+            });
 
             if (data.Value == null)
             {
