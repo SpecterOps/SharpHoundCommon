@@ -1481,6 +1481,12 @@ references:
   commentId: F:SharpHoundCommonLib.Enums.CollectionMethod.SessionLoop
   fullName: SharpHoundCommonLib.Enums.CollectionMethod.SessionLoop
   nameWithType: CollectionMethod.SessionLoop
+- uid: SharpHoundCommonLib.Enums.CollectionMethod.Site
+  name: Site
+  href: api/SharpHoundCommonLib.Enums.CollectionMethod.html#SharpHoundCommonLib_Enums_CollectionMethod_Site
+  commentId: F:SharpHoundCommonLib.Enums.CollectionMethod.Site
+  fullName: SharpHoundCommonLib.Enums.CollectionMethod.Site
+  nameWithType: CollectionMethod.Site
 - uid: SharpHoundCommonLib.Enums.CollectionMethod.SmbInfo
   name: SmbInfo
   href: api/SharpHoundCommonLib.Enums.CollectionMethod.html#SharpHoundCommonLib_Enums_CollectionMethod_SmbInfo
@@ -1631,6 +1637,24 @@ references:
   commentId: F:SharpHoundCommonLib.Enums.DataType.RootCAs
   fullName: SharpHoundCommonLib.Enums.DataType.RootCAs
   nameWithType: DataType.RootCAs
+- uid: SharpHoundCommonLib.Enums.DataType.Sites
+  name: Sites
+  href: api/SharpHoundCommonLib.Enums.DataType.html#SharpHoundCommonLib_Enums_DataType_Sites
+  commentId: F:SharpHoundCommonLib.Enums.DataType.Sites
+  fullName: SharpHoundCommonLib.Enums.DataType.Sites
+  nameWithType: DataType.Sites
+- uid: SharpHoundCommonLib.Enums.DataType.SiteServers
+  name: SiteServers
+  href: api/SharpHoundCommonLib.Enums.DataType.html#SharpHoundCommonLib_Enums_DataType_SiteServers
+  commentId: F:SharpHoundCommonLib.Enums.DataType.SiteServers
+  fullName: SharpHoundCommonLib.Enums.DataType.SiteServers
+  nameWithType: DataType.SiteServers
+- uid: SharpHoundCommonLib.Enums.DataType.SiteSubnets
+  name: SiteSubnets
+  href: api/SharpHoundCommonLib.Enums.DataType.html#SharpHoundCommonLib_Enums_DataType_SiteSubnets
+  commentId: F:SharpHoundCommonLib.Enums.DataType.SiteSubnets
+  fullName: SharpHoundCommonLib.Enums.DataType.SiteSubnets
+  nameWithType: DataType.SiteSubnets
 - uid: SharpHoundCommonLib.Enums.DataType.Users
   name: Users
   href: api/SharpHoundCommonLib.Enums.DataType.html#SharpHoundCommonLib_Enums_DataType_Users
@@ -1697,6 +1721,12 @@ references:
   commentId: F:SharpHoundCommonLib.Enums.DirectoryPaths.RootCALocation
   fullName: SharpHoundCommonLib.Enums.DirectoryPaths.RootCALocation
   nameWithType: DirectoryPaths.RootCALocation
+- uid: SharpHoundCommonLib.Enums.DirectoryPaths.SitesLocation
+  name: SitesLocation
+  href: api/SharpHoundCommonLib.Enums.DirectoryPaths.html#SharpHoundCommonLib_Enums_DirectoryPaths_SitesLocation
+  commentId: F:SharpHoundCommonLib.Enums.DirectoryPaths.SitesLocation
+  fullName: SharpHoundCommonLib.Enums.DirectoryPaths.SitesLocation
+  nameWithType: DirectoryPaths.SitesLocation
 - uid: SharpHoundCommonLib.Enums.EdgeNames
   name: EdgeNames
   href: api/SharpHoundCommonLib.Enums.EdgeNames.html
@@ -1805,6 +1835,12 @@ references:
   commentId: F:SharpHoundCommonLib.Enums.EdgeNames.ReadLAPSPassword
   fullName: SharpHoundCommonLib.Enums.EdgeNames.ReadLAPSPassword
   nameWithType: EdgeNames.ReadLAPSPassword
+- uid: SharpHoundCommonLib.Enums.EdgeNames.ServerIs
+  name: ServerIs
+  href: api/SharpHoundCommonLib.Enums.EdgeNames.html#SharpHoundCommonLib_Enums_EdgeNames_ServerIs
+  commentId: F:SharpHoundCommonLib.Enums.EdgeNames.ServerIs
+  fullName: SharpHoundCommonLib.Enums.EdgeNames.ServerIs
+  nameWithType: EdgeNames.ServerIs
 - uid: SharpHoundCommonLib.Enums.EdgeNames.SQLAdmin
   name: SQLAdmin
   href: api/SharpHoundCommonLib.Enums.EdgeNames.html#SharpHoundCommonLib_Enums_EdgeNames_SQLAdmin
@@ -2021,6 +2057,24 @@ references:
   commentId: F:SharpHoundCommonLib.Enums.Label.RootCA
   fullName: SharpHoundCommonLib.Enums.Label.RootCA
   nameWithType: Label.RootCA
+- uid: SharpHoundCommonLib.Enums.Label.Site
+  name: Site
+  href: api/SharpHoundCommonLib.Enums.Label.html#SharpHoundCommonLib_Enums_Label_Site
+  commentId: F:SharpHoundCommonLib.Enums.Label.Site
+  fullName: SharpHoundCommonLib.Enums.Label.Site
+  nameWithType: Label.Site
+- uid: SharpHoundCommonLib.Enums.Label.SiteServer
+  name: SiteServer
+  href: api/SharpHoundCommonLib.Enums.Label.html#SharpHoundCommonLib_Enums_Label_SiteServer
+  commentId: F:SharpHoundCommonLib.Enums.Label.SiteServer
+  fullName: SharpHoundCommonLib.Enums.Label.SiteServer
+  nameWithType: Label.SiteServer
+- uid: SharpHoundCommonLib.Enums.Label.SiteSubnet
+  name: SiteSubnet
+  href: api/SharpHoundCommonLib.Enums.Label.html#SharpHoundCommonLib_Enums_Label_SiteSubnet
+  commentId: F:SharpHoundCommonLib.Enums.Label.SiteSubnet
+  fullName: SharpHoundCommonLib.Enums.Label.SiteSubnet
+  nameWithType: Label.SiteSubnet
 - uid: SharpHoundCommonLib.Enums.Label.User
   name: User
   href: api/SharpHoundCommonLib.Enums.Label.html#SharpHoundCommonLib_Enums_Label_User
@@ -2543,6 +2597,12 @@ references:
   commentId: T:SharpHoundCommonLib.Enums.ObjectClass
   fullName: SharpHoundCommonLib.Enums.ObjectClass
   nameWithType: ObjectClass
+- uid: SharpHoundCommonLib.Enums.ObjectClass.BuiltinDomainClass
+  name: BuiltinDomainClass
+  href: api/SharpHoundCommonLib.Enums.ObjectClass.html#SharpHoundCommonLib_Enums_ObjectClass_BuiltinDomainClass
+  commentId: F:SharpHoundCommonLib.Enums.ObjectClass.BuiltinDomainClass
+  fullName: SharpHoundCommonLib.Enums.ObjectClass.BuiltinDomainClass
+  nameWithType: ObjectClass.BuiltinDomainClass
 - uid: SharpHoundCommonLib.Enums.ObjectClass.CertificationAuthorityClass
   name: CertificationAuthorityClass
   href: api/SharpHoundCommonLib.Enums.ObjectClass.html#SharpHoundCommonLib_Enums_ObjectClass_CertificationAuthorityClass
@@ -2609,6 +2669,30 @@ references:
   commentId: F:SharpHoundCommonLib.Enums.ObjectClass.PKIEnrollmentServiceClass
   fullName: SharpHoundCommonLib.Enums.ObjectClass.PKIEnrollmentServiceClass
   nameWithType: ObjectClass.PKIEnrollmentServiceClass
+- uid: SharpHoundCommonLib.Enums.ObjectClass.SiteClass
+  name: SiteClass
+  href: api/SharpHoundCommonLib.Enums.ObjectClass.html#SharpHoundCommonLib_Enums_ObjectClass_SiteClass
+  commentId: F:SharpHoundCommonLib.Enums.ObjectClass.SiteClass
+  fullName: SharpHoundCommonLib.Enums.ObjectClass.SiteClass
+  nameWithType: ObjectClass.SiteClass
+- uid: SharpHoundCommonLib.Enums.ObjectClass.SitesContainerClass
+  name: SitesContainerClass
+  href: api/SharpHoundCommonLib.Enums.ObjectClass.html#SharpHoundCommonLib_Enums_ObjectClass_SitesContainerClass
+  commentId: F:SharpHoundCommonLib.Enums.ObjectClass.SitesContainerClass
+  fullName: SharpHoundCommonLib.Enums.ObjectClass.SitesContainerClass
+  nameWithType: ObjectClass.SitesContainerClass
+- uid: SharpHoundCommonLib.Enums.ObjectClass.SiteServerClass
+  name: SiteServerClass
+  href: api/SharpHoundCommonLib.Enums.ObjectClass.html#SharpHoundCommonLib_Enums_ObjectClass_SiteServerClass
+  commentId: F:SharpHoundCommonLib.Enums.ObjectClass.SiteServerClass
+  fullName: SharpHoundCommonLib.Enums.ObjectClass.SiteServerClass
+  nameWithType: ObjectClass.SiteServerClass
+- uid: SharpHoundCommonLib.Enums.ObjectClass.SiteSubnetClass
+  name: SiteSubnetClass
+  href: api/SharpHoundCommonLib.Enums.ObjectClass.html#SharpHoundCommonLib_Enums_ObjectClass_SiteSubnetClass
+  commentId: F:SharpHoundCommonLib.Enums.ObjectClass.SiteSubnetClass
+  fullName: SharpHoundCommonLib.Enums.ObjectClass.SiteSubnetClass
+  nameWithType: ObjectClass.SiteSubnetClass
 - uid: SharpHoundCommonLib.Enums.PKICertificateAuthorityFlags
   name: PKICertificateAuthorityFlags
   href: api/SharpHoundCommonLib.Enums.PKICertificateAuthorityFlags.html
@@ -3733,6 +3817,25 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.Helpers.IsSidFiltered
   nameWithType: Helpers.IsSidFiltered
+- uid: SharpHoundCommonLib.Helpers.ReadGPLinks(SharpHoundCommonLib.IDirectoryObject,SharpHoundCommonLib.ILdapUtils)
+  name: ReadGPLinks(IDirectoryObject, ILdapUtils)
+  href: api/SharpHoundCommonLib.Helpers.html#SharpHoundCommonLib_Helpers_ReadGPLinks_SharpHoundCommonLib_IDirectoryObject_SharpHoundCommonLib_ILdapUtils_
+  commentId: M:SharpHoundCommonLib.Helpers.ReadGPLinks(SharpHoundCommonLib.IDirectoryObject,SharpHoundCommonLib.ILdapUtils)
+  fullName: SharpHoundCommonLib.Helpers.ReadGPLinks(SharpHoundCommonLib.IDirectoryObject, SharpHoundCommonLib.ILdapUtils)
+  nameWithType: Helpers.ReadGPLinks(IDirectoryObject, ILdapUtils)
+- uid: SharpHoundCommonLib.Helpers.ReadGPLinks(System.String,SharpHoundCommonLib.ILdapUtils)
+  name: ReadGPLinks(String, ILdapUtils)
+  href: api/SharpHoundCommonLib.Helpers.html#SharpHoundCommonLib_Helpers_ReadGPLinks_System_String_SharpHoundCommonLib_ILdapUtils_
+  commentId: M:SharpHoundCommonLib.Helpers.ReadGPLinks(System.String,SharpHoundCommonLib.ILdapUtils)
+  fullName: SharpHoundCommonLib.Helpers.ReadGPLinks(System.String, SharpHoundCommonLib.ILdapUtils)
+  nameWithType: Helpers.ReadGPLinks(String, ILdapUtils)
+- uid: SharpHoundCommonLib.Helpers.ReadGPLinks*
+  name: ReadGPLinks
+  href: api/SharpHoundCommonLib.Helpers.html#SharpHoundCommonLib_Helpers_ReadGPLinks_
+  commentId: Overload:SharpHoundCommonLib.Helpers.ReadGPLinks
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Helpers.ReadGPLinks
+  nameWithType: Helpers.ReadGPLinks
 - uid: SharpHoundCommonLib.Helpers.RemoveDistinguishedNamePrefix(System.String)
   name: RemoveDistinguishedNamePrefix(String)
   href: api/SharpHoundCommonLib.Helpers.html#SharpHoundCommonLib_Helpers_RemoveDistinguishedNamePrefix_System_String_
@@ -5401,6 +5504,12 @@ references:
   commentId: F:SharpHoundCommonLib.LDAPProperties.ServerName
   fullName: SharpHoundCommonLib.LDAPProperties.ServerName
   nameWithType: LDAPProperties.ServerName
+- uid: SharpHoundCommonLib.LDAPProperties.ServerReference
+  name: ServerReference
+  href: api/SharpHoundCommonLib.LDAPProperties.html#SharpHoundCommonLib_LDAPProperties_ServerReference
+  commentId: F:SharpHoundCommonLib.LDAPProperties.ServerReference
+  fullName: SharpHoundCommonLib.LDAPProperties.ServerReference
+  nameWithType: LDAPProperties.ServerReference
 - uid: SharpHoundCommonLib.LDAPProperties.ServicePack
   name: ServicePack
   href: api/SharpHoundCommonLib.LDAPProperties.html#SharpHoundCommonLib_LDAPProperties_ServicePack
@@ -5419,6 +5528,12 @@ references:
   commentId: F:SharpHoundCommonLib.LDAPProperties.SIDHistory
   fullName: SharpHoundCommonLib.LDAPProperties.SIDHistory
   nameWithType: LDAPProperties.SIDHistory
+- uid: SharpHoundCommonLib.LDAPProperties.SiteObject
+  name: SiteObject
+  href: api/SharpHoundCommonLib.LDAPProperties.html#SharpHoundCommonLib_LDAPProperties_SiteObject
+  commentId: F:SharpHoundCommonLib.LDAPProperties.SiteObject
+  fullName: SharpHoundCommonLib.LDAPProperties.SiteObject
+  nameWithType: LDAPProperties.SiteObject
 - uid: SharpHoundCommonLib.LDAPProperties.SupportedEncryptionTypes
   name: SupportedEncryptionTypes
   href: api/SharpHoundCommonLib.LDAPProperties.html#SharpHoundCommonLib_LDAPProperties_SupportedEncryptionTypes
@@ -5716,6 +5831,24 @@ references:
   commentId: F:SharpHoundCommonLib.LDAPQueries.CommonProperties.ObjectSID
   fullName: SharpHoundCommonLib.LDAPQueries.CommonProperties.ObjectSID
   nameWithType: CommonProperties.ObjectSID
+- uid: SharpHoundCommonLib.LDAPQueries.CommonProperties.SiteProps
+  name: SiteProps
+  href: api/SharpHoundCommonLib.LDAPQueries.CommonProperties.html#SharpHoundCommonLib_LDAPQueries_CommonProperties_SiteProps
+  commentId: F:SharpHoundCommonLib.LDAPQueries.CommonProperties.SiteProps
+  fullName: SharpHoundCommonLib.LDAPQueries.CommonProperties.SiteProps
+  nameWithType: CommonProperties.SiteProps
+- uid: SharpHoundCommonLib.LDAPQueries.CommonProperties.SiteServerProps
+  name: SiteServerProps
+  href: api/SharpHoundCommonLib.LDAPQueries.CommonProperties.html#SharpHoundCommonLib_LDAPQueries_CommonProperties_SiteServerProps
+  commentId: F:SharpHoundCommonLib.LDAPQueries.CommonProperties.SiteServerProps
+  fullName: SharpHoundCommonLib.LDAPQueries.CommonProperties.SiteServerProps
+  nameWithType: CommonProperties.SiteServerProps
+- uid: SharpHoundCommonLib.LDAPQueries.CommonProperties.SiteSubnetProps
+  name: SiteSubnetProps
+  href: api/SharpHoundCommonLib.LDAPQueries.CommonProperties.html#SharpHoundCommonLib_LDAPQueries_CommonProperties_SiteSubnetProps
+  commentId: F:SharpHoundCommonLib.LDAPQueries.CommonProperties.SiteSubnetProps
+  fullName: SharpHoundCommonLib.LDAPQueries.CommonProperties.SiteSubnetProps
+  nameWithType: CommonProperties.SiteSubnetProps
 - uid: SharpHoundCommonLib.LDAPQueries.CommonProperties.SPNTargetProps
   name: SPNTargetProps
   href: api/SharpHoundCommonLib.LDAPQueries.CommonProperties.html#SharpHoundCommonLib_LDAPQueries_CommonProperties_SPNTargetProps
@@ -5756,6 +5889,22 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.LDAPQueries.LdapFilter.AddAllObjects
   nameWithType: LdapFilter.AddAllObjects
+- uid: SharpHoundCommonLib.LDAPQueries.LdapFilter.AddBuiltinDomains(System.String[])
+  name: AddBuiltinDomains(String[])
+  href: api/SharpHoundCommonLib.LDAPQueries.LdapFilter.html#SharpHoundCommonLib_LDAPQueries_LdapFilter_AddBuiltinDomains_System_String___
+  commentId: M:SharpHoundCommonLib.LDAPQueries.LdapFilter.AddBuiltinDomains(System.String[])
+  name.vb: AddBuiltinDomains(String())
+  fullName: SharpHoundCommonLib.LDAPQueries.LdapFilter.AddBuiltinDomains(System.String[])
+  fullName.vb: SharpHoundCommonLib.LDAPQueries.LdapFilter.AddBuiltinDomains(System.String())
+  nameWithType: LdapFilter.AddBuiltinDomains(String[])
+  nameWithType.vb: LdapFilter.AddBuiltinDomains(String())
+- uid: SharpHoundCommonLib.LDAPQueries.LdapFilter.AddBuiltinDomains*
+  name: AddBuiltinDomains
+  href: api/SharpHoundCommonLib.LDAPQueries.LdapFilter.html#SharpHoundCommonLib_LDAPQueries_LdapFilter_AddBuiltinDomains_
+  commentId: Overload:SharpHoundCommonLib.LDAPQueries.LdapFilter.AddBuiltinDomains
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.LDAPQueries.LdapFilter.AddBuiltinDomains
+  nameWithType: LdapFilter.AddBuiltinDomains
 - uid: SharpHoundCommonLib.LDAPQueries.LdapFilter.AddCertificateAuthorities(System.String[])
   name: AddCertificateAuthorities(String[])
   href: api/SharpHoundCommonLib.LDAPQueries.LdapFilter.html#SharpHoundCommonLib_LDAPQueries_LdapFilter_AddCertificateAuthorities_System_String___
@@ -5993,6 +6142,70 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.LDAPQueries.LdapFilter.AddSchemaID
   nameWithType: LdapFilter.AddSchemaID
+- uid: SharpHoundCommonLib.LDAPQueries.LdapFilter.AddSites(System.String[])
+  name: AddSites(String[])
+  href: api/SharpHoundCommonLib.LDAPQueries.LdapFilter.html#SharpHoundCommonLib_LDAPQueries_LdapFilter_AddSites_System_String___
+  commentId: M:SharpHoundCommonLib.LDAPQueries.LdapFilter.AddSites(System.String[])
+  name.vb: AddSites(String())
+  fullName: SharpHoundCommonLib.LDAPQueries.LdapFilter.AddSites(System.String[])
+  fullName.vb: SharpHoundCommonLib.LDAPQueries.LdapFilter.AddSites(System.String())
+  nameWithType: LdapFilter.AddSites(String[])
+  nameWithType.vb: LdapFilter.AddSites(String())
+- uid: SharpHoundCommonLib.LDAPQueries.LdapFilter.AddSites*
+  name: AddSites
+  href: api/SharpHoundCommonLib.LDAPQueries.LdapFilter.html#SharpHoundCommonLib_LDAPQueries_LdapFilter_AddSites_
+  commentId: Overload:SharpHoundCommonLib.LDAPQueries.LdapFilter.AddSites
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.LDAPQueries.LdapFilter.AddSites
+  nameWithType: LdapFilter.AddSites
+- uid: SharpHoundCommonLib.LDAPQueries.LdapFilter.AddSitesContainer(System.String[])
+  name: AddSitesContainer(String[])
+  href: api/SharpHoundCommonLib.LDAPQueries.LdapFilter.html#SharpHoundCommonLib_LDAPQueries_LdapFilter_AddSitesContainer_System_String___
+  commentId: M:SharpHoundCommonLib.LDAPQueries.LdapFilter.AddSitesContainer(System.String[])
+  name.vb: AddSitesContainer(String())
+  fullName: SharpHoundCommonLib.LDAPQueries.LdapFilter.AddSitesContainer(System.String[])
+  fullName.vb: SharpHoundCommonLib.LDAPQueries.LdapFilter.AddSitesContainer(System.String())
+  nameWithType: LdapFilter.AddSitesContainer(String[])
+  nameWithType.vb: LdapFilter.AddSitesContainer(String())
+- uid: SharpHoundCommonLib.LDAPQueries.LdapFilter.AddSitesContainer*
+  name: AddSitesContainer
+  href: api/SharpHoundCommonLib.LDAPQueries.LdapFilter.html#SharpHoundCommonLib_LDAPQueries_LdapFilter_AddSitesContainer_
+  commentId: Overload:SharpHoundCommonLib.LDAPQueries.LdapFilter.AddSitesContainer
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.LDAPQueries.LdapFilter.AddSitesContainer
+  nameWithType: LdapFilter.AddSitesContainer
+- uid: SharpHoundCommonLib.LDAPQueries.LdapFilter.AddSiteServers(System.String[])
+  name: AddSiteServers(String[])
+  href: api/SharpHoundCommonLib.LDAPQueries.LdapFilter.html#SharpHoundCommonLib_LDAPQueries_LdapFilter_AddSiteServers_System_String___
+  commentId: M:SharpHoundCommonLib.LDAPQueries.LdapFilter.AddSiteServers(System.String[])
+  name.vb: AddSiteServers(String())
+  fullName: SharpHoundCommonLib.LDAPQueries.LdapFilter.AddSiteServers(System.String[])
+  fullName.vb: SharpHoundCommonLib.LDAPQueries.LdapFilter.AddSiteServers(System.String())
+  nameWithType: LdapFilter.AddSiteServers(String[])
+  nameWithType.vb: LdapFilter.AddSiteServers(String())
+- uid: SharpHoundCommonLib.LDAPQueries.LdapFilter.AddSiteServers*
+  name: AddSiteServers
+  href: api/SharpHoundCommonLib.LDAPQueries.LdapFilter.html#SharpHoundCommonLib_LDAPQueries_LdapFilter_AddSiteServers_
+  commentId: Overload:SharpHoundCommonLib.LDAPQueries.LdapFilter.AddSiteServers
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.LDAPQueries.LdapFilter.AddSiteServers
+  nameWithType: LdapFilter.AddSiteServers
+- uid: SharpHoundCommonLib.LDAPQueries.LdapFilter.AddSiteSubnets(System.String[])
+  name: AddSiteSubnets(String[])
+  href: api/SharpHoundCommonLib.LDAPQueries.LdapFilter.html#SharpHoundCommonLib_LDAPQueries_LdapFilter_AddSiteSubnets_System_String___
+  commentId: M:SharpHoundCommonLib.LDAPQueries.LdapFilter.AddSiteSubnets(System.String[])
+  name.vb: AddSiteSubnets(String())
+  fullName: SharpHoundCommonLib.LDAPQueries.LdapFilter.AddSiteSubnets(System.String[])
+  fullName.vb: SharpHoundCommonLib.LDAPQueries.LdapFilter.AddSiteSubnets(System.String())
+  nameWithType: LdapFilter.AddSiteSubnets(String[])
+  nameWithType.vb: LdapFilter.AddSiteSubnets(String())
+- uid: SharpHoundCommonLib.LDAPQueries.LdapFilter.AddSiteSubnets*
+  name: AddSiteSubnets
+  href: api/SharpHoundCommonLib.LDAPQueries.LdapFilter.html#SharpHoundCommonLib_LDAPQueries_LdapFilter_AddSiteSubnets_
+  commentId: Overload:SharpHoundCommonLib.LDAPQueries.LdapFilter.AddSiteSubnets
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.LDAPQueries.LdapFilter.AddSiteSubnets
+  nameWithType: LdapFilter.AddSiteSubnets
 - uid: SharpHoundCommonLib.LDAPQueries.LdapFilter.AddUsers(System.String[])
   name: AddUsers(String[])
   href: api/SharpHoundCommonLib.LDAPQueries.LdapFilter.html#SharpHoundCommonLib_LDAPQueries_LdapFilter_AddUsers_System_String___
@@ -9564,6 +9777,76 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.OutputTypes.SessionAPIResult.Results
   nameWithType: SessionAPIResult.Results
+- uid: SharpHoundCommonLib.OutputTypes.Site
+  name: Site
+  href: api/SharpHoundCommonLib.OutputTypes.Site.html
+  commentId: T:SharpHoundCommonLib.OutputTypes.Site
+  fullName: SharpHoundCommonLib.OutputTypes.Site
+  nameWithType: Site
+- uid: SharpHoundCommonLib.OutputTypes.Site.ChildObjects
+  name: ChildObjects
+  href: api/SharpHoundCommonLib.OutputTypes.Site.html#SharpHoundCommonLib_OutputTypes_Site_ChildObjects
+  commentId: P:SharpHoundCommonLib.OutputTypes.Site.ChildObjects
+  fullName: SharpHoundCommonLib.OutputTypes.Site.ChildObjects
+  nameWithType: Site.ChildObjects
+- uid: SharpHoundCommonLib.OutputTypes.Site.ChildObjects*
+  name: ChildObjects
+  href: api/SharpHoundCommonLib.OutputTypes.Site.html#SharpHoundCommonLib_OutputTypes_Site_ChildObjects_
+  commentId: Overload:SharpHoundCommonLib.OutputTypes.Site.ChildObjects
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.OutputTypes.Site.ChildObjects
+  nameWithType: Site.ChildObjects
+- uid: SharpHoundCommonLib.OutputTypes.Site.InheritanceHashes
+  name: InheritanceHashes
+  href: api/SharpHoundCommonLib.OutputTypes.Site.html#SharpHoundCommonLib_OutputTypes_Site_InheritanceHashes
+  commentId: P:SharpHoundCommonLib.OutputTypes.Site.InheritanceHashes
+  fullName: SharpHoundCommonLib.OutputTypes.Site.InheritanceHashes
+  nameWithType: Site.InheritanceHashes
+- uid: SharpHoundCommonLib.OutputTypes.Site.InheritanceHashes*
+  name: InheritanceHashes
+  href: api/SharpHoundCommonLib.OutputTypes.Site.html#SharpHoundCommonLib_OutputTypes_Site_InheritanceHashes_
+  commentId: Overload:SharpHoundCommonLib.OutputTypes.Site.InheritanceHashes
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.OutputTypes.Site.InheritanceHashes
+  nameWithType: Site.InheritanceHashes
+- uid: SharpHoundCommonLib.OutputTypes.Site.Links
+  name: Links
+  href: api/SharpHoundCommonLib.OutputTypes.Site.html#SharpHoundCommonLib_OutputTypes_Site_Links
+  commentId: P:SharpHoundCommonLib.OutputTypes.Site.Links
+  fullName: SharpHoundCommonLib.OutputTypes.Site.Links
+  nameWithType: Site.Links
+- uid: SharpHoundCommonLib.OutputTypes.Site.Links*
+  name: Links
+  href: api/SharpHoundCommonLib.OutputTypes.Site.html#SharpHoundCommonLib_OutputTypes_Site_Links_
+  commentId: Overload:SharpHoundCommonLib.OutputTypes.Site.Links
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.OutputTypes.Site.Links
+  nameWithType: Site.Links
+- uid: SharpHoundCommonLib.OutputTypes.SiteServer
+  name: SiteServer
+  href: api/SharpHoundCommonLib.OutputTypes.SiteServer.html
+  commentId: T:SharpHoundCommonLib.OutputTypes.SiteServer
+  fullName: SharpHoundCommonLib.OutputTypes.SiteServer
+  nameWithType: SiteServer
+- uid: SharpHoundCommonLib.OutputTypes.SiteServer.ServerIs
+  name: ServerIs
+  href: api/SharpHoundCommonLib.OutputTypes.SiteServer.html#SharpHoundCommonLib_OutputTypes_SiteServer_ServerIs
+  commentId: P:SharpHoundCommonLib.OutputTypes.SiteServer.ServerIs
+  fullName: SharpHoundCommonLib.OutputTypes.SiteServer.ServerIs
+  nameWithType: SiteServer.ServerIs
+- uid: SharpHoundCommonLib.OutputTypes.SiteServer.ServerIs*
+  name: ServerIs
+  href: api/SharpHoundCommonLib.OutputTypes.SiteServer.html#SharpHoundCommonLib_OutputTypes_SiteServer_ServerIs_
+  commentId: Overload:SharpHoundCommonLib.OutputTypes.SiteServer.ServerIs
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.OutputTypes.SiteServer.ServerIs
+  nameWithType: SiteServer.ServerIs
+- uid: SharpHoundCommonLib.OutputTypes.SiteSubnet
+  name: SiteSubnet
+  href: api/SharpHoundCommonLib.OutputTypes.SiteSubnet.html
+  commentId: T:SharpHoundCommonLib.OutputTypes.SiteSubnet
+  fullName: SharpHoundCommonLib.OutputTypes.SiteSubnet
+  nameWithType: SiteSubnet
 - uid: SharpHoundCommonLib.OutputTypes.SPNPrivilege
   name: SPNPrivilege
   href: api/SharpHoundCommonLib.OutputTypes.SPNPrivilege.html
@@ -11613,6 +11896,45 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.Processors.LdapPropertyProcessor.ReadRootCAProperties
   nameWithType: LdapPropertyProcessor.ReadRootCAProperties
+- uid: SharpHoundCommonLib.Processors.LdapPropertyProcessor.ReadSiteProperties(SharpHoundCommonLib.IDirectoryObject)
+  name: ReadSiteProperties(IDirectoryObject)
+  href: api/SharpHoundCommonLib.Processors.LdapPropertyProcessor.html#SharpHoundCommonLib_Processors_LdapPropertyProcessor_ReadSiteProperties_SharpHoundCommonLib_IDirectoryObject_
+  commentId: M:SharpHoundCommonLib.Processors.LdapPropertyProcessor.ReadSiteProperties(SharpHoundCommonLib.IDirectoryObject)
+  fullName: SharpHoundCommonLib.Processors.LdapPropertyProcessor.ReadSiteProperties(SharpHoundCommonLib.IDirectoryObject)
+  nameWithType: LdapPropertyProcessor.ReadSiteProperties(IDirectoryObject)
+- uid: SharpHoundCommonLib.Processors.LdapPropertyProcessor.ReadSiteProperties*
+  name: ReadSiteProperties
+  href: api/SharpHoundCommonLib.Processors.LdapPropertyProcessor.html#SharpHoundCommonLib_Processors_LdapPropertyProcessor_ReadSiteProperties_
+  commentId: Overload:SharpHoundCommonLib.Processors.LdapPropertyProcessor.ReadSiteProperties
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Processors.LdapPropertyProcessor.ReadSiteProperties
+  nameWithType: LdapPropertyProcessor.ReadSiteProperties
+- uid: SharpHoundCommonLib.Processors.LdapPropertyProcessor.ReadSiteServerProperties(SharpHoundCommonLib.IDirectoryObject)
+  name: ReadSiteServerProperties(IDirectoryObject)
+  href: api/SharpHoundCommonLib.Processors.LdapPropertyProcessor.html#SharpHoundCommonLib_Processors_LdapPropertyProcessor_ReadSiteServerProperties_SharpHoundCommonLib_IDirectoryObject_
+  commentId: M:SharpHoundCommonLib.Processors.LdapPropertyProcessor.ReadSiteServerProperties(SharpHoundCommonLib.IDirectoryObject)
+  fullName: SharpHoundCommonLib.Processors.LdapPropertyProcessor.ReadSiteServerProperties(SharpHoundCommonLib.IDirectoryObject)
+  nameWithType: LdapPropertyProcessor.ReadSiteServerProperties(IDirectoryObject)
+- uid: SharpHoundCommonLib.Processors.LdapPropertyProcessor.ReadSiteServerProperties*
+  name: ReadSiteServerProperties
+  href: api/SharpHoundCommonLib.Processors.LdapPropertyProcessor.html#SharpHoundCommonLib_Processors_LdapPropertyProcessor_ReadSiteServerProperties_
+  commentId: Overload:SharpHoundCommonLib.Processors.LdapPropertyProcessor.ReadSiteServerProperties
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Processors.LdapPropertyProcessor.ReadSiteServerProperties
+  nameWithType: LdapPropertyProcessor.ReadSiteServerProperties
+- uid: SharpHoundCommonLib.Processors.LdapPropertyProcessor.ReadSiteSubnetProperties(SharpHoundCommonLib.IDirectoryObject)
+  name: ReadSiteSubnetProperties(IDirectoryObject)
+  href: api/SharpHoundCommonLib.Processors.LdapPropertyProcessor.html#SharpHoundCommonLib_Processors_LdapPropertyProcessor_ReadSiteSubnetProperties_SharpHoundCommonLib_IDirectoryObject_
+  commentId: M:SharpHoundCommonLib.Processors.LdapPropertyProcessor.ReadSiteSubnetProperties(SharpHoundCommonLib.IDirectoryObject)
+  fullName: SharpHoundCommonLib.Processors.LdapPropertyProcessor.ReadSiteSubnetProperties(SharpHoundCommonLib.IDirectoryObject)
+  nameWithType: LdapPropertyProcessor.ReadSiteSubnetProperties(IDirectoryObject)
+- uid: SharpHoundCommonLib.Processors.LdapPropertyProcessor.ReadSiteSubnetProperties*
+  name: ReadSiteSubnetProperties
+  href: api/SharpHoundCommonLib.Processors.LdapPropertyProcessor.html#SharpHoundCommonLib_Processors_LdapPropertyProcessor_ReadSiteSubnetProperties_
+  commentId: Overload:SharpHoundCommonLib.Processors.LdapPropertyProcessor.ReadSiteSubnetProperties
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Processors.LdapPropertyProcessor.ReadSiteSubnetProperties
+  nameWithType: LdapPropertyProcessor.ReadSiteSubnetProperties
 - uid: SharpHoundCommonLib.Processors.LdapPropertyProcessor.ReadUserProperties(SharpHoundCommonLib.IDirectoryObject,SharpHoundCommonLib.ResolvedSearchResult)
   name: ReadUserProperties(IDirectoryObject, ResolvedSearchResult)
   href: api/SharpHoundCommonLib.Processors.LdapPropertyProcessor.html#SharpHoundCommonLib_Processors_LdapPropertyProcessor_ReadUserProperties_SharpHoundCommonLib_IDirectoryObject_SharpHoundCommonLib_ResolvedSearchResult_
@@ -11896,6 +12218,113 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.Processors.RegistryResult.Value
   nameWithType: RegistryResult.Value
+- uid: SharpHoundCommonLib.Processors.SiteProcessor
+  name: SiteProcessor
+  href: api/SharpHoundCommonLib.Processors.SiteProcessor.html
+  commentId: T:SharpHoundCommonLib.Processors.SiteProcessor
+  fullName: SharpHoundCommonLib.Processors.SiteProcessor
+  nameWithType: SiteProcessor
+- uid: SharpHoundCommonLib.Processors.SiteProcessor.#ctor(SharpHoundCommonLib.ILdapUtils,ILogger)
+  name: SiteProcessor(ILdapUtils, ILogger)
+  href: api/SharpHoundCommonLib.Processors.SiteProcessor.html#SharpHoundCommonLib_Processors_SiteProcessor__ctor_SharpHoundCommonLib_ILdapUtils_ILogger_
+  commentId: M:SharpHoundCommonLib.Processors.SiteProcessor.#ctor(SharpHoundCommonLib.ILdapUtils,ILogger)
+  fullName: SharpHoundCommonLib.Processors.SiteProcessor.SiteProcessor(SharpHoundCommonLib.ILdapUtils, ILogger)
+  nameWithType: SiteProcessor.SiteProcessor(ILdapUtils, ILogger)
+- uid: SharpHoundCommonLib.Processors.SiteProcessor.#ctor*
+  name: SiteProcessor
+  href: api/SharpHoundCommonLib.Processors.SiteProcessor.html#SharpHoundCommonLib_Processors_SiteProcessor__ctor_
+  commentId: Overload:SharpHoundCommonLib.Processors.SiteProcessor.#ctor
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Processors.SiteProcessor.SiteProcessor
+  nameWithType: SiteProcessor.SiteProcessor
+- uid: SharpHoundCommonLib.Processors.SiteProcessor.GetContainingSiteForServer(SharpHoundCommonLib.IDirectoryObject)
+  name: GetContainingSiteForServer(IDirectoryObject)
+  href: api/SharpHoundCommonLib.Processors.SiteProcessor.html#SharpHoundCommonLib_Processors_SiteProcessor_GetContainingSiteForServer_SharpHoundCommonLib_IDirectoryObject_
+  commentId: M:SharpHoundCommonLib.Processors.SiteProcessor.GetContainingSiteForServer(SharpHoundCommonLib.IDirectoryObject)
+  fullName: SharpHoundCommonLib.Processors.SiteProcessor.GetContainingSiteForServer(SharpHoundCommonLib.IDirectoryObject)
+  nameWithType: SiteProcessor.GetContainingSiteForServer(IDirectoryObject)
+- uid: SharpHoundCommonLib.Processors.SiteProcessor.GetContainingSiteForServer(System.String)
+  name: GetContainingSiteForServer(String)
+  href: api/SharpHoundCommonLib.Processors.SiteProcessor.html#SharpHoundCommonLib_Processors_SiteProcessor_GetContainingSiteForServer_System_String_
+  commentId: M:SharpHoundCommonLib.Processors.SiteProcessor.GetContainingSiteForServer(System.String)
+  fullName: SharpHoundCommonLib.Processors.SiteProcessor.GetContainingSiteForServer(System.String)
+  nameWithType: SiteProcessor.GetContainingSiteForServer(String)
+- uid: SharpHoundCommonLib.Processors.SiteProcessor.GetContainingSiteForServer*
+  name: GetContainingSiteForServer
+  href: api/SharpHoundCommonLib.Processors.SiteProcessor.html#SharpHoundCommonLib_Processors_SiteProcessor_GetContainingSiteForServer_
+  commentId: Overload:SharpHoundCommonLib.Processors.SiteProcessor.GetContainingSiteForServer
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Processors.SiteProcessor.GetContainingSiteForServer
+  nameWithType: SiteProcessor.GetContainingSiteForServer
+- uid: SharpHoundCommonLib.Processors.SiteProcessor.GetContainingSiteForSubnet(System.Collections.Generic.Dictionary{System.String,System.Object})
+  name: GetContainingSiteForSubnet(Dictionary<String, Object>)
+  href: api/SharpHoundCommonLib.Processors.SiteProcessor.html#SharpHoundCommonLib_Processors_SiteProcessor_GetContainingSiteForSubnet_System_Collections_Generic_Dictionary_System_String_System_Object__
+  commentId: M:SharpHoundCommonLib.Processors.SiteProcessor.GetContainingSiteForSubnet(System.Collections.Generic.Dictionary{System.String,System.Object})
+  name.vb: GetContainingSiteForSubnet(Dictionary(Of String, Object))
+  fullName: SharpHoundCommonLib.Processors.SiteProcessor.GetContainingSiteForSubnet(System.Collections.Generic.Dictionary<System.String, System.Object>)
+  fullName.vb: SharpHoundCommonLib.Processors.SiteProcessor.GetContainingSiteForSubnet(System.Collections.Generic.Dictionary(Of System.String, System.Object))
+  nameWithType: SiteProcessor.GetContainingSiteForSubnet(Dictionary<String, Object>)
+  nameWithType.vb: SiteProcessor.GetContainingSiteForSubnet(Dictionary(Of String, Object))
+- uid: SharpHoundCommonLib.Processors.SiteProcessor.GetContainingSiteForSubnet(System.String)
+  name: GetContainingSiteForSubnet(String)
+  href: api/SharpHoundCommonLib.Processors.SiteProcessor.html#SharpHoundCommonLib_Processors_SiteProcessor_GetContainingSiteForSubnet_System_String_
+  commentId: M:SharpHoundCommonLib.Processors.SiteProcessor.GetContainingSiteForSubnet(System.String)
+  fullName: SharpHoundCommonLib.Processors.SiteProcessor.GetContainingSiteForSubnet(System.String)
+  nameWithType: SiteProcessor.GetContainingSiteForSubnet(String)
+- uid: SharpHoundCommonLib.Processors.SiteProcessor.GetContainingSiteForSubnet*
+  name: GetContainingSiteForSubnet
+  href: api/SharpHoundCommonLib.Processors.SiteProcessor.html#SharpHoundCommonLib_Processors_SiteProcessor_GetContainingSiteForSubnet_
+  commentId: Overload:SharpHoundCommonLib.Processors.SiteProcessor.GetContainingSiteForSubnet
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Processors.SiteProcessor.GetContainingSiteForSubnet
+  nameWithType: SiteProcessor.GetContainingSiteForSubnet
+- uid: SharpHoundCommonLib.Processors.SiteProcessor.GetReferencedComputerForServer(SharpHoundCommonLib.IDirectoryObject)
+  name: GetReferencedComputerForServer(IDirectoryObject)
+  href: api/SharpHoundCommonLib.Processors.SiteProcessor.html#SharpHoundCommonLib_Processors_SiteProcessor_GetReferencedComputerForServer_SharpHoundCommonLib_IDirectoryObject_
+  commentId: M:SharpHoundCommonLib.Processors.SiteProcessor.GetReferencedComputerForServer(SharpHoundCommonLib.IDirectoryObject)
+  fullName: SharpHoundCommonLib.Processors.SiteProcessor.GetReferencedComputerForServer(SharpHoundCommonLib.IDirectoryObject)
+  nameWithType: SiteProcessor.GetReferencedComputerForServer(IDirectoryObject)
+- uid: SharpHoundCommonLib.Processors.SiteProcessor.GetReferencedComputerForServer(System.Collections.Generic.Dictionary{System.String,System.Object})
+  name: GetReferencedComputerForServer(Dictionary<String, Object>)
+  href: api/SharpHoundCommonLib.Processors.SiteProcessor.html#SharpHoundCommonLib_Processors_SiteProcessor_GetReferencedComputerForServer_System_Collections_Generic_Dictionary_System_String_System_Object__
+  commentId: M:SharpHoundCommonLib.Processors.SiteProcessor.GetReferencedComputerForServer(System.Collections.Generic.Dictionary{System.String,System.Object})
+  name.vb: GetReferencedComputerForServer(Dictionary(Of String, Object))
+  fullName: SharpHoundCommonLib.Processors.SiteProcessor.GetReferencedComputerForServer(System.Collections.Generic.Dictionary<System.String, System.Object>)
+  fullName.vb: SharpHoundCommonLib.Processors.SiteProcessor.GetReferencedComputerForServer(System.Collections.Generic.Dictionary(Of System.String, System.Object))
+  nameWithType: SiteProcessor.GetReferencedComputerForServer(Dictionary<String, Object>)
+  nameWithType.vb: SiteProcessor.GetReferencedComputerForServer(Dictionary(Of String, Object))
+- uid: SharpHoundCommonLib.Processors.SiteProcessor.GetReferencedComputerForServer(System.String)
+  name: GetReferencedComputerForServer(String)
+  href: api/SharpHoundCommonLib.Processors.SiteProcessor.html#SharpHoundCommonLib_Processors_SiteProcessor_GetReferencedComputerForServer_System_String_
+  commentId: M:SharpHoundCommonLib.Processors.SiteProcessor.GetReferencedComputerForServer(System.String)
+  fullName: SharpHoundCommonLib.Processors.SiteProcessor.GetReferencedComputerForServer(System.String)
+  nameWithType: SiteProcessor.GetReferencedComputerForServer(String)
+- uid: SharpHoundCommonLib.Processors.SiteProcessor.GetReferencedComputerForServer*
+  name: GetReferencedComputerForServer
+  href: api/SharpHoundCommonLib.Processors.SiteProcessor.html#SharpHoundCommonLib_Processors_SiteProcessor_GetReferencedComputerForServer_
+  commentId: Overload:SharpHoundCommonLib.Processors.SiteProcessor.GetReferencedComputerForServer
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Processors.SiteProcessor.GetReferencedComputerForServer
+  nameWithType: SiteProcessor.GetReferencedComputerForServer
+- uid: SharpHoundCommonLib.Processors.SiteProcessor.ReadSiteGPLinks(SharpHoundCommonLib.ResolvedSearchResult,SharpHoundCommonLib.IDirectoryObject)
+  name: ReadSiteGPLinks(ResolvedSearchResult, IDirectoryObject)
+  href: api/SharpHoundCommonLib.Processors.SiteProcessor.html#SharpHoundCommonLib_Processors_SiteProcessor_ReadSiteGPLinks_SharpHoundCommonLib_ResolvedSearchResult_SharpHoundCommonLib_IDirectoryObject_
+  commentId: M:SharpHoundCommonLib.Processors.SiteProcessor.ReadSiteGPLinks(SharpHoundCommonLib.ResolvedSearchResult,SharpHoundCommonLib.IDirectoryObject)
+  fullName: SharpHoundCommonLib.Processors.SiteProcessor.ReadSiteGPLinks(SharpHoundCommonLib.ResolvedSearchResult, SharpHoundCommonLib.IDirectoryObject)
+  nameWithType: SiteProcessor.ReadSiteGPLinks(ResolvedSearchResult, IDirectoryObject)
+- uid: SharpHoundCommonLib.Processors.SiteProcessor.ReadSiteGPLinks(System.String)
+  name: ReadSiteGPLinks(String)
+  href: api/SharpHoundCommonLib.Processors.SiteProcessor.html#SharpHoundCommonLib_Processors_SiteProcessor_ReadSiteGPLinks_System_String_
+  commentId: M:SharpHoundCommonLib.Processors.SiteProcessor.ReadSiteGPLinks(System.String)
+  fullName: SharpHoundCommonLib.Processors.SiteProcessor.ReadSiteGPLinks(System.String)
+  nameWithType: SiteProcessor.ReadSiteGPLinks(String)
+- uid: SharpHoundCommonLib.Processors.SiteProcessor.ReadSiteGPLinks*
+  name: ReadSiteGPLinks
+  href: api/SharpHoundCommonLib.Processors.SiteProcessor.html#SharpHoundCommonLib_Processors_SiteProcessor_ReadSiteGPLinks_
+  commentId: Overload:SharpHoundCommonLib.Processors.SiteProcessor.ReadSiteGPLinks
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Processors.SiteProcessor.ReadSiteGPLinks
+  nameWithType: SiteProcessor.ReadSiteGPLinks
 - uid: SharpHoundCommonLib.Processors.SmbProcessor
   name: SmbProcessor
   href: api/SharpHoundCommonLib.Processors.SmbProcessor.html
