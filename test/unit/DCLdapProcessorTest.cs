@@ -33,6 +33,7 @@ namespace CommonLibTest {
             var mockProcessor = new Mock<DCLdapProcessor>(10, "primary.testlab.local", null);
 
             mockProcessor.Setup(x => x.Authenticate(It.IsAny<Uri>(), It.IsAny<LdapAuthOptions>(), null, null, It.IsAny<CancellationToken>())).ReturnsAsync(false);
+            mockProcessor.Setup(x => x.AuthenticateForSigning(It.IsAny<Uri>(), It.IsAny<LdapAuthOptions>(), null, null, It.IsAny<CancellationToken>())).ReturnsAsync(SharpHoundRPC.Result<bool>.Ok(true));
 
             mockProcessor.Setup(x => x.TestLdapPort()).ReturnsAsync(true);
             mockProcessor.Setup(x => x.TestLdapsPort()).ReturnsAsync(true);
@@ -61,6 +62,7 @@ namespace CommonLibTest {
             var mockProcessor = new Mock<DCLdapProcessor>(10, "primary.testlab.local", null);
 
             mockProcessor.Setup(x => x.Authenticate(It.IsAny<Uri>(), It.IsAny<LdapAuthOptions>(), null, null, It.IsAny<CancellationToken>())).Throws(new Exception("Error"));
+            mockProcessor.Setup(x => x.AuthenticateForSigning(It.IsAny<Uri>(), It.IsAny<LdapAuthOptions>(), null, null, It.IsAny<CancellationToken>())).ReturnsAsync(SharpHoundRPC.Result<bool>.Fail("Could not determine whether LDAP signing is required"));
 
             mockProcessor.Setup(x => x.TestLdapPort()).ReturnsAsync(true);
             mockProcessor.Setup(x => x.TestLdapsPort()).ReturnsAsync(true);
@@ -75,7 +77,7 @@ namespace CommonLibTest {
 
             Assert.Equal(2, receivedStatus.Count);
             var status = receivedStatus[0];
-            Assert.Contains("CheckIsNtlmSigningRequired failed: System.Exception: Error", status.Status);
+            Assert.Contains("Could not determine whether LDAP signing is required", status.Status);
             status = receivedStatus[1];
             Assert.Contains("CheckIsNtlmSigningRequired failed: System.Exception: Error", status.Status);
             Assert.True(results.HasLdap);
@@ -119,7 +121,7 @@ namespace CommonLibTest {
         [Fact]
         public async Task DCLdapProcessor_CheckIsNtlmSigningRequired() {
             var mockProcessor = new Mock<DCLdapProcessor>(10, "primary.testlab.local", null);
-            mockProcessor.Setup(x => x.Authenticate(It.IsAny<Uri>(), It.IsAny<LdapAuthOptions>(), null, null, It.IsAny<CancellationToken>())).ReturnsAsync(false);
+            mockProcessor.Setup(x => x.AuthenticateForSigning(It.IsAny<Uri>(), It.IsAny<LdapAuthOptions>(), null, null, It.IsAny<CancellationToken>())).ReturnsAsync(SharpHoundRPC.Result<bool>.Ok(true));
             var processor = mockProcessor.Object;
             var result = await processor.CheckIsNtlmSigningRequired();
             Assert.True(result.IsSuccess);
@@ -129,7 +131,7 @@ namespace CommonLibTest {
         [Fact]
         public async Task DCLdapProcessor_CheckIsNtlmSigningRequired_Exception() {
             var mockProcessor = new Mock<DCLdapProcessor>(10, "primary.testlab.local", null);
-            mockProcessor.Setup(x => x.Authenticate(It.IsAny<Uri>(), It.IsAny<LdapAuthOptions>(), null, null, It.IsAny<CancellationToken>())).Throws(new Exception("Error"));
+            mockProcessor.Setup(x => x.AuthenticateForSigning(It.IsAny<Uri>(), It.IsAny<LdapAuthOptions>(), null, null, It.IsAny<CancellationToken>())).Throws(new Exception("Error"));
             var processor = mockProcessor.Object;
             var result = await processor.CheckIsNtlmSigningRequired();
             Assert.True(result.IsFailed);
