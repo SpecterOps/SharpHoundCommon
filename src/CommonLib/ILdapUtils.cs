@@ -1,9 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
 using SharpHoundCommonLib.Enums;
+using SharpHoundCommonLib.Models;
 using SharpHoundCommonLib.OutputTypes;
 
 namespace SharpHoundCommonLib {
@@ -76,18 +77,18 @@ namespace SharpHoundCommonLib {
         /// <returns>A tuple containing success state as well as the resolved domain sid if successful</returns>
         Task<(bool Success, string DomainSid)> GetDomainSidFromDomainName(string domainName);
         /// <summary>
-        /// Attempts to retrieve the Domain object for the specified domain
+        /// Attempts to resolve plain domain metadata using configured LDAP settings.
         /// </summary>
-        /// <param name="domainName">The domain name to retrieve the Domain object for</param>
-        /// <param name="domain">The domain object</param>
+        /// <param name="domainName">The requested domain; null selects the configured target or discovery hint.</param>
+        /// <param name="domain">The resolved metadata, or null on failure.</param>
         /// <returns>True if the domain was found, false if not</returns>
-        bool GetDomain(string domainName, out System.DirectoryServices.ActiveDirectory.Domain domain);
+        bool GetDomain(string domainName, out LdapDomainInfo domain);
         /// <summary>
-        /// Attempts to retrieve the Domain object for the user's current domain
+        /// Attempts to resolve plain domain metadata using the configured target or discovery hint.
         /// </summary>
-        /// <param name="domain">The domain object</param>
+        /// <param name="domain">The resolved metadata, or null on failure.</param>
         /// <returns>True if the domain was found, false if not</returns>
-        bool GetDomain(out System.DirectoryServices.ActiveDirectory.Domain domain);
+        bool GetDomain(out LdapDomainInfo domain);
 
         Task<(bool Success, string ForestName)> GetForest(string domain);
         /// <summary>

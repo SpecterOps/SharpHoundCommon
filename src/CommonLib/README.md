@@ -39,7 +39,9 @@ You may optionally provide an `ILogger` and a pre-created `Cache` instance to `C
 
 `SharpHoundCommonLib.Models.LdapDomainInfo` holds plain domain metadata: domain and forest names, the domain SID, naming contexts, the PDC hostname, `DomainControllerNames`, and `TrustTypes`. Additional strings may be null; collections start empty. `TrustTypes` compares target domain names case-insensitively.
 
-`LdapConfig.AllowUncontrolledDomainFallback` defaults to `false` and appears in configuration logging. The internal resolver attempts controlled LDAP first and permits legacy framework resolution only after core identity resolution fails and this flag is enabled. Fallback use is logged and may ignore LDAP settings. Successful controlled results with unavailable additional metadata never trigger legacy enrichment. The current public `GetDomain` signatures and behavior are unchanged, and this flag does not yet control those calls.
+All `GetDomain` overloads now return `LdapDomainInfo` through the synchronous `bool`/`out` pattern instead of framework `Domain` objects. Success requires a resolved name and default naming context. Callers should use the returned naming contexts and check optional metadata before using it. Successful controlled results are cached per `LdapUtils` instance, case-insensitively; `SetLdapConfig` and `ResetUtils` clear that cache. Static calls and legacy results are not cached.
+
+`LdapConfig.AllowUncontrolledDomainFallback` defaults to `false` and appears in configuration logging. `GetDomain` attempts controlled LDAP first and permits legacy framework resolution only after core identity resolution fails and this flag is enabled. Fallback use is logged and may ignore LDAP settings. Successful controlled results with unavailable additional metadata never trigger legacy enrichment.
 
 `LdapConfig.UserDomain` declares the DNS or NetBIOS domain associated with the user's credentials. The internal controlled resolver selects its endpoint in this order: `Server`, the supplied domain argument, `UserDomain`, then `USERDNSDOMAIN`. Null, empty, or whitespace hints are ignored. The resolved identity comes from LDAP; the hint does not restrict collection to the credential domain.
 
@@ -51,7 +53,7 @@ var config = new LdapConfig {
 };
 ```
 
-`UserDomain` defaults to null and appears in configuration logging. It guides endpoint selection without changing credentials or the Windows authentication context. As with the controlled resolver itself, this hint is not yet wired into the public `GetDomain` calls.
+`UserDomain` defaults to null and appears in configuration logging. It guides endpoint selection without changing credentials or the Windows authentication context. For reliable `/netonly` targeting, supply `Server` or a domain argument to `GetDomain`; `USERDNSDOMAIN` is only a last-resort target hint.
 
 ## Relationship to SharpHoundRPC
 
