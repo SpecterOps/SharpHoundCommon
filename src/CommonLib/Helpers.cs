@@ -213,7 +213,8 @@ namespace SharpHoundCommonLib {
 
             if (dcValues.Count == 0) return null;
             dcValues.Reverse();
-            return string.Join(".", dcValues).ToUpper();
+            // DNS identity must not depend on the process culture (for example, Turkish casing of i).
+            return string.Join(".", dcValues).ToUpperInvariant();
         }
 
         /// <summary>
