@@ -1,0 +1,30 @@
+using System;
+using CommonLibTest.Facades;
+using Microsoft.Extensions.Logging;
+using Moq;
+using SharpHoundCommonLib;
+using Xunit;
+
+namespace CommonLibTest;
+
+public class LdapConfigTests {
+    [Fact]
+    public void AllowUncontrolledDomainFallback_IsDisabledByDefault() {
+        Assert.False(new LdapConfig().AllowUncontrolledDomainFallback);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void SetLdapConfig_LogsAllowUncontrolledDomainFallback(bool enabled) {
+        var logger = new Mock<ILogger<LdapUtils>>();
+        var utils = new LdapUtils(log: logger.Object);
+        var config = new LdapConfig { AllowUncontrolledDomainFallback = enabled };
+
+        utils.SetLdapConfig(config);
+
+        logger.VerifyLogContains(LogLevel.Information,
+            "New LDAP Config Set:", $"AllowUncontrolledDomainFallback: {enabled}");
+        Assert.Contains($"AllowUncontrolledDomainFallback: {enabled}{Environment.NewLine}", config.ToString());
+    }
+}
