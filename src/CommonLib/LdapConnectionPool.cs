@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.DirectoryServices.ActiveDirectory;
 using System.DirectoryServices.Protocols;
 using System.Linq;
-using System.Net;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -971,36 +970,7 @@ namespace SharpHoundCommonLib {
         private LdapConnection CreateBaseConnection(string directoryIdentifier, bool ssl,
             bool globalCatalog) {
             _log.LogDebug("Creating connection for identifier {Identifier}", directoryIdentifier);
-            var port = globalCatalog ? _ldapConfig.GetGCPort(ssl) : _ldapConfig.GetPort(ssl);
-            var identifier = new LdapDirectoryIdentifier(directoryIdentifier, port, false, false);
-            var connection = new LdapConnection(identifier) { Timeout = new TimeSpan(0, 0, 5, 0) };
-
-            //These options are important!
-            connection.SessionOptions.ProtocolVersion = 3;
-            //Referral chasing does not work with paged searches 
-            connection.SessionOptions.ReferralChasing = ReferralChasingOptions.None;
-            if (ssl) connection.SessionOptions.SecureSocketLayer = true;
-
-            if (_ldapConfig.DisableSigning || ssl) {
-                connection.SessionOptions.Signing = false;
-                connection.SessionOptions.Sealing = false;
-            }
-            else {
-                connection.SessionOptions.Signing = true;
-                connection.SessionOptions.Sealing = true;
-            }
-
-            if (_ldapConfig.DisableCertVerification)
-                connection.SessionOptions.VerifyServerCertificate = (_, _) => true;
-
-            if (_ldapConfig.Username != null) {
-                var cred = new NetworkCredential(_ldapConfig.Username, _ldapConfig.Password);
-                connection.Credential = cred;
-            }
-
-            connection.AuthType = _ldapConfig.AuthType;
-
-            return connection;
+            return LdapConnectionFactory.Create(_ldapConfig, directoryIdentifier, ssl, globalCatalog);
         }
 
         /// <summary>

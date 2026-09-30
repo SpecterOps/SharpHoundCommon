@@ -1165,7 +1165,7 @@ namespace SharpHoundCommonLib {
         ///
         /// <para>
         /// Signing and sealing are disabled when SSL is active, mirroring the mutual-exclusion rule
-        /// applied by <see cref="LdapConnectionPool.CreateBaseConnection"/>.
+        /// applied by <see cref="LdapConnectionFactory.Create"/>.
         /// </para>
         /// </summary>
         internal static (string ContextName, ContextOptions Options) BuildPrincipalContextParameters(
