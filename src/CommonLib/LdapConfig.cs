@@ -13,6 +13,11 @@ namespace SharpHoundCommonLib
         public bool ForceSSL { get; set; } = false;
         public bool DisableSigning { get; set; } = false;
         public bool DisableCertVerification { get; set; } = false;
+        /// <summary>
+        /// Permits legacy framework domain resolution after controlled LDAP resolution fails.
+        /// This fallback may ignore configured LDAP settings. Disabled by default.
+        /// </summary>
+        public bool AllowUncontrolledDomainFallback { get; set; } = false;
         public AuthType AuthType { get; set; } = AuthType.Kerberos;
         public int MaxConcurrentQueries { get; set; } = 15;
 
@@ -54,6 +59,7 @@ namespace SharpHoundCommonLib
             sb.AppendLine($"LdapPort: {GetPort(false)}");
             sb.AppendLine($"LdapSSLPort: {GetPort(true)}");
             sb.AppendLine($"ForceSSL: {ForceSSL}");
+            sb.AppendLine($"AllowUncontrolledDomainFallback: {AllowUncontrolledDomainFallback}");
             sb.AppendLine($"AuthType: {AuthType.ToString()}");
             sb.AppendLine($"MaxConcurrentQueries: {MaxConcurrentQueries}");
             if (!string.IsNullOrWhiteSpace(Username)) {

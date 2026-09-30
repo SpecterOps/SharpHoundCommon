@@ -35,6 +35,12 @@ You may optionally provide an `ILogger` and a pre-created `Cache` instance to `C
 - Registry collection orchestration via `RegistryProcessor`
 - User rights, SPN, and certificate-related processing helpers
 
+## Domain resolution metadata
+
+`SharpHoundCommonLib.Models.LdapDomainInfo` holds plain domain metadata: domain and forest names, the domain SID, naming contexts, the PDC hostname, `DomainControllerNames`, and `TrustTypes`. Additional strings may be null; collections start empty. `TrustTypes` compares target domain names case-insensitively.
+
+`LdapConfig.AllowUncontrolledDomainFallback` defaults to `false` and appears in configuration logging. It is reserved for permitting legacy framework resolution after controlled LDAP resolution fails; that fallback may ignore LDAP settings. The current `GetDomain` signatures and behavior are unchanged, and this flag does not yet control those calls.
+
 ## Relationship to SharpHoundRPC
 
 `SharpHoundCommon` depends on `SharpHoundRPC` and is intended to be the higher-level entry point. Most consumers should not reference `SharpHoundRPC` directly unless they need its lower-level SAM, LSA, NetAPI, or registry APIs.
