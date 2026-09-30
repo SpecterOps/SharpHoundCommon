@@ -9,6 +9,25 @@ namespace CommonLibTest;
 
 public class LdapConfigTests {
     [Fact]
+    public void UserDomain_IsNullByDefault() {
+        Assert.Null(new LdapConfig().UserDomain);
+    }
+
+    [Theory]
+    [InlineData("child.example.test")]
+    [InlineData("CHILD")]
+    public void SetLdapConfig_LogsUserDomain(string userDomain) {
+        var logger = new Mock<ILogger<LdapUtils>>();
+        var utils = new LdapUtils(log: logger.Object);
+        var config = new LdapConfig { UserDomain = userDomain };
+
+        utils.SetLdapConfig(config);
+
+        logger.VerifyLogContains(LogLevel.Information, "New LDAP Config Set:", $"UserDomain: {userDomain}");
+        Assert.Contains($"UserDomain: {userDomain}{Environment.NewLine}", config.ToString());
+    }
+
+    [Fact]
     public void AllowUncontrolledDomainFallback_IsDisabledByDefault() {
         Assert.False(new LdapConfig().AllowUncontrolledDomainFallback);
     }

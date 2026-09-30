@@ -41,6 +41,18 @@ You may optionally provide an `ILogger` and a pre-created `Cache` instance to `C
 
 `LdapConfig.AllowUncontrolledDomainFallback` defaults to `false` and appears in configuration logging. It is reserved for permitting legacy framework resolution after controlled LDAP resolution fails; that fallback may ignore LDAP settings. The current `GetDomain` signatures and behavior are unchanged, and this flag does not yet control those calls.
 
+`LdapConfig.UserDomain` declares the DNS or NetBIOS domain associated with the user's credentials. The internal controlled resolver selects its endpoint in this order: `Server`, the supplied domain argument, `UserDomain`, then `USERDNSDOMAIN`. Null, empty, or whitespace hints are ignored. The resolved identity comes from LDAP; the hint does not restrict collection to the credential domain.
+
+For `/netonly`, set `UserDomain` to the outbound credential domain and leave `Username` unset so LDAP binding uses ambient outbound credentials:
+
+```csharp
+var config = new LdapConfig {
+    UserDomain = "child.example.test"
+};
+```
+
+`UserDomain` defaults to null and appears in configuration logging. It guides endpoint selection without changing credentials or the Windows authentication context. As with the controlled resolver itself, this hint is not yet wired into the public `GetDomain` calls.
+
 ## Relationship to SharpHoundRPC
 
 `SharpHoundCommon` depends on `SharpHoundRPC` and is intended to be the higher-level entry point. Most consumers should not reference `SharpHoundRPC` directly unless they need its lower-level SAM, LSA, NetAPI, or registry APIs.
