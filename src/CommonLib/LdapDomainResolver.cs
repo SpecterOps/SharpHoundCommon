@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.DirectoryServices.Protocols;
 using System.Linq;
 using Microsoft.Extensions.Logging;
+using SharpHoundCommonLib.Enums;
 using SharpHoundCommonLib.LDAPQueries;
 using SharpHoundCommonLib.Models;
 
@@ -156,6 +157,79 @@ namespace SharpHoundCommonLib {
                 // Publish only a complete search; a later-page failure leaves the list empty.
                 domain.DomainControllerNames.AddRange(ReadControllerNames(connection, domain.DefaultNamingContext));
             });
+            ReadTrustMetadata(connection, domain);
+        }
+
+        private void ReadTrustMetadata(IConnection connection, LdapDomainInfo domain) {
+            var topology = new Dictionary<string, IDirectoryObject>(StringComparer.OrdinalIgnoreCase);
+            if (domain.ConfigurationNamingContext != null) {
+                ReadOptionalMetadata(domain.Name, "domain trust topology", () => {
+                    var request = new SearchRequest("CN=Partitions," + domain.ConfigurationNamingContext,
+                        "(&(objectClass=crossRef)(systemFlags:1.2.840.113556.1.4.803:=2))",
+                        SearchScope.OneLevel, "nCName", "trustParent", "distinguishedName");
+                    // Materialize every page before publishing topology. An incomplete search
+                    // cannot establish that a missing trustParent denotes a tree root.
+                    var entries = ReadPages(connection, request);
+                    var resolved = new Dictionary<string, IDirectoryObject>(StringComparer.OrdinalIgnoreCase);
+                    foreach (var entry in entries) {
+                        var name = DomainFromNamingContext(ReadString(entry, "nCName"));
+                        if (name != null) resolved.Add(name, entry);
+                    }
+                    topology = resolved;
+                });
+            }
+
+            ReadOptionalMetadata(domain.Name, "trust classifications", () => {
+                var request = new SearchRequest(domain.DefaultNamingContext, CommonFilters.TrustedDomains,
+                    SearchScope.Subtree, "trustPartner", "trustType", "trustAttributes");
+                var classifications = new Dictionary<string, TrustType>(StringComparer.OrdinalIgnoreCase);
+                foreach (var entry in ReadPages(connection, request)) {
+                    var target = ReadString(entry, "trustPartner");
+                    if (target != null) classifications[target] = ClassifyTrust(entry, domain, target, topology);
+                }
+                foreach (var trust in classifications) domain.TrustTypes.Add(trust.Key, trust.Value);
+            });
+        }
+
+        private static TrustType ClassifyTrust(IDirectoryObject trust, LdapDomainInfo domain, string target,
+            IReadOnlyDictionary<string, IDirectoryObject> topology) {
+            // AD trustType 3 denotes an MIT Kerberos realm and takes precedence over attributes.
+            if (!trust.TryGetLongProperty("trustType", out var type)) return TrustType.Unknown;
+            if (type == 3) return TrustType.Kerberos;
+            if (type != 1 && type != 2) return TrustType.Unknown;
+            if (!trust.TryGetLongProperty("trustAttributes", out var value)) return TrustType.Unknown;
+            var attributes = (TrustAttributes)value;
+            if (!attributes.HasFlag(TrustAttributes.WithinForest)) {
+                return attributes.HasFlag(TrustAttributes.ForestTransitive) ? TrustType.Forest : TrustType.External;
+            }
+            return ClassifyWithinForestTrust(domain, target, topology);
+        }
+
+        private static TrustType ClassifyWithinForestTrust(LdapDomainInfo domain, string target,
+            IReadOnlyDictionary<string, IDirectoryObject> topology) {
+            if (!topology.TryGetValue(domain.Name, out var source) || !topology.TryGetValue(target, out var destination)) {
+                return TrustType.Unknown;
+            }
+            if (!source.TryGetDistinguishedName(out var sourceDn) ||
+                !destination.TryGetDistinguishedName(out var destinationDn)) return TrustType.Unknown;
+            // Ambiguous parent values cannot establish either a parent-child link or a tree root.
+            if (source.PropertyCount("trustParent") > 1 || destination.PropertyCount("trustParent") > 1) {
+                return TrustType.Unknown;
+            }
+            var sourceParent = ReadString(source, "trustParent");
+            var destinationParent = ReadString(destination, "trustParent");
+            if ((source.PropertyCount("trustParent") == 1 && sourceParent == null) ||
+                (destination.PropertyCount("trustParent") == 1 && destinationParent == null)) return TrustType.Unknown;
+            if (string.Equals(sourceParent, destinationDn, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(destinationParent, sourceDn, StringComparison.OrdinalIgnoreCase)) {
+                return TrustType.ParentChild;
+            }
+            if (sourceParent == null && destinationParent == null) {
+                if (domain.ForestName == null) return TrustType.Unknown;
+                if (string.Equals(domain.Name, domain.ForestName, StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(target, domain.ForestName, StringComparison.OrdinalIgnoreCase)) return TrustType.TreeRoot;
+            }
+            return TrustType.CrossLink;
         }
 
         private static string ReadPdcHostname(IConnection connection, IDirectoryObject domainRoot) {
@@ -174,21 +248,27 @@ namespace SharpHoundCommonLib {
         private static List<string> ReadControllerNames(IConnection connection, string defaultNamingContext) {
             var request = new SearchRequest(defaultNamingContext, CommonFilters.DomainControllers,
                 SearchScope.Subtree, "dNSHostName");
+            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var entry in ReadPages(connection, request)) {
+                var name = ReadHostname(entry);
+                if (name != null) seen.Add(name);
+            }
+            return seen.ToList();
+        }
+
+        private static List<IDirectoryObject> ReadPages(IConnection connection, SearchRequest request) {
             var pageControl = new PageResultRequestControl(500);
             request.Controls.Add(pageControl);
-            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var results = new List<IDirectoryObject>();
             do {
                 var entries = connection.SearchPage(request, out var cookie);
                 // Without the response control we cannot know that all pages were read.
                 if (cookie == null) throw new InvalidOperationException("Missing LDAP paging response control");
-                foreach (var entry in entries) {
-                    var name = ReadHostname(entry);
-                    if (name != null) seen.Add(name);
-                }
+                results.AddRange(entries);
                 pageControl.Cookie = cookie;
             } while (pageControl.Cookie.Length != 0);
 
-            return seen.ToList();
+            return results;
         }
 
         private void ReadOptionalMetadata(string domainName, string metadata, Action read) {
