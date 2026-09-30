@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.DirectoryServices.Protocols;
 using System.Linq;
 using Microsoft.Extensions.Logging;
+using SharpHoundCommonLib.LDAPQueries;
 using SharpHoundCommonLib.Models;
 
 namespace SharpHoundCommonLib {
@@ -96,7 +97,7 @@ namespace SharpHoundCommonLib {
             return false;
         }
 
-        private static bool TryReadIdentity(IConnection connection, string suppliedDomain,
+        private bool TryReadIdentity(IConnection connection, string suppliedDomain,
             out LdapDomainInfo domain) {
             domain = null;
             // RootDSE is the server's naming-context advertisement. The empty DN and base
@@ -129,7 +130,80 @@ namespace SharpHoundCommonLib {
                 ConfigurationNamingContext = configurationNamingContext,
                 SchemaNamingContext = ReadString(root, "schemaNamingContext")
             };
+            ReadAdditionalMetadata(connection, domain);
             return true;
+        }
+
+        private void ReadAdditionalMetadata(IConnection connection, LdapDomainInfo domain) {
+            IDirectoryObject domainRoot = null;
+            ReadOptionalMetadata(domain.Name, "domain root", () => {
+                var entries = connection.Search(new SearchRequest(domain.DefaultNamingContext,
+                    "(objectClass=*)", SearchScope.Base, "objectSid", "fSMORoleOwner"));
+                if (entries.Count == 1) domainRoot = entries[0];
+            });
+
+            if (domainRoot != null) {
+                // SID conversion and the PDC lookup are independent: malformed or unreadable
+                // metadata in either must not prevent the other from being materialized.
+                ReadOptionalMetadata(domain.Name, "domain SID", () => {
+                    if (domainRoot.TryGetSecurityIdentifier(out var sid)) domain.DomainSid = Normalize(sid);
+                });
+                ReadOptionalMetadata(domain.Name, "PDC hostname", () =>
+                    domain.PdcRoleOwnerName = ReadPdcHostname(connection, domainRoot));
+            }
+
+            ReadOptionalMetadata(domain.Name, "controller hostnames", () => {
+                // Publish only a complete search; a later-page failure leaves the list empty.
+                domain.DomainControllerNames.AddRange(ReadControllerNames(connection, domain.DefaultNamingContext));
+            });
+        }
+
+        private static string ReadPdcHostname(IConnection connection, IDirectoryObject domainRoot) {
+            var owner = ReadString(domainRoot, "fSMORoleOwner");
+            const string ntdsPrefix = "CN=NTDS Settings,";
+            if (owner == null || !owner.StartsWith(ntdsPrefix, StringComparison.OrdinalIgnoreCase)) return null;
+            // Remove only the fixed NTDS Settings RDN, preserving escaped commas in
+            // the parent server DN. The hostname is data, never a connection target.
+            var serverDn = owner.Substring(ntdsPrefix.Length);
+            if (string.IsNullOrWhiteSpace(serverDn)) return null;
+            var entries = connection.Search(new SearchRequest(serverDn, "(objectClass=server)",
+                SearchScope.Base, "dNSHostName"));
+            return entries.Count == 1 ? ReadHostname(entries[0]) : null;
+        }
+
+        private static List<string> ReadControllerNames(IConnection connection, string defaultNamingContext) {
+            var request = new SearchRequest(defaultNamingContext, CommonFilters.DomainControllers,
+                SearchScope.Subtree, "dNSHostName");
+            var pageControl = new PageResultRequestControl(500);
+            request.Controls.Add(pageControl);
+            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            do {
+                var entries = connection.SearchPage(request, out var cookie);
+                // Without the response control we cannot know that all pages were read.
+                if (cookie == null) throw new InvalidOperationException("Missing LDAP paging response control");
+                foreach (var entry in entries) {
+                    var name = ReadHostname(entry);
+                    if (name != null) seen.Add(name);
+                }
+                pageControl.Cookie = cookie;
+            } while (pageControl.Cookie.Length != 0);
+
+            return seen.ToList();
+        }
+
+        private void ReadOptionalMetadata(string domainName, string metadata, Action read) {
+            try {
+                read();
+            }
+            catch (Exception e) when (e is LdapException or DirectoryOperationException or InvalidOperationException or ArgumentException or FormatException) {
+                _log.LogDebug(e, "Controlled domain resolution could not read additional metadata {Metadata} for domain {Domain}",
+                    metadata, domainName);
+            }
+        }
+
+        private static string ReadHostname(IDirectoryObject entry) {
+            var name = ReadString(entry, "dNSHostName");
+            return name != null && Uri.CheckHostName(name) == UriHostNameType.Dns ? name : null;
         }
 
         private static bool MatchesSuppliedDomain(IConnection connection, string suppliedDomain,
@@ -202,6 +276,8 @@ namespace SharpHoundCommonLib {
         internal interface IConnection : IDisposable {
             void Bind();
             IReadOnlyList<IDirectoryObject> Search(SearchRequest request);
+            // A null cookie means the response omitted the paging control; empty means complete.
+            IReadOnlyList<IDirectoryObject> SearchPage(SearchRequest request, out byte[] cookie);
         }
 
         // Thin adapter over direct LDAP operations; it performs no discovery or pool access.
@@ -214,6 +290,16 @@ namespace SharpHoundCommonLib {
 
             public IReadOnlyList<IDirectoryObject> Search(SearchRequest request) {
                 var response = (SearchResponse)_connection.SendRequest(request);
+                return WrapEntries(response);
+            }
+
+            public IReadOnlyList<IDirectoryObject> SearchPage(SearchRequest request, out byte[] cookie) {
+                var response = (SearchResponse)_connection.SendRequest(request);
+                cookie = response.Controls.OfType<PageResultResponseControl>().FirstOrDefault()?.Cookie;
+                return WrapEntries(response);
+            }
+
+            private static IReadOnlyList<IDirectoryObject> WrapEntries(SearchResponse response) {
                 // Reuse the common attribute accessors and expose the existing test abstraction.
                 return response.Entries.Cast<SearchResultEntry>()
                     .Select(entry => (IDirectoryObject)new SearchResultEntryWrapper(entry)).ToArray();
