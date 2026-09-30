@@ -90,7 +90,7 @@ public class LdapConnectionFactoryTests {
 
     [Fact]
     public void Create_LeavesCredentialsUnsetWithoutUsername() {
-        var config = new LdapConfig { Password = "unused-test-password" };
+        var config = new LdapConfig { Password = "unused-test-password", UserDomain = "child.example.test" };
 
         using var connection = LdapConnectionFactory.Create(config, "dc.example.test", true);
 
@@ -102,7 +102,7 @@ public class LdapConnectionFactoryTests {
     [InlineData("test-user", null)]
     [InlineData("", "test-password")]
     public void Create_PreservesExplicitCredentials(string username, string password) {
-        var config = new LdapConfig { Username = username, Password = password };
+        var config = new LdapConfig { Username = username, Password = password, UserDomain = "OTHER" };
 
         using var connection = LdapConnectionFactory.Create(config, "dc.example.test", true);
 
@@ -110,6 +110,7 @@ public class LdapConnectionFactoryTests {
         Assert.NotNull(credential);
         Assert.Equal(username, credential.UserName);
         Assert.Equal(password ?? "", credential.Password);
+        Assert.Equal("", credential.Domain);
     }
 
     [Theory]

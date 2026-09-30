@@ -12,7 +12,7 @@ namespace SharpHoundCommonLib {
         // Creates an unbound connection owned and disposed by the resolver.
         internal delegate IConnection ConnectionFactory(string target, bool ssl, bool pinServer);
 
-        // Reads the USERDNSDOMAIN endpoint hint when no explicit target is available.
+        // Reads the USERDNSDOMAIN endpoint hint when no explicit target or UserDomain hint is available.
         internal delegate string EnvironmentDomainReader();
 
         private readonly LdapConfig _config;
@@ -49,6 +49,12 @@ namespace SharpHoundCommonLib {
             // A configured server selects the endpoint, but does not override validation of
             // an explicitly supplied domain. USERDNSDOMAIN is only a last-resort endpoint hint.
             var target = server ?? suppliedDomain;
+            if (target == null) {
+                // UserDomain describes the credential domain, which can differ from the local
+                // logon environment under /netonly. It guides discovery without changing credentials
+                // or constraining the domain advertised by a configured server.
+                target = Normalize(_config.UserDomain);
+            }
             if (target == null) {
                 target = Normalize(_getEnvironmentDomain());
             }

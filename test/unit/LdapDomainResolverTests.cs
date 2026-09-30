@@ -62,14 +62,18 @@ public class LdapDomainResolverTests {
     }
 
     [Theory]
-    [InlineData("dc.example.test", "child.example.test", "other.test", "dc.example.test", true)]
-    [InlineData(null, "child.example.test", "other.test", "child.example.test", false)]
-    [InlineData(" ", "child.example.test", "other.test", "child.example.test", false)]
-    [InlineData(null, null, "child.example.test", "child.example.test", false)]
-    [InlineData(null, " ", "other.test", "other.test", false)]
-    public void TryResolve_SelectsEndpointInOrder(string server, string suppliedDomain, string environmentDomain,
-        string expectedTarget, bool expectedPinned) {
-        var harness = new Harness(new LdapConfig { Server = server }, environmentDomain);
+    [InlineData("dc.example.test", "child.example.test", "credential.test", "other.test", "dc.example.test", true)]
+    [InlineData("dc.example.test", null, "credential.test", "other.test", "dc.example.test", true)]
+    [InlineData(null, "child.example.test", "credential.test", "other.test", "child.example.test", false)]
+    [InlineData(" ", "child.example.test", null, "other.test", "child.example.test", false)]
+    [InlineData(null, null, "child.example.test", "other.test", "child.example.test", false)]
+    [InlineData(null, " ", " child.example.test ", "other.test", "child.example.test", false)]
+    [InlineData(null, null, null, "child.example.test", "child.example.test", false)]
+    [InlineData(null, null, "", "child.example.test", "child.example.test", false)]
+    [InlineData(null, " ", " ", "other.test", "other.test", false)]
+    public void TryResolve_SelectsEndpointInOrder(string server, string suppliedDomain, string userDomain,
+        string environmentDomain, string expectedTarget, bool expectedPinned) {
+        var harness = new Harness(new LdapConfig { Server = server, UserDomain = userDomain }, environmentDomain);
         var connection = new FakeConnection();
         harness.Connections.Enqueue(connection);
 
@@ -77,8 +81,29 @@ public class LdapDomainResolverTests {
 
         Assert.Equal("CHILD.EXAMPLE.TEST", domain.Name);
         Assert.Equal((expectedTarget, true, expectedPinned), Assert.Single(harness.Attempts));
-        Assert.Equal(string.IsNullOrWhiteSpace(server) && string.IsNullOrWhiteSpace(suppliedDomain) ? 1 : 0,
+        Assert.Equal(string.IsNullOrWhiteSpace(server) && string.IsNullOrWhiteSpace(suppliedDomain) &&
+            string.IsNullOrWhiteSpace(userDomain) ? 1 : 0,
             harness.EnvironmentReads);
+        Assert.True(connection.Disposed);
+    }
+
+    [Theory]
+    [InlineData("child.example.test")]
+    [InlineData("child.example.test.")]
+    [InlineData("CHILD")]
+    public void TryResolve_UserDomainSupportsDnsAndNetBiosEndpointHints(string userDomain) {
+        var config = new LdapConfig { UserDomain = userDomain };
+        var harness = new Harness(config, "local.logon.test");
+        var connection = new FakeConnection();
+        harness.Connections.Enqueue(connection);
+
+        Assert.True(harness.Resolver.TryResolve(null, out var domain));
+
+        Assert.Equal("CHILD.EXAMPLE.TEST", domain.Name);
+        Assert.Equal((userDomain, true, false), Assert.Single(harness.Attempts));
+        Assert.Equal(0, harness.EnvironmentReads);
+        Assert.Single(connection.Requests);
+        Assert.Null(config.Username);
         Assert.True(connection.Disposed);
     }
 
