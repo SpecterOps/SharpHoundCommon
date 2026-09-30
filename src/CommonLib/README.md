@@ -39,7 +39,7 @@ You may optionally provide an `ILogger` and a pre-created `Cache` instance to `C
 
 `SharpHoundCommonLib.Models.LdapDomainInfo` holds plain domain metadata: domain and forest names, the domain SID, naming contexts, the PDC hostname, `DomainControllerNames`, and `TrustTypes`. Additional strings may be null; collections start empty. `TrustTypes` compares target domain names case-insensitively.
 
-`LdapConfig.AllowUncontrolledDomainFallback` defaults to `false` and appears in configuration logging. It is reserved for permitting legacy framework resolution after controlled LDAP resolution fails; that fallback may ignore LDAP settings. The current `GetDomain` signatures and behavior are unchanged, and this flag does not yet control those calls.
+`LdapConfig.AllowUncontrolledDomainFallback` defaults to `false` and appears in configuration logging. The internal resolver attempts controlled LDAP first and permits legacy framework resolution only after core identity resolution fails and this flag is enabled. Fallback use is logged and may ignore LDAP settings. Successful controlled results with unavailable additional metadata never trigger legacy enrichment. The current public `GetDomain` signatures and behavior are unchanged, and this flag does not yet control those calls.
 
 `LdapConfig.UserDomain` declares the DNS or NetBIOS domain associated with the user's credentials. The internal controlled resolver selects its endpoint in this order: `Server`, the supplied domain argument, `UserDomain`, then `USERDNSDOMAIN`. Null, empty, or whitespace hints are ignored. The resolved identity comes from LDAP; the hint does not restrict collection to the credential domain.
 
