@@ -10,6 +10,13 @@ namespace SharpHoundCommonLib.Models;
 /// Unavailable additional strings are null and unavailable collections are empty.
 /// </summary>
 public class LdapDomainInfo {
+    internal string GetNamingContext(NamingContext context) => context switch {
+        NamingContext.Default => DefaultNamingContext,
+        NamingContext.Configuration => ConfigurationNamingContext,
+        NamingContext.Schema => SchemaNamingContext,
+        _ => throw new ArgumentOutOfRangeException(nameof(context), context, null)
+    };
+
     /// <summary>The resolved DNS domain name.</summary>
     public string Name { get; set; }
 
