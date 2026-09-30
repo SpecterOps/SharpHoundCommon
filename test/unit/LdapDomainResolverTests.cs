@@ -6,6 +6,7 @@ using System.Linq;
 using System.Security.Principal;
 using CommonLibTest.Facades;
 using SharpHoundCommonLib;
+using SharpHoundCommonLib.Enums;
 using SharpHoundCommonLib.LDAPQueries;
 using Xunit;
 
@@ -44,6 +45,10 @@ public class LdapDomainResolverTests {
         internal Func<SearchRequest, IReadOnlyList<IDirectoryObject>> OnSearch = _ => new[] { Root() };
         internal Func<SearchRequest, (IReadOnlyList<IDirectoryObject> Entries, byte[] Cookie)> OnPage =
             _ => (Array.Empty<IDirectoryObject>(), Array.Empty<byte>());
+        internal Func<SearchRequest, (IReadOnlyList<IDirectoryObject> Entries, byte[] Cookie)> OnTopologyPage =
+            _ => (Array.Empty<IDirectoryObject>(), Array.Empty<byte>());
+        internal Func<SearchRequest, (IReadOnlyList<IDirectoryObject> Entries, byte[] Cookie)> OnTrustPage =
+            _ => (Array.Empty<IDirectoryObject>(), Array.Empty<byte>());
         internal Exception BindFailure;
         internal bool Bound;
         internal bool Disposed;
@@ -62,7 +67,8 @@ public class LdapDomainResolverTests {
         public IReadOnlyList<IDirectoryObject> SearchPage(SearchRequest request, out byte[] cookie) {
             Assert.True(Bound);
             Requests.Add(request);
-            var page = OnPage(request);
+            var page = request.Filter.Equals(CommonFilters.TrustedDomains) ? OnTrustPage(request) :
+                request.Scope == SearchScope.OneLevel ? OnTopologyPage(request) : OnPage(request);
             cookie = page.Cookie;
             return page.Entries;
         }
@@ -128,7 +134,7 @@ public class LdapDomainResolverTests {
         Assert.Equal("CHILD.EXAMPLE.TEST", domain.Name);
         Assert.Equal((userDomain, true, false), Assert.Single(harness.Attempts));
         Assert.Equal(0, harness.EnvironmentReads);
-        Assert.Equal(3, connection.Requests.Count);
+        Assert.Equal(5, connection.Requests.Count);
         Assert.Null(config.Username);
         Assert.True(connection.Disposed);
     }
@@ -186,7 +192,7 @@ public class LdapDomainResolverTests {
             Assert.Null(domain);
         }
         Assert.Equal((server ?? suppliedDomain, true, server != null), Assert.Single(harness.Attempts));
-        Assert.Equal(expected ? 3 : 1, connection.Requests.Count);
+        Assert.Equal(expected ? 5 : 1, connection.Requests.Count);
         Assert.True(connection.Disposed);
     }
 
@@ -330,7 +336,7 @@ public class LdapDomainResolverTests {
         Assert.Equal(expected, harness.Resolver.TryResolve("CHILD", out var domain));
         Assert.Equal(expected, domain != null);
         Assert.Equal(("dc.example.test", true, true), Assert.Single(harness.Attempts));
-        Assert.Equal(expected ? 4 : 2, connection.Requests.Count);
+        Assert.Equal(expected ? 6 : 2, connection.Requests.Count);
         var request = connection.Requests[1];
         Assert.Equal("CN=Partitions," + ConfigDn, request.DistinguishedName);
         Assert.Equal(SearchScope.OneLevel, request.Scope);
@@ -544,7 +550,7 @@ public class LdapDomainResolverTests {
         Assert.True(harness.Resolver.TryResolve("child.example.test", out var domain));
         Assert.Equal(DomainSid, domain.DomainSid);
         Assert.Null(domain.PdcRoleOwnerName);
-        Assert.Equal(3, connection.Requests.Count);
+        Assert.Equal(5, connection.Requests.Count);
         Assert.True(connection.Disposed);
     }
 
@@ -612,6 +618,218 @@ public class LdapDomainResolverTests {
         Assert.Empty(domain.DomainControllerNames);
         Assert.Equal(2, pages);
         Assert.Equal(("pinned.example.test", true, true), Assert.Single(harness.Attempts));
+        Assert.True(connection.Disposed);
+    }
+
+    private static IDirectoryObject CrossRef(string name, string parent = null) {
+        var entry = (MockDirectoryObject)Entry(("nCName", "DC=" + name.Replace(".", ",DC=")));
+        entry.DistinguishedName = "CN=" + name + ",CN=Partitions," + ConfigDn;
+        if (parent != null) entry.Properties["trustParent"] = "CN=" + parent + ",CN=Partitions," + ConfigDn;
+        return entry;
+    }
+
+    private static IDirectoryObject Trust(string target, int type = 2,
+        TrustAttributes attributes = TrustAttributes.WithinForest) =>
+        Entry(("trustPartner", target), ("trustType", type), ("trustAttributes", (int)attributes));
+
+    private static IDirectoryObject[] ForestTopology() => new[] {
+        CrossRef("example.test"),
+        CrossRef("child.example.test", "EXAMPLE.TEST"),
+        CrossRef("grandchild.child.example.test", "child.example.test"),
+        CrossRef("sibling.example.test", "example.test"),
+        CrossRef("alternate.test"),
+        CrossRef("other.test"),
+        CrossRef("child.alternate.test", "alternate.test")
+    };
+
+    [Theory]
+    [InlineData("child.example.test", "EXAMPLE.TEST", TrustType.ParentChild)]
+    [InlineData("example.test", "CHILD.EXAMPLE.TEST", TrustType.ParentChild)]
+    [InlineData("example.test", "alternate.test", TrustType.TreeRoot)]
+    [InlineData("alternate.test", "example.test", TrustType.TreeRoot)]
+    [InlineData("alternate.test", "other.test", TrustType.CrossLink)]
+    [InlineData("child.example.test", "alternate.test", TrustType.CrossLink)]
+    [InlineData("alternate.test", "child.example.test", TrustType.CrossLink)]
+    [InlineData("child.example.test", "sibling.example.test", TrustType.CrossLink)]
+    [InlineData("child.example.test", "grandchild.child.example.test", TrustType.ParentChild)]
+    [InlineData("example.test", "grandchild.child.example.test", TrustType.CrossLink)]
+    [InlineData("alternate.test", "child.alternate.test", TrustType.ParentChild)]
+    public void TryResolve_ClassifiesWithinForestTrustsFromCrossRefLinks(string source, string target, TrustType expected) {
+        var harness = new Harness(new LdapConfig { Server = "pinned.example.test" });
+        var connection = new FakeConnection {
+            OnSearch = request => request.DistinguishedName == "" ? new[] { Entry(
+                ("defaultNamingContext", "DC=" + source.Replace(".", ",DC=")),
+                ("rootDomainNamingContext", "DC=example,DC=test"), ("configurationNamingContext", ConfigDn)) } :
+                Array.Empty<IDirectoryObject>(),
+            OnTopologyPage = _ => (ForestTopology(), Array.Empty<byte>()),
+            OnTrustPage = _ => (new[] { Trust(target) }, Array.Empty<byte>())
+        };
+        harness.Connections.Enqueue(connection);
+
+        Assert.True(harness.Resolver.TryResolve(source, out var domain));
+        Assert.Equal(expected, domain.TrustTypes[target.ToLowerInvariant()]);
+        Assert.Single(domain.TrustTypes);
+        Assert.Equal(("pinned.example.test", true, true), Assert.Single(harness.Attempts));
+        Assert.True(connection.Disposed);
+    }
+
+    [Theory]
+    [InlineData(3, TrustAttributes.WithinForest, TrustType.Kerberos)]
+    [InlineData(2, TrustAttributes.ForestTransitive, TrustType.Forest)]
+    [InlineData(2, TrustAttributes.ForestTransitive | TrustAttributes.TreatAsExternal, TrustType.Forest)]
+    [InlineData(2, TrustAttributes.NonTransitive, TrustType.External)]
+    [InlineData(1, TrustAttributes.QuarantinedDomain, TrustType.External)]
+    [InlineData(2, (TrustAttributes)0, TrustType.External)]
+    [InlineData(2, TrustAttributes.WithinForest, TrustType.Unknown)]
+    [InlineData(99, (TrustAttributes)0, TrustType.Unknown)]
+    public void TryResolve_ClassifiesTrustRecordsWithoutTopology(int type, TrustAttributes attributes, TrustType expected) {
+        var harness = new Harness();
+        var connection = new FakeConnection {
+            OnTopologyPage = _ => throw new LdapException(81),
+            OnTrustPage = _ => (new[] { Trust("target.test", type, attributes) }, Array.Empty<byte>())
+        };
+        harness.Connections.Enqueue(connection);
+
+        Assert.True(harness.Resolver.TryResolve("child.example.test", out var domain));
+        Assert.Equal(expected, domain.TrustTypes["TARGET.TEST"]);
+        Assert.Single(harness.Attempts);
+        Assert.True(connection.Disposed);
+    }
+
+    [Fact]
+    public void TryResolve_PagesTopologyAndTrustRecordsOnConfiguredConnection() {
+        var harness = new Harness(new LdapConfig { Server = "pinned.example.test" });
+        var topologyPages = 0;
+        var trustPages = 0;
+        var connection = new FakeConnection {
+            OnTopologyPage = request => {
+                Assert.Equal("CN=Partitions," + ConfigDn, request.DistinguishedName);
+                Assert.Equal(SearchScope.OneLevel, request.Scope);
+                Assert.Equal("(&(objectClass=crossRef)(systemFlags:1.2.840.113556.1.4.803:=2))", request.Filter);
+                Assert.Equal(new[] { "nCName", "trustParent", "distinguishedName" }, request.Attributes.Cast<string>());
+                var control = Assert.IsType<PageResultRequestControl>(Assert.Single(request.Controls.Cast<DirectoryControl>()));
+                Assert.Equal(500, control.PageSize);
+                if (topologyPages++ == 0) {
+                    Assert.Empty(control.Cookie);
+                    return (new[] { CrossRef("child.example.test", "example.test") }, new byte[] { 1 });
+                }
+                Assert.Equal(new byte[] { 1 }, control.Cookie);
+                return (new[] { CrossRef("example.test"), CrossRef("alternate.test") }, Array.Empty<byte>());
+            },
+            OnTrustPage = request => {
+                Assert.Equal(DomainDn, request.DistinguishedName);
+                Assert.Equal(SearchScope.Subtree, request.Scope);
+                Assert.Equal(new[] { "trustPartner", "trustType", "trustAttributes" }, request.Attributes.Cast<string>());
+                var control = Assert.IsType<PageResultRequestControl>(Assert.Single(request.Controls.Cast<DirectoryControl>()));
+                Assert.Equal(500, control.PageSize);
+                if (trustPages++ == 0) {
+                    Assert.Empty(control.Cookie);
+                    return (new[] { Trust("example.test") }, new byte[] { 2 });
+                }
+                Assert.Equal(new byte[] { 2 }, control.Cookie);
+                return (new[] { Trust("EXAMPLE.TEST"), Trust("alternate.test"), Entry() }, Array.Empty<byte>());
+            }
+        };
+        harness.Connections.Enqueue(connection);
+
+        Assert.True(harness.Resolver.TryResolve("child.example.test", out var domain));
+        Assert.Equal(TrustType.ParentChild, domain.TrustTypes["Example.Test"]);
+        Assert.Equal(TrustType.CrossLink, domain.TrustTypes["ALTERNATE.TEST"]);
+        Assert.Equal(2, domain.TrustTypes.Count);
+        Assert.Equal(2, topologyPages);
+        Assert.Equal(2, trustPages);
+        Assert.Equal(("pinned.example.test", true, true), Assert.Single(harness.Attempts));
+        Assert.True(connection.Disposed);
+    }
+
+    [Theory]
+    [InlineData("configuration")]
+    [InlineData("source")]
+    [InlineData("target")]
+    [InlineData("forest")]
+    [InlineData("duplicate")]
+    public void TryResolve_MissingOrAmbiguousTopologyLeavesWithinForestTrustUnknown(string missing) {
+        var topology = ForestTopology().ToList();
+        if (missing == "source") topology.RemoveAt(1);
+        if (missing == "target") topology.RemoveAt(4);
+        if (missing == "duplicate") topology.Add(CrossRef("CHILD.EXAMPLE.TEST", "example.test"));
+        var source = missing == "forest" ? "example.test" : "child.example.test";
+        var harness = new Harness();
+        var connection = new FakeConnection {
+            OnSearch = request => request.DistinguishedName == "" ? new[] { Entry(
+                ("defaultNamingContext", "DC=" + source.Replace(".", ",DC=")),
+                ("rootDomainNamingContext", missing == "forest" ? "" : "DC=example,DC=test"),
+                ("configurationNamingContext", missing == "configuration" ? "" : ConfigDn)) } : Array.Empty<IDirectoryObject>(),
+            OnTopologyPage = _ => (topology, Array.Empty<byte>()),
+            OnTrustPage = _ => (new[] { Trust("alternate.test") }, Array.Empty<byte>())
+        };
+        harness.Connections.Enqueue(connection);
+
+        Assert.True(harness.Resolver.TryResolve(source, out var domain));
+        Assert.Equal(TrustType.Unknown, domain.TrustTypes["alternate.test"]);
+        Assert.Single(harness.Attempts);
+        Assert.True(connection.Disposed);
+    }
+
+    [Theory]
+    [InlineData(true, true)]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    [InlineData(false, false)]
+    public void TryResolve_IncompleteTrustMetadataPreservesCoreWithoutRetry(bool failTopology, bool missingControl) {
+        var harness = new Harness(new LdapConfig { Server = "pinned.example.test", AllowUncontrolledDomainFallback = true });
+        var pages = 0;
+        (IReadOnlyList<IDirectoryObject>, byte[]) ReadIncompletePage(SearchRequest _) {
+            if (pages++ == 0) return (failTopology ? ForestTopology() : new[] { Trust("example.test") }, new byte[] { 1 });
+            if (missingControl) return (Array.Empty<IDirectoryObject>(), null);
+            throw new DirectoryOperationException("Later page unavailable");
+        }
+        var connection = new FakeConnection {
+            OnTopologyPage = failTopology ? ReadIncompletePage : _ => (ForestTopology(), Array.Empty<byte>()),
+            OnTrustPage = failTopology ? _ => (new[] { Trust("example.test"),
+                Trust("external.test", attributes: TrustAttributes.NonTransitive) }, Array.Empty<byte>()) : ReadIncompletePage
+        };
+        harness.Connections.Enqueue(connection);
+
+        Assert.True(harness.Resolver.TryResolve("child.example.test", out var domain));
+        Assert.Equal("CHILD.EXAMPLE.TEST", domain.Name);
+        Assert.Equal(DomainDn, domain.DefaultNamingContext);
+        if (failTopology) {
+            Assert.Equal(TrustType.Unknown, domain.TrustTypes["example.test"]);
+            Assert.Equal(TrustType.External, domain.TrustTypes["external.test"]);
+        }
+        else Assert.Empty(domain.TrustTypes);
+        Assert.Equal(2, pages);
+        Assert.Equal(("pinned.example.test", true, true), Assert.Single(harness.Attempts));
+        Assert.True(connection.Disposed);
+    }
+
+    [Theory]
+    [InlineData("trustType")]
+    [InlineData("trustAttributes")]
+    [InlineData("sourceDn")]
+    [InlineData("targetDn")]
+    [InlineData("emptyParent")]
+    [InlineData("multipleParents")]
+    public void TryResolve_UnreadableTrustFieldsOrTopologyLeaveClassificationUnknown(string malformed) {
+        var source = (MockDirectoryObject)CrossRef("child.example.test", "example.test");
+        var target = (MockDirectoryObject)CrossRef("example.test");
+        var trust = (MockDirectoryObject)Trust("example.test");
+        if (malformed == "trustType" || malformed == "trustAttributes") trust.Properties[malformed] = "invalid";
+        if (malformed == "sourceDn") source.DistinguishedName = "";
+        if (malformed == "targetDn") target.DistinguishedName = "";
+        if (malformed == "emptyParent") source.Properties["trustParent"] = " ";
+        if (malformed == "multipleParents") source.Properties["trustParent"] = new[] { target.DistinguishedName, "CN=other" };
+        var harness = new Harness();
+        var connection = new FakeConnection {
+            OnTopologyPage = _ => (new[] { source, target }, Array.Empty<byte>()),
+            OnTrustPage = _ => (new[] { trust }, Array.Empty<byte>())
+        };
+        harness.Connections.Enqueue(connection);
+
+        Assert.True(harness.Resolver.TryResolve("child.example.test", out var domain));
+        Assert.Equal(TrustType.Unknown, domain.TrustTypes["example.test"]);
+        Assert.Single(harness.Attempts);
         Assert.True(connection.Disposed);
     }
 }
