@@ -10,17 +10,12 @@ using SharpHoundCommonLib.Models;
 namespace SharpHoundCommonLib {
     // Resolves domain identity directly from LDAP. Do not use LdapUtils or the pools here:
     // pool initialization itself needs domain resolution and would recurse back into this code.
-    internal sealed class LdapDomainResolver {
-        // Creates an unbound connection owned and disposed by the resolver.
-        internal delegate IConnection ConnectionFactory(string target, bool ssl, bool pinServer);
-
-        // Reads the USERDNSDOMAIN endpoint hint when no explicit target or UserDomain hint is available.
-        internal delegate string EnvironmentDomainReader();
-
+    internal sealed partial class LdapDomainResolver {
         private readonly LdapConfig _config;
         private readonly ILogger _log;
         private readonly ConnectionFactory _createConnection;
         private readonly EnvironmentDomainReader _getEnvironmentDomain;
+        private readonly Func<string, ILegacyDomain> _getLegacyDomain;
 
         // The shared factory preserves LDAP settings and leaves credentials unset when no
         // username is configured, allowing the bind to use ambient outbound credentials.
@@ -28,17 +23,6 @@ namespace SharpHoundCommonLib {
             : this(config, (target, ssl, pinServer) =>
                 new Connection(LdapConnectionFactory.Create(config, target, ssl, pinServer: pinServer)),
                 () => Environment.GetEnvironmentVariable("USERDNSDOMAIN"), log) { }
-
-        // These delegates keep connection failures and environment hints testable without AD
-        // access or changes to process-wide environment variables.
-        internal LdapDomainResolver(LdapConfig config,
-            ConnectionFactory createConnection, EnvironmentDomainReader getEnvironmentDomain,
-            ILogger log = null) {
-            _config = config;
-            _createConnection = createConnection;
-            _getEnvironmentDomain = getEnvironmentDomain;
-            _log = log ?? Logging.LogProvider.CreateLogger("LdapDomainResolver");
-        }
 
         /// <summary>
         /// Resolves a domain name and default naming context; additional naming contexts may be null.
@@ -352,14 +336,6 @@ namespace SharpHoundCommonLib {
                 .Replace("\0", "\\00");
         }
 
-        // Test seam limited to the direct resolver's operations and connection ownership.
-        internal interface IConnection : IDisposable {
-            void Bind();
-            IReadOnlyList<IDirectoryObject> Search(SearchRequest request);
-            // A null cookie means the response omitted the paging control; empty means complete.
-            IReadOnlyList<IDirectoryObject> SearchPage(SearchRequest request, out byte[] cookie);
-        }
-
         // Thin adapter over direct LDAP operations; it performs no discovery or pool access.
         private sealed class Connection : IConnection {
             private readonly LdapConnection _connection;
@@ -380,7 +356,7 @@ namespace SharpHoundCommonLib {
             }
 
             private static IReadOnlyList<IDirectoryObject> WrapEntries(SearchResponse response) {
-                // Reuse the common attribute accessors and expose the existing test abstraction.
+                // Reuse the common directory attribute accessors.
                 return response.Entries.Cast<SearchResultEntry>()
                     .Select(entry => (IDirectoryObject)new SearchResultEntryWrapper(entry)).ToArray();
             }
