@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.Versioning;
 using System.Text;
@@ -215,6 +216,21 @@ namespace CommonLibTest {
             Exception ex = Assert.Throws<FormatException>(() =>
                 Helpers.ConvertFileTimeToUnixEpoch("-201adsfasf12180244"));
             Assert.Equal("The input string '-201adsfasf12180244' was not in a correct format.", ex.Message);
+        }
+
+        [Fact]
+        public void DistinguishedNameToDomain_TurkishCulture_UsesInvariantCasing() {
+            var originalCulture = CultureInfo.CurrentCulture;
+            try {
+                CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("tr-TR");
+
+                var result = Helpers.DistinguishedNameToDomain("DC=child,DC=example,DC=test");
+
+                Assert.Equal("CHILD.EXAMPLE.TEST", result);
+            }
+            finally {
+                CultureInfo.CurrentCulture = originalCulture;
+            }
         }
 
         [Fact]
