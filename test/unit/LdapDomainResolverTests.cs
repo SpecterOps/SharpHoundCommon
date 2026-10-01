@@ -4,6 +4,7 @@ using System.DirectoryServices.Protocols;
 using System.Globalization;
 using System.Linq;
 using System.Security.Principal;
+using System.Text.RegularExpressions;
 using CommonLibTest.Facades;
 using SharpHoundCommonLib;
 using SharpHoundCommonLib.Enums;
@@ -467,7 +468,8 @@ public class LdapDomainResolverTests {
             OnPage = request => {
                 Assert.Equal(DomainDn, request.DistinguishedName);
                 Assert.Equal(SearchScope.Subtree, request.Scope);
-                Assert.Equal(CommonFilters.DomainControllers, request.Filter);
+                Assert.Equal("(|(userAccountControl:1.2.840.113556.1.4.803:=8192)" +
+                    "(userAccountControl:1.2.840.113556.1.4.803:=67108864))", request.Filter);
                 Assert.Equal(new[] { "dNSHostName" }, request.Attributes.Cast<string>());
                 var control = Assert.IsType<PageResultRequestControl>(Assert.Single(request.Controls.Cast<DirectoryControl>()));
                 Assert.Equal(500, control.PageSize);
@@ -491,6 +493,38 @@ public class LdapDomainResolverTests {
         Assert.Equal(new[] { "dc1.child.example.test", "dc2.child.example.test" }, domain.DomainControllerNames);
         Assert.Equal(2, page);
         Assert.Equal(("pinned.example.test", true, true), Assert.Single(harness.Attempts));
+        Assert.True(connection.Disposed);
+    }
+
+    [Fact]
+    public void TryResolve_ControllerDiscoveryIncludesWritableAndReadOnlyControllersWithoutWorkstations() {
+        var accounts = new[] {
+            (Hostname: "dc.child.example.test", UserAccountControl: 0x82000),
+            (Hostname: "rodc.child.example.test", UserAccountControl: 0x5001000),
+            (Hostname: "workstation.child.example.test", UserAccountControl: 0x1000)
+        };
+        var harness = new Harness();
+        var connection = new FakeConnection {
+            OnSearch = request => request.DistinguishedName == "" ? new[] { Root() } :
+                Array.Empty<IDirectoryObject>(),
+            OnPage = request => {
+                // Evaluate the two LDAP bitwise-AND clauses against a mixed account set,
+                // rather than returning an RODC regardless of the requested filter.
+                var clause = @"\(userAccountControl:1\.2\.840\.113556\.1\.4\.803:=(\d+)\)";
+                var filter = Regex.Match(Assert.IsType<string>(request.Filter), @"^\(\|" + clause + clause + @"\)$");
+                Assert.True(filter.Success);
+                var masks = new[] { int.Parse(filter.Groups[1].Value), int.Parse(filter.Groups[2].Value) };
+                var entries = accounts.Where(account => masks.Any(mask =>
+                        (account.UserAccountControl & mask) == mask))
+                    .Select(account => Entry(("dNSHostName", account.Hostname))).ToArray();
+                return (entries, Array.Empty<byte>());
+            }
+        };
+        harness.Connections.Enqueue(connection);
+
+        Assert.True(harness.Resolver.TryResolve("child.example.test", out var domain));
+
+        Assert.Equal(new[] { "dc.child.example.test", "rodc.child.example.test" }, domain.DomainControllerNames);
         Assert.True(connection.Disposed);
     }
 

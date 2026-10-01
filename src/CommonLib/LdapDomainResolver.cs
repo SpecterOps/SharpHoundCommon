@@ -234,7 +234,12 @@ namespace SharpHoundCommonLib {
         }
 
         private static List<string> ReadControllerNames(IConnection connection, string defaultNamingContext) {
-            var request = new SearchRequest(defaultNamingContext, CommonFilters.DomainControllers,
+            // RODCs carry PARTIAL_SECRETS_ACCOUNT rather than SERVER_TRUST_ACCOUNT.
+            var controllerFilter = new LdapFilter()
+                .AddFilter(CommonFilters.DomainControllers, false)
+                .AddFilter("(userAccountControl:1.2.840.113556.1.4.803:=67108864)", false)
+                .GetFilter();
+            var request = new SearchRequest(defaultNamingContext, controllerFilter,
                 SearchScope.Subtree, "dNSHostName");
             var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             foreach (var entry in ReadPages(connection, request)) {

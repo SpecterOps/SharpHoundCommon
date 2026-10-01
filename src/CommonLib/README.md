@@ -39,6 +39,8 @@ You may optionally provide an `ILogger` and a pre-created `Cache` instance to `C
 
 `SharpHoundCommonLib.Models.LdapDomainInfo` holds plain domain metadata: domain and forest names, the domain SID, naming contexts, the PDC hostname, `DomainControllerNames`, and `TrustTypes`. Additional strings may be null; collections start empty. `TrustTypes` compares target domain names case-insensitively.
 
+Controlled LDAP discovery includes both writable and read-only domain controllers in `DomainControllerNames`, providing candidates for the connection pool's controller fallback strategy.
+
 All `GetDomain` overloads now return `LdapDomainInfo` through the synchronous `bool`/`out` pattern instead of framework `Domain` objects. Success requires a resolved name and default naming context. Callers should use the returned naming contexts and check optional metadata before using it. Successful controlled results are cached per `LdapUtils` instance, case-insensitively; `SetLdapConfig` and `ResetUtils` clear that cache. Static calls and legacy results are not cached.
 
 `LdapConfig.AllowUncontrolledDomainFallback` defaults to `false` and appears in configuration logging. `GetDomain` attempts controlled LDAP first and permits legacy framework resolution only after core identity resolution fails and this flag is enabled. Fallback use is logged and may ignore LDAP settings. Successful controlled results with unavailable additional metadata never trigger legacy enrichment.
