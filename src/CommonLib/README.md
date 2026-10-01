@@ -45,15 +45,25 @@ All `GetDomain` overloads now return `LdapDomainInfo` through the synchronous `b
 
 `LdapConfig.UserDomain` declares the DNS or NetBIOS domain associated with the user's credentials. The internal controlled resolver selects its endpoint in this order: `Server`, the supplied domain argument, `UserDomain`, then `USERDNSDOMAIN`. Null, empty, or whitespace hints are ignored. The resolved identity comes from LDAP; the hint does not restrict collection to the credential domain.
 
-For `/netonly`, set `UserDomain` to the outbound credential domain and leave `Username` unset so LDAP binding uses ambient outbound credentials:
+For reliable `/netonly` use, supply an explicit `Server` or domain argument to `GetDomain` and leave `Username` unset so LDAP binding can use ambient outbound credentials. For example, run the calling application under `runas /netonly` and resolve the target through the static overload:
 
 ```csharp
 var config = new LdapConfig {
-    UserDomain = "child.example.test"
+    Server = "dc.child.example.test",
+    ForceSSL = true
 };
+
+if (LdapUtils.GetDomain("child.example.test", config, out var domain)) {
+    // domain.Name and domain.DefaultNamingContext come from the target's LDAP response.
+    var searchBase = domain.DefaultNamingContext;
+}
 ```
 
 `UserDomain` defaults to null and appears in configuration logging. It guides endpoint selection without changing credentials or the Windows authentication context. For reliable `/netonly` targeting, supply `Server` or a domain argument to `GetDomain`; `USERDNSDOMAIN` is only a last-resort target hint.
+
+Controlled resolution tries SSL first, using `SSLPort` (default 636). An SSL operation failure permits a retry on the same endpoint using `Port` (default 389) only when `ForceSSL` is false. It preserves `AuthType`, enables signing and sealing on plaintext connections unless `DisableSigning` is set, and validates certificates unless `DisableCertVerification` is set. A configured `Username` supplies explicit credentials instead of ambient credentials.
+
+With `Server` configured, every resolver read stays on that host with referrals and automatic reconnection disabled. Discovered PDC and controller names are returned as metadata. A supplied DNS domain or NetBIOS alias must match the target's advertised identity; a mismatch fails controlled resolution. Unavailable SID, PDC, controller, or trust metadata preserves successful core resolution without changing endpoints or invoking legacy enrichment.
 
 ## Relationship to SharpHoundRPC
 

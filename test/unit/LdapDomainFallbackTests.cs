@@ -82,8 +82,17 @@ public class LdapDomainFallbackTests {
     [InlineData(true, true)]
     public void ControlledSuccess_NeverInvokesFallback(bool enabled, bool failMetadata) {
         var connection = new Connection { FailMetadata = failMetadata };
-        var resolver = new LdapDomainResolver(new LdapConfig { AllowUncontrolledDomainFallback = enabled },
-            (_, _, _) => connection, () => null,
+        var connectionCalls = 0;
+        var resolver = new LdapDomainResolver(new LdapConfig {
+                Server = "pinned.example.test", AllowUncontrolledDomainFallback = enabled
+            },
+            (target, ssl, pinServer) => {
+                Assert.Equal("pinned.example.test", target);
+                Assert.True(ssl);
+                Assert.True(pinServer);
+                connectionCalls++;
+                return connection;
+            }, () => null,
             getLegacyDomain: _ => throw new Xunit.Sdk.XunitException("Fallback must not be invoked"));
 
         Assert.True(resolver.TryResolveWithFallback(DomainName, out var domain, out var usedLegacy));
@@ -93,6 +102,7 @@ public class LdapDomainFallbackTests {
         Assert.Null(domain.DomainSid);
         Assert.Empty(domain.DomainControllerNames);
         Assert.Empty(domain.TrustTypes);
+        Assert.Equal(1, connectionCalls);
         Assert.True(connection.Disposed);
     }
 
