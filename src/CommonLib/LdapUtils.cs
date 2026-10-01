@@ -27,9 +27,11 @@ using SearchScope = System.DirectoryServices.Protocols.SearchScope;
 
 namespace SharpHoundCommonLib {
     public class LdapUtils : ILdapUtils {
-        // Only successful controlled results are cached, by requested domain name.
-        private ConcurrentDictionary<string, LdapDomainInfo> _domainCache = new(StringComparer.OrdinalIgnoreCase);
+        // Successful results from either enabled resolution path are cached by requested domain name.
+        private ConcurrentDictionary<string, DomainCacheEntry> _domainCache = new(StringComparer.OrdinalIgnoreCase);
         private readonly Func<LdapConfig, LdapDomainResolver> _createDomainResolver;
+        private readonly Func<DateTime> _utcNow = () => DateTime.UtcNow;
+        private static readonly TimeSpan MetadataRetryInterval = TimeSpan.FromSeconds(30);
         private static ConcurrentHashSet _domainControllers = new(StringComparer.OrdinalIgnoreCase);
         private static ConcurrentHashSet _unresolvablePrincipals = new(StringComparer.OrdinalIgnoreCase);
 
@@ -94,8 +96,18 @@ namespace SharpHoundCommonLib {
             _connectionPool = new ConnectionPoolManager(_ldapConfig, scanner: _portScanner);
         }
 
-        internal LdapUtils(Func<LdapConfig, LdapDomainResolver> createDomainResolver) : this() {
+        internal LdapUtils(Func<LdapConfig, LdapDomainResolver> createDomainResolver,
+            Func<DateTime> utcNow = null) : this() {
             _createDomainResolver = createDomainResolver;
+            _utcNow = utcNow ?? (() => DateTime.UtcNow);
+        }
+
+        private sealed class DomainCacheEntry {
+            internal readonly LdapDomainResolver Resolver;
+            internal LdapDomainResolver.MetadataState Metadata;
+            internal DateTime RetryAfter;
+
+            internal DomainCacheEntry(LdapDomainResolver resolver) => Resolver = resolver;
         }
 
         public IAsyncEnumerable<Result<string>> RangedRetrieval(string distinguishedName,
@@ -484,18 +496,34 @@ namespace SharpHoundCommonLib {
 
         /// <summary>
         /// Resolves plain domain metadata using configured LDAP settings. A null or blank name
-        /// selects the configured target or discovery hint. Only controlled successes are cached.
+        /// selects the configured target or discovery hint. Successful results from either enabled path are cached.
+        /// Failed metadata reads are retried on a later call after 30 seconds; earlier results remain unchanged.
         /// </summary>
         public bool GetDomain(string domainName, out LdapDomainInfo domain) {
             domainName = string.IsNullOrWhiteSpace(domainName) ? null : domainName.Trim();
             var cacheKey = domainName ?? _nullCacheKey;
             var cache = _domainCache;
-            if (cache.TryGetValue(cacheKey, out domain)) return true;
+            var entry = cache.GetOrAdd(cacheKey, _ => new DomainCacheEntry(
+                _createDomainResolver?.Invoke(_ldapConfig) ?? new LdapDomainResolver(_ldapConfig, _log)));
+            // Serialize both initial resolution and refresh for this requested domain.
+            lock (entry) {
+                if (entry.Metadata == null) {
+                    if (!entry.Resolver.TryResolveWithFallback(domainName, out domain, out _,
+                            out var metadata)) return false;
+                    entry.Metadata = metadata;
+                    entry.RetryAfter = _utcNow().Add(MetadataRetryInterval);
+                }
+                else if (!entry.Metadata.Complete && _utcNow() >= entry.RetryAfter) {
+                    if (entry.Resolver.TryRefreshMetadata(entry.Metadata, out var metadata)) {
+                        entry.Metadata = metadata;
+                    }
+                    // Connection failures also back off while preserving the cached identity.
+                    entry.RetryAfter = _utcNow().Add(MetadataRetryInterval);
+                }
 
-            var resolver = _createDomainResolver?.Invoke(_ldapConfig) ?? new LdapDomainResolver(_ldapConfig, _log);
-            if (!resolver.TryResolveWithFallback(domainName, out domain, out var usedLegacy)) return false;
-            if (!usedLegacy) cache.TryAdd(cacheKey, domain);
-            return true;
+                domain = entry.Metadata.Domain;
+                return true;
+            }
         }
 
         /// <summary>Resolves domain metadata without caching, using the supplied LDAP settings.</summary>
@@ -993,7 +1021,7 @@ namespace SharpHoundCommonLib {
 
         public void SetLdapConfig(LdapConfig config) {
             _ldapConfig = config;
-            _domainCache = new ConcurrentDictionary<string, LdapDomainInfo>(StringComparer.OrdinalIgnoreCase);
+            _domainCache = new ConcurrentDictionary<string, DomainCacheEntry>(StringComparer.OrdinalIgnoreCase);
             DomainToForestCache.Clear();
             _log.LogInformation("New LDAP Config Set:\n {ConfigString}", config.ToString());
             _connectionPool.Dispose();
@@ -1039,7 +1067,7 @@ namespace SharpHoundCommonLib {
 
         public void ResetUtils() {
             _unresolvablePrincipals = new ConcurrentHashSet(StringComparer.OrdinalIgnoreCase);
-            _domainCache = new ConcurrentDictionary<string, LdapDomainInfo>(StringComparer.OrdinalIgnoreCase);
+            _domainCache = new ConcurrentDictionary<string, DomainCacheEntry>(StringComparer.OrdinalIgnoreCase);
             DomainToForestCache.Clear();
             _domainControllers = new ConcurrentHashSet(StringComparer.OrdinalIgnoreCase);
             _connectionPool?.Dispose();
