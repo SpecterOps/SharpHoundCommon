@@ -29,12 +29,24 @@ namespace SharpHoundCommonLib {
         /// Returns false with a null result when the target cannot establish the requested identity.
         /// </summary>
         internal bool TryResolve(string domainName, out LdapDomainInfo domain) {
-            domain = null;
+            var success = TryResolveMetadata(domainName, null, out var metadata);
+            domain = metadata?.Domain;
+            return success;
+        }
+
+        // Keep the successful resolution path and identity when refreshing its failed metadata reads.
+        internal bool TryRefreshMetadata(MetadataState previous, out MetadataState metadata) =>
+            previous.UsedLegacy
+                ? TryResolveLegacy(previous.Domain.Name, previous, out metadata)
+                : TryResolveMetadata(null, previous, out metadata);
+
+        private bool TryResolveMetadata(string domainName, MetadataState previous, out MetadataState metadata) {
+            metadata = null;
             var suppliedDomain = Normalize(domainName);
             var server = Normalize(_config.Server);
             // A configured server selects the endpoint, but does not override validation of
             // an explicitly supplied domain. USERDNSDOMAIN is only a last-resort endpoint hint.
-            var target = server ?? suppliedDomain;
+            var target = previous?.Endpoint ?? server ?? suppliedDomain;
             if (target == null) {
                 // UserDomain describes the credential domain, which can differ from the local
                 // logon environment under /netonly. It guides discovery without changing credentials
@@ -53,12 +65,12 @@ namespace SharpHoundCommonLib {
                 using (var connection = _createConnection(target, ssl: true, pinServer: pinServer)) {
                     connection.Bind();
                     // A mismatch or missing core data is definitive; do not retry over plaintext.
-                    return TryReadIdentity(connection, suppliedDomain, out domain);
+                    return TryReadIdentity(connection, suppliedDomain, target, previous, out metadata);
                 }
             }
             catch (Exception e) when (e is LdapException || e is DirectoryOperationException ||
                                       e is InvalidOperationException || e is ArgumentException) {
-                domain = null;
+                metadata = null;
                 _log.LogDebug(e, "Controlled domain resolution failed for endpoint {Endpoint} using SSL {SSL}",
                     target, true);
                 // Authentication rejection is definitive; another transport would reuse the same credentials.
@@ -73,12 +85,12 @@ namespace SharpHoundCommonLib {
             try {
                 using (var connection = _createConnection(target, ssl: false, pinServer: pinServer)) {
                     connection.Bind();
-                    return TryReadIdentity(connection, suppliedDomain, out domain);
+                    return TryReadIdentity(connection, suppliedDomain, target, previous, out metadata);
                 }
             }
             catch (Exception e) when (e is LdapException || e is DirectoryOperationException ||
                                       e is InvalidOperationException || e is ArgumentException) {
-                domain = null;
+                metadata = null;
                 _log.LogDebug(e, "Controlled domain resolution failed for endpoint {Endpoint} using SSL {SSL}",
                     target, false);
             }
@@ -86,9 +98,9 @@ namespace SharpHoundCommonLib {
             return false;
         }
 
-        private bool TryReadIdentity(IConnection connection, string suppliedDomain,
-            out LdapDomainInfo domain) {
-            domain = null;
+        private bool TryReadIdentity(IConnection connection, string suppliedDomain, string target,
+            MetadataState previous, out MetadataState metadata) {
+            metadata = null;
             // RootDSE is the server's naming-context advertisement. The empty DN and base
             // scope address that entry without needing to know a domain search base first.
             var rootDseRequest = new SearchRequest("", "(objectClass=*)", SearchScope.Base,
@@ -105,6 +117,15 @@ namespace SharpHoundCommonLib {
             if (domainName == null) return false;
 
             var configurationNamingContext = ReadString(root, "configurationNamingContext");
+            if (previous != null) {
+                if (!string.Equals(previous.Domain.Name, domainName, StringComparison.OrdinalIgnoreCase) ||
+                    !string.Equals(previous.Domain.DefaultNamingContext, defaultNamingContext,
+                        StringComparison.OrdinalIgnoreCase)) return false;
+                metadata = previous.Copy();
+                ReadAdditionalMetadata(connection, metadata);
+                return true;
+            }
+
             if (!MatchesSuppliedDomain(connection, suppliedDomain, domainName, defaultNamingContext,
                     configurationNamingContext)) {
                 return false;
@@ -112,104 +133,124 @@ namespace SharpHoundCommonLib {
 
             // Only the default naming context and its domain name are required for success.
             // Missing forest, configuration, or schema metadata must preserve that success.
-            domain = new LdapDomainInfo {
+            var domain = new LdapDomainInfo {
                 Name = domainName,
                 DefaultNamingContext = defaultNamingContext,
                 ForestName = DomainFromNamingContext(ReadString(root, "rootDomainNamingContext")),
                 ConfigurationNamingContext = configurationNamingContext,
                 SchemaNamingContext = ReadString(root, "schemaNamingContext")
             };
-            ReadAdditionalMetadata(connection, domain);
+            metadata = new MetadataState { Domain = domain, Endpoint = target };
+            ReadAdditionalMetadata(connection, metadata);
             return true;
         }
 
-        private void ReadAdditionalMetadata(IConnection connection, LdapDomainInfo domain) {
+        private void ReadAdditionalMetadata(IConnection connection, MetadataState metadata) {
+            var domain = metadata.Domain;
+            ReadDomainMetadata(connection, metadata);
+            ReadOptionalMetadata(domain.Name, "controller hostnames", ref metadata.ControllersRead, () => {
+                // Publish only a complete search; a later-page failure leaves the list empty.
+                domain.DomainControllerNames.AddRange(ReadControllerNames(connection, domain.DefaultNamingContext));
+            });
+            ReadTrustMetadata(connection, metadata);
+        }
+
+        private void ReadDomainMetadata(IConnection connection, MetadataState metadata) {
+            if (metadata.SidRead && metadata.PdcRead) return;
+            var domain = metadata.Domain;
             IDirectoryObject domainRoot = null;
-            ReadOptionalMetadata(domain.Name, "domain root", () => {
+            var rootRead = false;
+            ReadOptionalMetadata(domain.Name, "domain root", ref rootRead, () => {
                 var entries = connection.Search(new SearchRequest(domain.DefaultNamingContext,
                     "(objectClass=*)", SearchScope.Base, "objectSid", "fSMORoleOwner"));
                 if (entries.Count == 1) domainRoot = entries[0];
             });
-
-            if (domainRoot != null) {
-                // SID conversion and the PDC lookup are independent: malformed or unreadable
-                // metadata in either must not prevent the other from being materialized.
-                ReadOptionalMetadata(domain.Name, "domain SID", () => {
-                    if (domainRoot.TryGetSecurityIdentifier(out var sid)) domain.DomainSid = Normalize(sid);
-                });
-                ReadOptionalMetadata(domain.Name, "PDC hostname", () =>
-                    domain.PdcRoleOwnerName = ReadPdcHostname(connection, domainRoot));
+            if (!rootRead) return;
+            if (domainRoot == null) {
+                // A completed search without a usable root is unavailable data, not a failed read.
+                metadata.SidRead = metadata.PdcRead = true;
+                return;
             }
 
-            ReadOptionalMetadata(domain.Name, "controller hostnames", () => {
-                // Publish only a complete search; a later-page failure leaves the list empty.
-                domain.DomainControllerNames.AddRange(ReadControllerNames(connection, domain.DefaultNamingContext));
+            // Retry the shared root dependency, but preserve each successful metadata read.
+            ReadOptionalMetadata(domain.Name, "domain SID", ref metadata.SidRead, () => {
+                if (domainRoot.TryGetSecurityIdentifier(out var sid)) domain.DomainSid = Normalize(sid);
             });
-            ReadTrustMetadata(connection, domain);
+            ReadOptionalMetadata(domain.Name, "PDC hostname", ref metadata.PdcRead, () =>
+                domain.PdcRoleOwnerName = ReadPdcHostname(connection, domainRoot));
         }
 
-        private void ReadTrustMetadata(IConnection connection, LdapDomainInfo domain) {
-            var topology = new Dictionary<string, IDirectoryObject>(StringComparer.OrdinalIgnoreCase);
-            if (domain.ConfigurationNamingContext != null) {
-                ReadOptionalMetadata(domain.Name, "domain trust topology", () => {
-                    var request = new SearchRequest("CN=Partitions," + domain.ConfigurationNamingContext,
-                        "(&(objectClass=crossRef)(systemFlags:1.2.840.113556.1.4.803:=2))",
-                        SearchScope.OneLevel, "nCName", "trustParent", "distinguishedName");
-                    // Materialize every page before publishing topology. An incomplete search
-                    // cannot establish that a missing trustParent denotes a tree root.
-                    var entries = ReadPages(connection, request);
-                    var resolved = new Dictionary<string, IDirectoryObject>(StringComparer.OrdinalIgnoreCase);
-                    foreach (var entry in entries) {
-                        var name = DomainFromNamingContext(ReadString(entry, "nCName"));
-                        if (name != null) resolved.Add(name, entry);
-                    }
-                    topology = resolved;
-                });
-            }
+        private void ReadTrustMetadata(IConnection connection, MetadataState metadata) {
+            var domain = metadata.Domain;
+            if (domain.ConfigurationNamingContext == null) metadata.TopologyRead = true;
+            ReadOptionalMetadata(domain.Name, "domain trust topology", ref metadata.TopologyRead, () => {
+                var request = new SearchRequest("CN=Partitions," + domain.ConfigurationNamingContext,
+                    "(&(objectClass=crossRef)(systemFlags:1.2.840.113556.1.4.803:=2))",
+                    SearchScope.OneLevel, "nCName", "trustParent", "distinguishedName");
+                // Materialize every page before publishing topology. An incomplete search
+                // cannot establish that a missing trustParent denotes a tree root.
+                var entries = ReadPages(connection, request);
+                var resolved = new Dictionary<string, TopologyEntry>(StringComparer.OrdinalIgnoreCase);
+                foreach (var entry in entries) {
+                    var name = DomainFromNamingContext(ReadString(entry, "nCName"));
+                    if (name == null) continue;
+                    var hasDn = entry.TryGetDistinguishedName(out var dn);
+                    var parent = ReadString(entry, "trustParent");
+                    var parentCount = entry.PropertyCount("trustParent");
+                    resolved.Add(name, new TopologyEntry {
+                        DistinguishedName = dn,
+                        Parent = parent,
+                        Valid = hasDn && (parentCount == 0 || parentCount == 1 && parent != null)
+                    });
+                }
+                metadata.Topology = resolved;
+            });
 
-            ReadOptionalMetadata(domain.Name, "trust classifications", () => {
+            ReadOptionalMetadata(domain.Name, "trust records", ref metadata.TrustsRead, () => {
                 var request = new SearchRequest(domain.DefaultNamingContext, CommonFilters.TrustedDomains,
                     SearchScope.Subtree, "trustPartner", "trustType", "trustAttributes");
-                var classifications = new Dictionary<string, TrustType>(StringComparer.OrdinalIgnoreCase);
+                var trusts = new List<TrustRecord>();
                 foreach (var entry in ReadPages(connection, request)) {
                     var target = ReadString(entry, "trustPartner");
-                    if (target != null) classifications[target] = ClassifyTrust(entry, domain, target, topology);
+                    if (target == null) continue;
+                    trusts.Add(new TrustRecord {
+                        Target = target,
+                        Type = entry.TryGetLongProperty("trustType", out var type) ? type : (long?)null,
+                        Attributes = entry.TryGetLongProperty("trustAttributes", out var attributes) ? attributes : (long?)null
+                    });
                 }
-                foreach (var trust in classifications) domain.TrustTypes.Add(trust.Key, trust.Value);
+                metadata.Trusts = trusts;
             });
+
+            // Topology recovery must reclassify even when the trust records were already read successfully.
+            domain.TrustTypes.Clear();
+            foreach (var trust in metadata.Trusts) {
+                domain.TrustTypes[trust.Target] = ClassifyTrust(trust, domain, metadata.Topology);
+            }
         }
 
-        private static TrustType ClassifyTrust(IDirectoryObject trust, LdapDomainInfo domain, string target,
-            IReadOnlyDictionary<string, IDirectoryObject> topology) {
+        private static TrustType ClassifyTrust(TrustRecord trust, LdapDomainInfo domain,
+            IReadOnlyDictionary<string, TopologyEntry> topology) {
             // AD trustType 3 denotes an MIT Kerberos realm and takes precedence over attributes.
-            if (!trust.TryGetLongProperty("trustType", out var type)) return TrustType.Unknown;
-            if (type == 3) return TrustType.Kerberos;
-            if (type != 1 && type != 2) return TrustType.Unknown;
-            if (!trust.TryGetLongProperty("trustAttributes", out var value)) return TrustType.Unknown;
-            var attributes = (TrustAttributes)value;
+            if (trust.Type == 3) return TrustType.Kerberos;
+            if ((trust.Type != 1 && trust.Type != 2) || !trust.Attributes.HasValue) return TrustType.Unknown;
+            var attributes = (TrustAttributes)trust.Attributes.Value;
             if (!attributes.HasFlag(TrustAttributes.WithinForest)) {
                 return attributes.HasFlag(TrustAttributes.ForestTransitive) ? TrustType.Forest : TrustType.External;
             }
-            return ClassifyWithinForestTrust(domain, target, topology);
+            return ClassifyWithinForestTrust(domain, trust.Target, topology);
         }
 
         private static TrustType ClassifyWithinForestTrust(LdapDomainInfo domain, string target,
-            IReadOnlyDictionary<string, IDirectoryObject> topology) {
+            IReadOnlyDictionary<string, TopologyEntry> topology) {
             if (!topology.TryGetValue(domain.Name, out var source) || !topology.TryGetValue(target, out var destination)) {
                 return TrustType.Unknown;
             }
-            if (!source.TryGetDistinguishedName(out var sourceDn) ||
-                !destination.TryGetDistinguishedName(out var destinationDn)) return TrustType.Unknown;
-            // Ambiguous parent values cannot establish either a parent-child link or a tree root.
-            if (source.PropertyCount("trustParent") > 1 || destination.PropertyCount("trustParent") > 1) {
-                return TrustType.Unknown;
-            }
-            var sourceParent = ReadString(source, "trustParent");
-            var destinationParent = ReadString(destination, "trustParent");
-            if ((source.PropertyCount("trustParent") == 1 && sourceParent == null) ||
-                (destination.PropertyCount("trustParent") == 1 && destinationParent == null)) return TrustType.Unknown;
-            if (string.Equals(sourceParent, destinationDn, StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(destinationParent, sourceDn, StringComparison.OrdinalIgnoreCase)) {
+            if (!source.Valid || !destination.Valid) return TrustType.Unknown;
+            var sourceParent = source.Parent;
+            var destinationParent = destination.Parent;
+            if (string.Equals(sourceParent, destination.DistinguishedName, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(destinationParent, source.DistinguishedName, StringComparison.OrdinalIgnoreCase)) {
                 return TrustType.ParentChild;
             }
             if (sourceParent == null && destinationParent == null) {
@@ -264,9 +305,11 @@ namespace SharpHoundCommonLib {
             return results;
         }
 
-        private void ReadOptionalMetadata(string domainName, string metadata, Action read) {
+        private void ReadOptionalMetadata(string domainName, string metadata, ref bool completed, Action read) {
+            if (completed) return;
             try {
                 read();
+                completed = true;
             }
             catch (Exception e) when (e is LdapException or DirectoryOperationException or InvalidOperationException or ArgumentException or FormatException) {
                 _log.LogDebug(e, "Controlled domain resolution could not read additional metadata {Metadata} for domain {Domain}",
