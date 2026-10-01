@@ -96,7 +96,8 @@ namespace SharpHoundCommonLib.Processors
                     (attributes.HasFlag(TrustAttributes.WithinForest) ||
                     attributes.HasFlag(TrustAttributes.CrossOrganizationEnableTGTDelegation));
 
-                if (trust.TargetDomainName != null && trustTypes.TryGetValue(trust.TargetDomainName, out var classifiedType)) {
+                if (trust.TargetDomainName != null && trustTypes.TryGetValue(trust.TargetDomainName, out var classifiedType) &&
+                    classifiedType != TrustType.Unknown) {
                     trust.TrustType = classifiedType;
                 }
                 else if (entry.TryGetLongProperty(LDAPProperties.TrustType, out var ldapTrustType) && ldapTrustType == 3) {

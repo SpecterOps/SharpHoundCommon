@@ -132,6 +132,9 @@ namespace CommonLibTest
         [InlineData(TrustType.ParentChild)]
         [InlineData(TrustType.TreeRoot)]
         [InlineData(TrustType.CrossLink)]
+        [InlineData(TrustType.External)]
+        [InlineData(TrustType.Forest)]
+        [InlineData(TrustType.Kerberos)]
         [InlineData(TrustType.Unknown)]
         public async Task EnumerateDomainTrusts_PreservesResolvedClassification(TrustType classification) {
             var domain = new LdapDomainInfo { Name = "testlab.local", DefaultNamingContext = "DC=testlab,DC=local" };
@@ -142,6 +145,24 @@ namespace CommonLibTest
                 .Returns(new[] { CreateTrustEntry(2) }.ToAsyncEnumerable);
             var trusts = await new DomainTrustProcessor(utils.Object).EnumerateDomainTrusts("testlab.local").ToArrayAsync();
             Assert.Equal(classification, Assert.Single(trusts).TrustType);
+        }
+
+        [Theory]
+        [InlineData(2, TrustAttributes.ForestTransitive, TrustType.Forest)]
+        [InlineData(2, (TrustAttributes)0, TrustType.External)]
+        [InlineData(1, TrustAttributes.QuarantinedDomain, TrustType.External)]
+        [InlineData(3, TrustAttributes.WithinForest, TrustType.Kerberos)]
+        [InlineData(2, TrustAttributes.WithinForest, TrustType.Unknown)]
+        public async Task EnumerateDomainTrusts_UnknownClassificationUsesReadableTrustFields(
+            int ldapType, TrustAttributes attributes, TrustType expected) {
+            var domain = new LdapDomainInfo { Name = "testlab.local", DefaultNamingContext = "DC=testlab,DC=local" };
+            domain.TrustTypes["external.local"] = TrustType.Unknown;
+            var utils = new Mock<ILdapUtils>();
+            utils.Setup(x => x.GetDomain("testlab.local", out domain)).Returns(true);
+            utils.Setup(x => x.Query(It.IsAny<LdapQueryParameters>(), It.IsAny<CancellationToken>()))
+                .Returns(new[] { CreateTrustEntry(ldapType, attributes) }.ToAsyncEnumerable);
+            var trusts = await new DomainTrustProcessor(utils.Object).EnumerateDomainTrusts("testlab.local").ToArrayAsync();
+            Assert.Equal(expected, Assert.Single(trusts).TrustType);
         }
 
         [Theory]
@@ -156,11 +177,12 @@ namespace CommonLibTest
             Assert.Equal(expected, Assert.Single(trusts).TrustType);
         }
 
-        private static LdapResult<IDirectoryObject> CreateTrustEntry(int ldapType) =>
+        private static LdapResult<IDirectoryObject> CreateTrustEntry(int ldapType,
+            TrustAttributes attributes = TrustAttributes.WithinForest) =>
             LdapResult<IDirectoryObject>.Ok(new MockDirectoryObject("", new Dictionary<string, object> {
                 ["trustdirection"] = "3",
                 ["trusttype"] = ldapType.ToString(),
-                ["trustattributes"] = ((int)TrustAttributes.WithinForest).ToString(),
+                ["trustattributes"] = ((int)attributes).ToString(),
                 ["cn"] = "EXTERNAL.LOCAL",
                 ["securityidentifier"] = Utils.B64ToBytes("AQQAAAAAAAUVAAAA7JjftxhaHTnafGWh")
             }));
