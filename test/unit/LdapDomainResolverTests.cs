@@ -422,6 +422,28 @@ public class LdapDomainResolverTests {
         Assert.Null(domain);
     }
 
+    [Theory]
+    [InlineData((int)LdapErrorCodes.InvalidCredentials, false)]
+    [InlineData((int)LdapErrorCodes.InvalidCredentials, true)]
+    [InlineData((int)ResultCode.InappropriateAuthentication, false)]
+    [InlineData((int)ResultCode.InappropriateAuthentication, true)]
+    public void TryResolve_AuthenticationRejectionFailsWithoutTransportRetry(int errorCode, bool forceSsl) {
+        var harness = new Harness(new LdapConfig { ForceSSL = forceSsl });
+        var rejected = new FakeConnection { BindFailure = new LdapException(errorCode) };
+        var second = new FakeConnection();
+        harness.Connections.Enqueue(rejected);
+        harness.Connections.Enqueue(second);
+
+        Assert.False(harness.Resolver.TryResolve("child.example.test", out var domain));
+        Assert.Null(domain);
+        Assert.Equal(("child.example.test", true, false), Assert.Single(harness.Attempts));
+        Assert.True(rejected.Bound);
+        Assert.True(rejected.Disposed);
+        Assert.Empty(rejected.Requests);
+        Assert.False(second.Bound);
+        Assert.False(second.Disposed);
+    }
+
     [Fact]
     public void TryResolve_ReadsSidPdcAndControllerPagesOnConfiguredConnection() {
         // Convert a binary SID, resolve the PDC's parent server DN (including an escaped comma),

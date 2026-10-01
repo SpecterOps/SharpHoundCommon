@@ -61,6 +61,10 @@ namespace SharpHoundCommonLib {
                 domain = null;
                 _log.LogDebug(e, "Controlled domain resolution failed for endpoint {Endpoint} using SSL {SSL}",
                     target, true);
+                // Authentication rejection is definitive; another transport would reuse the same credentials.
+                if (e is LdapException ldapException &&
+                    ldapException.ErrorCode is (int)LdapErrorCodes.InvalidCredentials
+                        or (int)ResultCode.InappropriateAuthentication) return false;
             }
 
             if (_config.ForceSSL) return false;
