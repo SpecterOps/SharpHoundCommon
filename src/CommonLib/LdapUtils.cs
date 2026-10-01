@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.DirectoryServices;
 using System.DirectoryServices.AccountManagement;
-using System.DirectoryServices.ActiveDirectory;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -23,18 +22,18 @@ using SharpHoundCommonLib.Processors;
 using SharpHoundCommonLib.Static;
 using SharpHoundRPC.NetAPINative;
 using SharpHoundRPC.PortScanner;
-using Domain = System.DirectoryServices.ActiveDirectory.Domain;
 using Group = SharpHoundCommonLib.OutputTypes.Group;
 using SearchScope = System.DirectoryServices.Protocols.SearchScope;
 
 namespace SharpHoundCommonLib {
     public class LdapUtils : ILdapUtils {
-        //This cache is indexed by domain sid
-        private static ConcurrentDictionary<string, Domain> _domainCache = new();
+        // Only successful controlled results are cached, by requested domain name.
+        private ConcurrentDictionary<string, LdapDomainInfo> _domainCache = new(StringComparer.OrdinalIgnoreCase);
+        private readonly Func<LdapConfig, LdapDomainResolver> _createDomainResolver;
         private static ConcurrentHashSet _domainControllers = new(StringComparer.OrdinalIgnoreCase);
         private static ConcurrentHashSet _unresolvablePrincipals = new(StringComparer.OrdinalIgnoreCase);
 
-        private static readonly ConcurrentDictionary<string, string> DomainToForestCache =
+        private readonly ConcurrentDictionary<string, string> DomainToForestCache =
             new(StringComparer.OrdinalIgnoreCase);
 
         private static readonly ConcurrentDictionary<string, ResolvedWellKnownPrincipal>
@@ -93,6 +92,10 @@ namespace SharpHoundCommonLib {
             _log = log ?? Logging.LogProvider.CreateLogger("LDAPUtils");
             _metric = metric ?? Metrics.Factory.CreateMetricRouter();
             _connectionPool = new ConnectionPoolManager(_ldapConfig, scanner: _portScanner);
+        }
+
+        internal LdapUtils(Func<LdapConfig, LdapDomainResolver> createDomainResolver) : this() {
+            _createDomainResolver = createDomainResolver;
         }
 
         public IAsyncEnumerable<Result<string>> RangedRetrieval(string distinguishedName,
@@ -301,15 +304,9 @@ namespace SharpHoundCommonLib {
                 return (true, cachedForest);
             }
 
-            if (GetDomain(domain, out var domainObject)) {
-                try {
-                    var forestName = domainObject.Forest.Name.ToUpper();
-                    DomainToForestCache.TryAdd(domain, forestName);
-                    return (true, forestName);
-                }
-                catch {
-                    //pass
-                }
+            if (GetDomain(domain, out var domainObject) && !string.IsNullOrWhiteSpace(domainObject.ForestName)) {
+                var forestName = domainObject.ForestName.ToUpper();
+                return (true, forestName);
             }
 
             var (success, forest) = await GetForestFromLdap(domain);
@@ -452,17 +449,11 @@ namespace SharpHoundCommonLib {
                 //we expect this to fail sometimes
             }
 
-            if (GetDomain(domainName, out var domainObject))
-                try {
-                    var entry = domainObject.GetDirectoryEntry().ToDirectoryObject();
-                    if (entry.TryGetSecurityIdentifier(out domainSid)) {
-                        Cache.AddDomainSidMapping(domainName, domainSid);
-                        return (true, domainSid);
-                    }
-                }
-                catch {
-                    //we expect this to fail sometimes (not sure why, but better safe than sorry)
-                }
+            if (GetDomain(domainName, out var domainObject) && !string.IsNullOrWhiteSpace(domainObject.DomainSid)) {
+                domainSid = domainObject.DomainSid;
+                Cache.AddDomainSidMapping(domainName, domainSid);
+                return (true, domainSid);
+            }
 
             foreach (var name in _translateNames)
                 try {
@@ -492,98 +483,29 @@ namespace SharpHoundCommonLib {
         }
 
         /// <summary>
-        ///     Attempts to get the Domain object representing the target domain. If null is specified for the domain name, gets
-        ///     the user's current domain
+        /// Resolves plain domain metadata using configured LDAP settings. A null or blank name
+        /// selects the configured target or discovery hint. Only controlled successes are cached.
         /// </summary>
-        /// <param name="domain"></param>
-        /// <param name="domainName"></param>
-        /// <returns></returns>
-        public bool GetDomain(string domainName, out Domain domain) {
+        public bool GetDomain(string domainName, out LdapDomainInfo domain) {
+            domainName = string.IsNullOrWhiteSpace(domainName) ? null : domainName.Trim();
             var cacheKey = domainName ?? _nullCacheKey;
-            if (_domainCache.TryGetValue(cacheKey, out domain)) return true;
+            var cache = _domainCache;
+            if (cache.TryGetValue(cacheKey, out domain)) return true;
 
-            try {
-                DirectoryContext context;
-                if (_ldapConfig.Username != null)
-                    context = domainName != null
-                        ? new DirectoryContext(DirectoryContextType.Domain, domainName, _ldapConfig.Username,
-                            _ldapConfig.Password)
-                        : new DirectoryContext(DirectoryContextType.Domain, _ldapConfig.Username,
-                            _ldapConfig.Password);
-                else
-                    context = domainName != null
-                        ? new DirectoryContext(DirectoryContextType.Domain, domainName)
-                        : new DirectoryContext(DirectoryContextType.Domain);
-
-                // Blocking External Call
-                domain = Domain.GetDomain(context);
-                if (domain == null) return false;
-                _domainCache.TryAdd(cacheKey, domain);
-                return true;
-            }
-            catch (Exception e) {
-                _log.LogDebug(e, "GetDomain call failed for domain name {Name}", domainName);
-                domain = null;
-                return false;
-            }
+            var resolver = _createDomainResolver?.Invoke(_ldapConfig) ?? new LdapDomainResolver(_ldapConfig, _log);
+            if (!resolver.TryResolveWithFallback(domainName, out domain, out var usedLegacy)) return false;
+            if (!usedLegacy) cache.TryAdd(cacheKey, domain);
+            return true;
         }
 
-        public static bool GetDomain(string domainName, LdapConfig ldapConfig, out Domain domain) {
-            if (_domainCache.TryGetValue(domainName, out domain)) return true;
-
-            try {
-                DirectoryContext context;
-                if (ldapConfig.Username != null)
-                    context = domainName != null
-                        ? new DirectoryContext(DirectoryContextType.Domain, domainName, ldapConfig.Username,
-                            ldapConfig.Password)
-                        : new DirectoryContext(DirectoryContextType.Domain, ldapConfig.Username,
-                            ldapConfig.Password);
-                else
-                    context = domainName != null
-                        ? new DirectoryContext(DirectoryContextType.Domain, domainName)
-                        : new DirectoryContext(DirectoryContextType.Domain);
-
-                // Blocking External Call
-                domain = Domain.GetDomain(context);
-                if (domain == null) return false;
-                _domainCache.TryAdd(domainName, domain);
-                return true;
-            }
-            catch (Exception e) {
-                Logging.Logger.LogDebug("Static GetDomain call failed for domain {DomainName}: {Error}", domainName,
-                    e.Message);
-                domain = null;
-                return false;
-            }
+        /// <summary>Resolves domain metadata without caching, using the supplied LDAP settings.</summary>
+        public static bool GetDomain(string domainName, LdapConfig ldapConfig, out LdapDomainInfo domain) {
+            return new LdapDomainResolver(ldapConfig).TryResolveWithFallback(domainName, out domain, out _);
         }
 
-        /// <summary>
-        ///     Attempts to get the Domain object representing the target domain. If null is specified for the domain name, gets
-        ///     the user's current domain
-        /// </summary>
-        /// <param name="domain"></param>
-        /// <param name="domainName"></param>
-        /// <returns></returns>
-        public bool GetDomain(out Domain domain) {
-            if (_domainCache.TryGetValue(_nullCacheKey, out domain)) return true;
-
-            try {
-                var context = _ldapConfig.Username != null
-                    ? new DirectoryContext(DirectoryContextType.Domain, _ldapConfig.Username,
-                        _ldapConfig.Password)
-                    : new DirectoryContext(DirectoryContextType.Domain);
-
-                // Blocking External Call
-                domain = Domain.GetDomain(context);
-                _domainCache.TryAdd(_nullCacheKey, domain);
-                return true;
-            }
-            catch (Exception e) {
-                _log.LogDebug(e, "GetDomain call failed for blank domain");
-                domain = null;
-                return false;
-            }
+        /// <summary>Resolves domain metadata using the configured target or discovery hint.</summary>
+        public bool GetDomain(out LdapDomainInfo domain) {
+            return GetDomain(null, out domain);
         }
 
         public async Task<(bool Success, TypedPrincipal Principal)> ResolveAccountName(string name, string domain) {
@@ -1071,6 +993,8 @@ namespace SharpHoundCommonLib {
 
         public void SetLdapConfig(LdapConfig config) {
             _ldapConfig = config;
+            _domainCache = new ConcurrentDictionary<string, LdapDomainInfo>(StringComparer.OrdinalIgnoreCase);
+            DomainToForestCache.Clear();
             _log.LogInformation("New LDAP Config Set:\n {ConfigString}", config.ToString());
             _connectionPool.Dispose();
             _connectionPool = new ConnectionPoolManager(_ldapConfig, scanner: _portScanner);
@@ -1106,29 +1030,8 @@ namespace SharpHoundCommonLib {
             }
 
             if (GetDomain(domain, out var domainObj)) {
-                try {
-                    var entry = domainObj.GetDirectoryEntry().ToDirectoryObject();
-                    if (entry.TryGetProperty(property, out var searchBase)) {
-                        return (true, searchBase);
-                    }
-                }
-                catch {
-                    //pass
-                }
-
-                var name = domainObj.Name;
-                if (!string.IsNullOrWhiteSpace(name)) {
-                    var tempPath = Helpers.DomainNameToDistinguishedName(name);
-
-                    var searchBase = context switch {
-                        NamingContext.Configuration => $"CN=Configuration,{tempPath}",
-                        NamingContext.Schema => $"CN=Schema,CN=Configuration,{tempPath}",
-                        NamingContext.Default => tempPath,
-                        _ => throw new ArgumentOutOfRangeException()
-                    };
-
-                    return (true, searchBase);
-                }
+                var searchBase = domainObj.GetNamingContext(context);
+                if (!string.IsNullOrWhiteSpace(searchBase)) return (true, searchBase);
             }
 
             return (false, default);
@@ -1136,7 +1039,8 @@ namespace SharpHoundCommonLib {
 
         public void ResetUtils() {
             _unresolvablePrincipals = new ConcurrentHashSet(StringComparer.OrdinalIgnoreCase);
-            _domainCache = new ConcurrentDictionary<string, Domain>();
+            _domainCache = new ConcurrentDictionary<string, LdapDomainInfo>(StringComparer.OrdinalIgnoreCase);
+            DomainToForestCache.Clear();
             _domainControllers = new ConcurrentHashSet(StringComparer.OrdinalIgnoreCase);
             _connectionPool?.Dispose();
             _connectionPool = new ConnectionPoolManager(_ldapConfig, scanner: _portScanner);
@@ -1165,7 +1069,7 @@ namespace SharpHoundCommonLib {
         ///
         /// <para>
         /// Signing and sealing are disabled when SSL is active, mirroring the mutual-exclusion rule
-        /// applied by <see cref="LdapConnectionPool.CreateBaseConnection"/>.
+        /// applied by <see cref="LdapConnectionFactory.Create"/>.
         /// </para>
         /// </summary>
         internal static (string ContextName, ContextOptions Options) BuildPrincipalContextParameters(

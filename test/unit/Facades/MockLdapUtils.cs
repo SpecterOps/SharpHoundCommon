@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -12,7 +12,7 @@ using Moq;
 using SharpHoundCommonLib;
 using SharpHoundCommonLib.Enums;
 using SharpHoundCommonLib.OutputTypes;
-using Domain = System.DirectoryServices.ActiveDirectory.Domain;
+using SharpHoundCommonLib.Models;
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
 
 namespace CommonLibTest.Facades
@@ -693,12 +693,12 @@ namespace CommonLibTest.Facades
             return (false, default);
         }
 
-        public bool GetDomain(string domainName, out Domain domain) {
+        public bool GetDomain(string domainName, out LdapDomainInfo domain) {
             domain = null;
             return false;
         }
 
-        public bool GetDomain(out Domain domain) {
+        public bool GetDomain(out LdapDomainInfo domain) {
             domain = null;
             return false;
         }

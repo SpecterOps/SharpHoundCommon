@@ -146,17 +146,12 @@ namespace SharpHoundCommonLib {
                 //we expect this to fail sometimes
             }
 
-            if (LdapUtils.GetDomain(domainName, _ldapConfig, out var domainObject))
-                try {
-                    // TODO: MC - Confirm GetDirectoryEntry is not a Blocking External Call
-                    if (domainObject.GetDirectoryEntry().ToDirectoryObject().TryGetSecurityIdentifier(out domainSid)) {
-                        Cache.AddDomainSidMapping(domainName, domainSid);
-                        return (true, domainSid);
-                    }
-                }
-                catch {
-                    //we expect this to fail sometimes (not sure why, but better safe than sorry)
-                }
+            if (LdapUtils.GetDomain(domainName, _ldapConfig, out var domainObject) &&
+                !string.IsNullOrWhiteSpace(domainObject.DomainSid)) {
+                domainSid = domainObject.DomainSid;
+                Cache.AddDomainSidMapping(domainName, domainSid);
+                return (true, domainSid);
+            }
 
             foreach (var name in _translateNames)
                 try {
