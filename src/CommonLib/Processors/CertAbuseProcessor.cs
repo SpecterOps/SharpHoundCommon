@@ -257,10 +257,7 @@ namespace SharpHoundCommonLib.Processors
         /// <returns></returns>
         private RegistryResult GetCASecurity(string target, string caName)
         {
-            var regSubKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{caName}";
-            const string regValue = "Security";
-        
-            return _registryAccessor.GetRegistryKeyData(target, regSubKey, regValue);
+            return GetCAConfigurationValue(target, caName, "Security");
         }
 
         /// <summary>
@@ -271,10 +268,13 @@ namespace SharpHoundCommonLib.Processors
         /// <returns></returns>
         private RegistryResult GetEnrollmentAgentRights(string target, string caName)
         {
-            var regSubKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{caName}";
-            var regValue = "EnrollmentAgentRights";
+            return GetCAConfigurationValue(target, caName, "EnrollmentAgentRights");
+        }
 
-            return _registryAccessor.GetRegistryKeyData(target, regSubKey, regValue);
+        private RegistryResult GetCAConfigurationValue(string target, string caName, string valueName)
+        {
+            var configurationKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{caName}";
+            return _registryAccessor.GetRegistryKeyData(target, configurationKey, valueName);
         }
 
         /// <summary>
@@ -327,6 +327,51 @@ namespace SharpHoundCommonLib.Processors
         }
 
         /// <summary>
+        /// This function checks whether the CA requires RPC-encrypted certificate requests.
+        /// </summary>
+        /// <remarks>IF_ENFORCEENCRYPTICERTREQUEST is bit 9 of the CA InterfaceFlags value.</remarks>
+        /// <param name="target"></param>
+        /// <param name="caName"></param>
+        /// <param name="computerObjectId"></param>
+        /// <returns></returns>
+        public async Task<BoolRegistryAPIResult> IsRPCEncryptionEnforced(string target, string caName, string computerObjectId)
+        {
+            var ret = new BoolRegistryAPIResult();
+            var data = GetCAConfigurationValue(target, caName, "InterfaceFlags");
+
+            ret.Collected = data.Collected;
+            if (!data.Collected)
+            {
+                await SendComputerStatus(new CSVComputerStatus {
+                    Status = data.FailureReason,
+                    Task = nameof(IsRPCEncryptionEnforced),
+                    ComputerName = target,
+                    ObjectId = computerObjectId
+                });
+
+                ret.FailureReason = data.FailureReason;
+                return ret;
+            }
+
+            await SendComputerStatus(new CSVComputerStatus {
+                Status = CSVComputerStatus.StatusSuccess,
+                Task = nameof(IsRPCEncryptionEnforced),
+                ComputerName = target,
+                ObjectId = computerObjectId
+            });
+
+            if (data.Value == null)
+            {
+                return ret;
+            }
+
+            var interfaceFlags = (int)data.Value;
+            ret.Value = (interfaceFlags & 0x00000200) == 0x00000200;
+
+            return ret;
+        }
+
+        /// <summary>
         /// This function checks a registry setting on the target host for the specified CA to see if role separation is enabled.
         /// If enabled, you cannot perform any CA actions if you have both ManageCA and ManageCertificates permissions. Only CA admins can modify the setting.
         /// </summary>
@@ -339,9 +384,7 @@ namespace SharpHoundCommonLib.Processors
         public async Task<BoolRegistryAPIResult> IsRoleSeparationEnabled(string target, string caName, string computerObjectId)
         {
             var ret = new BoolRegistryAPIResult();
-            var regSubKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{caName}";
-            const string regValue = "RoleSeparationEnabled";
-            var data = _registryAccessor.GetRegistryKeyData(target, regSubKey, regValue);
+            var data = GetCAConfigurationValue(target, caName, "RoleSeparationEnabled");
 
             ret.Collected = data.Collected;
             if (!data.Collected)
