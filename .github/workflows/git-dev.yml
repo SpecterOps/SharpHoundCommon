@@ -1,0 +1,80 @@
+name: Publish Git-Dev
+
+on:
+  push:
+    branches:
+      - v4
+
+jobs:
+  nuget:
+    name: nuget
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+              7.0.x
+              5.0.x
+
+      - name: Restore Dependencies
+        run: dotnet restore
+
+      - name: Generate Coverage Report
+        run: dotnet test # coverage happens by default
+
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: report
+          path: docfx/coverage/report/
+
+      - name: Pack
+        run: | 
+          mkdir pkgs
+          dotnet pack --no-restore -c Release -p:PackageVersion=0.0.0-git-dev -o ./pkgs
+        
+#      - name: Prep Packages
+#        run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/BloodHoundAD/index.json"
+
+#      - name: Publish to GitHub Packages
+#        run: dotnet nuget push *.nupkg --api-key ${{ secrets.GITHUB_TOKEN }} --source "github"
+#
+#      - name: Publish NuGet
+#        run: dotnet nuget push *.nupkg -s https://api.nuget.org/v3/index.json -k ${{ secrets.NUGET_TOKEN }} --skip-duplicate
+        
+      - name: Publish to SpecterOps Packages
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
+        run: |
+          dotnet tool install -g sleet
+          sleet push ./pkgs --force
+        
+  ghpages:
+    name: ghpages
+    needs: nuget
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Download Coverage Report
+        uses: actions/download-artifact@v4
+        with:
+          name: report
+          path: docfx/coverage/report
+
+      - name: Build Documentation
+        uses: nikeee/docfx-action@v1.0.0
+        with:
+          args: docfx/docfx.json
+
+      - name: Deploy GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@4.1.4
+        with:
+          branch: gh-pages
+          folder: docs
