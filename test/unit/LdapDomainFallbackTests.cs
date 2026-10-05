@@ -18,8 +18,11 @@ public class LdapDomainFallbackTests {
         internal bool FailCore;
         internal bool FailMetadata;
         internal bool Disposed;
+        internal Exception BindFailure;
 
-        public void Bind() { }
+        public void Bind() {
+            if (BindFailure != null) throw BindFailure;
+        }
 
         public IReadOnlyList<IDirectoryObject> Search(SearchRequest request) {
             if (FailCore) throw new LdapException();
@@ -118,6 +121,76 @@ public class LdapDomainFallbackTests {
         Assert.Null(domain);
         Assert.False(usedLegacy);
         Assert.True(connection.Disposed);
+    }
+
+    [Theory]
+    [InlineData((int)LdapErrorCodes.InvalidCredentials, false, true)]
+    [InlineData((int)LdapErrorCodes.InvalidCredentials, true, true)]
+    [InlineData((int)ResultCode.InappropriateAuthentication, false, true)]
+    [InlineData((int)ResultCode.InappropriateAuthentication, true, true)]
+    [InlineData((int)LdapErrorCodes.InvalidCredentials, false, false)]
+    [InlineData((int)ResultCode.InappropriateAuthentication, false, false)]
+    public void AuthenticationRejection_WithFlagOnNeverInvokesFallback(int errorCode, bool forceSsl,
+        bool rejectOnSsl) {
+        var sslConnection = new Connection {
+            BindFailure = new LdapException(rejectOnSsl ? errorCode : 81)
+        };
+        var plaintextConnection = new Connection { BindFailure = new LdapException(errorCode) };
+        var attempts = new List<bool>();
+        var legacyCalls = 0;
+        var resolver = new LdapDomainResolver(new LdapConfig {
+                Server = "pinned.example.test", Username = "test-user", Password = "unused",
+                ForceSSL = forceSsl, AllowUncontrolledDomainFallback = true
+            },
+            (target, ssl, pinServer) => {
+                Assert.Equal("pinned.example.test", target);
+                Assert.True(pinServer);
+                attempts.Add(ssl);
+                return ssl ? sslConnection : plaintextConnection;
+            }, () => null,
+            getLegacyDomain: _ => {
+                legacyCalls++;
+                return new LegacyDomain();
+            });
+
+        Assert.False(resolver.TryResolveWithFallback(DomainName, out var domain, out var usedLegacy,
+            out var metadata));
+
+        Assert.Null(domain);
+        Assert.Null(metadata);
+        Assert.False(usedLegacy);
+        Assert.Equal(0, legacyCalls);
+        Assert.Equal(rejectOnSsl ? new[] { true } : new[] { true, false }, attempts);
+        Assert.True(sslConnection.Disposed);
+        Assert.Equal(!rejectOnSsl, plaintextConnection.Disposed);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void TransportFailure_WithFlagOnStillInvokesFallback(bool forceSsl) {
+        var connections = new List<Connection>();
+        var legacyCalls = 0;
+        var resolver = new LdapDomainResolver(new LdapConfig {
+                ForceSSL = forceSsl, AllowUncontrolledDomainFallback = true
+            },
+            (_, _, _) => {
+                var connection = new Connection { BindFailure = new LdapException(81) };
+                connections.Add(connection);
+                return connection;
+            }, () => null,
+            getLegacyDomain: _ => {
+                legacyCalls++;
+                return new LegacyDomain();
+            });
+
+        Assert.True(resolver.TryResolveWithFallback(DomainName, out var domain, out var usedLegacy));
+
+        Assert.NotNull(domain);
+        Assert.True(usedLegacy);
+        Assert.Equal(1, legacyCalls);
+        Assert.Equal(forceSsl ? 1 : 2, connections.Count);
+        Assert.All(connections, connection => Assert.True(connection.Disposed));
     }
 
     [Fact]

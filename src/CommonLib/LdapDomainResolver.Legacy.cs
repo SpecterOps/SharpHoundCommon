@@ -17,10 +17,10 @@ namespace SharpHoundCommonLib {
         internal bool TryResolveWithFallback(string domainName, out LdapDomainInfo domain, out bool usedLegacy,
             out MetadataState metadata) {
             usedLegacy = false;
-            var success = TryResolveMetadata(domainName, null, out metadata);
+            var success = TryResolveMetadata(domainName, null, out metadata, out var authenticationRejected);
             domain = metadata?.Domain;
             if (success) return true;
-            if (!_config.AllowUncontrolledDomainFallback) return false;
+            if (authenticationRejected || !_config.AllowUncontrolledDomainFallback) return false;
 
             usedLegacy = true;
             _log.LogWarning("Using uncontrolled framework domain fallback for domain {Domain}; configured LDAP settings may be ignored",
