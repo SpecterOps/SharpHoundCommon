@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.DirectoryServices.ActiveDirectory;
 using System.DirectoryServices.Protocols;
 using System.Linq;
-using System.Net;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -26,6 +24,7 @@ namespace SharpHoundCommonLib {
         private readonly string _identifier;
         private readonly string _poolIdentifier;
         private readonly LdapConfig _ldapConfig;
+        private readonly LdapDomainResolver _domainResolver;
         private readonly ILogger _log;
         private readonly IPortScanner _portScanner;
         private readonly NativeMethods _nativeMethods;
@@ -46,13 +45,15 @@ namespace SharpHoundCommonLib {
         private static readonly ConcurrentHashSet ExcludedDomains = new();
 
         public LdapConnectionPool(string identifier, string poolIdentifier, LdapConfig config,
-            IPortScanner scanner = null, NativeMethods nativeMethods = null, ILogger log = null, IMetricRouter metric = null) {
+            IPortScanner scanner = null, NativeMethods nativeMethods = null, ILogger log = null, IMetricRouter metric = null,
+            LdapDomainResolver domainResolver = null) {
             _connections = [];
             _globalCatalogConnection = [];
             _identifier = identifier;
             _poolIdentifier = poolIdentifier;
             _ldapConfig = config;
             _log = log ?? Logging.LogProvider.CreateLogger("LdapConnectionPool");
+            _domainResolver = domainResolver ?? new LdapDomainResolver(config, _log);
             _metric = metric ?? Metrics.Factory.CreateMetricRouter();
             _portScanner = scanner ?? new PortScanner();
             _nativeMethods = nativeMethods ?? new NativeMethods();
@@ -692,25 +693,20 @@ namespace SharpHoundCommonLib {
                 basePath = queryParameters.SearchBase;
             }
             else if (!connectionWrapper.GetSearchBase(queryParameters.NamingContext, out basePath)) {
-                string tempPath;
-                if (CallDsGetDcName(queryParameters.DomainName, out var info) && info != null) {
-                    tempPath = Helpers.DomainNameToDistinguishedName(info.Value.DomainName);
-                    connectionWrapper.SaveContext(queryParameters.NamingContext, basePath);
+                // Native discovery supplies a default domain DN. Configuration and schema
+                // contexts must come from the server's advertised naming contexts.
+                if (queryParameters.NamingContext == NamingContext.Default &&
+                    CallDsGetDcName(queryParameters.DomainName, out var info) && info != null) {
+                    basePath = Helpers.DomainNameToDistinguishedName(info.Value.DomainName);
                 }
-                else if (LdapUtils.GetDomain(queryParameters.DomainName, _ldapConfig, out var domainObject)) {
-                    tempPath = Helpers.DomainNameToDistinguishedName(domainObject.Name);
+                else if (_domainResolver.TryResolveWithFallback(queryParameters.DomainName, out var domainObject, out _)) {
+                    basePath = domainObject.GetNamingContext(queryParameters.NamingContext);
                 }
                 else {
                     return (false, null);
                 }
 
-                basePath = queryParameters.NamingContext switch {
-                    NamingContext.Configuration => $"CN=Configuration,{tempPath}",
-                    NamingContext.Schema => $"CN=Schema,CN=Configuration,{tempPath}",
-                    NamingContext.Default => tempPath,
-                    _ => throw new ArgumentOutOfRangeException()
-                };
-
+                if (string.IsNullOrWhiteSpace(basePath)) return (false, null);
                 connectionWrapper.SaveContext(queryParameters.NamingContext, basePath);
             }
 
@@ -873,7 +869,7 @@ namespace SharpHoundCommonLib {
                     }
                 }
 
-                if (!LdapUtils.GetDomain(_identifier, _ldapConfig, out var domainObject) || domainObject?.Name == null) {
+                if (!_domainResolver.TryResolveWithFallback(_identifier, out var domainObject, out _) || domainObject?.Name == null) {
                     //If we don't get a result here, we effectively have no other ways to resolve this domain, so we'll just have to exit out
                     _log.LogDebug(
                         "Could not get domain object from GetDomain, unable to create ldap connection for domain {Domain}",
@@ -892,25 +888,17 @@ namespace SharpHoundCommonLib {
                     return (true, connectionWrapper4, "");
                 }
 
-                var primaryDomainController = domainObject.PdcRoleOwner.Name;
-                var portConnectionResult =
-                    await CreateLDAPConnectionWithPortCheck(primaryDomainController, globalCatalog);
-                if (portConnectionResult.success) {
-                    _log.LogDebug(
-                        "Successfully created ldap connection for domain: {Domain} using strategy 5 with to pdc {Server}",
-                        _identifier, primaryDomainController);
-                    return (true, portConnectionResult.connection, "");
-                }
-
-                // Blocking External Call - Possible on domainObject.DomainControllers as it calls DsGetDcNameWrapper
-                foreach (DomainController dc in domainObject.DomainControllers) {
-                    portConnectionResult =
-                        await CreateLDAPConnectionWithPortCheck(dc.Name, globalCatalog);
-                    if (portConnectionResult.success) {
+                // Try the PDC first, then the remaining controller metadata. Missing hostnames
+                // are optional metadata and must not become connection targets.
+                var controllerNames = new[] { domainObject.PdcRoleOwnerName }.Concat(domainObject.DomainControllerNames);
+                foreach (var hostname in controllerNames) {
+                    if (string.IsNullOrWhiteSpace(hostname)) continue;
+                    var result = await CreateLDAPConnectionWithPortCheck(hostname, globalCatalog);
+                    if (result.success) {
                         _log.LogDebug(
-                            "Successfully created ldap connection for domain: {Domain} using strategy 6 with to pdc {Server}",
-                            _identifier, primaryDomainController);
-                        return (true, portConnectionResult.connection, "");
+                            "Successfully created ldap connection for domain: {Domain} using controller metadata to server {Server}",
+                            _identifier, hostname);
+                        return (true, result.connection, "");
                     }
                 }
             }
@@ -971,36 +959,7 @@ namespace SharpHoundCommonLib {
         private LdapConnection CreateBaseConnection(string directoryIdentifier, bool ssl,
             bool globalCatalog) {
             _log.LogDebug("Creating connection for identifier {Identifier}", directoryIdentifier);
-            var port = globalCatalog ? _ldapConfig.GetGCPort(ssl) : _ldapConfig.GetPort(ssl);
-            var identifier = new LdapDirectoryIdentifier(directoryIdentifier, port, false, false);
-            var connection = new LdapConnection(identifier) { Timeout = new TimeSpan(0, 0, 5, 0) };
-
-            //These options are important!
-            connection.SessionOptions.ProtocolVersion = 3;
-            //Referral chasing does not work with paged searches 
-            connection.SessionOptions.ReferralChasing = ReferralChasingOptions.None;
-            if (ssl) connection.SessionOptions.SecureSocketLayer = true;
-
-            if (_ldapConfig.DisableSigning || ssl) {
-                connection.SessionOptions.Signing = false;
-                connection.SessionOptions.Sealing = false;
-            }
-            else {
-                connection.SessionOptions.Signing = true;
-                connection.SessionOptions.Sealing = true;
-            }
-
-            if (_ldapConfig.DisableCertVerification)
-                connection.SessionOptions.VerifyServerCertificate = (_, _) => true;
-
-            if (_ldapConfig.Username != null) {
-                var cred = new NetworkCredential(_ldapConfig.Username, _ldapConfig.Password);
-                connection.Credential = cred;
-            }
-
-            connection.AuthType = _ldapConfig.AuthType;
-
-            return connection;
+            return LdapConnectionFactory.Create(_ldapConfig, directoryIdentifier, ssl, globalCatalog);
         }
 
         /// <summary>

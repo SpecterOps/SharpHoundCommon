@@ -1,6 +1,5 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.DirectoryServices.Protocols;
-using System.Linq;
 using System.Security.Principal;
 using Microsoft.Extensions.Logging;
 using SharpHoundCommonLib.Enums;
@@ -29,16 +28,9 @@ namespace SharpHoundCommonLib.Processors
         {
             _log.LogDebug("Running trust enumeration for {Domain}", domain);
 
-            // Attempt to get trust type
-            var trustInfoList = new List<(string TargetName, System.DirectoryServices.ActiveDirectory.TrustType TrustType)>();
-            try {
-                if (_utils.GetDomain(domain, out var domainObject)) {
-                    trustInfoList.AddRange(from System.DirectoryServices.ActiveDirectory.TrustRelationshipInformation trust in domainObject.GetAllTrustRelationships()
-                                           select (trust.TargetName, trust.TrustType));
-                }
-            }
-            catch {
-                _log.LogWarning("Trust type enumeration using non-LDAP for {Domain} failed", domain);
+            var trustTypes = new Dictionary<string, TrustType>(System.StringComparer.OrdinalIgnoreCase);
+            if (_utils.GetDomain(domain, out var domainInfo)) {
+                trustTypes = domainInfo.TrustTypes;
             }
 
             await foreach (var result in _utils.Query(new LdapQueryParameters {
@@ -91,7 +83,7 @@ namespace SharpHoundCommonLib.Processors
 
                 trust.IsTransitive = !attributes.HasFlag(TrustAttributes.NonTransitive);
                 if (entry.TryGetProperty(LDAPProperties.CanonicalName, out var cn)) {
-                    trust.TargetDomainName = cn.ToUpper();
+                    trust.TargetDomainName = cn.ToUpperInvariant();
                 }
 
                 trust.SidFilteringEnabled = 
@@ -104,9 +96,16 @@ namespace SharpHoundCommonLib.Processors
                     (attributes.HasFlag(TrustAttributes.WithinForest) ||
                     attributes.HasFlag(TrustAttributes.CrossOrganizationEnableTGTDelegation));
 
-                var match = trustInfoList.FirstOrDefault(t => 
-                    t.TargetName.ToUpper().Equals(trust.TargetDomainName));
-                trust.TrustType = !string.IsNullOrEmpty(match.TargetName) ? (TrustType) match.TrustType : TrustAttributesToType(attributes);
+                if (trust.TargetDomainName != null && trustTypes.TryGetValue(trust.TargetDomainName, out var classifiedType) &&
+                    classifiedType != TrustType.Unknown) {
+                    trust.TrustType = classifiedType;
+                }
+                else if (entry.TryGetLongProperty(LDAPProperties.TrustType, out var ldapTrustType) && ldapTrustType == 3) {
+                    trust.TrustType = TrustType.Kerberos;
+                }
+                else {
+                    trust.TrustType = TrustAttributesToType(attributes);
+                }
 
                 yield return trust;
             }
@@ -114,19 +113,9 @@ namespace SharpHoundCommonLib.Processors
 
         public static TrustType TrustAttributesToType(TrustAttributes attributes)
         {
-            TrustType trustType;
-
-            if (attributes.HasFlag(TrustAttributes.WithinForest))
-                trustType = TrustType.ParentChild;
-            else if (attributes.HasFlag(TrustAttributes.ForestTransitive))
-                trustType = TrustType.Forest;
-            else if (!attributes.HasFlag(TrustAttributes.WithinForest) &&
-                     !attributes.HasFlag(TrustAttributes.ForestTransitive))
-                trustType = TrustType.External;
-            else
-                trustType = TrustType.Unknown;
-
-            return trustType;
+            if (attributes.HasFlag(TrustAttributes.WithinForest)) return TrustType.Unknown;
+            if (attributes.HasFlag(TrustAttributes.ForestTransitive)) return TrustType.Forest;
+            return TrustType.External;
         }
     }
 }
