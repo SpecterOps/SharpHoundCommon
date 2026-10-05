@@ -22,6 +22,7 @@ namespace SharpHoundCommonLib
         public bool DisableCertVerification { get; set; } = false;
         /// <summary>
         /// Permits legacy framework domain resolution after controlled LDAP resolution fails.
+        /// Authentication rejection stops resolution without invoking this fallback.
         /// This fallback may ignore configured LDAP settings. Disabled by default.
         /// </summary>
         public bool AllowUncontrolledDomainFallback { get; set; } = false;

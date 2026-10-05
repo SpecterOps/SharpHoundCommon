@@ -29,7 +29,7 @@ namespace SharpHoundCommonLib {
         /// Returns false with a null result when the target cannot establish the requested identity.
         /// </summary>
         internal bool TryResolve(string domainName, out LdapDomainInfo domain) {
-            var success = TryResolveMetadata(domainName, null, out var metadata);
+            var success = TryResolveMetadata(domainName, null, out var metadata, out _);
             domain = metadata?.Domain;
             return success;
         }
@@ -38,10 +38,12 @@ namespace SharpHoundCommonLib {
         internal bool TryRefreshMetadata(MetadataState previous, out MetadataState metadata) =>
             previous.UsedLegacy
                 ? TryResolveLegacy(previous.Domain.Name, previous, out metadata)
-                : TryResolveMetadata(null, previous, out metadata);
+                : TryResolveMetadata(null, previous, out metadata, out _);
 
-        private bool TryResolveMetadata(string domainName, MetadataState previous, out MetadataState metadata) {
+        private bool TryResolveMetadata(string domainName, MetadataState previous, out MetadataState metadata,
+            out bool authenticationRejected) {
             metadata = null;
+            authenticationRejected = false;
             var suppliedDomain = Normalize(domainName);
             var server = Normalize(_config.Server);
             // A configured server selects the endpoint, but does not override validation of
@@ -73,10 +75,9 @@ namespace SharpHoundCommonLib {
                 metadata = null;
                 _log.LogDebug(e, "Controlled domain resolution failed for endpoint {Endpoint} using SSL {SSL}",
                     target, true);
-                // Authentication rejection is definitive; another transport would reuse the same credentials.
-                if (e is LdapException ldapException &&
-                    ldapException.ErrorCode is (int)LdapErrorCodes.InvalidCredentials
-                        or (int)ResultCode.InappropriateAuthentication) return false;
+                // Authentication rejection is definitive; transport and legacy retries would reuse credentials.
+                authenticationRejected = IsAuthenticationRejection(e);
+                if (authenticationRejected) return false;
             }
 
             if (_config.ForceSSL) return false;
@@ -93,10 +94,16 @@ namespace SharpHoundCommonLib {
                 metadata = null;
                 _log.LogDebug(e, "Controlled domain resolution failed for endpoint {Endpoint} using SSL {SSL}",
                     target, false);
+                authenticationRejected = IsAuthenticationRejection(e);
             }
 
             return false;
         }
+
+        private static bool IsAuthenticationRejection(Exception exception) =>
+            exception is LdapException ldapException &&
+            ldapException.ErrorCode is (int)LdapErrorCodes.InvalidCredentials
+                or (int)ResultCode.InappropriateAuthentication;
 
         private bool TryReadIdentity(IConnection connection, string suppliedDomain, string target,
             MetadataState previous, out MetadataState metadata) {
