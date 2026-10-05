@@ -83,7 +83,7 @@ namespace SharpHoundCommonLib.Processors
 
                 trust.IsTransitive = !attributes.HasFlag(TrustAttributes.NonTransitive);
                 if (entry.TryGetProperty(LDAPProperties.CanonicalName, out var cn)) {
-                    trust.TargetDomainName = cn.ToUpper();
+                    trust.TargetDomainName = cn.ToUpperInvariant();
                 }
 
                 trust.SidFilteringEnabled = 

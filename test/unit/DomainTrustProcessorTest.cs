@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.DirectoryServices.Protocols;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.Versioning;
 using System.Threading;
@@ -147,6 +148,30 @@ namespace CommonLibTest
             Assert.Equal(classification, Assert.Single(trusts).TrustType);
         }
 
+        [SupportedOSPlatform("windows")]
+        [WindowsOnlyFact]
+        public async Task EnumerateDomainTrusts_TurkishCulture_PreservesResolvedClassification() {
+            var originalCulture = CultureInfo.CurrentCulture;
+            try {
+                CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("tr-TR");
+                var domain = new LdapDomainInfo { Name = "testlab.local", DefaultNamingContext = "DC=testlab,DC=local" };
+                domain.TrustTypes["child.test"] = TrustType.ParentChild;
+                var utils = new Mock<ILdapUtils>();
+                utils.Setup(x => x.GetDomain("testlab.local", out domain)).Returns(true);
+                utils.Setup(x => x.Query(It.IsAny<LdapQueryParameters>(), It.IsAny<CancellationToken>()))
+                    .Returns(new[] { CreateTrustEntry(2, targetDomainName: "child.test") }.ToAsyncEnumerable);
+
+                var trusts = await new DomainTrustProcessor(utils.Object).EnumerateDomainTrusts("testlab.local").ToArrayAsync();
+
+                var trust = Assert.Single(trusts);
+                Assert.Equal(TrustType.ParentChild, trust.TrustType);
+                Assert.Equal("CHILD.TEST", trust.TargetDomainName);
+            }
+            finally {
+                CultureInfo.CurrentCulture = originalCulture;
+            }
+        }
+
         [Theory]
         [InlineData(2, TrustAttributes.ForestTransitive, TrustType.Forest)]
         [InlineData(2, (TrustAttributes)0, TrustType.External)]
@@ -178,12 +203,12 @@ namespace CommonLibTest
         }
 
         private static LdapResult<IDirectoryObject> CreateTrustEntry(int ldapType,
-            TrustAttributes attributes = TrustAttributes.WithinForest) =>
+            TrustAttributes attributes = TrustAttributes.WithinForest, string targetDomainName = "EXTERNAL.LOCAL") =>
             LdapResult<IDirectoryObject>.Ok(new MockDirectoryObject("", new Dictionary<string, object> {
                 ["trustdirection"] = "3",
                 ["trusttype"] = ldapType.ToString(),
                 ["trustattributes"] = ((int)attributes).ToString(),
-                ["cn"] = "EXTERNAL.LOCAL",
+                ["cn"] = targetDomainName,
                 ["securityidentifier"] = Utils.B64ToBytes("AQQAAAAAAAUVAAAA7JjftxhaHTnafGWh")
             }));
     }
