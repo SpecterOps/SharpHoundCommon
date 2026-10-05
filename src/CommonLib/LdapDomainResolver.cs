@@ -335,7 +335,10 @@ namespace SharpHoundCommonLib {
             // only to the domain the caller explicitly requested.
             if (suppliedDomain == null) return true;
 
-            // Treat dotted input as a DNS name and single-label input as a NetBIOS alias.
+            // DNS identities may be single-label names. Accept them before requiring alias metadata.
+            if (string.Equals(suppliedDomain, domainName, StringComparison.OrdinalIgnoreCase)) return true;
+
+            // Dotted input must match the DNS identity; other single-label input may be an alias.
             if (suppliedDomain.IndexOf('.') >= 0) {
                 // A single terminal dot denotes the DNS root. Remove it only for identity
                 // comparison, preserving the caller's endpoint and any other empty labels.

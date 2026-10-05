@@ -317,6 +317,27 @@ public class LdapUtilsDomainTests {
     }
 
     [Fact]
+    public void GetDomain_AcceptsSingleLabelNameReturnedByDefaultResolution() {
+        var harness = new Harness {
+            ConfigureConnection = connection => connection.OnSearch = request => request.DistinguishedName == ""
+                ? new[] { Entry("", ("defaultNamingContext", "DC=single")) }
+                : Array.Empty<IDirectoryObject>()
+        };
+        using var utils = harness.CreateUtils();
+
+        Assert.True(utils.GetDomain(out var first));
+        Assert.Equal("SINGLE", first.Name);
+        Assert.True(utils.GetDomain(first.Name, out var resolved));
+        Assert.Equal(first.Name, resolved.Name);
+        Assert.Equal(first.DefaultNamingContext, resolved.DefaultNamingContext);
+        Assert.Equal(new[] { DomainName, "SINGLE" }, harness.Targets);
+        Assert.All(harness.Connections, connection => {
+            Assert.DoesNotContain(connection.Requests, request => request.Attributes.Contains("nETBIOSName"));
+            Assert.True(connection.Disposed);
+        });
+    }
+
+    [Fact]
     public void GetDomain_RefreshValidatesSingleLabelDnsIdentityWithoutNetBiosLookup() {
         string failure = "controllers";
         var harness = CreateMetadataHarness(() => failure);
