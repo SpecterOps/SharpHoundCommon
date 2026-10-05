@@ -67,7 +67,7 @@ if (LdapUtils.GetDomain("child.example.test", config, out var domain)) {
 
 Controlled resolution tries SSL first, using `SSLPort` (default 636). An SSL operation failure permits a retry on the same endpoint using `Port` (default 389) only when `ForceSSL` is false. Invalid credentials or inappropriate authentication fail resolution without a transport retry. It preserves `AuthType`, enables signing and sealing on plaintext connections unless `DisableSigning` is set, and validates certificates unless `DisableCertVerification` is set. A configured `Username` supplies explicit credentials instead of ambient credentials.
 
-With `Server` configured, every resolver read stays on that host with referrals and automatic reconnection disabled. Discovered PDC and controller names are returned as metadata. A supplied DNS domain or NetBIOS alias must match the target's advertised identity; a mismatch fails controlled resolution. Unavailable SID, PDC, controller, or trust metadata preserves successful core resolution without changing endpoints or invoking legacy enrichment.
+With `Server` configured, every resolver read stays on that host with referrals and automatic reconnection disabled. Discovered PDC and controller names are returned as metadata. A supplied DNS domain or NetBIOS alias must match the target's advertised identity; a mismatch fails controlled resolution. DNS matches, including single-label names, are accepted before requiring a NetBIOS cross-reference. Unavailable SID, PDC, controller, or trust metadata preserves successful core resolution without changing endpoints or invoking legacy enrichment.
 
 ## Relationship to SharpHoundRPC
 

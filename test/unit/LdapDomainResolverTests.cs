@@ -197,6 +197,34 @@ public class LdapDomainResolverTests {
         Assert.True(connection.Disposed);
     }
 
+    [Theory]
+    [InlineData("single", false)]
+    [InlineData("SiNgLe", false)]
+    [InlineData("single.", false)]
+    [InlineData("single", true)]
+    [InlineData("SiNgLe", true)]
+    [InlineData("single.", true)]
+    public void TryResolve_SingleLabelDnsMatchDoesNotRequireNetBiosAlias(string suppliedDomain,
+        bool missingConfiguration) {
+        var harness = new Harness(new LdapConfig { Server = "dc.example.test" });
+        var connection = new FakeConnection {
+            OnSearch = request => request.DistinguishedName == ""
+                ? new[] { missingConfiguration ? Entry(("defaultNamingContext", "DC=single")) :
+                    Entry(("defaultNamingContext", "DC=single"), ("configurationNamingContext", ConfigDn)) }
+                : request.Scope == SearchScope.OneLevel
+                    ? new[] { Entry(("nCName", "DC=single"), ("nETBIOSName", "OTHER")) }
+                    : Array.Empty<IDirectoryObject>()
+        };
+        harness.Connections.Enqueue(connection);
+
+        Assert.True(harness.Resolver.TryResolve(suppliedDomain, out var domain));
+        Assert.Equal("SINGLE", domain.Name);
+        Assert.Equal("DC=single", domain.DefaultNamingContext);
+        Assert.DoesNotContain(connection.Requests, request => request.Attributes.Contains("nETBIOSName"));
+        Assert.Equal(("dc.example.test", true, true), Assert.Single(harness.Attempts));
+        Assert.True(connection.Disposed);
+    }
+
     [Fact]
     public void TryResolve_ReadsRootDseAndMaterializesNamingContexts() {
         var harness = new Harness();
