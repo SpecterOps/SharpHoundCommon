@@ -16,7 +16,7 @@ public class MockDirectoryObject : IDirectoryObject {
 
     public MockDirectoryObject(string distinguishedName, IDictionary properties, string sid = "", string guid = "") {
         DistinguishedName = distinguishedName;
-        Properties = properties;
+        Properties = properties ?? new Dictionary<string, object>();
         _objectSID = sid;
         _objectGuid = guid;
     }

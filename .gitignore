@@ -606,3 +606,6 @@ FodyWeavers.xsd
 # JetBrains Rider
 .idea/
 *.sln.iml
+
+# Codex local workspace state
+.codex

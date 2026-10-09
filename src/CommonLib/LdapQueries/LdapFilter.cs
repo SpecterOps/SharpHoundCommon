@@ -130,12 +130,34 @@ namespace SharpHoundCommonLib.LDAPQueries {
         }
 
         /// <summary>
+        ///     Add a filter that will include Builtin domain container objects.
+        /// </summary>
+        /// <param name="conditions"></param>
+        /// <returns></returns>
+        public LdapFilter AddBuiltinDomains(params string[] conditions) {
+            _filterParts.Add(BuildString("(objectClass=builtinDomain)", conditions));
+
+            return this;
+        }
+
+        /// <summary>
         ///     Add a filter that will include Configuration objects
         /// </summary>
         /// <param name="conditions"></param>
         /// <returns></returns>
         public LdapFilter AddConfiguration(params string[] conditions) {
             _filterParts.Add(BuildString("(objectClass=configuration)", conditions));
+
+            return this;
+        }
+
+        /// <summary>
+        ///     Add a filter that will include Sites container objects.
+        /// </summary>
+        /// <param name="conditions"></param>
+        /// <returns></returns>
+        public LdapFilter AddSitesContainer(params string[] conditions) {
+            _filterParts.Add(BuildString("(objectClass=sitesContainer)", conditions));
 
             return this;
         }
@@ -211,6 +233,45 @@ namespace SharpHoundCommonLib.LDAPQueries {
         public LdapFilter AddComputersNoMSAs(params string[] conditions) {
             _filterParts.Add(BuildString(
                 "(&(samaccounttype=805306369)(!(objectclass=msDS-GroupManagedServiceAccount))(!(objectclass=msDS-ManagedServiceAccount)))",
+                conditions));
+            return this;
+        }
+
+        /// <summary>
+        ///     Add a filter that will match Active Directory sites
+        /// </summary>
+        /// <param name="conditions"></param>
+        /// <returns></returns>
+        public LdapFilter AddSites(params string[] conditions)
+        {
+            _filterParts.Add(BuildString(
+                "(objectClass=site)",
+                conditions));
+            return this;
+        }
+
+        /// <summary>
+        ///     Add a filter that will match Active Directory site servers
+        /// </summary>
+        /// <param name="conditions"></param>
+        /// <returns></returns>
+        public LdapFilter AddSiteServers(params string[] conditions)
+        {
+            _filterParts.Add(BuildString(
+                "(objectClass=server)",
+                conditions));
+            return this;
+        }
+
+        /// <summary>
+        ///     Add a filter that will match Active Directory site subnets
+        /// </summary>
+        /// <param name="conditions"></param>
+        /// <returns></returns>
+        public LdapFilter AddSiteSubnets(params string[] conditions)
+        {
+            _filterParts.Add(BuildString(
+                "(objectClass=subnet)",
                 conditions));
             return this;
         }

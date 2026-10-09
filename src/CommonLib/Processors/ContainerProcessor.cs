@@ -57,18 +57,6 @@ namespace SharpHoundCommonLib.Processors
         {
             var containerDn = Helpers.RemoveDistinguishedNamePrefix(distinguishedName);
 
-            //If the container is the builtin container, we want to redirect the containing object to the domain of the object
-            if (containerDn.StartsWith("CN=BUILTIN", StringComparison.OrdinalIgnoreCase))
-            {
-                //This is always safe
-                var domain = Helpers.DistinguishedNameToDomain(distinguishedName);
-                if (await _utils.GetDomainSidFromDomainName(domain) is (true, var domainSid)) {
-                    return (true, new TypedPrincipal(domainSid, Label.Domain));    
-                }
-
-                return (false, default);
-            }
-
             return await _utils.ResolveDistinguishedName(containerDn);
         }
 
@@ -97,7 +85,8 @@ namespace SharpHoundCommonLib.Processors
         /// <returns></returns>
         public async IAsyncEnumerable<TypedPrincipal> GetContainerChildObjects(string distinguishedName, string containerName = "")
         {
-            var filter = new LdapFilter().AddComputers().AddUsers().AddGroups().AddOUs().AddContainers();
+            var filter = new LdapFilter().AddComputers().AddUsers().AddGroups().AddOUs().AddContainers()
+                .AddBuiltinDomains().AddSitesContainer();
             filter.AddCertificateAuthorities().AddCertificateTemplates().AddEnterpriseCertificationAuthorities();
             await foreach (var childEntryResult in _utils.Query(new LdapQueryParameters {
                                DomainName = Helpers.DistinguishedNameToDomain(distinguishedName),
@@ -132,11 +121,7 @@ namespace SharpHoundCommonLib.Processors
 
         public IAsyncEnumerable<GPLink> ReadContainerGPLinks(ResolvedSearchResult result, IDirectoryObject entry)
         {
-            if (entry.TryGetProperty(LDAPProperties.GPLink, out var links)) {
-                return ReadContainerGPLinks(links);    
-            }
-
-            return AsyncEnumerable.Empty<GPLink>();
+            return Helpers.ReadGPLinks(entry, _utils);
         }
 
         /// <summary>
@@ -144,25 +129,9 @@ namespace SharpHoundCommonLib.Processors
         /// </summary>
         /// <param name="gpLink"></param>
         /// <returns></returns>
-        public async IAsyncEnumerable<GPLink> ReadContainerGPLinks(string gpLink)
+        public IAsyncEnumerable<GPLink> ReadContainerGPLinks(string gpLink)
         {
-            if (gpLink == null)
-                yield break;
-
-            foreach (var link in Helpers.SplitGPLinkProperty(gpLink))
-            {
-                var enforced = link.Status.Equals("2");
-
-                var res = await _utils.ResolveDistinguishedName(link.DistinguishedName);
-
-                if (res.Success) {
-                    yield return new GPLink
-                    {
-                        GUID = res.Principal.ObjectIdentifier,
-                        IsEnforced = enforced
-                    };
-                }
-            }
+            return Helpers.ReadGPLinks(gpLink, _utils);
         }
 
         /// <summary>

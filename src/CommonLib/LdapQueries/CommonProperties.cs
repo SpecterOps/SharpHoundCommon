@@ -9,7 +9,8 @@
             LDAPProperties.Flags
         };
 
-        public static readonly string[] ObjectID = { LDAPProperties.ObjectSID, LDAPProperties.ObjectGUID };
+        public static readonly string[] ObjectID =
+            { LDAPProperties.ObjectSID, LDAPProperties.ObjectGUID, LDAPProperties.ObjectClass };
         public static readonly string[] ObjectSID = { LDAPProperties.ObjectSID };
         public static readonly string[] GPCFileSysPath = { LDAPProperties.GPCFileSYSPath };
 
@@ -97,6 +98,25 @@
 
         public static readonly string[] StealthProperties = {
             LDAPProperties.HomeDirectory, LDAPProperties.ScriptPath, LDAPProperties.ProfilePath
+        };
+
+        public static readonly string[] SiteProps =
+        {
+            LDAPProperties.DisplayName, LDAPProperties.Name, LDAPProperties.ObjectGUID, LDAPProperties.GPLink,
+            LDAPProperties.GroupPolicyOptions, LDAPProperties.ObjectClass, LDAPProperties.Description,
+            LDAPProperties.WhenCreated
+        };
+
+        public static readonly string[] SiteServerProps =
+        {
+            LDAPProperties.DisplayName, LDAPProperties.Name, LDAPProperties.ObjectGUID, LDAPProperties.ObjectClass, LDAPProperties.DNSHostName,
+            LDAPProperties.ServerReference
+        };
+
+        public static readonly string[] SiteSubnetProps =
+        {
+            LDAPProperties.DisplayName, LDAPProperties.Name, LDAPProperties.CanonicalName, LDAPProperties.ObjectGUID, LDAPProperties.ObjectClass,
+            LDAPProperties.SiteObject
         };
     }
 }
