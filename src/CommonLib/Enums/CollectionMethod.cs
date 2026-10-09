@@ -28,16 +28,17 @@ namespace SharpHoundCommonLib.Enums {
         SmbInfo = 1 << 22,
         NTLMRegistry = 1 << 23,
         Site = 1 << 24,
+        AzureVM = 1 << 25,
         //TODO: Re-introduce this when we're ready for Event Log collection
         //EventLogs = 1 << 23,
         LocalGroups = DCOM | RDP | LocalAdmin | PSRemote,
-        ComputerOnly = LocalGroups | Session | UserRights | CARegistry | DCRegistry | WebClientService | SmbInfo | NTLMRegistry,
-        DCOnly = ACL | Container | Group | ObjectProps | Trusts | GPOLocalGroup | CertServices | Site,
+        ComputerOnly = LocalGroups | Session | UserRights | CARegistry | DCRegistry | WebClientService | SmbInfo | NTLMRegistry | AzureVM,
+        DCOnly = ACL | Container | Group | ObjectProps | Trusts | GPOLocalGroup | CertServices, Site
 
         Default = Group | Session | Trusts | ACL | ObjectProps | LocalGroups | SPNTargets | Container | CertServices |
                   LdapServices | SmbInfo | WebClientService | Site,
 
         All = Default | LoggedOn | GPOLocalGroup | UserRights | CARegistry | DCRegistry | WebClientService |
-              LdapServices | NTLMRegistry
+              LdapServices | NTLMRegistry | AzureVM
     }
 }

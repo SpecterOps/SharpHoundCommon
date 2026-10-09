@@ -18,6 +18,10 @@ public class RegistryProcessor {
     private readonly AdaptiveTimeout _registryAdaptiveTimeout = new(maxTimeout:TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ReadRegistrySettings)));
     private readonly ICollectionStrategy<RegistryQueryResult, RegistryQuery>[] _strategies;
     private readonly RegistryQuery[] _queries;
+    private static readonly RegistryQuery[] AzureVmQueries = [
+        RegistryQuery.ForKey(RegistryHive.LocalMachine, @"SOFTWARE\Microsoft\Windows Azure")
+            .WithValues(["VmId"])
+    ];
 
     public RegistryProcessor(ILogger log, IStrategyExecutor registryCollector, string domain) {
         _log = log ?? Logging.LogProvider.CreateLogger("RegistryProcessor");
@@ -140,6 +144,53 @@ public class RegistryProcessor {
                 ex.ToString());
 
             return APIResult<RegistryData>.Failure(ex.ToString());
+        }
+    }
+
+    public async Task<APIResult<string>> ReadAzureVmId(string targetMachine) {
+        try {
+            var result = await _registryAdaptiveTimeout.ExecuteWithTimeout(async (_) => await _registryCollector
+                .CollectAsync(targetMachine, AzureVmQueries, _strategies)
+                .ConfigureAwait(false));
+
+            if (!result.IsSuccess)
+                return APIResult<string>.Failure($"Timeout when reading the Azure VM ID from {targetMachine}");
+
+            var collectedData = result.Value;
+            foreach (var attempt in collectedData.FailureAttempts ?? []) {
+                _log.LogTrace("ReadAzureVmId failed on {ComputerName} using {Strategy}: {Error}", targetMachine,
+                    attempt.StrategyType.Name, attempt.FailureReason);
+                await SendComputerStatus(new CSVComputerStatus {
+                    Task = $"{nameof(ReadAzureVmId)} - {attempt.StrategyType.Name}",
+                    ComputerName = targetMachine,
+                    Status = attempt.FailureReason
+                });
+            }
+
+            if (!collectedData.WasSuccessful) {
+                var message = collectedData.FailureAttempts is null
+                    ? "Failed to read the Azure VM ID"
+                    : string.Join("\n", collectedData.FailureAttempts.Select(attempt =>
+                        $"{attempt.StrategyType.Name}: {attempt.FailureReason ?? ""}"));
+                return APIResult<string>.Failure(message);
+            }
+
+            var vmIdResult = collectedData.Results?.FirstOrDefault(result =>
+                result.ValueExists && string.Equals(result.ValueName, "VmId", StringComparison.OrdinalIgnoreCase));
+            var vmId = Convert.ToString(vmIdResult?.Value);
+            if (string.IsNullOrWhiteSpace(vmId))
+                return APIResult<string>.Failure("The Azure VM ID registry value was not found");
+
+            await SendComputerStatus(new CSVComputerStatus {
+                Task = $"{nameof(ReadAzureVmId)} - {collectedData.SuccessfulStrategy?.Name ?? ""}",
+                ComputerName = targetMachine,
+                Status = CSVComputerStatus.StatusSuccess
+            });
+
+            return APIResult<string>.Success(vmId.Trim().ToLowerInvariant());
+        } catch (Exception ex) {
+            _log.LogError(ex, "Unhandled Azure VM registry read exception for {ComputerName}", targetMachine);
+            return APIResult<string>.Failure(ex.ToString());
         }
     }
 
