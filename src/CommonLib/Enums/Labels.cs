@@ -6,8 +6,8 @@
         User,
         Computer,
         Group,
-        LocalGroup,
-        LocalUser,
+        ADLocalGroup,
+        ADLocalUser,
         GPO,
         Domain,
         OU,
@@ -18,6 +18,9 @@
         AIACA,
         EnterpriseCA,
         NTAuthStore,
-        IssuancePolicy
+        IssuancePolicy,
+        Site,
+        SiteServer,
+        SiteSubnet
     }
 }

@@ -63,7 +63,7 @@ namespace CommonLibTest {
         }
 
         [Fact]
-        public async void ResolveIDAndType_WellKnownAdministrators_ReturnsConvertedSID() {
+        public async Task ResolveIDAndType_WellKnownAdministrators_ReturnsConvertedSID() {
             var test = await _utils.ResolveIDAndType("S-1-5-32-544", "TESTLAB.LOCAL");
             Assert.True(test.Success);
             Assert.NotNull(test.Principal);
@@ -72,7 +72,7 @@ namespace CommonLibTest {
         }
 
         [Fact]
-        public async void GetWellKnownPrincipal_EnterpriseDomainControllers_ReturnsCorrectedSID()
+        public async Task GetWellKnownPrincipal_EnterpriseDomainControllers_ReturnsCorrectedSID()
         {
             var mock = new Mock<LdapUtils>();
             mock.Setup(x => x.GetForest(It.IsAny<string>())).ReturnsAsync((true, _testForestName));
@@ -83,14 +83,14 @@ namespace CommonLibTest {
         }
 
         [Fact]
-        public async void GetWellKnownPrincipal_NonWellKnown_ReturnsNull() {
+        public async Task GetWellKnownPrincipal_NonWellKnown_ReturnsNull() {
             var result = await _utils.GetWellKnownPrincipal("S-1-5-21-123456-78910", _testDomainName);
             Assert.False(result.Success);
             Assert.Null(result.WellKnownPrincipal);
         }
 
         [Fact]
-        public async void GetWellKnownPrincipal_WithDomain_ConvertsSID() {
+        public async Task GetWellKnownPrincipal_WithDomain_ConvertsSID() {
             var result =
                 await _utils.GetWellKnownPrincipal("S-1-5-32-544", _testDomainName);
             Assert.True(result.Success);
@@ -248,6 +248,38 @@ namespace CommonLibTest {
             Assert.Equal(sid, result.ObjectId);
             Assert.Equal(Label.User, result.ObjectType);
             Assert.Equal("DOMAIN1$@TESTLAB.LOCAL", result.DisplayName);
+            Assert.Equal("S-1-5-21-3130019616-2776909439-2417379446", result.DomainSid);
+            Assert.Equal("TESTLAB.LOCAL", result.Domain);
+            Assert.False(result.Deleted);
+        }
+
+        [Theory]
+        [InlineData(ObjectClass.SiteClass, Label.Site,
+            "CN=Default-First-Site-Name,CN=Sites,CN=Configuration,DC=TESTLAB,DC=LOCAL",
+            "Default-First-Site-Name", "DEFAULT-FIRST-SITE-NAME@TESTLAB.LOCAL")]
+        [InlineData(ObjectClass.SiteServerClass, Label.SiteServer,
+            "CN=PRIMARY,CN=Servers,CN=Default-First-Site-Name,CN=Sites,CN=Configuration,DC=TESTLAB,DC=LOCAL",
+            "primary.testlab.local", "PRIMARY.TESTLAB.LOCAL@TESTLAB.LOCAL")]
+        [InlineData(ObjectClass.SiteSubnetClass, Label.SiteSubnet,
+            "CN=10.0.0.0/24,CN=Subnets,CN=Sites,CN=Configuration,DC=TESTLAB,DC=LOCAL",
+            "10.0.0.0/24", "10.0.0.0/24@TESTLAB.LOCAL")]
+        public async Task Test_ResolveSearchResult_SiteObjects(string objectClass, Label expectedLabel,
+            string distinguishedName, string name, string expectedDisplayName) {
+            var utils = new MockLdapUtils();
+            var guid = new Guid().ToString();
+            var attribs = new Dictionary<string, object> {
+                { LDAPProperties.ObjectClass, new[] { "top", objectClass } },
+                { LDAPProperties.Name, name }
+            };
+
+            var mock = new MockDirectoryObject(distinguishedName, attribs, "", guid);
+
+            var (success, result) = await LdapUtils.ResolveSearchResult(mock, utils);
+
+            Assert.True(success);
+            Assert.Equal(guid, result.ObjectId);
+            Assert.Equal(expectedLabel, result.ObjectType);
+            Assert.Equal(expectedDisplayName, result.DisplayName);
             Assert.Equal("S-1-5-21-3130019616-2776909439-2417379446", result.DomainSid);
             Assert.Equal("TESTLAB.LOCAL", result.Domain);
             Assert.False(result.Deleted);

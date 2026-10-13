@@ -402,7 +402,7 @@ namespace SharpHoundCommonLib.Processors
                 // The local group sid is computer machine sid - group rid.
                 var groupRid = sid.Rid();
                 var newSid = $"{computerObjectId}-{groupRid}";
-                return (true, new TypedPrincipal(newSid, Label.LocalGroup));
+                return (true, new TypedPrincipal(newSid, Label.ADLocalGroup));
             }
 
             //If we get here, we most likely have a domain principal. Do a lookup

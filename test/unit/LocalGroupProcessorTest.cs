@@ -47,11 +47,11 @@ namespace CommonLibTest {
             Assert.Collection(rdpGroup.Results,
                 principal => {
                     Assert.Equal($"{machineDomainSid}-1003", principal.ObjectIdentifier);
-                    Assert.Equal(Label.LocalGroup, principal.ObjectType);
+                    Assert.Equal(Label.ADLocalGroup, principal.ObjectType);
 
                 }, principal => {
                     Assert.Equal($"{machineDomainSid}-544", principal.ObjectIdentifier);
-                    Assert.Equal(Label.LocalGroup, principal.ObjectType);
+                    Assert.Equal(Label.ADLocalGroup, principal.ObjectType);
                 });
         }
 
@@ -344,7 +344,7 @@ namespace CommonLibTest {
             Assert.Collection(rdpGroup.Results,
                 principal => {
                     Assert.Equal($"{machineDomainSid}-544", principal.ObjectIdentifier);
-                    Assert.Equal(Label.LocalGroup, principal.ObjectType);
+                    Assert.Equal(Label.ADLocalGroup, principal.ObjectType);
                 });
         }
 
@@ -369,14 +369,14 @@ namespace CommonLibTest {
             Assert.Collection(rdpGroup.Results,
                 principal => {
                     Assert.Equal($"{machineDomainSid}-1003", principal.ObjectIdentifier);
-                    Assert.Equal(Label.LocalGroup, principal.ObjectType);
+                    Assert.Equal(Label.ADLocalGroup, principal.ObjectType);
 
                 }, principal => {
                     Assert.Equal($"{Consts.MockWorkstationMachineSid}-1003", principal.ObjectIdentifier);
-                    Assert.Equal(Label.LocalGroup, principal.ObjectType);
+                    Assert.Equal(Label.ADLocalGroup, principal.ObjectType);
                 }, principal => {
                     Assert.Equal($"{machineDomainSid}-544", principal.ObjectIdentifier);
-                    Assert.Equal(Label.LocalGroup, principal.ObjectType);
+                    Assert.Equal(Label.ADLocalGroup, principal.ObjectType);
                 });
         }
     }

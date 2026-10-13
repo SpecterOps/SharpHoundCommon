@@ -487,7 +487,7 @@ namespace CommonLibTest
         [SupportedOSPlatform("windows")]
         [WindowsOnlyFact]
         public async Task CertAbuseProcessor_GetRegistryPrincipal_ResolvesToLocalPrincipal_ForLocalSID() {
-            var expectedPrincipalType = Label.LocalGroup;
+            var expectedPrincipalType = Label.ADLocalGroup;
             var expectedPrincipalSID = $"{TargetDomainSid}-123";
 
             _mockLdapUtils.Setup(x => x.ConvertLocalWellKnownPrincipal(It.IsAny<SecurityIdentifier>(), It.IsAny<string>(), It.IsAny<string>()))

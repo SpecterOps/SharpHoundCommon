@@ -49,10 +49,10 @@ namespace CommonLibTest
             Assert.Equal(3, results[0].Results.Length);
             var adminResult = privilege.Results.First(x => x.ObjectIdentifier.EndsWith("-544"));
             Assert.Equal($"{machineDomainSid}-544", adminResult.ObjectIdentifier);
-            Assert.Equal(Label.LocalGroup, adminResult.ObjectType);
+            Assert.Equal(Label.ADLocalGroup, adminResult.ObjectType);
             var rdpResult = privilege.Results.First(x => x.ObjectIdentifier.EndsWith("-555"));
             Assert.Equal($"{machineDomainSid}-555", rdpResult.ObjectIdentifier);
-            Assert.Equal(Label.LocalGroup, rdpResult.ObjectType);
+            Assert.Equal(Label.ADLocalGroup, rdpResult.ObjectType);
         }
 
         [SupportedOSPlatform("windows")]

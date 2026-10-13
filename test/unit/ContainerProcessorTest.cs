@@ -121,6 +121,24 @@ namespace CommonLibTest
         }
 
         [Fact]
+        public async Task ContainerProcessor_GetContainerChildObjects_QueryIncludesAdditionalContainerClasses()
+        {
+            var mock = new Mock<MockLdapUtils>();
+            LdapQueryParameters queryParameters = null;
+            mock.Setup(x => x.Query(It.IsAny<LdapQueryParameters>(), It.IsAny<CancellationToken>()))
+                .Callback<LdapQueryParameters, CancellationToken>((parameters, _) => queryParameters = parameters)
+                .Returns(Array.Empty<LdapResult<IDirectoryObject>>().ToAsyncEnumerable);
+
+            var processor = new ContainerProcessor(mock.Object);
+
+            await processor.GetContainerChildObjects("DC=testlab,DC=local").ToArrayAsync();
+
+            Assert.NotNull(queryParameters);
+            Assert.Contains("(objectClass=builtinDomain)", queryParameters.LDAPFilter);
+            Assert.Contains("(objectClass=sitesContainer)", queryParameters.LDAPFilter);
+        }
+
+        [Fact]
         public void ContainerProcessor_ReadBlocksInheritance_ReturnsCorrectValues()
         {
             var test = ContainerProcessor.ReadBlocksInheritance(null);
@@ -149,8 +167,8 @@ namespace CommonLibTest
             Assert.True(success);
 
             (success, result) = await proc.GetContainingObject("CN=ADMINISTRATORS,CN=BUILTIN,DC=TESTLAB,DC=LOCAL");
-            Assert.Equal(Label.Domain, result.ObjectType);
-            Assert.Equal("S-1-5-21-3130019616-2776909439-2417379446", result.ObjectIdentifier);
+            Assert.Equal(Label.Container, result.ObjectType);
+            Assert.Equal(MockLdapUtils.BuiltinContainerGuid, result.ObjectIdentifier);
             Assert.True(success);
         }
 

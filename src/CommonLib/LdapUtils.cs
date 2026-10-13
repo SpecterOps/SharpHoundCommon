@@ -831,7 +831,7 @@ namespace SharpHoundCommonLib {
             string computerDomainSid, string computerDomain) {
             if (!WellKnownPrincipal.GetWellKnownPrincipal(sid.Value, out var common)) return (false, null);
             //The "Everyone" and "Authenticated Users" principals are special and will be converted to the domain equivalent
-            if (sid.Value is "S-1-1-0" or "S-1-5-11") {
+            if (sid.Value is WellKnownPrincipal.EveryoneSid or "S-1-5-11") {
                 return await GetWellKnownPrincipal(sid.Value, computerDomain);
             }
 
@@ -839,8 +839,8 @@ namespace SharpHoundCommonLib {
             var principal = new TypedPrincipal {
                 ObjectIdentifier = $"{computerDomainSid}-{sid.Rid()}",
                 ObjectType = common.ObjectType switch {
-                    Label.User => Label.LocalUser,
-                    Label.Group => Label.LocalGroup,
+                    Label.User => Label.ADLocalUser,
+                    Label.Group => Label.ADLocalGroup,
                     _ => common.ObjectType
                 }
             };
@@ -1192,6 +1192,10 @@ namespace SharpHoundCommonLib {
                 type = Label.Container;
             else if (objectClasses.Contains(ObjectClass.ConfigurationClass, StringComparer.OrdinalIgnoreCase))
                 type = Label.Configuration;
+            else if (objectClasses.Contains(ObjectClass.BuiltinDomainClass, StringComparer.OrdinalIgnoreCase))
+                type = Label.Container;
+            else if (objectClasses.Contains(ObjectClass.SitesContainerClass, StringComparer.OrdinalIgnoreCase))
+                type = Label.Container;
             else if (objectClasses.Contains(ObjectClass.PKICertificateTemplateClass, StringComparer.OrdinalIgnoreCase))
                 type = Label.CertTemplate;
             else if (objectClasses.Contains(ObjectClass.PKIEnrollmentServiceClass, StringComparer.OrdinalIgnoreCase))
@@ -1214,8 +1218,34 @@ namespace SharpHoundCommonLib {
                     type = Label.IssuancePolicy;
                 }
             }
+            else if (objectClasses.Contains(ObjectClass.SiteClass, StringComparer.OrdinalIgnoreCase))
+            {
+                type = Label.Site;
+            }
+            else if (objectClasses.Contains(ObjectClass.SiteServerClass, StringComparer.OrdinalIgnoreCase) &&
+                     IsUnderConfigurationSites(distinguishedName))
+            {
+                type = Label.SiteServer;
+            }
+            else if (objectClasses.Contains(ObjectClass.SiteSubnetClass, StringComparer.OrdinalIgnoreCase))
+            {
+                type = Label.SiteSubnet;
+            }
 
             return type != Label.Base;
+        }
+
+        private static bool IsUnderConfigurationSites(string distinguishedName) {
+            var sitesPath = $"{DirectoryPaths.SitesLocation},{DirectoryPaths.ConfigLocation},";
+
+            for (var currentDn = distinguishedName; !string.IsNullOrWhiteSpace(currentDn);
+                 currentDn = Helpers.RemoveDistinguishedNamePrefix(currentDn)) {
+                if (currentDn.StartsWith(sitesPath, StringComparison.OrdinalIgnoreCase)) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public static async Task<(bool Success, ResolvedSearchResult ResolvedResult)> ResolveSearchResult(
@@ -1223,7 +1253,7 @@ namespace SharpHoundCommonLib {
             if (!directoryObject.GetObjectIdentifier(out var objectIdentifier)) {
                 return (false, default);
             }
-
+            
             var res = new ResolvedSearchResult {
                 ObjectId = objectIdentifier
             };
@@ -1279,11 +1309,10 @@ namespace SharpHoundCommonLib {
                 if (await utils.GetWellKnownPrincipal(objectIdentifier, domain) is (true, var convertedPrincipal)) {
                     res.ObjectId = convertedPrincipal.ObjectIdentifier;
                 }
-
                 return (true, res);
             }
 
-            res.ObjectType = await ComputeLabel(directoryObject, objectIdentifier, domain, utils);
+            res.ObjectType = await ComputeLabel(directoryObject, objectIdentifier, domain, utils);          
 
             directoryObject.TryGetProperty(LDAPProperties.SAMAccountName, out var samAccountName);
             res.DisplayName = ComputeDisplayName(directoryObject, domain, res.ObjectType, samAccountName);
@@ -1404,6 +1433,46 @@ namespace SharpHoundCommonLib {
                             displayName = $"UNKNOWN@{domain}";
                         }
 
+                        break;
+                    }
+                case Label.Site: {
+                        if (directoryObject.TryGetProperty(LDAPProperties.Name, out var name))
+                        {
+                            displayName = $"{name}@{domain}";
+                        }
+                        else
+                        {
+                            displayName = $"UNKNOWN@{domain}";
+                        }
+                        break;
+                    }
+                case Label.SiteServer:
+                    {
+                        if (directoryObject.TryGetProperty(LDAPProperties.DNSHostName, out var dnsHostName) &&
+                            !string.IsNullOrWhiteSpace(dnsHostName))
+                        {
+                            displayName = dnsHostName;
+                        }
+                        else if (directoryObject.TryGetProperty(LDAPProperties.Name, out var name))
+                        {
+                            displayName = $"{name}@{domain}";
+                        }
+                        else
+                        {
+                            displayName = $"UNKNOWN@{domain}";
+                        }
+                        break;
+                    }
+                case Label.SiteSubnet:
+                    {
+                        if (directoryObject.TryGetProperty(LDAPProperties.Name, out var name))
+                        {
+                            displayName = $"{name}@{domain}";
+                        }
+                        else
+                        {
+                            displayName = $"UNKNOWN@{domain}";
+                        }
                         break;
                     }
                 default:

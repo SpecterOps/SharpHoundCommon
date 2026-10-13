@@ -65,7 +65,7 @@ namespace CommonLibTest
         }
 
         [Fact]
-        public async void ReadSPNTargets_SuppliedPort_ParsedCorrectly()
+        public async Task ReadSPNTargets_SuppliedPort_ParsedCorrectly()
         {
             var processor = new SPNProcessors(new MockLdapUtils());
             string[] servicePrincipalNames = {"MSSQLSvc/PRIMARY.TESTLAB.LOCAL:2345"};
@@ -86,7 +86,7 @@ namespace CommonLibTest
         }
 
         [Fact]
-        public async void ReadSPNTargets_MissingMssqlSvc_NotRead()
+        public async Task ReadSPNTargets_MissingMssqlSvc_NotRead()
         {
             var processor = new SPNProcessors(new MockLdapUtils());
             string[] servicePrincipalNames = {"myhost.redmond.microsoft.com:1433"};
@@ -96,7 +96,7 @@ namespace CommonLibTest
         }
 
         [Fact]
-        public async void ReadSPNTargets_SPNWithAddressSign_NotRead()
+        public async Task ReadSPNTargets_SPNWithAddressSign_NotRead()
         {
             var processor = new SPNProcessors(new MockLdapUtils());
             string[] servicePrincipalNames = {"MSSQLSvc/myhost.redmond.microsoft.com:1433 user@domain"};
@@ -106,7 +106,7 @@ namespace CommonLibTest
         }
         
         [Fact]
-        public async void ReadSPNTargets_SendComputerStatus()
+        public async Task ReadSPNTargets_SendComputerStatus()
         {
             var processor = new SPNProcessors(new MockLdapUtils());
             string[] servicePrincipalNames = {"MSSQLSvc/PRIMARY.TESTLAB.LOCAL:2345"};

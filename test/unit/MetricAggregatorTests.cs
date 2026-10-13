@@ -4,12 +4,11 @@ using System.Text;
 using SharpHoundCommonLib.Models;
 using SharpHoundCommonLib.Services;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace CommonLibTest;
 
 
-public class MetricAggregatorTests(ITestOutputHelper output) {
+public class MetricAggregatorTests {
 
     [Theory]
     [MemberData(nameof(MetricAggregatorTestData.CreateTestData), MemberType = typeof(MetricAggregatorTestData))]

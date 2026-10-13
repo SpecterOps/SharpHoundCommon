@@ -5,7 +5,6 @@ using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using SharpHoundCommonLib;
-using SharpHoundCommonLib.Enums;
 
 namespace CommonLibTest.Facades;
 
@@ -17,7 +16,7 @@ public class MockDirectoryObject : IDirectoryObject {
 
     public MockDirectoryObject(string distinguishedName, IDictionary properties, string sid = "", string guid = "") {
         DistinguishedName = distinguishedName;
-        Properties = properties;
+        Properties = properties ?? new Dictionary<string, object>();
         _objectSID = sid;
         _objectGuid = guid;
     }
@@ -126,10 +125,10 @@ public class MockDirectoryObject : IDirectoryObject {
 
     public bool TryGetCertificateArrayProperty(string propertyName, out X509Certificate2[] value) {
         if (!TryGetByteArrayProperty(propertyName, out var b)) {
-            value = Array.Empty<X509Certificate2>();
+            value = [];
             return false;
         }
-        
+
         value = b.Select(x => new X509Certificate2(x)).ToArray();
         return true;
     }

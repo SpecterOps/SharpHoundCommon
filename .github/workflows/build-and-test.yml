@@ -15,13 +15,13 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # ratchet:actions/setup-dotnet@v5
         with:
-          dotnet-version: 8.0.x
-
+          dotnet-version: 10.0.x
+  
       - name: Restore dependencies
         run: dotnet restore
 
       - name: Build
-        run: dotnet build --no-restore
+        run: dotnet build --no-restore -p:BuildDocFx=false
 
       - name: Test
         run: dotnet test --no-build
