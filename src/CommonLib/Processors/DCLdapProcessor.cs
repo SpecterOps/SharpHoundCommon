@@ -22,6 +22,14 @@ public class LdapAuthOptions {
 /// This processor checks if LDAP is requiring signing, as well as if channel binding is disabled. This is only used for domain controllers
 /// </summary>
 public class DCLdapProcessor {
+    // A failed unsigned bind only proves signing is required when LDAP explicitly returns StrongAuthRequired.
+    // Other failures (for example, NTLM being unsupported) mean the signing setting could not be determined.
+    private enum LdapAuthenticationOutcome {
+        Success,
+        SigningRequired,
+        Failed
+    }
+
     private readonly ILogger _log;
     private readonly IPortScanner _scanner;
     private readonly int _ldapTimeout;
@@ -131,13 +139,9 @@ public class DCLdapProcessor {
 
     public async Task<SharpHoundRPC.Result<bool>> CheckIsNtlmSigningRequired(CancellationToken cancellationToken = default) {
         try {
-            var options = new LdapAuthOptions() {
+            return await AuthenticateForSigning(_ldapEndpoint, new LdapAuthOptions {
                 Signing = false
-            };
-            var accessibleWithoutSigning = await Authenticate(_ldapEndpoint, options, cancellationToken : cancellationToken);
-
-            return SharpHoundRPC.Result<bool>.Ok(accessibleWithoutSigning == false);
-
+            }, cancellationToken: cancellationToken);
         } catch (Exception ex) {
             return SharpHoundRPC.Result<bool>.Fail($"CheckIsNtlmSigningRequired failed: {ex}");
         }
@@ -176,6 +180,20 @@ public class DCLdapProcessor {
     /// <param name="options"></param>
     /// <returns></returns>
     protected internal virtual async Task<bool> Authenticate(Uri endpoint, LdapAuthOptions options, NtlmAuthenticationHandler? ntlmAuth = null, LdapTransport? ldapTransport = null, CancellationToken cancellationToken = default) {
+        return await AuthenticateCore(endpoint, options, ntlmAuth, ldapTransport, cancellationToken) == LdapAuthenticationOutcome.Success;
+    }
+
+    protected internal virtual async Task<SharpHoundRPC.Result<bool>> AuthenticateForSigning(Uri endpoint, LdapAuthOptions options, NtlmAuthenticationHandler? ntlmAuth = null, LdapTransport? ldapTransport = null, CancellationToken cancellationToken = default) {
+        var outcome = await AuthenticateCore(endpoint, options, ntlmAuth, ldapTransport, cancellationToken);
+        // Only the explicit signing-required response maps to true; unknown outcomes stay uncollected.
+        return outcome switch {
+            LdapAuthenticationOutcome.Success => SharpHoundRPC.Result<bool>.Ok(false),
+            LdapAuthenticationOutcome.SigningRequired => SharpHoundRPC.Result<bool>.Ok(true),
+            _ => SharpHoundRPC.Result<bool>.Fail("Could not determine whether LDAP signing is required")
+        };
+    }
+
+    private async Task<LdapAuthenticationOutcome> AuthenticateCore(Uri endpoint, LdapAuthOptions options, NtlmAuthenticationHandler? ntlmAuth, LdapTransport? ldapTransport, CancellationToken cancellationToken) {
         var host = endpoint.Host;
         var auth = ntlmAuth ?? new NtlmAuthenticationHandler($"LDAP/{host.ToUpper()}") {
             Options = options
@@ -185,7 +203,7 @@ public class DCLdapProcessor {
         try {
             transport.InitializeConnectionAsync(_ldapTimeout);
             await auth.PerformNtlmAuthenticationAsync(transport, cancellationToken);
-            return true;
+            return LdapAuthenticationOutcome.Success;
         } catch (LdapNativeException ex) {
             switch (ex.ErrorCode) {
                 case (int)LdapErrorCodes.InvalidCredentials:
@@ -194,13 +212,13 @@ public class DCLdapProcessor {
                     //   0x80090302 == SEC_E_UNSUPPORTED_FUNCTION
                     if (ex.ServerErrorMessage.StartsWith(SEC_E_UNSUPPORTED_FUNCTION)) {
                         _log.LogDebug("LDAP endpoint '{endpoint}' does not support NTLM", endpoint);
-                        return false;
+                        return LdapAuthenticationOutcome.Failed;
                     }
 
                     if (ex.ServerErrorMessage.StartsWith(SEC_E_BAD_BINDINGS)) {
                         _log.LogDebug("Bad bindings with the LDAPS endpoint '{endpoint}'. Server error: {serverError}",
                             endpoint, ex.ServerErrorMessage);
-                        return false;
+                        return LdapAuthenticationOutcome.Failed;
                     } else {
                         _log.LogError(
                             "Unhandled LDAP InvalidCred error code during LDAP test: {ex}, Server error: {err}", ex,
@@ -209,10 +227,10 @@ public class DCLdapProcessor {
                     }
                 case (int)LdapErrorCodes.StrongAuthRequired:
                     _log.LogDebug("LDAP requires signing. Endpoint: {endpoint}", endpoint);
-                    return false;
+                    return LdapAuthenticationOutcome.SigningRequired;
                 case (int)LdapErrorCodes.ServerDown:
                     _log.LogDebug("LDAP endpoint '{endpoint}' not accessible", endpoint);
-                    return false;
+                    return LdapAuthenticationOutcome.Failed;
                 default:
                     _log.LogError("Unhandled LdapException error code during LDAP test: {ex}, Server error: {err}", ex,
                         ex.ServerErrorMessage);
@@ -225,7 +243,7 @@ public class DCLdapProcessor {
             _log.LogError("An unhandled error occurred during the LDAP test: {ex}", ex);
         }
 
-        return false;
+        return LdapAuthenticationOutcome.Failed;
     }
     
     private async Task SendComputerStatus(CSVComputerStatus status) {
