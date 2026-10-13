@@ -7,12 +7,25 @@ namespace SharpHoundCommonLib
     {
         public string Username { get; set; } = null;
         public string Password { get; set; } = null;
+        /// <summary>
+        /// The DNS or NetBIOS domain associated with the user's credentials, used as an endpoint
+        /// hint by controlled domain resolution when neither a server nor a domain argument is supplied.
+        /// Takes precedence over USERDNSDOMAIN. Does not change the authentication context or
+        /// set explicit credentials; leave Username unset to use ambient credentials under /netonly.
+        /// </summary>
+        public string UserDomain { get; set; } = null;
         public string Server { get; set; } = null;
         public int Port { get; set; } = 0;
         public int SSLPort { get; set; } = 0;
         public bool ForceSSL { get; set; } = false;
         public bool DisableSigning { get; set; } = false;
         public bool DisableCertVerification { get; set; } = false;
+        /// <summary>
+        /// Permits legacy framework domain resolution after controlled LDAP resolution fails.
+        /// Authentication rejection stops resolution without invoking this fallback.
+        /// This fallback may ignore configured LDAP settings. Disabled by default.
+        /// </summary>
+        public bool AllowUncontrolledDomainFallback { get; set; } = false;
         public AuthType AuthType { get; set; } = AuthType.Kerberos;
         public int MaxConcurrentQueries { get; set; } = 15;
 
@@ -51,9 +64,11 @@ namespace SharpHoundCommonLib
         public override string ToString() {
             var sb = new StringBuilder();
             sb.AppendLine($"Server: {Server}");
+            sb.AppendLine($"UserDomain: {UserDomain}");
             sb.AppendLine($"LdapPort: {GetPort(false)}");
             sb.AppendLine($"LdapSSLPort: {GetPort(true)}");
             sb.AppendLine($"ForceSSL: {ForceSSL}");
+            sb.AppendLine($"AllowUncontrolledDomainFallback: {AllowUncontrolledDomainFallback}");
             sb.AppendLine($"AuthType: {AuthType.ToString()}");
             sb.AppendLine($"MaxConcurrentQueries: {MaxConcurrentQueries}");
             if (!string.IsNullOrWhiteSpace(Username)) {

@@ -14,6 +14,7 @@
         public const string TrustDirection = "trustdirection";
         public const string TrustAttributes = "trustattributes";
         public const string TrustType = "trusttype";
+        public const string TrustPartner = "trustpartner";
         public const string CanonicalName = "cn";
         public const string GPCFileSYSPath = "gpcfilesyspath";
         public const string Description = "description";

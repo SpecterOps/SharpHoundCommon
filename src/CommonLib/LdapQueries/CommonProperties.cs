@@ -79,7 +79,7 @@
         public static readonly string[] DomainTrustProps =
         {
             LDAPProperties.TrustAttributes, LDAPProperties.SecurityIdentifier, LDAPProperties.TrustDirection,
-            LDAPProperties.TrustType, LDAPProperties.CanonicalName
+            LDAPProperties.TrustType, LDAPProperties.TrustPartner, LDAPProperties.CanonicalName
         };
 
         public static readonly string[] GPOLocalGroupProps =

@@ -1,6 +1,5 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.DirectoryServices.Protocols;
-using System.Linq;
 using System.Security.Principal;
 using Microsoft.Extensions.Logging;
 using SharpHoundCommonLib.Enums;
@@ -29,16 +28,12 @@ namespace SharpHoundCommonLib.Processors
         {
             _log.LogDebug("Running trust enumeration for {Domain}", domain);
 
-            // Attempt to get trust type
-            var trustInfoList = new List<(string TargetName, System.DirectoryServices.ActiveDirectory.TrustType TrustType)>();
-            try {
-                if (_utils.GetDomain(domain, out var domainObject)) {
-                    trustInfoList.AddRange(from System.DirectoryServices.ActiveDirectory.TrustRelationshipInformation trust in domainObject.GetAllTrustRelationships()
-                                           select (trust.TargetName, trust.TrustType));
-                }
-            }
-            catch {
-                _log.LogWarning("Trust type enumeration using non-LDAP for {Domain} failed", domain);
+            // Domain resolution enriches trust records with forest topology. A trustParent link
+            // identifies ParentChild; a forest-root/alternate-root pair identifies TreeRoot;
+            // other within-forest relationships are CrossLink. Missing topology leaves Unknown.
+            var trustTypes = new Dictionary<string, TrustType>(System.StringComparer.OrdinalIgnoreCase);
+            if (_utils.GetDomain(domain, out var domainInfo)) {
+                trustTypes = domainInfo.TrustTypes;
             }
 
             await foreach (var result in _utils.Query(new LdapQueryParameters {
@@ -90,8 +85,14 @@ namespace SharpHoundCommonLib.Processors
                 attributes = (TrustAttributes) ta;
 
                 trust.IsTransitive = !attributes.HasFlag(TrustAttributes.NonTransitive);
-                if (entry.TryGetProperty(LDAPProperties.CanonicalName, out var cn)) {
-                    trust.TargetDomainName = cn.ToUpper();
+                // The resolver keys classifications by trustPartner. Prefer the same target name
+                // here so a differing cn does not lose enrichment; retain cn as a fallback.
+                if (entry.TryGetProperty(LDAPProperties.TrustPartner, out var partner) &&
+                    !string.IsNullOrWhiteSpace(partner)) {
+                    trust.TargetDomainName = partner.Trim().ToUpperInvariant();
+                }
+                else if (entry.TryGetProperty(LDAPProperties.CanonicalName, out var cn)) {
+                    trust.TargetDomainName = cn.ToUpperInvariant();
                 }
 
                 trust.SidFilteringEnabled = 
@@ -104,29 +105,36 @@ namespace SharpHoundCommonLib.Processors
                     (attributes.HasFlag(TrustAttributes.WithinForest) ||
                     attributes.HasFlag(TrustAttributes.CrossOrganizationEnableTGTDelegation));
 
-                var match = trustInfoList.FirstOrDefault(t => 
-                    t.TargetName.ToUpper().Equals(trust.TargetDomainName));
-                trust.TrustType = !string.IsNullOrEmpty(match.TargetName) ? (TrustType) match.TrustType : TrustAttributesToType(attributes);
+                // Preserve a known enriched classification. An absent or Unknown result can still
+                // be classified from this entry's readable type and attributes without topology.
+                if (trust.TargetDomainName != null && trustTypes.TryGetValue(trust.TargetDomainName, out var classifiedType) &&
+                    classifiedType != TrustType.Unknown) {
+                    trust.TrustType = classifiedType;
+                }
+                else {
+                    var ldapTrustType = entry.TryGetLongProperty(LDAPProperties.TrustType, out var type)
+                        ? type : (long?)null;
+                    trust.TrustType = Classify(ldapTrustType, attributes);
+                }
 
                 yield return trust;
             }
         }
 
-        public static TrustType TrustAttributesToType(TrustAttributes attributes)
+        // Shared by enumeration and the resolver, which supplies withinForestType from topology.
+        internal static TrustType Classify(long? ldapTrustType, TrustAttributes? attributes,
+            TrustType withinForestType = TrustType.Unknown)
         {
-            TrustType trustType;
-
-            if (attributes.HasFlag(TrustAttributes.WithinForest))
-                trustType = TrustType.ParentChild;
-            else if (attributes.HasFlag(TrustAttributes.ForestTransitive))
-                trustType = TrustType.Forest;
-            else if (!attributes.HasFlag(TrustAttributes.WithinForest) &&
-                     !attributes.HasFlag(TrustAttributes.ForestTransitive))
-                trustType = TrustType.External;
-            else
-                trustType = TrustType.Unknown;
-
-            return trustType;
+            // LDAP trustType is a protocol value, not our output enum: 3 means an MIT Kerberos
+            // realm and takes precedence over attributes; 1 and 2 represent Windows domains.
+            if (ldapTrustType == 3) return TrustType.Kerberos;
+            // Missing or unsupported Windows trust fields cannot establish a classification.
+            if ((ldapTrustType != 1 && ldapTrustType != 2) || !attributes.HasValue) return TrustType.Unknown;
+            // WithinForest alone cannot distinguish ParentChild, TreeRoot, and CrossLink.
+            // Without the resolver's topology classification, keep the default Unknown.
+            if (attributes.Value.HasFlag(TrustAttributes.WithinForest)) return withinForestType;
+            // TreatAsExternal affects SID filtering, not the Forest classification.
+            return attributes.Value.HasFlag(TrustAttributes.ForestTransitive) ? TrustType.Forest : TrustType.External;
         }
     }
 }

@@ -323,7 +323,9 @@ namespace CommonLibTest {
                 .Returns(mockComputerResults.ToAsyncEnumerable)
                 .Returns(mockGCPFileSysPathResults.ToAsyncEnumerable)
                 .Returns(Array.Empty<LdapResult<IDirectoryObject>>().ToAsyncEnumerable);
-            var domain = MockableDomain.Construct("TESTLAB.LOCAL");
+            var domain = new SharpHoundCommonLib.Models.LdapDomainInfo {
+                Name = "TESTLAB.LOCAL", DefaultNamingContext = "DC=TESTLAB,DC=LOCAL"
+            };
             mockLDAPUtils.Setup(x => x.GetDomain(out domain)).Returns(true);
 
             var processor = new GPOLocalGroupProcessor(mockLDAPUtils.Object);
@@ -338,6 +340,17 @@ namespace CommonLibTest {
             var actual = result.AffectedComputers.First();
             Assert.Equal(Label.Computer, actual.ObjectType);
             Assert.Equal("teapot", actual.ObjectIdentifier);
+            mockLDAPUtils.Verify(x => x.Query(It.Is<LdapQueryParameters>(q => q.DomainName == "TESTLAB.LOCAL"),
+                It.IsAny<CancellationToken>()), Times.AtLeastOnce);
+        }
+
+        [Fact]
+        public async Task GPOLocalGroupProcessor_MissingDefaultDomainNameSkipsQueries() {
+            var utils = new Mock<ILdapUtils>(MockBehavior.Strict);
+            var domain = new SharpHoundCommonLib.Models.LdapDomainInfo();
+            utils.Setup(x => x.GetDomain(out domain)).Returns(true);
+            var result = await new GPOLocalGroupProcessor(utils.Object).ReadGPOLocalGroups("[LDAP://CN=Policy;0]", null);
+            Assert.Empty(result.AffectedComputers);
         }
 
         [Fact]

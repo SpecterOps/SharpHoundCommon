@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.DirectoryServices.Protocols;
@@ -66,7 +66,7 @@ namespace SharpHoundCommonLib.Processors {
             string domain;
             //If our dn is null, use our default domain
             if (string.IsNullOrEmpty(distinguishedName)) {
-                if (!_utils.GetDomain(out var domainResult)) {
+                if (!_utils.GetDomain(out var domainResult) || string.IsNullOrWhiteSpace(domainResult?.Name)) {
                     return ret;
                 }
 
