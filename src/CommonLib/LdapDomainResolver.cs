@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using SharpHoundCommonLib.Enums;
 using SharpHoundCommonLib.LDAPQueries;
 using SharpHoundCommonLib.Models;
+using SharpHoundCommonLib.Processors;
 
 namespace SharpHoundCommonLib {
     // Resolves domain identity directly from LDAP. Do not use LdapUtils or the pools here:
@@ -238,14 +239,19 @@ namespace SharpHoundCommonLib {
 
         private static TrustType ClassifyTrust(TrustRecord trust, LdapDomainInfo domain,
             IReadOnlyDictionary<string, TopologyEntry> topology) {
-            // AD trustType 3 denotes an MIT Kerberos realm and takes precedence over attributes.
-            if (trust.Type == 3) return TrustType.Kerberos;
-            if ((trust.Type != 1 && trust.Type != 2) || !trust.Attributes.HasValue) return TrustType.Unknown;
-            var attributes = (TrustAttributes)trust.Attributes.Value;
-            if (!attributes.HasFlag(TrustAttributes.WithinForest)) {
-                return attributes.HasFlag(TrustAttributes.ForestTransitive) ? TrustType.Forest : TrustType.External;
+            TrustAttributes? attributes = null;
+            if (trust.Attributes.HasValue) {
+                attributes = (TrustAttributes)trust.Attributes.Value;
             }
-            return ClassifyWithinForestTrust(domain, trust.Target, topology);
+
+            // Only within-forest trusts need topology to distinguish ParentChild, TreeRoot, and CrossLink.
+            var withinForestType = TrustType.Unknown;
+            if (attributes.HasValue && attributes.Value.HasFlag(TrustAttributes.WithinForest)) {
+                withinForestType = ClassifyWithinForestTrust(domain, trust.Target, topology);
+            }
+
+            // The processor validates the LDAP trust type and applies the attribute rules.
+            return DomainTrustProcessor.Classify(trust.Type, attributes, withinForestType);
         }
 
         private static TrustType ClassifyWithinForestTrust(LdapDomainInfo domain, string target,
