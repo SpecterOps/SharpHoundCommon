@@ -239,6 +239,206 @@ namespace CommonLibTest
             Assert.Empty(_receivedCompStatuses);
         }
 
+        [Fact]
+        public async Task RegistryProcessor_ReadAzureRegistryData_SetsVmId() {
+            const string vmId = "  A5EFCFA9-06E7-4A43-9D20-AB1C3F35B190  ";
+            var executorResult = new StrategyExecutorResult<RegistryQueryResult> {
+                Results = [
+                    new RegistryQueryResult(
+                        @"SOFTWARE\Microsoft\Windows Azure",
+                        "VmId",
+                        vmId,
+                        null,
+                        true)
+                ],
+                WasSuccessful = true,
+                SuccessfulStrategy = typeof(DotNetWmiRegistryStrategy)
+            };
+
+            _mockStrategyExecutor.Setup(se => se.CollectAsync(
+                    TargetName,
+                    It.Is<IEnumerable<RegistryQuery>>(queries =>
+                        queries.Single().KeyPath == @"SOFTWARE\Microsoft\Windows Azure" &&
+                        queries.Single().ValueNames.Single() == "VmId"),
+                    It.IsAny<IEnumerable<ICollectionStrategy<RegistryQueryResult, RegistryQuery>>>()))
+                .ReturnsAsync(executorResult);
+
+            var result = await _registryProcessor.ReadAzureRegistryData(TargetName);
+
+            Assert.True(result.Collected);
+            Assert.Equal(vmId.Trim().ToLowerInvariant(), result.Result.VmId);
+            _mockLogger.VerifyNoLogs(LogLevel.Warning);
+            VerifyCompStatusLog(
+                $"{nameof(_registryProcessor.ReadAzureRegistryData)} - {nameof(DotNetWmiRegistryStrategy)}",
+                TargetName,
+                CSVComputerStatus.StatusSuccess);
+        }
+
+        [Fact]
+        public async Task RegistryProcessor_ReadAzureRegistryData_MissingVmIdIsSuccessful() {
+            var executorResult = new StrategyExecutorResult<RegistryQueryResult> {
+                Results = [
+                    new RegistryQueryResult(
+                        @"SOFTWARE\Microsoft\Windows Azure",
+                        "VmId",
+                        null,
+                        null,
+                        false)
+                ],
+                WasSuccessful = true,
+                SuccessfulStrategy = typeof(DotNetWmiRegistryStrategy)
+            };
+
+            SetupRegistryCollection(executorResult);
+
+            var result = await _registryProcessor.ReadAzureRegistryData(TargetName);
+
+            Assert.True(result.Collected);
+            Assert.Null(result.Result.VmId);
+            _mockLogger.VerifyLogContains(LogLevel.Warning, "Azure VM ID registry value was not found");
+            VerifyCompStatusLog(
+                $"{nameof(_registryProcessor.ReadAzureRegistryData)} - {nameof(DotNetWmiRegistryStrategy)}",
+                TargetName,
+                CSVComputerStatus.StatusSuccess);
+        }
+
+        [Fact]
+        public async Task RegistryProcessor_ReadAzureRegistryData_NoResultsIsSuccessful() {
+            var executorResult = new StrategyExecutorResult<RegistryQueryResult> {
+                WasSuccessful = true,
+                SuccessfulStrategy = typeof(DotNetWmiRegistryStrategy)
+            };
+
+            SetupRegistryCollection(executorResult);
+
+            var result = await _registryProcessor.ReadAzureRegistryData(TargetName);
+
+            Assert.True(result.Collected);
+            Assert.Null(result.Result.VmId);
+            _mockLogger.VerifyLogContains(LogLevel.Warning, "Azure VM ID registry value was not found");
+            VerifyCompStatusLog(
+                $"{nameof(_registryProcessor.ReadAzureRegistryData)} - {nameof(DotNetWmiRegistryStrategy)}",
+                TargetName,
+                CSVComputerStatus.StatusSuccess);
+        }
+
+        [Fact]
+        public async Task RegistryProcessor_ReadAzureRegistryData_CollectionFailed() {
+            const string failureReason = "No such host is known.";
+            var attempts = new List<StrategyResult<RegistryQueryResult>> {
+                new(typeof(DotNetWmiRegistryStrategy)) { FailureReason = failureReason },
+                new(typeof(RemoteRegistryStrategy)) { FailureReason = failureReason }
+            };
+            var executorResult = new StrategyExecutorResult<RegistryQueryResult> {
+                FailureAttempts = attempts,
+                WasSuccessful = false
+            };
+
+            SetupRegistryCollection(executorResult);
+
+            var result = await _registryProcessor.ReadAzureRegistryData(TargetName);
+
+            Assert.False(result.Collected);
+            Assert.Equal(
+                string.Join("\n", attempts.Select(attempt => $"{attempt.StrategyType.Name}: {failureReason}")),
+                result.FailureReason);
+            Assert.Equal(2, _receivedCompStatuses.Count);
+            foreach (var attempt in attempts) {
+                _mockLogger.VerifyLogContains(
+                    LogLevel.Trace,
+                    nameof(_registryProcessor.ReadAzureRegistryData),
+                    TargetName,
+                    attempt.StrategyType.Name,
+                    failureReason);
+                VerifyCompStatusLog(
+                    $"{nameof(_registryProcessor.ReadAzureRegistryData)} - {attempt.StrategyType.Name}",
+                    TargetName,
+                    failureReason);
+            }
+        }
+
+        [Fact]
+        public async Task RegistryProcessor_ReadAzureRegistryData_SecondStrategySuccessful() {
+            const string failureReason = "WMI unavailable";
+            const string vmId = "a5efcfa9-06e7-4a43-9d20-ab1c3f35b190";
+            var attempt = new StrategyResult<RegistryQueryResult>(typeof(DotNetWmiRegistryStrategy)) {
+                FailureReason = failureReason
+            };
+            var executorResult = new StrategyExecutorResult<RegistryQueryResult> {
+                FailureAttempts = [attempt],
+                Results = [
+                    new RegistryQueryResult(
+                        @"SOFTWARE\Microsoft\Windows Azure",
+                        "VmId",
+                        vmId,
+                        null,
+                        true)
+                ],
+                WasSuccessful = true,
+                SuccessfulStrategy = typeof(RemoteRegistryStrategy)
+            };
+
+            SetupRegistryCollection(executorResult);
+
+            var result = await _registryProcessor.ReadAzureRegistryData(TargetName);
+
+            Assert.True(result.Collected);
+            Assert.Equal(vmId, result.Result.VmId);
+            Assert.Equal(2, _receivedCompStatuses.Count);
+            VerifyCompStatusLog(
+                $"{nameof(_registryProcessor.ReadAzureRegistryData)} - {nameof(DotNetWmiRegistryStrategy)}",
+                TargetName,
+                failureReason);
+            VerifyCompStatusLog(
+                $"{nameof(_registryProcessor.ReadAzureRegistryData)} - {nameof(RemoteRegistryStrategy)}",
+                TargetName,
+                CSVComputerStatus.StatusSuccess);
+        }
+
+        [Fact]
+        public async Task RegistryProcessor_ReadAzureRegistryData_HandlesFailureWithNoAttempts() {
+            var executorResult = new StrategyExecutorResult<RegistryQueryResult> {
+                WasSuccessful = false
+            };
+
+            SetupRegistryCollection(executorResult);
+
+            var result = await _registryProcessor.ReadAzureRegistryData(TargetName);
+
+            Assert.False(result.Collected);
+            Assert.Equal("Failed to read the Azure Registry Data", result.FailureReason);
+            _mockLogger.VerifyNoLogs(LogLevel.Trace);
+            Assert.Empty(_receivedCompStatuses);
+        }
+
+        [Fact]
+        public async Task RegistryProcessor_ReadAzureRegistryData_HandlesException() {
+            var exception = new Exception("test exception");
+            _mockStrategyExecutor.Setup(se => se.CollectAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<IEnumerable<RegistryQuery>>(),
+                    It.IsAny<IEnumerable<ICollectionStrategy<RegistryQueryResult, RegistryQuery>>>()))
+                .Throws(exception);
+
+            var result = await _registryProcessor.ReadAzureRegistryData(TargetName);
+
+            Assert.False(result.Collected);
+            Assert.Equal(exception.ToString(), result.FailureReason);
+            _mockLogger.VerifyLogContains(
+                LogLevel.Error,
+                "Unhandled Azure registry read exception",
+                TargetName);
+            Assert.Empty(_receivedCompStatuses);
+        }
+
+        private void SetupRegistryCollection(StrategyExecutorResult<RegistryQueryResult> result) {
+            _mockStrategyExecutor.Setup(se => se.CollectAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<IEnumerable<RegistryQuery>>(),
+                    It.IsAny<IEnumerable<ICollectionStrategy<RegistryQueryResult, RegistryQuery>>>()))
+                .ReturnsAsync(result);
+        }
+
         private void VerifyFailureLog<TStrategy>(string target, string reason) {
             var expected = $"ReadRegistry failed on {target} using {typeof(TStrategy).Name}: {reason}"; 
             _mockLogger.VerifyLogContains(LogLevel.Trace, expected);
