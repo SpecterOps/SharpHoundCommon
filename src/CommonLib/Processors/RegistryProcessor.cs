@@ -193,7 +193,8 @@ public class RegistryProcessor {
                 var name = key.ValueName;
                 switch (name) {
                     case "VmId":
-                        output.VmId = Convert.ToString(key.Value)?.Trim()?.ToLowerInvariant();
+                        var value = Convert.ToString(key.Value)?.Trim().ToLowerInvariant();
+                        output.VmId = string.IsNullOrWhiteSpace(value) ? null : value;
                         break;
                 }
             }
