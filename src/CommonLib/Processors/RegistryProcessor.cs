@@ -56,7 +56,9 @@ public class RegistryProcessor {
 
         _azureQueries = [
             RegistryQuery.ForKey(RegistryHive.LocalMachine, @"SOFTWARE\Microsoft\Windows Azure")
-                .WithValues(["VmId"])
+                .WithValues([
+                    "VmId",                         // Identifier: Adding an identifier for Azure VMs used for correlation
+                ])
         ];
     }
 
@@ -200,7 +202,7 @@ public class RegistryProcessor {
             }
             
             if (string.IsNullOrWhiteSpace(output.VmId))
-                _log.LogWarning("The Azure VM ID registry value was not found");
+                _log.LogDebug("The Azure VM ID registry value was not found");
             
             return APIResult<AzureRegistryData>.Success(output);
         }
