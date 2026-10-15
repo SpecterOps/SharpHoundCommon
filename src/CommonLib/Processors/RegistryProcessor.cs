@@ -18,6 +18,7 @@ public class RegistryProcessor {
     private readonly AdaptiveTimeout _registryAdaptiveTimeout = new(maxTimeout:TimeSpan.FromMinutes(2), Logging.LogProvider.CreateLogger(nameof(ReadRegistrySettings)));
     private readonly ICollectionStrategy<RegistryQueryResult, RegistryQuery>[] _strategies;
     private readonly RegistryQuery[] _queries;
+    private readonly RegistryQuery[] _azureQueries;
 
     public RegistryProcessor(ILogger log, IStrategyExecutor registryCollector, string domain) {
         _log = log ?? Logging.LogProvider.CreateLogger("RegistryProcessor");
@@ -50,6 +51,13 @@ public class RegistryProcessor {
                 .WithValues([
                     "EnableSecuritySignature",      // Microsoft network client: Digitally sign communications (if server agrees) 
                     "RequireSecuritySignature",     // Microsoft network client: Digitally sign communications (always)
+                ])
+        ];
+
+        _azureQueries = [
+            RegistryQuery.ForKey(RegistryHive.LocalMachine, @"SOFTWARE\Microsoft\Windows Azure")
+                .WithValues([
+                    "VmId",                         // Identifier: Adding an identifier for Azure VMs used for correlation
                 ])
         ];
     }
@@ -141,6 +149,67 @@ public class RegistryProcessor {
 
             return APIResult<RegistryData>.Failure(ex.ToString());
         }
+    }
+
+    public async Task<APIResult<AzureRegistryData>> ReadAzureRegistryData(string targetMachine) {
+        var output = new AzureRegistryData();
+        try {
+            var result = await _registryAdaptiveTimeout.ExecuteWithTimeout(async (_) => await _registryCollector
+                .CollectAsync(targetMachine, _azureQueries, _strategies)
+                .ConfigureAwait(false));
+
+            if (!result.IsSuccess)
+                return APIResult<AzureRegistryData>.Failure(
+                    $"Timeout when reading the Azure Registry data {targetMachine}");
+
+            var collectedData = result.Value;
+            foreach (var attempt in collectedData.FailureAttempts ?? []) {
+                _log.LogTrace("{MethodName} failed on {ComputerName} using {Strategy}: {Error}",
+                    nameof(ReadAzureRegistryData), targetMachine,
+                    attempt.StrategyType.Name, attempt.FailureReason);
+                await SendComputerStatus(new CSVComputerStatus {
+                    Task = $"{nameof(ReadAzureRegistryData)} - {attempt.StrategyType.Name}",
+                    ComputerName = targetMachine,
+                    Status = attempt.FailureReason
+                });
+            }
+
+            if (!collectedData.WasSuccessful) {
+                var message = collectedData.FailureAttempts is null
+                    ? "Failed to read the Azure Registry Data"
+                    : string.Join("\n", collectedData.FailureAttempts.Select(attempt =>
+                        $"{attempt.StrategyType.Name}: {attempt.FailureReason ?? ""}"));
+                return APIResult<AzureRegistryData>.Failure(message);
+            }
+
+            await SendComputerStatus(new CSVComputerStatus {
+                Task = $"{nameof(ReadAzureRegistryData)} - {collectedData.SuccessfulStrategy?.Name ?? ""}",
+                ComputerName = targetMachine,
+                Status = CSVComputerStatus.StatusSuccess
+            });
+
+            foreach (var key in collectedData.Results ?? []) {
+                if (!key.ValueExists)
+                    continue;
+
+                var name = key.ValueName;
+                switch (name) {
+                    case "VmId":
+                        var value = Convert.ToString(key.Value)?.Trim().ToLowerInvariant();
+                        output.VmId = string.IsNullOrWhiteSpace(value) ? null : value;
+                        break;
+                }
+            }
+            
+            if (string.IsNullOrWhiteSpace(output.VmId))
+                _log.LogDebug("The Azure VM ID registry value was not found");
+            
+            return APIResult<AzureRegistryData>.Success(output);
+        }
+        catch (Exception ex) {
+            _log.LogError(ex, "Unhandled Azure registry read exception for {ComputerName}", targetMachine);
+            return APIResult<AzureRegistryData>.Failure(ex.ToString());
+        } 
     }
 
     private async Task SendComputerStatus(CSVComputerStatus status) {

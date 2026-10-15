@@ -14,4 +14,8 @@ public class RegistryData {
     public uint? EnableSecuritySignature { get; set; } = null;
     public string[]? ClientAllowedNTLMServers { get; set; } = null;
 }
+
+public class AzureRegistryData {
+    public string? VmId { get; set; } = null;
+}
 #nullable disable
