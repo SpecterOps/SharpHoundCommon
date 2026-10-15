@@ -295,7 +295,7 @@ namespace CommonLibTest
 
             Assert.True(result.Collected);
             Assert.Null(result.Result.VmId);
-            _mockLogger.VerifyLogContains(LogLevel.Warning, "Azure VM ID registry value was not found");
+            _mockLogger.VerifyLogContains(LogLevel.Debug, "Azure VM ID registry value was not found");
             VerifyCompStatusLog(
                 $"{nameof(_registryProcessor.ReadAzureRegistryData)} - {nameof(DotNetWmiRegistryStrategy)}",
                 TargetName,
@@ -315,7 +315,7 @@ namespace CommonLibTest
 
             Assert.True(result.Collected);
             Assert.Null(result.Result.VmId);
-            _mockLogger.VerifyLogContains(LogLevel.Warning, "Azure VM ID registry value was not found");
+            _mockLogger.VerifyLogContains(LogLevel.Debug, "Azure VM ID registry value was not found");
             VerifyCompStatusLog(
                 $"{nameof(_registryProcessor.ReadAzureRegistryData)} - {nameof(DotNetWmiRegistryStrategy)}",
                 TargetName,
