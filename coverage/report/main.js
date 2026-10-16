@@ -353,6 +353,7 @@ var assemblies = [
       { "name": "SharpHoundCommonLib.OutputTypes.AceRegistryAPIResult", "rp": "SharpHoundCommonLib_AceRegistryAPIResult.html", "cl": 0, "ucl": 1, "cal": 1, "tl": 9, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "SharpHoundCommonLib.OutputTypes.APIResult", "rp": "SharpHoundCommonLib_APIResult.html", "cl": 0, "ucl": 2, "cal": 2, "tl": 29, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "SharpHoundCommonLib.OutputTypes.APIResult<T>", "rp": "SharpHoundCommonLib_APIResult_1.html", "cl": 0, "ucl": 16, "cal": 16, "tl": 29, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "SharpHoundCommonLib.OutputTypes.AzureRegistryData", "rp": "SharpHoundCommonLib_AzureRegistryData.html", "cl": 0, "ucl": 1, "cal": 1, "tl": 21, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "SharpHoundCommonLib.OutputTypes.BoolRegistryAPIResult", "rp": "SharpHoundCommonLib_BoolRegistryAPIResult.html", "cl": 0, "ucl": 1, "cal": 1, "tl": 7, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "SharpHoundCommonLib.OutputTypes.CAEnrollmentEndpoint", "rp": "SharpHoundCommonLib_CAEnrollmentEndpoint.html", "cl": 0, "ucl": 7, "cal": 7, "tl": 71, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "SharpHoundCommonLib.OutputTypes.CARegistryData", "rp": "SharpHoundCommonLib_CARegistryData.html", "cl": 0, "ucl": 4, "cal": 4, "tl": 12, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
@@ -381,7 +382,7 @@ var assemblies = [
       { "name": "SharpHoundCommonLib.OutputTypes.OU", "rp": "SharpHoundCommonLib_OU.html", "cl": 0, "ucl": 4, "cal": 4, "tl": 12, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "SharpHoundCommonLib.OutputTypes.OutputBase", "rp": "SharpHoundCommonLib_OutputBase.html", "cl": 0, "ucl": 6, "cal": 6, "tl": 18, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "SharpHoundCommonLib.OutputTypes.OutputWrapper<T>", "rp": "SharpHoundCommonLib_OutputWrapper_1.html", "cl": 0, "ucl": 2, "cal": 2, "tl": 12, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "SharpHoundCommonLib.OutputTypes.RegistryData", "rp": "SharpHoundCommonLib_RegistryData.html", "cl": 0, "ucl": 9, "cal": 9, "tl": 17, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "SharpHoundCommonLib.OutputTypes.RegistryData", "rp": "SharpHoundCommonLib_RegistryData.html", "cl": 0, "ucl": 9, "cal": 9, "tl": 21, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "SharpHoundCommonLib.OutputTypes.ResultingGPOChanges", "rp": "SharpHoundCommonLib_ResultingGPOChanges.html", "cl": 0, "ucl": 5, "cal": 5, "tl": 13, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "SharpHoundCommonLib.OutputTypes.RootCA", "rp": "SharpHoundCommonLib_RootCA.html", "cl": 0, "ucl": 1, "cal": 1, "tl": 7, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "SharpHoundCommonLib.OutputTypes.Session", "rp": "SharpHoundCommonLib_Session.html", "cl": 0, "ucl": 18, "cal": 18, "tl": 42, "cb": 0, "tb": 16, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
@@ -419,7 +420,7 @@ var assemblies = [
       { "name": "SharpHoundCommonLib.Processors.LocalGroupProcessor", "rp": "SharpHoundCommonLib_LocalGroupProcessor.html", "cl": 0, "ucl": 261, "cal": 261, "tl": 396, "cb": 0, "tb": 81, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "SharpHoundCommonLib.Processors.ParsedCertificate", "rp": "SharpHoundCommonLib_ParsedCertificate.html", "cl": 0, "ucl": 33, "cal": 33, "tl": 1078, "cb": 0, "tb": 8, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "SharpHoundCommonLib.Processors.PortScanner", "rp": "SharpHoundCommonLib_PortScanner.html", "cl": 0, "ucl": 52, "cal": 52, "tl": 97, "cb": 0, "tb": 18, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "SharpHoundCommonLib.Processors.RegistryProcessor", "rp": "SharpHoundCommonLib_RegistryProcessor.html", "cl": 0, "ucl": 98, "cal": 98, "tl": 149, "cb": 0, "tb": 64, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "SharpHoundCommonLib.Processors.RegistryProcessor", "rp": "SharpHoundCommonLib_RegistryProcessor.html", "cl": 0, "ucl": 151, "cal": 151, "tl": 218, "cb": 0, "tb": 90, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "SharpHoundCommonLib.Processors.RegistryResult", "rp": "SharpHoundCommonLib_RegistryResult.html", "cl": 0, "ucl": 1, "cal": 1, "tl": 7, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "SharpHoundCommonLib.Processors.SiteProcessor", "rp": "SharpHoundCommonLib_SiteProcessor.html", "cl": 0, "ucl": 56, "cal": 56, "tl": 129, "cb": 0, "tb": 24, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "SharpHoundCommonLib.Processors.SmbProcessor", "rp": "SharpHoundCommonLib_SmbProcessor.html", "cl": 0, "ucl": 41, "cal": 41, "tl": 89, "cb": 0, "tb": 14, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
@@ -560,7 +561,7 @@ var riskHotspots = [
       { "value": 61, "exceeded": false },
     ]},
   {
-    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.Processors.RegistryProcessor", "reportPath": "SharpHoundCommonLib_RegistryProcessor.html", "methodName": "ReadRegistrySettings()", "methodShortName": "ReadRegistrySettings()", "fileIndex": 0, "line": 59,
+    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.Processors.RegistryProcessor", "reportPath": "SharpHoundCommonLib_RegistryProcessor.html", "methodName": "ReadRegistrySettings()", "methodShortName": "ReadRegistrySettings()", "fileIndex": 0, "line": 67,
     "metrics": [
       { "value": 60, "exceeded": true },
       { "value": 60, "exceeded": false },
@@ -675,6 +676,12 @@ var riskHotspots = [
     ]},
   {
     "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.Processors.DomainTrustProcessor", "reportPath": "SharpHoundCommonLib_DomainTrustProcessor.html", "methodName": "EnumerateDomainTrusts()", "methodShortName": "EnumerateDomainTrusts()", "fileIndex": 0, "line": 29,
+    "metrics": [
+      { "value": 26, "exceeded": true },
+      { "value": 26, "exceeded": false },
+    ]},
+  {
+    "assembly": "SharpHoundCommonLib", "class": "SharpHoundCommonLib.Processors.RegistryProcessor", "reportPath": "SharpHoundCommonLib_RegistryProcessor.html", "methodName": "ReadAzureRegistryData()", "methodShortName": "ReadAzureRegistryData()", "fileIndex": 0, "line": 154,
     "metrics": [
       { "value": 26, "exceeded": true },
       { "value": 26, "exceeded": false },

@@ -1349,6 +1349,12 @@ references:
   commentId: F:SharpHoundCommonLib.Enums.CollectionMethod.All
   fullName: SharpHoundCommonLib.Enums.CollectionMethod.All
   nameWithType: CollectionMethod.All
+- uid: SharpHoundCommonLib.Enums.CollectionMethod.AzureRegistry
+  name: AzureRegistry
+  href: api/SharpHoundCommonLib.Enums.CollectionMethod.html#SharpHoundCommonLib_Enums_CollectionMethod_AzureRegistry
+  commentId: F:SharpHoundCommonLib.Enums.CollectionMethod.AzureRegistry
+  fullName: SharpHoundCommonLib.Enums.CollectionMethod.AzureRegistry
+  nameWithType: CollectionMethod.AzureRegistry
 - uid: SharpHoundCommonLib.Enums.CollectionMethod.CARegistry
   name: CARegistry
   href: api/SharpHoundCommonLib.Enums.CollectionMethod.html#SharpHoundCommonLib_Enums_CollectionMethod_CARegistry
@@ -8046,6 +8052,25 @@ references:
   fullName.vb: SharpHoundCommonLib.OutputTypes.APIResult(Of T).Success
   nameWithType: APIResult<T>.Success
   nameWithType.vb: APIResult(Of T).Success
+- uid: SharpHoundCommonLib.OutputTypes.AzureRegistryData
+  name: AzureRegistryData
+  href: api/SharpHoundCommonLib.OutputTypes.AzureRegistryData.html
+  commentId: T:SharpHoundCommonLib.OutputTypes.AzureRegistryData
+  fullName: SharpHoundCommonLib.OutputTypes.AzureRegistryData
+  nameWithType: AzureRegistryData
+- uid: SharpHoundCommonLib.OutputTypes.AzureRegistryData.VmId
+  name: VmId
+  href: api/SharpHoundCommonLib.OutputTypes.AzureRegistryData.html#SharpHoundCommonLib_OutputTypes_AzureRegistryData_VmId
+  commentId: P:SharpHoundCommonLib.OutputTypes.AzureRegistryData.VmId
+  fullName: SharpHoundCommonLib.OutputTypes.AzureRegistryData.VmId
+  nameWithType: AzureRegistryData.VmId
+- uid: SharpHoundCommonLib.OutputTypes.AzureRegistryData.VmId*
+  name: VmId
+  href: api/SharpHoundCommonLib.OutputTypes.AzureRegistryData.html#SharpHoundCommonLib_OutputTypes_AzureRegistryData_VmId_
+  commentId: Overload:SharpHoundCommonLib.OutputTypes.AzureRegistryData.VmId
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.OutputTypes.AzureRegistryData.VmId
+  nameWithType: AzureRegistryData.VmId
 - uid: SharpHoundCommonLib.OutputTypes.BoolRegistryAPIResult
   name: BoolRegistryAPIResult
   href: api/SharpHoundCommonLib.OutputTypes.BoolRegistryAPIResult.html
@@ -12186,6 +12211,19 @@ references:
   commentId: E:SharpHoundCommonLib.Processors.RegistryProcessor.ComputerStatusEvent
   fullName: SharpHoundCommonLib.Processors.RegistryProcessor.ComputerStatusEvent
   nameWithType: RegistryProcessor.ComputerStatusEvent
+- uid: SharpHoundCommonLib.Processors.RegistryProcessor.ReadAzureRegistryData(System.String)
+  name: ReadAzureRegistryData(String)
+  href: api/SharpHoundCommonLib.Processors.RegistryProcessor.html#SharpHoundCommonLib_Processors_RegistryProcessor_ReadAzureRegistryData_System_String_
+  commentId: M:SharpHoundCommonLib.Processors.RegistryProcessor.ReadAzureRegistryData(System.String)
+  fullName: SharpHoundCommonLib.Processors.RegistryProcessor.ReadAzureRegistryData(System.String)
+  nameWithType: RegistryProcessor.ReadAzureRegistryData(String)
+- uid: SharpHoundCommonLib.Processors.RegistryProcessor.ReadAzureRegistryData*
+  name: ReadAzureRegistryData
+  href: api/SharpHoundCommonLib.Processors.RegistryProcessor.html#SharpHoundCommonLib_Processors_RegistryProcessor_ReadAzureRegistryData_
+  commentId: Overload:SharpHoundCommonLib.Processors.RegistryProcessor.ReadAzureRegistryData
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Processors.RegistryProcessor.ReadAzureRegistryData
+  nameWithType: RegistryProcessor.ReadAzureRegistryData
 - uid: SharpHoundCommonLib.Processors.RegistryProcessor.ReadRegistrySettings(System.String)
   name: ReadRegistrySettings(String)
   href: api/SharpHoundCommonLib.Processors.RegistryProcessor.html#SharpHoundCommonLib_Processors_RegistryProcessor_ReadRegistrySettings_System_String_
