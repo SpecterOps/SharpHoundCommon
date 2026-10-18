@@ -51,14 +51,25 @@ namespace CommonLibTest
         [InlineData(0x00040000, true)]
         [InlineData(0x00000000, false)]
         public async Task CertAbuseProcessor_IsUserSpecifiesSanEnabled_ReturnsResult(int editFlags, bool expectedResult) {
-            const string subKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{CAName}\\PolicyModules\\CertificateAuthority_MicrosoftDefault.Policy";
-            const string subValue = "EditFlags";
+            const string activePolicy = "Contoso.Custom.Policy";
+            const string policyModulesKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{CAName}\\PolicyModules";
+            var policyKey = $"{policyModulesKey}\\{activePolicy}";
 
             _mockRegistryAccessor
                 .Setup(ra => ra.GetRegistryKeyData(
                     TargetName,
-                    subKey,
-                    subValue))
+                    policyModulesKey,
+                    "Active"))
+                .Returns(new RegistryResult
+                {
+                    Collected = true,
+                    Value = activePolicy
+                });
+            _mockRegistryAccessor
+                .Setup(ra => ra.GetRegistryKeyData(
+                    TargetName,
+                    policyKey,
+                    "EditFlags"))
                 .Returns(new RegistryResult
                 {
                     Collected = true,
@@ -81,14 +92,23 @@ namespace CommonLibTest
 
         [Fact]
         public async Task CertAbuseProcessor_IsUserSpecifiesSanEnabled_HandlesFailedLookup() {
-            const string subKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{CAName}\\PolicyModules\\CertificateAuthority_MicrosoftDefault.Policy";
-            const string subValue = "EditFlags";
+            const string policyModulesKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{CAName}\\PolicyModules";
+            const string defaultPolicyKey = $"{policyModulesKey}\\CertificateAuthority_MicrosoftDefault.Policy";
 
             _mockRegistryAccessor
                 .Setup(ra => ra.GetRegistryKeyData(
                     TargetName,
-                    subKey,
-                    subValue))
+                    policyModulesKey,
+                    "Active"))
+                .Returns(new RegistryResult
+                {
+                    Collected = true
+                });
+            _mockRegistryAccessor
+                .Setup(ra => ra.GetRegistryKeyData(
+                    TargetName,
+                    defaultPolicyKey,
+                    "EditFlags"))
                 .Returns(new RegistryResult
                 {
                     Collected = false,
@@ -105,6 +125,110 @@ namespace CommonLibTest
             Assert.Equal(TargetName, _receivedCompStatus.ComputerName);
             Assert.Equal(nameof(_certAbuseProcessor.IsUserSpecifiesSanEnabled), _receivedCompStatus.Task);
             Assert.Equal(FailureReason, _receivedCompStatus.Status);
+            Assert.Equal(TargetDomainSid, _receivedCompStatus.ObjectId);
+        }
+
+        [Fact]
+        public async Task CertAbuseProcessor_IsUserSpecifiesSanEnabled_HandlesFailedActivePolicyLookup() {
+            const string policyModulesKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{CAName}\\PolicyModules";
+
+            _mockRegistryAccessor
+                .Setup(ra => ra.GetRegistryKeyData(TargetName, policyModulesKey, "Active"))
+                .Returns(new RegistryResult { Collected = false, FailureReason = FailureReason });
+
+            var results = await _certAbuseProcessor.IsUserSpecifiesSanEnabled(TargetName, CAName, TargetDomainSid);
+
+            Assert.False(results.Collected);
+            Assert.Equal(FailureReason, results.FailureReason);
+            Assert.Equal(nameof(CertAbuseProcessor.IsUserSpecifiesSanEnabled), _receivedCompStatus.Task);
+            Assert.Equal(FailureReason, _receivedCompStatus.Status);
+            Assert.Equal(TargetName, _receivedCompStatus.ComputerName);
+            Assert.Equal(TargetDomainSid, _receivedCompStatus.ObjectId);
+        }
+
+        [Fact]
+        public async Task CertAbuseProcessor_DisabledExtensions_ReturnsValuesFromActivePolicy() {
+            const string activePolicy = "Contoso.Custom.Policy";
+            const string policyModulesKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{CAName}\\PolicyModules";
+            var policyKey = $"{policyModulesKey}\\{activePolicy}";
+            var expectedExtensions = new[] { "1.2.3.4", "1.3.6.1.4.1.311.21.7" };
+
+            _mockRegistryAccessor
+                .Setup(ra => ra.GetRegistryKeyData(TargetName, policyModulesKey, "Active"))
+                .Returns(new RegistryResult { Collected = true, Value = activePolicy });
+            _mockRegistryAccessor
+                .Setup(ra => ra.GetRegistryKeyData(TargetName, policyKey, "DisableExtensionList"))
+                .Returns(new RegistryResult { Collected = true, Value = expectedExtensions });
+
+            var results = await _certAbuseProcessor.DisabledExtensions(TargetName, CAName, TargetDomainSid);
+
+            Assert.True(results.Collected);
+            Assert.Equal(expectedExtensions, results.Data);
+            Assert.Null(results.FailureReason);
+            Assert.Equal(nameof(CertAbuseProcessor.DisabledExtensions), _receivedCompStatus.Task);
+            Assert.Equal(CSVComputerStatus.StatusSuccess, _receivedCompStatus.Status);
+            Assert.Equal(TargetName, _receivedCompStatus.ComputerName);
+            Assert.Equal(TargetDomainSid, _receivedCompStatus.ObjectId);
+        }
+
+        [Fact]
+        public async Task CertAbuseProcessor_DisabledExtensions_DefaultsToMicrosoftPolicy() {
+            const string policyModulesKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{CAName}\\PolicyModules";
+            const string defaultPolicyKey = $"{policyModulesKey}\\CertificateAuthority_MicrosoftDefault.Policy";
+            var expectedExtensions = new[] { "1.2.3.4" };
+
+            _mockRegistryAccessor
+                .Setup(ra => ra.GetRegistryKeyData(TargetName, policyModulesKey, "Active"))
+                .Returns(new RegistryResult { Collected = true });
+            _mockRegistryAccessor
+                .Setup(ra => ra.GetRegistryKeyData(TargetName, defaultPolicyKey, "DisableExtensionList"))
+                .Returns(new RegistryResult { Collected = true, Value = expectedExtensions });
+
+            var results = await _certAbuseProcessor.DisabledExtensions(TargetName, CAName, TargetDomainSid);
+
+            Assert.True(results.Collected);
+            Assert.Equal(expectedExtensions, results.Data);
+        }
+
+        [Fact]
+        public async Task CertAbuseProcessor_DisabledExtensions_HandlesFailedActivePolicyLookup() {
+            const string policyModulesKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{CAName}\\PolicyModules";
+
+            _mockRegistryAccessor
+                .Setup(ra => ra.GetRegistryKeyData(TargetName, policyModulesKey, "Active"))
+                .Returns(new RegistryResult { Collected = false, FailureReason = FailureReason });
+
+            var results = await _certAbuseProcessor.DisabledExtensions(TargetName, CAName, TargetDomainSid);
+
+            Assert.False(results.Collected);
+            Assert.Equal(FailureReason, results.FailureReason);
+            Assert.Empty(results.Data);
+            Assert.Equal(nameof(CertAbuseProcessor.DisabledExtensions), _receivedCompStatus.Task);
+            Assert.Equal(FailureReason, _receivedCompStatus.Status);
+            Assert.Equal(TargetName, _receivedCompStatus.ComputerName);
+            Assert.Equal(TargetDomainSid, _receivedCompStatus.ObjectId);
+        }
+
+        [Fact]
+        public async Task CertAbuseProcessor_DisabledExtensions_HandlesFailedDisabledExtensionsLookup() {
+            const string policyModulesKey = $"SYSTEM\\CurrentControlSet\\Services\\CertSvc\\Configuration\\{CAName}\\PolicyModules";
+            const string defaultPolicyKey = $"{policyModulesKey}\\CertificateAuthority_MicrosoftDefault.Policy";
+
+            _mockRegistryAccessor
+                .Setup(ra => ra.GetRegistryKeyData(TargetName, policyModulesKey, "Active"))
+                .Returns(new RegistryResult { Collected = true });
+            _mockRegistryAccessor
+                .Setup(ra => ra.GetRegistryKeyData(TargetName, defaultPolicyKey, "DisableExtensionList"))
+                .Returns(new RegistryResult { Collected = false, FailureReason = FailureReason });
+
+            var results = await _certAbuseProcessor.DisabledExtensions(TargetName, CAName, TargetDomainSid);
+
+            Assert.False(results.Collected);
+            Assert.Equal(FailureReason, results.FailureReason);
+            Assert.Empty(results.Data);
+            Assert.Equal(nameof(CertAbuseProcessor.DisabledExtensions), _receivedCompStatus.Task);
+            Assert.Equal(FailureReason, _receivedCompStatus.Status);
+            Assert.Equal(TargetName, _receivedCompStatus.ComputerName);
             Assert.Equal(TargetDomainSid, _receivedCompStatus.ObjectId);
         }
 
