@@ -24,6 +24,8 @@
         public const string WriteGPLink = "WriteGPLink";
         public const string WriteAltSecurityIdentities = "WriteAltSecurityIdentities";
         public const string WritePublicInformation = "WritePublicInformation";
+        public const string WriteSupersededManagedAccountLink = "WriteSupersededManagedAccountLink";
+        public const string WriteSupersededServiceAccountState = "WriteSupersededServiceAccountState";
         public const string ServerIs = "ServerIs";
 
         //CertAbuse edges

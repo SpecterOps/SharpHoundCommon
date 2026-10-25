@@ -2438,6 +2438,26 @@ namespace CommonLibTest {
             Assert.Equal(actual.RightName, expectedRightName);
         }
 
+        [Theory]
+        [InlineData(Label.User, ACEGuids.WriteSupersededManagedAccountLink, EdgeNames.WriteSupersededManagedAccountLink)]
+        [InlineData(Label.Computer, ACEGuids.WriteSupersededManagedAccountLink, EdgeNames.WriteSupersededManagedAccountLink)]
+        [InlineData(Label.User, ACEGuids.WriteSupersededServiceAccountState, EdgeNames.WriteSupersededServiceAccountState)]
+        [InlineData(Label.Computer, ACEGuids.WriteSupersededServiceAccountState, EdgeNames.WriteSupersededServiceAccountState)]
+        public async Task ACLProcessor_ProcessACL_WriteProperty_DMSAVictimAttribute(Label objectType,
+            string attributeGuid, string expectedRightName) {
+            const string expectedPrincipalSid = "S-1-5-21-3130019616-2776909439-2417379446-512";
+            var rule = CreateRuleDescriptor(expectedPrincipalSid, AccessControlType.Allow,
+                ActiveDirectoryRights.WriteProperty, objectType: new Guid(attributeGuid));
+            rule.Setup(x => x.IsAceInheritedFrom(It.IsAny<string>())).Returns(true);
+
+            var processor = CreateCombinedAclProcessor(new[] { rule.Object });
+            var result = await processor.ProcessACL(new byte[] { 1 }, _testDomainName, objectType, true).ToArrayAsync();
+
+            var actual = Assert.Single(result);
+            Assert.Equal(expectedPrincipalSid, actual.PrincipalSID);
+            Assert.Equal(expectedRightName, actual.RightName);
+        }
+
         [Fact]
         public async Task ACLProcessor_ProcessACLWithCustomDenyAces_ReturnsRegularAcesAndDenyCounts() {
             var denyRule = CreateRuleDescriptor("S-1-5-21-3130019616-2776909439-2417379446-3100",
