@@ -126,7 +126,8 @@ namespace SharpHoundCommonLib.Processors {
                 { Label.IssuancePolicy, "37cfd85c-6719-4ad8-8f9e-8678ba627563" },
                 { Label.Site, "bf967ab3-0de6-11d0-a285-00aa003049e2" },
                 { Label.SiteServer, "bf967a92-0de6-11d0-a285-00aa003049e2" },
-                { Label.SiteSubnet, "b7b13124-b82e-11d0-afee-0000f80367c1" }
+                { Label.SiteSubnet, "b7b13124-b82e-11d0-afee-0000f80367c1" },
+                { Label.DMSA, ACEGuids.DMSAClass }
             };
         }
 
@@ -722,6 +723,21 @@ namespace SharpHoundCommonLib.Processors {
                     if (checkForOwnerRights && resolvedPrincipal.ObjectIdentifier.EndsWith("S-1-3-4")) {
                         isInheritedPermissionForOwnerRightsSid = true;
                     }
+                }
+
+                if (objectType is Label.OU or Label.Container &&
+                    (aceRights.HasFlag(ActiveDirectoryRights.CreateChild) ||
+                     aceRights.HasFlag(ActiveDirectoryRights.GenericAll)) &&
+                    aceType is ACEGuids.DMSAClass or ACEGuids.AllGuid or "") {
+                    yield return new ACE {
+                        PrincipalType = resolvedPrincipal.ObjectType,
+                        PrincipalSID = resolvedPrincipal.ObjectIdentifier,
+                        IsInherited = inherited,
+                        RightName = EdgeNames.CreateDMSA,
+                        InheritanceHash = aceInheritanceHash,
+                        IsPermissionForOwnerRightsSid = isPermissionForOwnerRightsSid,
+                        IsInheritedPermissionForOwnerRightsSid = isInheritedPermissionForOwnerRightsSid,
+                    };
                 }
 
                 //// This log is exceptionally noisy, disabling

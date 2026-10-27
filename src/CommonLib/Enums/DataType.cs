@@ -18,5 +18,6 @@
         public const string Sites = "sites";
         public const string SiteServers = "siteservers";
         public const string SiteSubnets = "sitesubnets";
+        public const string DMSAs = "dmsas";
     }
 }

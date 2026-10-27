@@ -2458,6 +2458,56 @@ namespace CommonLibTest {
             Assert.Equal(expectedRightName, actual.RightName);
         }
 
+        [Theory]
+        [InlineData(ACEGuids.DMSAClass, Label.OU)]
+        [InlineData(ACEGuids.AllGuid, Label.OU)]
+        [InlineData(ACEGuids.DMSAClass, Label.Container)]
+        public async Task ACLProcessor_ProcessACL_CreateChild_DMSAOnParent(string objectGuid, Label parentType) {
+            const string expectedPrincipalSid = "S-1-5-21-3130019616-2776909439-2417379446-512";
+            var rule = CreateRuleDescriptor(expectedPrincipalSid, AccessControlType.Allow,
+                ActiveDirectoryRights.CreateChild, objectType: new Guid(objectGuid));
+            rule.Setup(x => x.IsAceInheritedFrom(It.IsAny<string>())).Returns(true);
+
+            var processor = CreateCombinedAclProcessor(new[] { rule.Object });
+            var result = await processor.ProcessACL(new byte[] { 1 }, _testDomainName, parentType, false)
+                .ToArrayAsync();
+
+            var actual = Assert.Single(result);
+            Assert.Equal(expectedPrincipalSid, actual.PrincipalSID);
+            Assert.Equal(EdgeNames.CreateDMSA, actual.RightName);
+        }
+
+        [Fact]
+        public async Task ACLProcessor_ProcessACL_GenericAll_OnOUIncludesCreateDMSA() {
+            const string expectedPrincipalSid = "S-1-5-21-3130019616-2776909439-2417379446-512";
+            var rule = CreateRuleDescriptor(expectedPrincipalSid, AccessControlType.Allow,
+                ActiveDirectoryRights.GenericAll, objectType: new Guid(ACEGuids.AllGuid));
+            rule.Setup(x => x.IsAceInheritedFrom(It.IsAny<string>())).Returns(true);
+
+            var processor = CreateCombinedAclProcessor(new[] { rule.Object });
+            var result = await processor.ProcessACL(new byte[] { 1 }, _testDomainName, Label.OU, false)
+                .ToArrayAsync();
+
+            Assert.Contains(result, ace => ace.RightName == EdgeNames.CreateDMSA);
+            Assert.Contains(result, ace => ace.RightName == EdgeNames.GenericAll);
+        }
+
+        [Fact]
+        public async Task ACLProcessor_ProcessACL_GenericAll_DMSA() {
+            const string expectedPrincipalSid = "S-1-5-21-3130019616-2776909439-2417379446-512";
+            var rule = CreateRuleDescriptor(expectedPrincipalSid, AccessControlType.Allow,
+                ActiveDirectoryRights.GenericAll, objectType: new Guid(ACEGuids.AllGuid));
+            rule.Setup(x => x.IsAceInheritedFrom(It.IsAny<string>())).Returns(true);
+
+            var processor = CreateCombinedAclProcessor(new[] { rule.Object });
+            var result = await processor.ProcessACL(new byte[] { 1 }, _testDomainName, Label.DMSA, false)
+                .ToArrayAsync();
+
+            var actual = Assert.Single(result);
+            Assert.Equal(expectedPrincipalSid, actual.PrincipalSID);
+            Assert.Equal(EdgeNames.GenericAll, actual.RightName);
+        }
+
         [Fact]
         public async Task ACLProcessor_ProcessACLWithCustomDenyAces_ReturnsRegularAcesAndDenyCounts() {
             var denyRule = CreateRuleDescriptor("S-1-5-21-3130019616-2776909439-2417379446-3100",
