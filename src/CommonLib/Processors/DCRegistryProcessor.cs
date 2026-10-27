@@ -39,18 +39,20 @@ namespace SharpHoundCommonLib.Processors
             const string subValue = "CurrentBuildNumber";
             var data = _registryAccessor.GetRegistryKeyData(target, subKey, subValue);
 
-            ret.Collected = data.Collected;
             if (!data.Collected)
             {
                 ret.FailureReason = data.FailureReason;
                 return ret;
             }
 
-            if (data.Value != null)
+            if (data.Value == null)
             {
-                ret.Value = (string)data.Value;
+                ret.FailureReason = "Registry value was not found";
+                return ret;
             }
 
+            ret.Collected = true;
+            ret.Value = (string)data.Value;
             return ret;
         }
 
@@ -66,18 +68,20 @@ namespace SharpHoundCommonLib.Processors
             const string subValue = "UBR";
             var data = _registryAccessor.GetRegistryKeyData(target, subKey, subValue);
 
-            ret.Collected = data.Collected;
             if (!data.Collected)
             {
                 ret.FailureReason = data.FailureReason;
                 return ret;
             }
 
-            if (data.Value != null)
+            if (data.Value == null)
             {
-                ret.Value = (int)data.Value;
+                ret.FailureReason = "Registry value was not found";
+                return ret;
             }
 
+            ret.Collected = true;
+            ret.Value = (int)data.Value;
             return ret;
         }
 

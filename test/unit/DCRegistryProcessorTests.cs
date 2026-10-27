@@ -59,5 +59,36 @@ namespace CommonLibTest {
             Assert.False(result.Collected);
             Assert.Equal("access denied", result.FailureReason);
         }
+
+        [Fact]
+        public void GetCurrentBuildNumber_ReportsMissingValue() {
+            _registryAccessor
+                .Setup(s => s.GetRegistryKeyData(Target, CurrentVersionKey, "CurrentBuildNumber"))
+                .Returns(new RegistryResult {
+                    Collected = true,
+                    Value = null
+                });
+
+            var result = _processor.GetCurrentBuildNumber(Target);
+
+            Assert.False(result.Collected);
+            Assert.Null(result.Value);
+            Assert.Equal("Registry value was not found", result.FailureReason);
+        }
+
+        [Fact]
+        public void GetCurrentBuildRevision_ReportsMissingValue() {
+            _registryAccessor
+                .Setup(s => s.GetRegistryKeyData(Target, CurrentVersionKey, "UBR"))
+                .Returns(new RegistryResult {
+                    Collected = true,
+                    Value = null
+                });
+
+            var result = _processor.GetCurrentBuildRevision(Target);
+
+            Assert.False(result.Collected);
+            Assert.Equal("Registry value was not found", result.FailureReason);
+        }
     }
 }
