@@ -115,6 +115,24 @@ namespace CommonLibTest {
         }
 
         [Fact]
+        public void Test_IsDMSA() {
+            var attribs = new Dictionary<string, object> {
+                { LDAPProperties.ObjectClass, new[] { "top", ObjectClass.DMSAClass } },
+            };
+
+            var mock = new MockDirectoryObject("abc", attribs, "", "");
+            Assert.True(mock.IsDMSA());
+
+            mock.Properties = new Dictionary<string, object> {
+                { LDAPProperties.ObjectClass, new[] { "top" } },
+            };
+            Assert.False(mock.IsDMSA());
+
+            mock.Properties = new Dictionary<string, object>();
+            Assert.False(mock.IsDMSA());
+        }
+
+        [Fact]
         public void Test_GetLabel_BadObjectID() {
             var attribs = new Dictionary<string, object> {
                 { LDAPProperties.ObjectClass, new[] { "top", "msds-groupmanagedserviceaccount" } },

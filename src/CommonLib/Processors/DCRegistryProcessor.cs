@@ -20,6 +20,71 @@ namespace SharpHoundCommonLib.Processors
             _log = log ?? Logging.LogProvider.CreateLogger("DCRegProc");
         }
 
+        internal DCRegistryProcessor(ILdapUtils utils, IRegistryAccessor registryAccessor, ILogger log = null)
+        {
+            _utils = utils;
+            _registryAccessor = registryAccessor;
+            _log = log ?? Logging.LogProvider.CreateLogger("DCRegProc");
+        }
+
+        /// <summary>
+        /// Gets the Windows build number reported by a domain controller.
+        /// </summary>
+        /// <param name="target">Domain controller to query.</param>
+        /// <returns>The CurrentBuildNumber registry value and collection status.</returns>
+        public StrRegistryAPIResult GetCurrentBuildNumber(string target)
+        {
+            var ret = new StrRegistryAPIResult();
+            const string subKey = @"SOFTWARE\Microsoft\Windows NT\CurrentVersion";
+            const string subValue = "CurrentBuildNumber";
+            var data = _registryAccessor.GetRegistryKeyData(target, subKey, subValue);
+
+            if (!data.Collected)
+            {
+                ret.FailureReason = data.FailureReason;
+                return ret;
+            }
+
+            if (data.Value == null)
+            {
+                ret.FailureReason = "Registry value was not found";
+                return ret;
+            }
+
+            ret.Collected = true;
+            ret.Value = (string)data.Value;
+            return ret;
+        }
+
+        /// <summary>
+        /// Gets the Windows update build revision reported by a domain controller.
+        /// </summary>
+        /// <param name="target">Domain controller to query.</param>
+        /// <returns>The UBR registry value and collection status.</returns>
+        public IntRegistryAPIResult GetCurrentBuildRevision(string target)
+        {
+            var ret = new IntRegistryAPIResult();
+            const string subKey = @"SOFTWARE\Microsoft\Windows NT\CurrentVersion";
+            const string subValue = "UBR";
+            var data = _registryAccessor.GetRegistryKeyData(target, subKey, subValue);
+
+            if (!data.Collected)
+            {
+                ret.FailureReason = data.FailureReason;
+                return ret;
+            }
+
+            if (data.Value == null)
+            {
+                ret.FailureReason = "Registry value was not found";
+                return ret;
+            }
+
+            ret.Collected = true;
+            ret.Value = (int)data.Value;
+            return ret;
+        }
+
         /// <summary>
         /// This function gets the CertificateMappingMethods registry value stored on DCs.
         /// </summary>

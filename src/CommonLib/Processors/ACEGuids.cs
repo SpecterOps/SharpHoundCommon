@@ -17,6 +17,9 @@
         public const string WriteTitle = "bf967a55-0de6-11d0-a285-00aa003049e2"; // Not an edge, just used for testing
         public const string WriteAltSecurityIdentities = "00fbf30c-91fe-11d1-aebc-0000f80367c1";
         public const string WritePublicInformation = "e48d0154-bcf8-11d1-8702-00c04fb96050";
+        public const string WriteSupersededManagedAccountLink = "3752e002-43be-48c8-b3ca-2cb2fffbc8a1";
+        public const string WriteSupersededServiceAccountState = "a4693096-a4c3-4ecd-b8cb-73cd6398b7a2";
+        public const string DMSAClass = "0feb936f-47b3-49f2-9386-1dedc2c23765";
 
         //Cert abuse ACEs
         public const string PKINameFlag = "ea1dddc4-60ff-416e-8cc0-17cee534bce7";
