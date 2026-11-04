@@ -109,7 +109,7 @@ namespace SharpHoundCommonLib
         {
             // Blocking External Call -- Possible blocking through locks, and Translate call
             // see https://github.com/dotnet/runtime/blob/9d5a6a9aa463d6d10b0b0ba6d5982cc82f363dc3/src/libraries/System.Security.AccessControl/src/System/Security/AccessControl/ObjectSecurity.cs#L336
-            return _sd.GetOwner(targetType).Value;
+            return _sd.GetOwner(targetType)?.Value;
         }
     }
 }
