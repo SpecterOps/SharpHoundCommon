@@ -225,6 +225,30 @@ namespace CommonLibTest {
         }
 
         [Fact]
+        public async Task Test_ResolveSearchResult_DMSA() {
+            var utils = new MockLdapUtils();
+            var attribs = new Dictionary<string, object> {
+                { LDAPProperties.ObjectClass, new[] { "top", ObjectClass.DMSAClass } },
+                { LDAPProperties.SAMAccountType, "805306369" },
+                { LDAPProperties.SAMAccountName, "TESTDMSA$" }
+            };
+
+            const string sid = "S-1-5-21-3130019616-2776909439-2417379446-2106";
+            const string dn = "CN=TESTDMSA,OU=SERVICE ACCOUNTS,DC=TESTLAB,DC=LOCAL";
+            var mock = new MockDirectoryObject(dn, attribs, sid, new Guid().ToString());
+
+            var (success, result) = await LdapUtils.ResolveSearchResult(mock, utils);
+
+            Assert.True(success);
+            Assert.Equal(sid, result.ObjectId);
+            Assert.Equal(Label.DMSA, result.ObjectType);
+            Assert.Equal("TESTDMSA$@TESTLAB.LOCAL", result.DisplayName);
+            Assert.Equal("S-1-5-21-3130019616-2776909439-2417379446", result.DomainSid);
+            Assert.Equal("TESTLAB.LOCAL", result.Domain);
+            Assert.False(result.Deleted);
+        }
+
+        [Fact]
         public async Task Test_ResolveSearchResult_TrustAccount() {
             var utils = new MockLdapUtils();
             var attribs = new Dictionary<string, object> {
