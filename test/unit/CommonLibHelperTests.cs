@@ -201,13 +201,13 @@ namespace CommonLibTest {
 
         [Fact]
         public void ConvertFileTimeToUnixEpoch_ValidTimestamp_ValidUnixEpoch() {
-            var d = DateTime.Parse("2021-06-21T00:00:00");
+            var d = new DateTime(2021, 6, 21, 0, 0, 0, DateTimeKind.Utc);
             var result =
                 Helpers.ConvertFileTimeToUnixEpoch(d.ToFileTimeUtc().ToString()); // get the epoch
             var dateTimeOffset = DateTimeOffset.FromUnixTimeSeconds(result); // create an offset from the epoch
             var testDate = dateTimeOffset.UtcDateTime;
 
-            Assert.Equal(d.ToUniversalTime().Date, testDate);
+            Assert.Equal(d, testDate);
         }
 
         [Fact]
