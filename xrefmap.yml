@@ -5030,6 +5030,12 @@ references:
   commentId: T:SharpHoundCommonLib.LDAPProperties
   fullName: SharpHoundCommonLib.LDAPProperties
   nameWithType: LDAPProperties
+- uid: SharpHoundCommonLib.LDAPProperties.AADObjectID
+  name: AADObjectID
+  href: api/SharpHoundCommonLib.LDAPProperties.html#SharpHoundCommonLib_LDAPProperties_AADObjectID
+  commentId: F:SharpHoundCommonLib.LDAPProperties.AADObjectID
+  fullName: SharpHoundCommonLib.LDAPProperties.AADObjectID
+  nameWithType: LDAPProperties.AADObjectID
 - uid: SharpHoundCommonLib.LDAPProperties.AdminCount
   name: AdminCount
   href: api/SharpHoundCommonLib.LDAPProperties.html#SharpHoundCommonLib_LDAPProperties_AdminCount
@@ -8223,6 +8229,19 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.OutputTypes.CARegistryData.CASecurity
   nameWithType: CARegistryData.CASecurity
+- uid: SharpHoundCommonLib.OutputTypes.CARegistryData.DisabledExtensions
+  name: DisabledExtensions
+  href: api/SharpHoundCommonLib.OutputTypes.CARegistryData.html#SharpHoundCommonLib_OutputTypes_CARegistryData_DisabledExtensions
+  commentId: P:SharpHoundCommonLib.OutputTypes.CARegistryData.DisabledExtensions
+  fullName: SharpHoundCommonLib.OutputTypes.CARegistryData.DisabledExtensions
+  nameWithType: CARegistryData.DisabledExtensions
+- uid: SharpHoundCommonLib.OutputTypes.CARegistryData.DisabledExtensions*
+  name: DisabledExtensions
+  href: api/SharpHoundCommonLib.OutputTypes.CARegistryData.html#SharpHoundCommonLib_OutputTypes_CARegistryData_DisabledExtensions_
+  commentId: Overload:SharpHoundCommonLib.OutputTypes.CARegistryData.DisabledExtensions
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.OutputTypes.CARegistryData.DisabledExtensions
+  nameWithType: CARegistryData.DisabledExtensions
 - uid: SharpHoundCommonLib.OutputTypes.CARegistryData.EnrollmentAgentRestrictions
   name: EnrollmentAgentRestrictions
   href: api/SharpHoundCommonLib.OutputTypes.CARegistryData.html#SharpHoundCommonLib_OutputTypes_CARegistryData_EnrollmentAgentRestrictions
@@ -8262,6 +8281,19 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.OutputTypes.CARegistryData.RoleSeparationEnabled
   nameWithType: CARegistryData.RoleSeparationEnabled
+- uid: SharpHoundCommonLib.OutputTypes.CARegistryData.RPCEncryptionEnforced
+  name: RPCEncryptionEnforced
+  href: api/SharpHoundCommonLib.OutputTypes.CARegistryData.html#SharpHoundCommonLib_OutputTypes_CARegistryData_RPCEncryptionEnforced
+  commentId: P:SharpHoundCommonLib.OutputTypes.CARegistryData.RPCEncryptionEnforced
+  fullName: SharpHoundCommonLib.OutputTypes.CARegistryData.RPCEncryptionEnforced
+  nameWithType: CARegistryData.RPCEncryptionEnforced
+- uid: SharpHoundCommonLib.OutputTypes.CARegistryData.RPCEncryptionEnforced*
+  name: RPCEncryptionEnforced
+  href: api/SharpHoundCommonLib.OutputTypes.CARegistryData.html#SharpHoundCommonLib_OutputTypes_CARegistryData_RPCEncryptionEnforced_
+  commentId: Overload:SharpHoundCommonLib.OutputTypes.CARegistryData.RPCEncryptionEnforced
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.OutputTypes.CARegistryData.RPCEncryptionEnforced
+  nameWithType: CARegistryData.RPCEncryptionEnforced
 - uid: SharpHoundCommonLib.OutputTypes.CertificateExtension
   name: CertificateExtension
   href: api/SharpHoundCommonLib.OutputTypes.CertificateExtension.html
@@ -9917,6 +9949,25 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.OutputTypes.SPNPrivilege.Service
   nameWithType: SPNPrivilege.Service
+- uid: SharpHoundCommonLib.OutputTypes.StringArrayRegistryAPIResult
+  name: StringArrayRegistryAPIResult
+  href: api/SharpHoundCommonLib.OutputTypes.StringArrayRegistryAPIResult.html
+  commentId: T:SharpHoundCommonLib.OutputTypes.StringArrayRegistryAPIResult
+  fullName: SharpHoundCommonLib.OutputTypes.StringArrayRegistryAPIResult
+  nameWithType: StringArrayRegistryAPIResult
+- uid: SharpHoundCommonLib.OutputTypes.StringArrayRegistryAPIResult.Data
+  name: Data
+  href: api/SharpHoundCommonLib.OutputTypes.StringArrayRegistryAPIResult.html#SharpHoundCommonLib_OutputTypes_StringArrayRegistryAPIResult_Data
+  commentId: P:SharpHoundCommonLib.OutputTypes.StringArrayRegistryAPIResult.Data
+  fullName: SharpHoundCommonLib.OutputTypes.StringArrayRegistryAPIResult.Data
+  nameWithType: StringArrayRegistryAPIResult.Data
+- uid: SharpHoundCommonLib.OutputTypes.StringArrayRegistryAPIResult.Data*
+  name: Data
+  href: api/SharpHoundCommonLib.OutputTypes.StringArrayRegistryAPIResult.html#SharpHoundCommonLib_OutputTypes_StringArrayRegistryAPIResult_Data_
+  commentId: Overload:SharpHoundCommonLib.OutputTypes.StringArrayRegistryAPIResult.Data
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.OutputTypes.StringArrayRegistryAPIResult.Data
+  nameWithType: StringArrayRegistryAPIResult.Data
 - uid: SharpHoundCommonLib.OutputTypes.StrRegistryAPIResult
   name: StrRegistryAPIResult
   href: api/SharpHoundCommonLib.OutputTypes.StrRegistryAPIResult.html
@@ -10724,6 +10775,19 @@ references:
   commentId: E:SharpHoundCommonLib.Processors.CertAbuseProcessor.ComputerStatusEvent
   fullName: SharpHoundCommonLib.Processors.CertAbuseProcessor.ComputerStatusEvent
   nameWithType: CertAbuseProcessor.ComputerStatusEvent
+- uid: SharpHoundCommonLib.Processors.CertAbuseProcessor.DisabledExtensions(System.String,System.String,System.String)
+  name: DisabledExtensions(String, String, String)
+  href: api/SharpHoundCommonLib.Processors.CertAbuseProcessor.html#SharpHoundCommonLib_Processors_CertAbuseProcessor_DisabledExtensions_System_String_System_String_System_String_
+  commentId: M:SharpHoundCommonLib.Processors.CertAbuseProcessor.DisabledExtensions(System.String,System.String,System.String)
+  fullName: SharpHoundCommonLib.Processors.CertAbuseProcessor.DisabledExtensions(System.String, System.String, System.String)
+  nameWithType: CertAbuseProcessor.DisabledExtensions(String, String, String)
+- uid: SharpHoundCommonLib.Processors.CertAbuseProcessor.DisabledExtensions*
+  name: DisabledExtensions
+  href: api/SharpHoundCommonLib.Processors.CertAbuseProcessor.html#SharpHoundCommonLib_Processors_CertAbuseProcessor_DisabledExtensions_
+  commentId: Overload:SharpHoundCommonLib.Processors.CertAbuseProcessor.DisabledExtensions
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Processors.CertAbuseProcessor.DisabledExtensions
+  nameWithType: CertAbuseProcessor.DisabledExtensions
 - uid: SharpHoundCommonLib.Processors.CertAbuseProcessor.GetRegistryPrincipal(System.Security.Principal.SecurityIdentifier,System.String,System.String,System.Boolean,System.String,System.Security.Principal.SecurityIdentifier)
   name: GetRegistryPrincipal(SecurityIdentifier, String, String, Boolean, String, SecurityIdentifier)
   href: api/SharpHoundCommonLib.Processors.CertAbuseProcessor.html#SharpHoundCommonLib_Processors_CertAbuseProcessor_GetRegistryPrincipal_System_Security_Principal_SecurityIdentifier_System_String_System_String_System_Boolean_System_String_System_Security_Principal_SecurityIdentifier_
@@ -10750,6 +10814,19 @@ references:
   isSpec: "True"
   fullName: SharpHoundCommonLib.Processors.CertAbuseProcessor.IsRoleSeparationEnabled
   nameWithType: CertAbuseProcessor.IsRoleSeparationEnabled
+- uid: SharpHoundCommonLib.Processors.CertAbuseProcessor.IsRPCEncryptionEnforced(System.String,System.String,System.String)
+  name: IsRPCEncryptionEnforced(String, String, String)
+  href: api/SharpHoundCommonLib.Processors.CertAbuseProcessor.html#SharpHoundCommonLib_Processors_CertAbuseProcessor_IsRPCEncryptionEnforced_System_String_System_String_System_String_
+  commentId: M:SharpHoundCommonLib.Processors.CertAbuseProcessor.IsRPCEncryptionEnforced(System.String,System.String,System.String)
+  fullName: SharpHoundCommonLib.Processors.CertAbuseProcessor.IsRPCEncryptionEnforced(System.String, System.String, System.String)
+  nameWithType: CertAbuseProcessor.IsRPCEncryptionEnforced(String, String, String)
+- uid: SharpHoundCommonLib.Processors.CertAbuseProcessor.IsRPCEncryptionEnforced*
+  name: IsRPCEncryptionEnforced
+  href: api/SharpHoundCommonLib.Processors.CertAbuseProcessor.html#SharpHoundCommonLib_Processors_CertAbuseProcessor_IsRPCEncryptionEnforced_
+  commentId: Overload:SharpHoundCommonLib.Processors.CertAbuseProcessor.IsRPCEncryptionEnforced
+  isSpec: "True"
+  fullName: SharpHoundCommonLib.Processors.CertAbuseProcessor.IsRPCEncryptionEnforced
+  nameWithType: CertAbuseProcessor.IsRPCEncryptionEnforced
 - uid: SharpHoundCommonLib.Processors.CertAbuseProcessor.IsUserSpecifiesSanEnabled(System.String,System.String,System.String)
   name: IsUserSpecifiesSanEnabled(String, String, String)
   href: api/SharpHoundCommonLib.Processors.CertAbuseProcessor.html#SharpHoundCommonLib_Processors_CertAbuseProcessor_IsUserSpecifiesSanEnabled_System_String_System_String_System_String_
