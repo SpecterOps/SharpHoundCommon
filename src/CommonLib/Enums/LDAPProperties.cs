@@ -3,6 +3,7 @@
     public static class LDAPProperties
     {
         public const string GroupMSAMembership = "msds-groupmsamembership";
+        public const string ManagedAccountPrecededByLink = "msds-managedaccountprecededbylink";
         public const string UserAccountControl = "useraccountcontrol";
         public const string IsDeleted = "isdeleted";
         public const string SAMAccountType = "samaccounttype";

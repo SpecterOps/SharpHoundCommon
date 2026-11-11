@@ -21,6 +21,7 @@
         IssuancePolicy,
         Site,
         SiteServer,
-        SiteSubnet
+        SiteSubnet,
+        DMSA
     }
 }

@@ -29,6 +29,14 @@ public class LdapProducerQueryGeneratorTest
     }
 
     [Fact]
+    public void GenerateDefaultPartitionParameters_ObjectProps_IncludesDMSAPredecessor()
+    {
+        var result = LdapProducerQueryGenerator.GenerateDefaultPartitionParameters(CollectionMethod.ObjectProps);
+
+        Assert.Contains(LDAPProperties.ManagedAccountPrecededByLink, result.Attributes);
+    }
+
+    [Fact]
     public void GenerateConfigurationPartitionParameters_Site_IncludesSiteFiltersAndProperties()
     {
         var expectedFilter = new LdapFilter()

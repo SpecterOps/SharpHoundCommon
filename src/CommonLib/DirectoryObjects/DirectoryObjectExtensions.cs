@@ -20,7 +20,15 @@ public static class DirectoryObjectExtensions {
 
         return classes.Contains(ObjectClass.GMSAClass, StringComparer.InvariantCultureIgnoreCase);
     }
-    
+
+    public static bool IsDMSA(this IDirectoryObject directoryObject) {
+        if (!directoryObject.TryGetArrayProperty(LDAPProperties.ObjectClass, out var classes)) {
+            return false;
+        }
+
+        return classes.Contains(ObjectClass.DMSAClass, StringComparer.InvariantCultureIgnoreCase);
+    }
+
     public static bool GetObjectIdentifier(this IDirectoryObject directoryObject, out string objectIdentifier) {
         // Builtin container has a SID (always "S-1-5-32"). We use the ObjectGUID as ID like for other containers 
         if (directoryObject.TryGetArrayProperty(LDAPProperties.ObjectClass, out var objectClasses) &&

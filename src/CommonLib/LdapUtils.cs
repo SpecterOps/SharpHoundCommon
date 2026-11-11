@@ -1166,12 +1166,18 @@ namespace SharpHoundCommonLib {
                 return true;
             }
 
-            //Override GMSA/MSA account to treat them as users for the graph
-            if (objectClasses != null &&
-                (objectClasses.Contains(ObjectClass.MSAClass, StringComparer.OrdinalIgnoreCase) ||
-                 objectClasses.Contains(ObjectClass.GMSAClass, StringComparer.OrdinalIgnoreCase))) {
-                type = Label.User;
-                return true;
+            if (objectClasses != null) {
+                if (objectClasses.Contains(ObjectClass.DMSAClass, StringComparer.OrdinalIgnoreCase)) {
+                    type = Label.DMSA;
+                    return true;
+                }
+
+                //Override GMSA/MSA account to treat them as users for the graph
+                if (objectClasses.Contains(ObjectClass.MSAClass, StringComparer.OrdinalIgnoreCase) ||
+                    objectClasses.Contains(ObjectClass.GMSAClass, StringComparer.OrdinalIgnoreCase)) {
+                    type = Label.User;
+                    return true;
+                }
             }
 
             if (samAccountType != null) {
@@ -1344,6 +1350,7 @@ namespace SharpHoundCommonLib {
             string displayName;
             switch (label) {
                 case Label.User:
+                case Label.DMSA:
                 case Label.Group:
                 case Label.Base:
                     if (!string.IsNullOrWhiteSpace(samAccountName)) {
